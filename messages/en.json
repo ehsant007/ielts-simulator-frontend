@@ -1,0 +1,42 @@
+{
+	"HeroSection": {
+		"heading": {
+			"line1": "Exchange anytime, anywhere.",
+			"line2": "Trade with confidence."
+		},
+		"description": "Our P2P exchange platform empowers you to buy, sell, and swap currencies directly with others—securely, transparently, and without middlemen.",
+		"buttons": {
+			"createOffer": "Create an Offer",
+			"searchOffers": "Search Offers"
+		}
+	},
+	"dashboard": {
+		"layout": {
+			"SidebarBody": {
+				"home": "Home",
+				"offers": "Offers",
+				"tickets": "Tickets",
+				"accounts": "Accounts",
+				"payments": "Payments",
+				"profile": "Profile",
+				"verification": "Verification",
+				"settings": "Settings",
+				"logout": "Logout"
+			}
+		},
+		"tickets": {
+			"msg-placeholder": "Write your message here ...",
+			"attachments": "Attachments",
+			"tickets": "Tickets",
+			"subject": "Subject",
+			"status": "Status",
+			"createdAt": "Created At",
+			"open": "Open",
+			"closed": "Closed",
+			"btn-open-new-ticket": "Open a ticket",
+			"message": "Message",
+			"btn-send": "Send",
+			"create-ticket-title": "Send a new ticket"
+		}
+	}
+}

@@ -1,0 +1,42 @@
+{
+	"HeroSection": {
+		"heading": {
+			"line1": "هر زمان، هر مکان، تبادل کنید.",
+			"line2": "با اطمینان معامله کنید."
+		},
+		"description": "پلتفرم تبادل P2P ما به شما امکان می‌دهد ارزها را مستقیماً با دیگران خرید، فروش و مبادله کنید—به‌صورت امن، شفاف و بدون واسطه.",
+		"buttons": {
+			"createOffer": "ایجاد پیشنهاد",
+			"searchOffers": "جستجوی پیشنهادها"
+		}
+	},
+	"dashboard": {
+		"layout": {
+			"SidebarBody": {
+				"home": "خانه",
+				"offers": "پیشنهادها",
+				"tickets": "تیکت‌ها",
+				"accounts": "حساب‌ها",
+				"payments": "پرداخت‌ها",
+				"profile": "پروفایل",
+				"verification": "تأیید هویت",
+				"settings": "تنظیمات",
+				"logout": "خروج"
+			}
+		},
+		"tickets": {
+			"msg-placeholder": "پیام خود را اینجا بنویسید ...",
+			"attachments": "پیوست‌ها",
+			"tickets": "تیکت‌ها",
+			"subject": "موضوع",
+			"status": "وضعیت",
+			"createdAt": "تاریخ ایجاد",
+			"open": "باز",
+			"closed": "بسته",
+			"btn-open-new-ticket": "ایجاد تیکت جدید",
+			"message": "پیام",
+			"btn-send": "ارسال",
+			"create-ticket-title": "ارسال تیکت جدید"
+		}
+	}
+}

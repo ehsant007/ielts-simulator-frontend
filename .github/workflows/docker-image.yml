@@ -1,0 +1,53 @@
+name: Docker Image CI
+
+# on:
+#   push:
+#     branches: [ "main" ]
+#     tags: [ "v*" ]     # run also when pushing version tags like v1.0.0
+#   pull_request:
+#     branches: [ "main" ]
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write   # needed to push to GHCR
+      id-token: write   # optional but good practice
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Build and push Docker image
+        env:
+          REGISTRY: ghcr.io
+          IMAGE_NAME: ${{ github.repository }}
+        run: |
+          IMAGE="$REGISTRY/$IMAGE_NAME"
+          COMMIT_TAG=$(date +%s)
+          
+          echo "🛠️ Building Docker image..."
+          docker build . -f Dockerfile -t $IMAGE:$COMMIT_TAG
+          docker tag $IMAGE:$COMMIT_TAG $IMAGE:latest
+
+          echo "📦 Pushing Docker image with tags:"
+          echo " - $IMAGE:$COMMIT_TAG"
+          echo " - $IMAGE:latest"
+          docker push $IMAGE:$COMMIT_TAG
+          docker push $IMAGE:latest
+
+          # If this is a tagged release (vX.Y.Z), also push version tag
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            VERSION_TAG=${GITHUB_REF#refs/tags/}
+            echo "🚀 Detected release tag: $VERSION_TAG"
+            docker tag $IMAGE:$COMMIT_TAG $IMAGE:$VERSION_TAG
+            docker push $IMAGE:$VERSION_TAG
+          fi

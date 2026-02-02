@@ -1,0 +1,42 @@
+{
+	"HeroSection": {
+		"heading": {
+			"line1": "تبادل في أي وقت، في أي مكان.",
+			"line2": "تداول بثقة."
+		},
+		"description": "منصة التبادل P2P الخاصة بنا تمكنك من شراء وبيع وتبادل العملات مباشرة مع الآخرين—بأمان وشفافية وبدون وسطاء.",
+		"buttons": {
+			"createOffer": "إنشاء عرض",
+			"searchOffers": "البحث عن العروض"
+		}
+	},
+	"dashboard": {
+		"layout": {
+			"SidebarBody": {
+				"home": "الرئيسية",
+				"offers": "العروض",
+				"tickets": "التذاكر",
+				"accounts": "الحسابات",
+				"payments": "المدفوعات",
+				"profile": "الملف الشخصي",
+				"verification": "التحقق",
+				"settings": "الإعدادات",
+				"logout": "تسجيل الخروج"
+			}
+		},
+		"tickets": {
+			"msg-placeholder": "اكتب رسالتك هنا ...",
+			"attachments": "المرفقات",
+			"tickets": "التذاكر",
+			"subject": "الموضوع",
+			"status": "الحالة",
+			"createdAt": "تاريخ الإنشاء",
+			"open": "مفتوح",
+			"closed": "مغلق",
+			"btn-open-new-ticket": "فتح تذكرة جديدة",
+			"message": "الرسالة",
+			"btn-send": "إرسال",
+			"create-ticket-title": "إرسال تذكرة جديدة"
+		}
+	}
+}
