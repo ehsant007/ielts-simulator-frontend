@@ -9,9 +9,9 @@ export type ClientOptions = {
  */
 export type AppSettingRead = {
     /**
-     * Id
+     * Key
      */
-    id: string;
+    key: string;
     /**
      * Name
      */
@@ -47,7 +47,7 @@ export type AppSettingRead = {
  *
  * Notes:
  * - The setting name is derived from the field name by default.
- * - A custom name can be provided via `Field(name=...)`.
+ * - A custom name can be provided via `Field(title=...)`.
  * - Optional metadata such as descriptions should also be defined via `Field`.
  */
 export type AppSettingsInput = {
@@ -59,6 +59,16 @@ export type AppSettingsInput = {
      * Crypto Commission
      */
     crypto_commission?: number | string;
+    /**
+     * Payment Currency
+     */
+    payment_currency_id?: number;
+    /**
+     * Pivot Currency
+     *
+     * Pivot currency ID used as the canonical reference for storing and deriving exchange rates. All rates are interpreted as `1 base_currency = rate * pivot_currency`.
+     */
+    pivot_currency_id?: number;
 };
 
 /**
@@ -80,7 +90,7 @@ export type AppSettingsInput = {
  *
  * Notes:
  * - The setting name is derived from the field name by default.
- * - A custom name can be provided via `Field(name=...)`.
+ * - A custom name can be provided via `Field(title=...)`.
  * - Optional metadata such as descriptions should also be defined via `Field`.
  */
 export type AppSettingsOutput = {
@@ -92,6 +102,82 @@ export type AppSettingsOutput = {
      * Crypto Commission
      */
     crypto_commission?: string;
+    /**
+     * Payment Currency
+     */
+    payment_currency_id?: number;
+    /**
+     * Pivot Currency
+     *
+     * Pivot currency ID used as the canonical reference for storing and deriving exchange rates. All rates are interpreted as `1 base_currency = rate * pivot_currency`.
+     */
+    pivot_currency_id?: number;
+};
+
+/**
+ * AttemptCreate
+ */
+export type AttemptCreate = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Exam Id
+     */
+    exam_id?: string | null;
+    /**
+     * Module Id
+     */
+    module_id: string;
+    /**
+     * Answers
+     */
+    answers: {
+        [key: string]: string;
+    };
+    /**
+     * Idempotency Key
+     */
+    idempotency_key: string;
+};
+
+/**
+ * AttemptRead
+ */
+export type AttemptRead = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * User Id
+     */
+    user_id: string;
+    exam: ExamRead;
+    module: ModuleInfo;
+    /**
+     * Answers
+     */
+    answers: {
+        [key: string]: string;
+    };
+    /**
+     * Score
+     */
+    score: number | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    /**
+     * Idempotency Key
+     */
+    idempotency_key: string;
 };
 
 /**
@@ -105,13 +191,23 @@ export type BlockchainRead = {
 };
 
 /**
+ * Body_add_files_to_ielts_module
+ */
+export type BodyAddFilesToIeltsModule = {
+    /**
+     * Files
+     */
+    files: Array<Blob | File>;
+};
+
+/**
  * Body_create_kyc_document
  */
 export type BodyCreateKycDocument = {
     /**
      * Doc Type Id
      */
-    doc_type_id: string;
+    doc_type_id: number;
     /**
      * Files
      */
@@ -123,9 +219,29 @@ export type BodyCreateKycDocument = {
  */
 export type BodyCreatePayment = {
     /**
-     * Receipt
+     * Invoice Id
      */
-    receipt?: Blob | File | null;
+    invoice_id: string;
+    payment_method?: PaymentMethodEnum;
+    /**
+     * Receipt File
+     */
+    receipt_file?: Blob | File | null;
+    /**
+     * Receipt Test
+     */
+    receipt_test?: string | null;
+};
+
+/**
+ * Body_create_role
+ */
+export type BodyCreateRole = {
+    role_create: RoleCreate;
+    /**
+     * Permission Ids
+     */
+    permission_ids: Array<number>;
 };
 
 /**
@@ -191,13 +307,20 @@ export type BodyLoginAccessToken = {
 };
 
 /**
+ * Body_update_payment_status
+ */
+export type BodyUpdatePaymentStatus = {
+    status: PaymentStatus;
+};
+
+/**
  * CurrencyRead
  */
 export type CurrencyRead = {
     /**
      * Id
      */
-    id: string;
+    id: number;
     type: CurrencyType;
     /**
      * Name
@@ -244,6 +367,115 @@ export type CurrencyRead = {
 export type CurrencyType = 'fiat' | 'crypto';
 
 /**
+ * ExamCreate
+ */
+export type ExamCreate = {
+    /**
+     * Code
+     */
+    code?: string | null;
+    type: IeltsExamType;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Listening Id
+     */
+    listening_id?: string | null;
+    /**
+     * Reading Id
+     */
+    reading_id?: string | null;
+    /**
+     * Writing Id
+     */
+    writing_id?: string | null;
+    /**
+     * Speaking Id
+     */
+    speaking_id?: string | null;
+};
+
+/**
+ * ExamRead
+ */
+export type ExamRead = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Code
+     */
+    code: string | null;
+    type: IeltsExamType;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Description
+     */
+    description: string | null;
+    /**
+     * Listening Id
+     */
+    listening_id: string | null;
+    /**
+     * Reading Id
+     */
+    reading_id: string | null;
+    /**
+     * Writing Id
+     */
+    writing_id: string | null;
+    /**
+     * Speaking Id
+     */
+    speaking_id: string | null;
+};
+
+/**
+ * ExamUpdate
+ */
+export type ExamUpdate = {
+    /**
+     * Code
+     */
+    code?: string | null;
+    type?: IeltsExamType | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Listening Id
+     */
+    listening_id?: string | null;
+    /**
+     * Reading Id
+     */
+    reading_id?: string | null;
+    /**
+     * Writing Id
+     */
+    writing_id?: string | null;
+    /**
+     * Speaking Id
+     */
+    speaking_id?: string | null;
+};
+
+/**
  * FileRead
  */
 export type FileRead = {
@@ -254,15 +486,11 @@ export type FileRead = {
     /**
      * User Id
      */
-    user_id: string;
+    user_id: string | null;
     /**
      * Filename
      */
     filename: string | null;
-    /**
-     * Extension
-     */
-    extension: string | null;
     /**
      * Content Type
      */
@@ -286,6 +514,10 @@ export type FileSetRead = {
      */
     name: string | null;
     /**
+     * User Id
+     */
+    user_id: string | null;
+    /**
      * Files
      */
     files: Array<FileRead>;
@@ -299,6 +531,132 @@ export type HttpValidationError = {
      * Detail
      */
     detail?: Array<ValidationError>;
+};
+
+/**
+ * IdentifyInfoGroup
+ */
+export type IdentifyInfoGroupInput = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'identify_info';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Image
+     */
+    image?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+    /**
+     * Options Prompt
+     */
+    options_prompt?: string | null;
+    /**
+     * Options
+     */
+    options: {
+        [key: string]: string;
+    };
+};
+
+/**
+ * IdentifyInfoGroup
+ */
+export type IdentifyInfoGroupOutput = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'identify_info';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Image
+     */
+    image?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+    /**
+     * Options Prompt
+     */
+    options_prompt?: string | null;
+    /**
+     * Options
+     */
+    options: {
+        [key: string]: string;
+    };
+};
+
+/**
+ * IeltsExamType
+ */
+export type IeltsExamType = 'academic' | 'general';
+
+/**
+ * IeltsModuleType
+ */
+export type IeltsModuleType = 'listening' | 'reading' | 'writing' | 'speaking';
+
+/**
+ * Image
+ */
+export type Image = {
+    /**
+     * Type
+     */
+    type: 'image';
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * File
+     */
+    file: string;
 };
 
 /**
@@ -369,7 +727,7 @@ export type InvoiceStatus = 'paid' | 'unpaid' | 'expired' | 'cancelled';
 /**
  * InvoiceType
  */
-export type InvoiceType = 'wallet_top_up' | 'offer_commission';
+export type InvoiceType = 'wallet_top_up' | 'offer_create_commission' | 'offer_lock_commission';
 
 /**
  * InvoicesRead
@@ -447,7 +805,7 @@ export type KycDocumentTypeRead = {
     /**
      * Id
      */
-    id: string;
+    id: number;
     /**
      * Code
      */
@@ -463,9 +821,140 @@ export type KycDocumentTypeRead = {
 };
 
 /**
+ * KycRequirementCreate
+ *
+ * Satisfying at least one requirement group is enough to assign the role.
+ */
+export type KycRequirementCreate = {
+    /**
+     * Groups
+     */
+    groups: Array<KycRequirementGroupCreate>;
+};
+
+/**
+ * KycRequirementGroupCreate
+ *
+ * A requirement group: at least `required_count` distinct document types are required.
+ * If `required_count` is None, all document types in the group are required.
+ */
+export type KycRequirementGroupCreate = {
+    /**
+     * Document Type Ids
+     */
+    document_type_ids: Array<number>;
+    /**
+     * Required Count
+     */
+    required_count?: number | null;
+};
+
+/**
  * KycReviewAction
  */
 export type KycReviewAction = 'approve' | 'reject' | 'request_more_info' | 'expire';
+
+/**
+ * ListeningContent
+ */
+export type ListeningContentInput = {
+    /**
+     * Type
+     */
+    type?: 'listening';
+    /**
+     * Parts
+     */
+    parts: Array<ListeningSectionInput>;
+};
+
+/**
+ * ListeningContent
+ */
+export type ListeningContentOutput = {
+    /**
+     * Type
+     */
+    type?: 'listening';
+    /**
+     * Parts
+     */
+    parts: Array<ListeningSectionOutput>;
+};
+
+/**
+ * ListeningSection
+ */
+export type ListeningSectionInput = {
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Test
+     */
+    test: Array<({
+        group_type: 'basic';
+    } & QuestionGroupBaseInput) | ({
+        group_type: 'multiple_choice';
+    } & QuestionGroupMultiChoiceInput) | ({
+        group_type: 'identify_info';
+    } & IdentifyInfoGroupInput) | ({
+        group_type: 'matching';
+    } & MatchingInput) | ({
+        group_type: 'completion_sentence';
+    } & SentenceCompletionGroupInput) | ({
+        group_type: 'completion_note';
+    } & NoteCompletionGroupInput)>;
+    /**
+     * Audio File
+     */
+    audio_file: string;
+    /**
+     * Audio Script
+     */
+    audio_script: Array<Utterance>;
+};
+
+/**
+ * ListeningSection
+ */
+export type ListeningSectionOutput = {
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Test
+     */
+    test: Array<({
+        group_type: 'basic';
+    } & QuestionGroupBaseOutput) | ({
+        group_type: 'multiple_choice';
+    } & QuestionGroupMultiChoiceOutput) | ({
+        group_type: 'identify_info';
+    } & IdentifyInfoGroupOutput) | ({
+        group_type: 'matching';
+    } & MatchingOutput) | ({
+        group_type: 'completion_sentence';
+    } & SentenceCompletionGroupOutput) | ({
+        group_type: 'completion_note';
+    } & NoteCompletionGroupOutput)>;
+    /**
+     * Audio File
+     */
+    audio_file: string;
+    /**
+     * Audio Script
+     */
+    audio_script: Array<Utterance>;
+};
 
 /**
  * Maker
@@ -479,6 +968,96 @@ export type Maker = {
 };
 
 /**
+ * Matching
+ */
+export type MatchingInput = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'matching';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Image
+     */
+    image?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+    /**
+     * Source Title
+     */
+    source_title?: string | null;
+    /**
+     * Source
+     */
+    source?: Array<string> | null;
+};
+
+/**
+ * Matching
+ */
+export type MatchingOutput = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'matching';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Image
+     */
+    image?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+    /**
+     * Source Title
+     */
+    source_title?: string | null;
+    /**
+     * Source
+     */
+    source?: Array<string> | null;
+};
+
+/**
  * Message
  */
 export type Message = {
@@ -486,6 +1065,92 @@ export type Message = {
      * Message
      */
     message: string;
+};
+
+/**
+ * ModuleCreate
+ */
+export type ModuleCreate = {
+    type: IeltsModuleType;
+    /**
+     * Tag
+     */
+    tag?: string | null;
+    /**
+     * Duration Minutes
+     */
+    duration_minutes: number;
+    /**
+     * Questions
+     */
+    questions?: {
+        [key: string]: Question;
+    } | null;
+    /**
+     * Content
+     */
+    content: ({
+        type: 'listening';
+    } & ListeningContentInput) | ({
+        type: 'reading';
+    } & ReadingContentInput) | ({
+        type: 'writing';
+    } & WritingContentInput) | ({
+        type: 'speaking';
+    } & SpeakingContent);
+};
+
+/**
+ * ModuleInfo
+ */
+export type ModuleInfo = {
+    /**
+     * Id
+     */
+    id: string;
+    type: IeltsModuleType;
+    /**
+     * Tag
+     */
+    tag: string | null;
+};
+
+/**
+ * ModuleRead
+ */
+export type ModuleRead = {
+    /**
+     * Id
+     */
+    id: string;
+    type: IeltsModuleType;
+    /**
+     * Tag
+     */
+    tag: string | null;
+    /**
+     * Duration Minutes
+     */
+    duration_minutes: number;
+    file_set: FileSetRead | null;
+    /**
+     * Questions
+     */
+    questions: {
+        [key: string]: Question;
+    } | null;
+    /**
+     * Content
+     */
+    content: ({
+        type: 'listening';
+    } & ListeningContentOutput) | ({
+        type: 'reading';
+    } & ReadingContentOutput) | ({
+        type: 'writing';
+    } & WritingContentOutput) | ({
+        type: 'speaking';
+    } & SpeakingContent) | null;
 };
 
 /**
@@ -503,21 +1168,119 @@ export type NewPassword = {
 };
 
 /**
+ * NoteCompletionGroup
+ */
+export type NoteCompletionGroupInput = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'completion_note';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Image
+     */
+    image?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+    /**
+     * Options
+     */
+    options?: Array<string> | null;
+    /**
+     * Content
+     */
+    content: ({
+        type: 'table';
+    } & Table) | ({
+        type: 'text';
+    } & Text);
+};
+
+/**
+ * NoteCompletionGroup
+ */
+export type NoteCompletionGroupOutput = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'completion_note';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Image
+     */
+    image?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+    /**
+     * Options
+     */
+    options?: Array<string> | null;
+    /**
+     * Content
+     */
+    content: ({
+        type: 'table';
+    } & Table) | ({
+        type: 'text';
+    } & Text);
+};
+
+/**
  * OfferCreate
  */
 export type OfferCreate = {
     /**
      * Sell Asset Id
      */
-    sell_asset_id: string;
+    sell_asset_id: number;
     /**
      * Buy Asset Id
      */
-    buy_asset_id: string;
+    buy_asset_id: number;
     /**
-     * Price
+     * Quote
      */
-    price: number | string;
+    quote: number | string;
     /**
      * Total Amount
      */
@@ -626,6 +1389,42 @@ export type PageKycDocumentRead = {
 };
 
 /**
+ * Passage
+ */
+export type Passage = {
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Subtitle
+     */
+    subtitle?: string | null;
+    /**
+     * Sections
+     */
+    sections: Array<PassageSection>;
+    /**
+     * Footnotes
+     */
+    footnotes?: Array<string> | null;
+};
+
+/**
+ * PassageSection
+ */
+export type PassageSection = {
+    /**
+     * Label
+     */
+    label?: string | null;
+    /**
+     * Text
+     */
+    text: Array<string>;
+};
+
+/**
  * PaymentMethodEnum
  */
 export type PaymentMethodEnum = 'crypto' | 'paypal' | 'wallet' | 'bank_transfer';
@@ -647,10 +1446,11 @@ export type PaymentRead = {
      */
     amount: string;
     /**
-     * Currency
+     * Currency Id
      */
-    currency: string;
+    currency_id: number;
     status: PaymentStatus;
+    receipt_file_set: FileSetRead | null;
     /**
      * Created At
      */
@@ -679,6 +1479,46 @@ export type PaymentsRead = {
 };
 
 /**
+ * PermissionDomainRead
+ */
+export type PermissionDomainRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description: string | null;
+    /**
+     * Permissions
+     */
+    permissions: Array<PermissionRead>;
+};
+
+/**
+ * PermissionRead
+ */
+export type PermissionRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string | null;
+};
+
+/**
  * ProfilePublic
  */
 export type ProfilePublic = {
@@ -702,6 +1542,492 @@ export type ProfilePublic = {
      * Avatar Url
      */
     readonly avatar_url: string;
+};
+
+/**
+ * Question
+ */
+export type Question = {
+    /**
+     * Type
+     */
+    type: 'question';
+    /**
+     * Id
+     */
+    id: string;
+    question_type: QuestionType;
+    /**
+     * Question
+     */
+    question?: Array<string> | string | null;
+    /**
+     * Choices
+     */
+    choices?: Array<string> | null;
+    /**
+     * Answer
+     */
+    answer?: Array<string> | string | null;
+};
+
+/**
+ * QuestionGroupBase
+ */
+export type QuestionGroupBaseInput = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type?: 'basic';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Image
+     */
+    image?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+};
+
+/**
+ * QuestionGroupBase
+ */
+export type QuestionGroupBaseOutput = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type?: 'basic';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Image
+     */
+    image?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+};
+
+/**
+ * QuestionGroupMultiChoice
+ */
+export type QuestionGroupMultiChoiceInput = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'multiple_choice';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Image
+     */
+    image?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+};
+
+/**
+ * QuestionGroupMultiChoice
+ */
+export type QuestionGroupMultiChoiceOutput = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'multiple_choice';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Image
+     */
+    image?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+};
+
+/**
+ * QuestionType
+ */
+export type QuestionType = 'multiple_choice' | 'completion' | 'short_answer' | 'identify_info' | 'matching';
+
+/**
+ * ReadingContent
+ */
+export type ReadingContentInput = {
+    /**
+     * Type
+     */
+    type?: 'reading';
+    /**
+     * Parts
+     */
+    parts: Array<ReadingSectionInput>;
+};
+
+/**
+ * ReadingContent
+ */
+export type ReadingContentOutput = {
+    /**
+     * Type
+     */
+    type?: 'reading';
+    /**
+     * Parts
+     */
+    parts: Array<ReadingSectionOutput>;
+};
+
+/**
+ * ReadingSection
+ */
+export type ReadingSectionInput = {
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Test
+     */
+    test: Array<({
+        group_type: 'basic';
+    } & QuestionGroupBaseInput) | ({
+        group_type: 'multiple_choice';
+    } & QuestionGroupMultiChoiceInput) | ({
+        group_type: 'identify_info';
+    } & IdentifyInfoGroupInput) | ({
+        group_type: 'matching';
+    } & MatchingInput) | ({
+        group_type: 'completion_sentence';
+    } & SentenceCompletionGroupInput) | ({
+        group_type: 'completion_note';
+    } & NoteCompletionGroupInput)>;
+    /**
+     * Prompt
+     */
+    prompt: Array<string>;
+    passage: Passage;
+};
+
+/**
+ * ReadingSection
+ */
+export type ReadingSectionOutput = {
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Test
+     */
+    test: Array<({
+        group_type: 'basic';
+    } & QuestionGroupBaseOutput) | ({
+        group_type: 'multiple_choice';
+    } & QuestionGroupMultiChoiceOutput) | ({
+        group_type: 'identify_info';
+    } & IdentifyInfoGroupOutput) | ({
+        group_type: 'matching';
+    } & MatchingOutput) | ({
+        group_type: 'completion_sentence';
+    } & SentenceCompletionGroupOutput) | ({
+        group_type: 'completion_note';
+    } & NoteCompletionGroupOutput)>;
+    /**
+     * Prompt
+     */
+    prompt: Array<string>;
+    passage: Passage;
+};
+
+/**
+ * RoleCreate
+ */
+export type RoleCreate = {
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Description
+     */
+    description: string;
+};
+
+/**
+ * RoleRead
+ */
+export type RoleRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Permissions
+     */
+    permissions: Array<PermissionRead>;
+};
+
+/**
+ * SentenceCompletionGroup
+ */
+export type SentenceCompletionGroupInput = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'completion_sentence';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Image
+     */
+    image?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+    /**
+     * Options
+     */
+    options?: Array<string> | null;
+};
+
+/**
+ * SentenceCompletionGroup
+ */
+export type SentenceCompletionGroupOutput = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'completion_sentence';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Image
+     */
+    image?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+    /**
+     * Options
+     */
+    options?: Array<string> | null;
+};
+
+/**
+ * SpeakingContent
+ */
+export type SpeakingContent = {
+    /**
+     * Type
+     */
+    type?: 'speaking';
+    part1: SpeakingQuestionGroup;
+    part2: SpeakingCueCard;
+    /**
+     * Part3
+     */
+    part3: Array<SpeakingQuestionGroup>;
+};
+
+/**
+ * SpeakingCueCard
+ */
+export type SpeakingCueCard = {
+    /**
+     * First Paragraph
+     */
+    first_paragraph: string;
+    /**
+     * Instructions
+     */
+    instructions: Array<string>;
+    /**
+     * Last Paragraph
+     */
+    last_paragraph?: string | null;
+};
+
+/**
+ * SpeakingQuestionGroup
+ */
+export type SpeakingQuestionGroup = {
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Questions
+     */
+    questions: Array<string>;
+};
+
+/**
+ * Table
+ */
+export type Table = {
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Type
+     */
+    type: 'table';
+    /**
+     * Rows
+     */
+    rows: Array<Array<string>>;
+};
+
+/**
+ * Text
+ */
+export type Text = {
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Description
+     */
+    description?: string | null;
+    /**
+     * Type
+     */
+    type: 'text';
+    /**
+     * Text
+     */
+    text: Array<string>;
 };
 
 /**
@@ -945,6 +2271,24 @@ export type UsersPublic = {
 };
 
 /**
+ * Utterance
+ */
+export type Utterance = {
+    /**
+     * Speaker
+     */
+    speaker?: string | null;
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Questions
+     */
+    questions?: Array<string> | null;
+};
+
+/**
  * ValidationError
  */
 export type ValidationError = {
@@ -963,13 +2307,63 @@ export type ValidationError = {
 };
 
 /**
+ * WritingContent
+ */
+export type WritingContentInput = {
+    /**
+     * Type
+     */
+    type?: 'writing';
+    /**
+     * Tasks
+     */
+    tasks: Array<WritingTask>;
+};
+
+/**
+ * WritingContent
+ */
+export type WritingContentOutput = {
+    /**
+     * Type
+     */
+    type?: 'writing';
+    /**
+     * Tasks
+     */
+    tasks: Array<WritingTask>;
+};
+
+/**
+ * WritingTask
+ */
+export type WritingTask = {
+    /**
+     * Question
+     */
+    question: Array<string>;
+    /**
+     * Visuals
+     */
+    visuals?: Array<({
+        type: 'image';
+    } & Image) | ({
+        type: 'table';
+    } & Table)> | null;
+    /**
+     * Sample Answer
+     */
+    sample_answer: Array<string>;
+};
+
+/**
  * CurrencyRead
  */
 export type CurrencyReadWritable = {
     /**
      * Id
      */
-    id: string;
+    id: number;
     type: CurrencyType;
     /**
      * Name
@@ -1076,6 +2470,205 @@ export type UserMeWritable = {
     username: string;
     profile?: ProfilePublicWritable | null;
 };
+
+export type ReadSettingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/settings/';
+};
+
+export type ReadSettingsResponses = {
+    /**
+     * Response Read Settings
+     *
+     * Successful Response
+     */
+    200: Array<AppSettingRead>;
+};
+
+export type ReadSettingsResponse = ReadSettingsResponses[keyof ReadSettingsResponses];
+
+export type UpdateSettingsData = {
+    body: AppSettingsInput;
+    path?: never;
+    query?: never;
+    url: '/api/v1/settings/';
+};
+
+export type UpdateSettingsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateSettingsError = UpdateSettingsErrors[keyof UpdateSettingsErrors];
+
+export type UpdateSettingsResponses = {
+    /**
+     * Successful Response
+     */
+    200: AppSettingsOutput;
+};
+
+export type UpdateSettingsResponse = UpdateSettingsResponses[keyof UpdateSettingsResponses];
+
+export type ReadPermissionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/rbac/permissions';
+};
+
+export type ReadPermissionsResponses = {
+    /**
+     * Response Read Permissions
+     *
+     * Successful Response
+     */
+    200: Array<PermissionDomainRead>;
+};
+
+export type ReadPermissionsResponse = ReadPermissionsResponses[keyof ReadPermissionsResponses];
+
+export type ReadRolesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/rbac/roles';
+};
+
+export type ReadRolesResponses = {
+    /**
+     * Response Read Roles
+     *
+     * Successful Response
+     */
+    200: Array<RoleRead>;
+};
+
+export type ReadRolesResponse = ReadRolesResponses[keyof ReadRolesResponses];
+
+export type CreateRoleData = {
+    body: BodyCreateRole;
+    path?: never;
+    query?: never;
+    url: '/api/v1/rbac/roles';
+};
+
+export type CreateRoleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateRoleError = CreateRoleErrors[keyof CreateRoleErrors];
+
+export type CreateRoleResponses = {
+    /**
+     * Successful Response
+     */
+    200: RoleRead;
+};
+
+export type CreateRoleResponse = CreateRoleResponses[keyof CreateRoleResponses];
+
+export type ReadUserRolesData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/rbac/roles/{user_id}';
+};
+
+export type ReadUserRolesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadUserRolesError = ReadUserRolesErrors[keyof ReadUserRolesErrors];
+
+export type ReadUserRolesResponses = {
+    /**
+     * Response Read User Roles
+     *
+     * Successful Response
+     */
+    200: Array<RoleRead>;
+};
+
+export type ReadUserRolesResponse = ReadUserRolesResponses[keyof ReadUserRolesResponses];
+
+export type DeleteRoleData = {
+    body?: never;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: number;
+    };
+    query?: never;
+    url: '/api/v1/rbac/roles/{role_id}';
+};
+
+export type DeleteRoleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteRoleError = DeleteRoleErrors[keyof DeleteRoleErrors];
+
+export type DeleteRoleResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type DeleteRoleResponse = DeleteRoleResponses[keyof DeleteRoleResponses];
+
+export type UpdateRoleData = {
+    /**
+     * Permission Ids
+     */
+    body: Array<number>;
+    path: {
+        /**
+         * Role Id
+         */
+        role_id: number;
+    };
+    query?: never;
+    url: '/api/v1/rbac/roles/{role_id}';
+};
+
+export type UpdateRoleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateRoleError = UpdateRoleErrors[keyof UpdateRoleErrors];
+
+export type UpdateRoleResponses = {
+    /**
+     * Successful Response
+     */
+    200: RoleRead;
+};
+
+export type UpdateRoleResponse = UpdateRoleResponses[keyof UpdateRoleResponses];
 
 export type LoginAccessTokenData = {
     body: BodyLoginAccessToken;
@@ -1459,49 +3052,6 @@ export type UpdateUserResponses = {
 
 export type UpdateUserResponse = UpdateUserResponses[keyof UpdateUserResponses];
 
-export type ReadSettingsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/settings/';
-};
-
-export type ReadSettingsResponses = {
-    /**
-     * Response Read Settings
-     *
-     * Successful Response
-     */
-    200: Array<AppSettingRead>;
-};
-
-export type ReadSettingsResponse = ReadSettingsResponses[keyof ReadSettingsResponses];
-
-export type UpdateSettingsData = {
-    body: AppSettingsInput;
-    path?: never;
-    query?: never;
-    url: '/api/v1/settings/';
-};
-
-export type UpdateSettingsErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateSettingsError = UpdateSettingsErrors[keyof UpdateSettingsErrors];
-
-export type UpdateSettingsResponses = {
-    /**
-     * Successful Response
-     */
-    200: AppSettingsOutput;
-};
-
-export type UpdateSettingsResponse = UpdateSettingsResponses[keyof UpdateSettingsResponses];
-
 export type TestEmailData = {
     body?: never;
     path?: never;
@@ -1695,7 +3245,12 @@ export type ReadUserOffersResponse = ReadUserOffersResponses[keyof ReadUserOffer
 
 export type LockOfferData = {
     body: OfferLockCreate;
-    path?: never;
+    path: {
+        /**
+         * Offer Id
+         */
+        offer_id: string;
+    };
     query?: never;
     url: '/api/v1/offers/{offer_id}/lock';
 };
@@ -1991,15 +3546,9 @@ export type ReadPaymentsResponses = {
 export type ReadPaymentsResponse = ReadPaymentsResponses[keyof ReadPaymentsResponses];
 
 export type CreatePaymentData = {
-    body?: BodyCreatePayment;
+    body: BodyCreatePayment;
     path?: never;
-    query: {
-        /**
-         * Invoice Id
-         */
-        invoice_id: string;
-        payment_method: PaymentMethodEnum;
-    };
+    query?: never;
     url: '/api/v1/payments/';
 };
 
@@ -2138,6 +3687,36 @@ export type ReadReceiptByIdResponses = {
     200: unknown;
 };
 
+export type UpdatePaymentStatusData = {
+    body: BodyUpdatePaymentStatus;
+    path: {
+        /**
+         * Payment Id
+         */
+        payment_id: string;
+    };
+    query?: never;
+    url: '/api/v1/payments/{payment_id}';
+};
+
+export type UpdatePaymentStatusErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdatePaymentStatusError = UpdatePaymentStatusErrors[keyof UpdatePaymentStatusErrors];
+
+export type UpdatePaymentStatusResponses = {
+    /**
+     * Successful Response
+     */
+    200: PaymentRead;
+};
+
+export type UpdatePaymentStatusResponse = UpdatePaymentStatusResponses[keyof UpdatePaymentStatusResponses];
+
 export type ReadKycDocumentTypesData = {
     body?: never;
     path?: never;
@@ -2216,7 +3795,7 @@ export type ReadKycDocumentsData = {
          */
         size?: number;
     };
-    url: '/api/v1/kyc/';
+    url: '/api/v1/kyc/documents';
 };
 
 export type ReadKycDocumentsErrors = {
@@ -2241,7 +3820,7 @@ export type CreateKycDocumentData = {
     body: BodyCreateKycDocument;
     path?: never;
     query?: never;
-    url: '/api/v1/kyc/';
+    url: '/api/v1/kyc/documents';
 };
 
 export type CreateKycDocumentErrors = {
@@ -2266,7 +3845,7 @@ export type ReadMyKycDocumentsData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/v1/kyc/my';
+    url: '/api/v1/kyc/me/documents';
 };
 
 export type ReadMyKycDocumentsResponses = {
@@ -2289,7 +3868,7 @@ export type ReviewKycDocumentData = {
         doc_id: string;
     };
     query?: never;
-    url: '/api/v1/kyc/{doc_id}/review';
+    url: '/api/v1/kyc/documents/{doc_id}/review';
 };
 
 export type ReviewKycDocumentErrors = {
@@ -2311,15 +3890,12 @@ export type ReviewKycDocumentResponses = {
 export type ReviewKycDocumentResponse = ReviewKycDocumentResponses[keyof ReviewKycDocumentResponses];
 
 export type SetRoleKycRequirementsData = {
-    /**
-     * Doc Type Ids
-     */
-    body: Array<string>;
+    body: KycRequirementCreate;
     path: {
         /**
          * Role Id
          */
-        role_id: string;
+        role_id: number;
     };
     query?: never;
     url: '/api/v1/kyc/role-requirements/{role_id}';
@@ -2343,7 +3919,7 @@ export type SetRoleKycRequirementsResponses = {
 
 export type SetRoleKycRequirementsResponse = SetRoleKycRequirementsResponses[keyof SetRoleKycRequirementsResponses];
 
-export type ReadFileByIdData = {
+export type DeleteFileData = {
     body?: never;
     path: {
         /**
@@ -2355,18 +3931,327 @@ export type ReadFileByIdData = {
     url: '/api/v1/files/{file_id}';
 };
 
-export type ReadFileByIdErrors = {
+export type DeleteFileErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ReadFileByIdError = ReadFileByIdErrors[keyof ReadFileByIdErrors];
+export type DeleteFileError = DeleteFileErrors[keyof DeleteFileErrors];
 
-export type ReadFileByIdResponses = {
+export type DeleteFileResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type DeleteFileResponse = DeleteFileResponses[keyof DeleteFileResponses];
+
+export type GetFileData = {
+    body?: never;
+    path: {
+        /**
+         * File Id
+         */
+        file_id: string;
+    };
+    query?: never;
+    url: '/api/v1/files/{file_id}';
+};
+
+export type GetFileErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetFileError = GetFileErrors[keyof GetFileErrors];
+
+export type GetFileResponses = {
     /**
      * Successful Response
      */
     200: unknown;
 };
+
+export type ReadFileSetData = {
+    body?: never;
+    path: {
+        /**
+         * File Set Id
+         */
+        file_set_id: string;
+    };
+    query?: never;
+    url: '/api/v1/files/set/{file_set_id}';
+};
+
+export type ReadFileSetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadFileSetError = ReadFileSetErrors[keyof ReadFileSetErrors];
+
+export type ReadFileSetResponses = {
+    /**
+     * Successful Response
+     */
+    200: FileSetRead;
+};
+
+export type ReadFileSetResponse = ReadFileSetResponses[keyof ReadFileSetResponses];
+
+export type ReadIeltsExamsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ielts/exams';
+};
+
+export type ReadIeltsExamsResponses = {
+    /**
+     * Response Read Ielts Exams
+     *
+     * Successful Response
+     */
+    200: Array<ExamRead>;
+};
+
+export type ReadIeltsExamsResponse = ReadIeltsExamsResponses[keyof ReadIeltsExamsResponses];
+
+export type CreateIeltsExamData = {
+    body: ExamCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ielts/exams';
+};
+
+export type CreateIeltsExamErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateIeltsExamError = CreateIeltsExamErrors[keyof CreateIeltsExamErrors];
+
+export type CreateIeltsExamResponses = {
+    /**
+     * Successful Response
+     */
+    200: ExamRead;
+};
+
+export type CreateIeltsExamResponse = CreateIeltsExamResponses[keyof CreateIeltsExamResponses];
+
+export type ReadIeltsExamByIdData = {
+    body?: never;
+    path: {
+        /**
+         * Exam Id
+         */
+        exam_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/exams/{exam_id}';
+};
+
+export type ReadIeltsExamByIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadIeltsExamByIdError = ReadIeltsExamByIdErrors[keyof ReadIeltsExamByIdErrors];
+
+export type ReadIeltsExamByIdResponses = {
+    /**
+     * Successful Response
+     */
+    200: ExamRead;
+};
+
+export type ReadIeltsExamByIdResponse = ReadIeltsExamByIdResponses[keyof ReadIeltsExamByIdResponses];
+
+export type UpdateIeltsExamData = {
+    body: ExamUpdate;
+    path: {
+        /**
+         * Exam Id
+         */
+        exam_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/exams/{exam_id}';
+};
+
+export type UpdateIeltsExamErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateIeltsExamError = UpdateIeltsExamErrors[keyof UpdateIeltsExamErrors];
+
+export type UpdateIeltsExamResponses = {
+    /**
+     * Successful Response
+     */
+    200: ExamRead;
+};
+
+export type UpdateIeltsExamResponse = UpdateIeltsExamResponses[keyof UpdateIeltsExamResponses];
+
+export type ReadIeltsModulesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ielts/modules';
+};
+
+export type ReadIeltsModulesResponses = {
+    /**
+     * Response Read Ielts Modules
+     *
+     * Successful Response
+     */
+    200: Array<ModuleInfo>;
+};
+
+export type ReadIeltsModulesResponse = ReadIeltsModulesResponses[keyof ReadIeltsModulesResponses];
+
+export type CreateIeltsModuleData = {
+    body: ModuleCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ielts/modules';
+};
+
+export type CreateIeltsModuleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateIeltsModuleError = CreateIeltsModuleErrors[keyof CreateIeltsModuleErrors];
+
+export type CreateIeltsModuleResponses = {
+    /**
+     * Successful Response
+     */
+    200: ModuleRead;
+};
+
+export type CreateIeltsModuleResponse = CreateIeltsModuleResponses[keyof CreateIeltsModuleResponses];
+
+export type AddFilesToIeltsModuleData = {
+    body: BodyAddFilesToIeltsModule;
+    path: {
+        /**
+         * Module Id
+         */
+        module_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/modules/{module_id}/files';
+};
+
+export type AddFilesToIeltsModuleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AddFilesToIeltsModuleError = AddFilesToIeltsModuleErrors[keyof AddFilesToIeltsModuleErrors];
+
+export type AddFilesToIeltsModuleResponses = {
+    /**
+     * Successful Response
+     */
+    200: ModuleRead;
+};
+
+export type AddFilesToIeltsModuleResponse = AddFilesToIeltsModuleResponses[keyof AddFilesToIeltsModuleResponses];
+
+export type ReadIeltsModuleByIdData = {
+    body?: never;
+    path: {
+        /**
+         * Module Id
+         */
+        module_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/modules/{module_id}';
+};
+
+export type ReadIeltsModuleByIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadIeltsModuleByIdError = ReadIeltsModuleByIdErrors[keyof ReadIeltsModuleByIdErrors];
+
+export type ReadIeltsModuleByIdResponses = {
+    /**
+     * Successful Response
+     */
+    200: ModuleRead;
+};
+
+export type ReadIeltsModuleByIdResponse = ReadIeltsModuleByIdResponses[keyof ReadIeltsModuleByIdResponses];
+
+export type CreateIeltsAttemptData = {
+    body: AttemptCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ielts/attempts';
+};
+
+export type CreateIeltsAttemptErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateIeltsAttemptError = CreateIeltsAttemptErrors[keyof CreateIeltsAttemptErrors];
+
+export type CreateIeltsAttemptResponses = {
+    /**
+     * Successful Response
+     */
+    200: AttemptRead;
+};
+
+export type CreateIeltsAttemptResponse = CreateIeltsAttemptResponses[keyof CreateIeltsAttemptResponses];
+
+export type ReadMyIeltsAttemptsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ielts/attempts/me';
+};
+
+export type ReadMyIeltsAttemptsResponses = {
+    /**
+     * Response Read My Ielts Attempts
+     *
+     * Successful Response
+     */
+    200: Array<AttemptRead>;
+};
+
+export type ReadMyIeltsAttemptsResponse = ReadMyIeltsAttemptsResponses[keyof ReadMyIeltsAttemptsResponses];

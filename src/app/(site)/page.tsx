@@ -1,23 +1,21 @@
-'use client'
-
 //import Image from "next/image";
 //import styles from "./page.module.css";
-import { VStack } from "@chakra-ui/react";
-import OffersSection from "@/components/home/OffersSection";
-//import TradingViewWidget from "@/components/util/tradingViewWidget";
+import { VStack, Text } from "@chakra-ui/react";
 import HeroSection from "@/components/home/HeroSection";
 import OnboardingTimeline from "@/components/home/OnboardingTimeline";
-import OfferSearch from "@/components/home/OfferSearch";
+import { readIeltsExams } from "@/client";
 
-export default function Home() {
+export default async function Home() {
+
+	const exams = (await readIeltsExams());
 
 	return (
 		<VStack gap={0} align="stretch">
-			<HeroSection />
-			{/* <TradingViewWidget /> */}
-			<OfferSearch p="10" bg="bg.panel"/>
-			<OffersSection />
-			<OnboardingTimeline />
+			{exams.data.map((exam)=>(
+				<Text>{exam.title}</Text>
+			))
+
+			}
 		</VStack>
 	);
 }
