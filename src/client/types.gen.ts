@@ -50,7 +50,7 @@ export type AppSettingRead = {
  * - A custom name can be provided via `Field(title=...)`.
  * - Optional metadata such as descriptions should also be defined via `Field`.
  */
-export type AppSettingsInput = {
+export type AppSettings = {
     /**
      * Fiat Commission
      */
@@ -59,49 +59,6 @@ export type AppSettingsInput = {
      * Crypto Commission
      */
     crypto_commission?: number | string;
-    /**
-     * Payment Currency
-     */
-    payment_currency_id?: number;
-    /**
-     * Pivot Currency
-     *
-     * Pivot currency ID used as the canonical reference for storing and deriving exchange rates. All rates are interpreted as `1 base_currency = rate * pivot_currency`.
-     */
-    pivot_currency_id?: number;
-};
-
-/**
- * AppSettings
- *
- * Central definition of application-level configuration.
- *
- * Each field in this model represents a single configurable setting and
- * maps to one record in the `AppSetting` database table.
- *
- * Defaults defined here are used as fallbacks and as initial values during
- * database synchronization.
- *
- * After adding, removing, or modifying fields in this model, run:
- *
- * python -m cli db sync
- *
- * to synchronize the definitions with the database.
- *
- * Notes:
- * - The setting name is derived from the field name by default.
- * - A custom name can be provided via `Field(title=...)`.
- * - Optional metadata such as descriptions should also be defined via `Field`.
- */
-export type AppSettingsOutput = {
-    /**
-     * Fiat Commission
-     */
-    fiat_commission?: string;
-    /**
-     * Crypto Commission
-     */
-    crypto_commission?: string;
     /**
      * Payment Currency
      */
@@ -355,10 +312,6 @@ export type CurrencyRead = {
      * Contract Address
      */
     contract_address: string | null;
-    /**
-     * Logo Url
-     */
-    readonly logo_url: string;
 };
 
 /**
@@ -536,54 +489,7 @@ export type HttpValidationError = {
 /**
  * IdentifyInfoGroup
  */
-export type IdentifyInfoGroupInput = {
-    /**
-     * Type
-     */
-    type: 'question_group';
-    /**
-     * Group Type
-     */
-    group_type: 'identify_info';
-    /**
-     * Question Range
-     */
-    question_range?: [
-        number,
-        number
-    ] | null;
-    /**
-     * Prompt
-     */
-    prompt?: Array<string> | null;
-    /**
-     * Title
-     */
-    title?: string | null;
-    /**
-     * Image
-     */
-    image?: string | null;
-    /**
-     * Questions
-     */
-    questions: Array<Question>;
-    /**
-     * Options Prompt
-     */
-    options_prompt?: string | null;
-    /**
-     * Options
-     */
-    options: {
-        [key: string]: string;
-    };
-};
-
-/**
- * IdentifyInfoGroup
- */
-export type IdentifyInfoGroupOutput = {
+export type IdentifyInfoGroup = {
     /**
      * Type
      */
@@ -662,26 +568,11 @@ export type Image = {
 /**
  * InvoiceCreate
  */
-export type InvoiceCreateInput = {
+export type InvoiceCreate = {
     /**
      * Amount
      */
     amount: number | string;
-    /**
-     * Currency
-     */
-    currency: string;
-    type: InvoiceType;
-};
-
-/**
- * InvoiceCreate
- */
-export type InvoiceCreateOutput = {
-    /**
-     * Amount
-     */
-    amount: string;
     /**
      * Currency
      */
@@ -700,7 +591,7 @@ export type InvoiceRead = {
     /**
      * Amount
      */
-    amount: string;
+    amount: number | string;
     /**
      * Currency
      */
@@ -857,35 +748,21 @@ export type KycReviewAction = 'approve' | 'reject' | 'request_more_info' | 'expi
 /**
  * ListeningContent
  */
-export type ListeningContentInput = {
+export type ListeningContent = {
     /**
      * Type
      */
-    type?: 'listening';
+    type: 'listening';
     /**
      * Parts
      */
-    parts: Array<ListeningSectionInput>;
-};
-
-/**
- * ListeningContent
- */
-export type ListeningContentOutput = {
-    /**
-     * Type
-     */
-    type?: 'listening';
-    /**
-     * Parts
-     */
-    parts: Array<ListeningSectionOutput>;
+    parts: Array<ListeningSection>;
 };
 
 /**
  * ListeningSection
  */
-export type ListeningSectionInput = {
+export type ListeningSection = {
     /**
      * Question Range
      */
@@ -898,54 +775,17 @@ export type ListeningSectionInput = {
      */
     test: Array<({
         group_type: 'basic';
-    } & QuestionGroupBaseInput) | ({
+    } & QuestionGroupBase) | ({
         group_type: 'multiple_choice';
-    } & QuestionGroupMultiChoiceInput) | ({
+    } & QuestionGroupMultiChoice) | ({
         group_type: 'identify_info';
-    } & IdentifyInfoGroupInput) | ({
+    } & IdentifyInfoGroup) | ({
         group_type: 'matching';
-    } & MatchingInput) | ({
+    } & Matching) | ({
         group_type: 'completion_sentence';
-    } & SentenceCompletionGroupInput) | ({
+    } & SentenceCompletionGroup) | ({
         group_type: 'completion_note';
-    } & NoteCompletionGroupInput)>;
-    /**
-     * Audio File
-     */
-    audio_file: string;
-    /**
-     * Audio Script
-     */
-    audio_script: Array<Utterance>;
-};
-
-/**
- * ListeningSection
- */
-export type ListeningSectionOutput = {
-    /**
-     * Question Range
-     */
-    question_range?: [
-        number,
-        number
-    ] | null;
-    /**
-     * Test
-     */
-    test: Array<({
-        group_type: 'basic';
-    } & QuestionGroupBaseOutput) | ({
-        group_type: 'multiple_choice';
-    } & QuestionGroupMultiChoiceOutput) | ({
-        group_type: 'identify_info';
-    } & IdentifyInfoGroupOutput) | ({
-        group_type: 'matching';
-    } & MatchingOutput) | ({
-        group_type: 'completion_sentence';
-    } & SentenceCompletionGroupOutput) | ({
-        group_type: 'completion_note';
-    } & NoteCompletionGroupOutput)>;
+    } & NoteCompletionGroup)>;
     /**
      * Audio File
      */
@@ -970,52 +810,7 @@ export type Maker = {
 /**
  * Matching
  */
-export type MatchingInput = {
-    /**
-     * Type
-     */
-    type: 'question_group';
-    /**
-     * Group Type
-     */
-    group_type: 'matching';
-    /**
-     * Question Range
-     */
-    question_range?: [
-        number,
-        number
-    ] | null;
-    /**
-     * Prompt
-     */
-    prompt?: Array<string> | null;
-    /**
-     * Title
-     */
-    title?: string | null;
-    /**
-     * Image
-     */
-    image?: string | null;
-    /**
-     * Questions
-     */
-    questions: Array<Question>;
-    /**
-     * Source Title
-     */
-    source_title?: string | null;
-    /**
-     * Source
-     */
-    source?: Array<string> | null;
-};
-
-/**
- * Matching
- */
-export type MatchingOutput = {
+export type Matching = {
     /**
      * Type
      */
@@ -1091,11 +886,11 @@ export type ModuleCreate = {
      */
     content: ({
         type: 'listening';
-    } & ListeningContentInput) | ({
+    } & ListeningContent) | ({
         type: 'reading';
-    } & ReadingContentInput) | ({
+    } & ReadingContent) | ({
         type: 'writing';
-    } & WritingContentInput) | ({
+    } & WritingContent) | ({
         type: 'speaking';
     } & SpeakingContent);
 };
@@ -1144,13 +939,13 @@ export type ModuleRead = {
      */
     content: ({
         type: 'listening';
-    } & ListeningContentOutput) | ({
+    } & ListeningContent) | ({
         type: 'reading';
-    } & ReadingContentOutput) | ({
+    } & ReadingContent) | ({
         type: 'writing';
-    } & WritingContentOutput) | ({
+    } & WritingContent) | ({
         type: 'speaking';
-    } & SpeakingContent) | null;
+    } & SpeakingContent);
 };
 
 /**
@@ -1170,56 +965,7 @@ export type NewPassword = {
 /**
  * NoteCompletionGroup
  */
-export type NoteCompletionGroupInput = {
-    /**
-     * Type
-     */
-    type: 'question_group';
-    /**
-     * Group Type
-     */
-    group_type: 'completion_note';
-    /**
-     * Question Range
-     */
-    question_range?: [
-        number,
-        number
-    ] | null;
-    /**
-     * Prompt
-     */
-    prompt?: Array<string> | null;
-    /**
-     * Title
-     */
-    title?: string | null;
-    /**
-     * Image
-     */
-    image?: string | null;
-    /**
-     * Questions
-     */
-    questions: Array<Question>;
-    /**
-     * Options
-     */
-    options?: Array<string> | null;
-    /**
-     * Content
-     */
-    content: ({
-        type: 'table';
-    } & Table) | ({
-        type: 'text';
-    } & Text);
-};
-
-/**
- * NoteCompletionGroup
- */
-export type NoteCompletionGroupOutput = {
+export type NoteCompletionGroup = {
     /**
      * Type
      */
@@ -1333,19 +1079,19 @@ export type OfferPublic = {
     /**
      * Price
      */
-    readonly price: string;
+    price: number | string;
     /**
      * Total Amount
      */
-    readonly total_amount: string;
+    total_amount: number | string;
     /**
      * Min Lock Amount
      */
-    readonly min_lock_amount: string;
+    min_lock_amount: number | string;
     /**
      * Available Amount
      */
-    readonly available_amount: string;
+    available_amount: number | string;
 };
 
 /**
@@ -1444,7 +1190,7 @@ export type PaymentRead = {
     /**
      * Amount
      */
-    amount: string;
+    amount: number | string;
     /**
      * Currency Id
      */
@@ -1534,14 +1280,6 @@ export type ProfilePublic = {
      * Avatar
      */
     avatar?: string | null;
-    /**
-     * Full Name
-     */
-    full_name: string | null;
-    /**
-     * Avatar Url
-     */
-    readonly avatar_url: string;
 };
 
 /**
@@ -1574,7 +1312,7 @@ export type Question = {
 /**
  * QuestionGroupBase
  */
-export type QuestionGroupBaseInput = {
+export type QuestionGroupBase = {
     /**
      * Type
      */
@@ -1582,44 +1320,7 @@ export type QuestionGroupBaseInput = {
     /**
      * Group Type
      */
-    group_type?: 'basic';
-    /**
-     * Question Range
-     */
-    question_range?: [
-        number,
-        number
-    ] | null;
-    /**
-     * Prompt
-     */
-    prompt?: Array<string> | null;
-    /**
-     * Title
-     */
-    title?: string | null;
-    /**
-     * Image
-     */
-    image?: string | null;
-    /**
-     * Questions
-     */
-    questions: Array<Question>;
-};
-
-/**
- * QuestionGroupBase
- */
-export type QuestionGroupBaseOutput = {
-    /**
-     * Type
-     */
-    type: 'question_group';
-    /**
-     * Group Type
-     */
-    group_type?: 'basic';
+    group_type: 'basic';
     /**
      * Question Range
      */
@@ -1648,44 +1349,7 @@ export type QuestionGroupBaseOutput = {
 /**
  * QuestionGroupMultiChoice
  */
-export type QuestionGroupMultiChoiceInput = {
-    /**
-     * Type
-     */
-    type: 'question_group';
-    /**
-     * Group Type
-     */
-    group_type: 'multiple_choice';
-    /**
-     * Question Range
-     */
-    question_range?: [
-        number,
-        number
-    ] | null;
-    /**
-     * Prompt
-     */
-    prompt?: Array<string> | null;
-    /**
-     * Title
-     */
-    title?: string | null;
-    /**
-     * Image
-     */
-    image?: string | null;
-    /**
-     * Questions
-     */
-    questions: Array<Question>;
-};
-
-/**
- * QuestionGroupMultiChoice
- */
-export type QuestionGroupMultiChoiceOutput = {
+export type QuestionGroupMultiChoice = {
     /**
      * Type
      */
@@ -1727,35 +1391,21 @@ export type QuestionType = 'multiple_choice' | 'completion' | 'short_answer' | '
 /**
  * ReadingContent
  */
-export type ReadingContentInput = {
+export type ReadingContent = {
     /**
      * Type
      */
-    type?: 'reading';
+    type: 'reading';
     /**
      * Parts
      */
-    parts: Array<ReadingSectionInput>;
-};
-
-/**
- * ReadingContent
- */
-export type ReadingContentOutput = {
-    /**
-     * Type
-     */
-    type?: 'reading';
-    /**
-     * Parts
-     */
-    parts: Array<ReadingSectionOutput>;
+    parts: Array<ReadingSection>;
 };
 
 /**
  * ReadingSection
  */
-export type ReadingSectionInput = {
+export type ReadingSection = {
     /**
      * Question Range
      */
@@ -1768,51 +1418,17 @@ export type ReadingSectionInput = {
      */
     test: Array<({
         group_type: 'basic';
-    } & QuestionGroupBaseInput) | ({
+    } & QuestionGroupBase) | ({
         group_type: 'multiple_choice';
-    } & QuestionGroupMultiChoiceInput) | ({
+    } & QuestionGroupMultiChoice) | ({
         group_type: 'identify_info';
-    } & IdentifyInfoGroupInput) | ({
+    } & IdentifyInfoGroup) | ({
         group_type: 'matching';
-    } & MatchingInput) | ({
+    } & Matching) | ({
         group_type: 'completion_sentence';
-    } & SentenceCompletionGroupInput) | ({
+    } & SentenceCompletionGroup) | ({
         group_type: 'completion_note';
-    } & NoteCompletionGroupInput)>;
-    /**
-     * Prompt
-     */
-    prompt: Array<string>;
-    passage: Passage;
-};
-
-/**
- * ReadingSection
- */
-export type ReadingSectionOutput = {
-    /**
-     * Question Range
-     */
-    question_range?: [
-        number,
-        number
-    ] | null;
-    /**
-     * Test
-     */
-    test: Array<({
-        group_type: 'basic';
-    } & QuestionGroupBaseOutput) | ({
-        group_type: 'multiple_choice';
-    } & QuestionGroupMultiChoiceOutput) | ({
-        group_type: 'identify_info';
-    } & IdentifyInfoGroupOutput) | ({
-        group_type: 'matching';
-    } & MatchingOutput) | ({
-        group_type: 'completion_sentence';
-    } & SentenceCompletionGroupOutput) | ({
-        group_type: 'completion_note';
-    } & NoteCompletionGroupOutput)>;
+    } & NoteCompletionGroup)>;
     /**
      * Prompt
      */
@@ -1859,48 +1475,7 @@ export type RoleRead = {
 /**
  * SentenceCompletionGroup
  */
-export type SentenceCompletionGroupInput = {
-    /**
-     * Type
-     */
-    type: 'question_group';
-    /**
-     * Group Type
-     */
-    group_type: 'completion_sentence';
-    /**
-     * Question Range
-     */
-    question_range?: [
-        number,
-        number
-    ] | null;
-    /**
-     * Prompt
-     */
-    prompt?: Array<string> | null;
-    /**
-     * Title
-     */
-    title?: string | null;
-    /**
-     * Image
-     */
-    image?: string | null;
-    /**
-     * Questions
-     */
-    questions: Array<Question>;
-    /**
-     * Options
-     */
-    options?: Array<string> | null;
-};
-
-/**
- * SentenceCompletionGroup
- */
-export type SentenceCompletionGroupOutput = {
+export type SentenceCompletionGroup = {
     /**
      * Type
      */
@@ -1945,7 +1520,7 @@ export type SpeakingContent = {
     /**
      * Type
      */
-    type?: 'speaking';
+    type: 'speaking';
     part1: SpeakingQuestionGroup;
     part2: SpeakingCueCard;
     /**
@@ -2309,25 +1884,11 @@ export type ValidationError = {
 /**
  * WritingContent
  */
-export type WritingContentInput = {
+export type WritingContent = {
     /**
      * Type
      */
-    type?: 'writing';
-    /**
-     * Tasks
-     */
-    tasks: Array<WritingTask>;
-};
-
-/**
- * WritingContent
- */
-export type WritingContentOutput = {
-    /**
-     * Type
-     */
-    type?: 'writing';
+    type: 'writing';
     /**
      * Tasks
      */
@@ -2356,121 +1917,6 @@ export type WritingTask = {
     sample_answer: Array<string>;
 };
 
-/**
- * CurrencyRead
- */
-export type CurrencyReadWritable = {
-    /**
-     * Id
-     */
-    id: number;
-    type: CurrencyType;
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Symbol
-     */
-    symbol: string;
-    /**
-     * Sign
-     */
-    sign: string | null;
-    /**
-     * Decimals
-     */
-    decimals: number;
-    /**
-     * Logo
-     */
-    logo: string | null;
-    /**
-     * Is Active
-     */
-    is_active: boolean;
-    /**
-     * Token Std
-     */
-    token_std: string | null;
-    blockchain: BlockchainRead | null;
-    /**
-     * Contract Address
-     */
-    contract_address: string | null;
-};
-
-/**
- * Maker
- */
-export type MakerWritable = {
-    profile: ProfilePublicWritable;
-    /**
-     * Username
-     */
-    username: string;
-};
-
-/**
- * OfferPublic
- */
-export type OfferPublicWritable = {
-    /**
-     * Id
-     */
-    id: string;
-    maker: MakerWritable;
-    sell: CurrencyReadWritable;
-    buy: CurrencyReadWritable;
-};
-
-/**
- * OffersPublic
- */
-export type OffersPublicWritable = {
-    /**
-     * Data
-     */
-    data: Array<OfferPublicWritable>;
-    /**
-     * Count
-     */
-    count: number;
-};
-
-/**
- * ProfilePublic
- */
-export type ProfilePublicWritable = {
-    /**
-     * First Name
-     */
-    first_name?: string | null;
-    /**
-     * Last Name
-     */
-    last_name?: string | null;
-    /**
-     * Avatar
-     */
-    avatar?: string | null;
-};
-
-/**
- * UserMe
- */
-export type UserMeWritable = {
-    /**
-     * Email
-     */
-    email: string;
-    /**
-     * Username
-     */
-    username: string;
-    profile?: ProfilePublicWritable | null;
-};
-
 export type ReadSettingsData = {
     body?: never;
     path?: never;
@@ -2490,7 +1936,7 @@ export type ReadSettingsResponses = {
 export type ReadSettingsResponse = ReadSettingsResponses[keyof ReadSettingsResponses];
 
 export type UpdateSettingsData = {
-    body: AppSettingsInput;
+    body: AppSettings;
     path?: never;
     query?: never;
     url: '/api/v1/settings/';
@@ -2509,7 +1955,7 @@ export type UpdateSettingsResponses = {
     /**
      * Successful Response
      */
-    200: AppSettingsOutput;
+    200: AppSettings;
 };
 
 export type UpdateSettingsResponse = UpdateSettingsResponses[keyof UpdateSettingsResponses];
@@ -3605,7 +3051,7 @@ export type ReadInvoicesResponses = {
 export type ReadInvoicesResponse = ReadInvoicesResponses[keyof ReadInvoicesResponses];
 
 export type CreateInvoiceData = {
-    body: InvoiceCreateInput;
+    body: InvoiceCreate;
     path?: never;
     query?: never;
     url: '/api/v1/payments/invoices';
@@ -3624,7 +3070,7 @@ export type CreateInvoiceResponses = {
     /**
      * Successful Response
      */
-    200: InvoiceCreateOutput;
+    200: InvoiceCreate;
 };
 
 export type CreateInvoiceResponse = CreateInvoiceResponses[keyof CreateInvoiceResponses];
