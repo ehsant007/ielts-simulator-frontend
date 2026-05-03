@@ -5,6 +5,7 @@ import HeroSection from "@/components/home/HeroSection";
 import OnboardingTimeline from "@/components/home/OnboardingTimeline";
 import { readIeltsExams } from "@/client";
 import Link from "next/link";
+import Markdown from "react-markdown";
 
 export default async function Home() {
 
@@ -12,6 +13,7 @@ export default async function Home() {
 
 	return (
 		<VStack gap={0} align="stretch">
+
 			{exams.data.map((exam) => (
 				<Link href={`/ielts/exams/${exam.id}`} key={exam.id}>
 					{exam.title}

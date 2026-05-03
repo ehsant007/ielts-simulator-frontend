@@ -271,6 +271,15 @@ export type BodyUpdatePaymentStatus = {
 };
 
 /**
+ * Content
+ */
+export type Content = ({
+    type: 'table';
+} & Table) | ({
+    type: 'text';
+} & Text);
+
+/**
  * CurrencyRead
  */
 export type CurrencyRead = {
@@ -773,19 +782,7 @@ export type ListeningSection = {
     /**
      * Test
      */
-    test: Array<({
-        group_type: 'basic';
-    } & QuestionGroupBase) | ({
-        group_type: 'multiple_choice';
-    } & QuestionGroupMultiChoice) | ({
-        group_type: 'identify_info';
-    } & IdentifyInfoGroup) | ({
-        group_type: 'matching';
-    } & Matching) | ({
-        group_type: 'completion_sentence';
-    } & SentenceCompletionGroup) | ({
-        group_type: 'completion_note';
-    } & NoteCompletionGroup)>;
+    test: Array<QuestionGroup>;
     /**
      * Audio File
      */
@@ -863,6 +860,19 @@ export type Message = {
 };
 
 /**
+ * ModuleContent
+ */
+export type ModuleContent = ({
+    type: 'listening';
+} & ListeningContent) | ({
+    type: 'reading';
+} & ReadingContent) | ({
+    type: 'writing';
+} & WritingContent) | ({
+    type: 'speaking';
+} & SpeakingContent);
+
+/**
  * ModuleCreate
  */
 export type ModuleCreate = {
@@ -881,18 +891,7 @@ export type ModuleCreate = {
     questions?: {
         [key: string]: Question;
     } | null;
-    /**
-     * Content
-     */
-    content: ({
-        type: 'listening';
-    } & ListeningContent) | ({
-        type: 'reading';
-    } & ReadingContent) | ({
-        type: 'writing';
-    } & WritingContent) | ({
-        type: 'speaking';
-    } & SpeakingContent);
+    content: ModuleContent;
 };
 
 /**
@@ -934,18 +933,7 @@ export type ModuleRead = {
     questions: {
         [key: string]: Question;
     } | null;
-    /**
-     * Content
-     */
-    content: ({
-        type: 'listening';
-    } & ListeningContent) | ({
-        type: 'reading';
-    } & ReadingContent) | ({
-        type: 'writing';
-    } & WritingContent) | ({
-        type: 'speaking';
-    } & SpeakingContent);
+    content: ModuleContent;
 };
 
 /**
@@ -1001,14 +989,7 @@ export type NoteCompletionGroup = {
      * Options
      */
     options?: Array<string> | null;
-    /**
-     * Content
-     */
-    content: ({
-        type: 'table';
-    } & Table) | ({
-        type: 'text';
-    } & Text);
+    content: Content;
 };
 
 /**
@@ -1310,6 +1291,23 @@ export type Question = {
 };
 
 /**
+ * QuestionGroup
+ */
+export type QuestionGroup = ({
+    group_type: 'basic';
+} & QuestionGroupBase) | ({
+    group_type: 'multiple_choice';
+} & QuestionGroupMultiChoice) | ({
+    group_type: 'identify_info';
+} & IdentifyInfoGroup) | ({
+    group_type: 'matching';
+} & Matching) | ({
+    group_type: 'completion_sentence';
+} & SentenceCompletionGroup) | ({
+    group_type: 'completion_note';
+} & NoteCompletionGroup);
+
+/**
  * QuestionGroupBase
  */
 export type QuestionGroupBase = {
@@ -1416,19 +1414,7 @@ export type ReadingSection = {
     /**
      * Test
      */
-    test: Array<({
-        group_type: 'basic';
-    } & QuestionGroupBase) | ({
-        group_type: 'multiple_choice';
-    } & QuestionGroupMultiChoice) | ({
-        group_type: 'identify_info';
-    } & IdentifyInfoGroup) | ({
-        group_type: 'matching';
-    } & Matching) | ({
-        group_type: 'completion_sentence';
-    } & SentenceCompletionGroup) | ({
-        group_type: 'completion_note';
-    } & NoteCompletionGroup)>;
+    test: Array<QuestionGroup>;
     /**
      * Prompt
      */

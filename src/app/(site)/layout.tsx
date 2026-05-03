@@ -10,7 +10,7 @@ export default async function SiteLayout({
 		<>
 			<Navbar />
 			{children}
-			<Footer />
+			{/* <Footer /> */}
 		</>
 
 	);

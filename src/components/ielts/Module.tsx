@@ -1,14 +1,13 @@
 "use client"
 
 import { ModuleRead } from "@/client";
+import { ListeningModule } from "./ListeningModule";
 
 export function Module({ module }: { module: ModuleRead }) {
 
-	return (
-		<>
-			<h1>
-				{module.content.type}
-			</h1>
-		</>
-	)
+	switch(module.content.type)
+	{
+		case "listening":
+			return <ListeningModule module={module}/>
+	}
 }
