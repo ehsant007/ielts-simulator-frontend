@@ -18,7 +18,7 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 			{
 				content.parts.map((part, i) => <div key={i}>
 					<h1>Part {i + 1}</h1>
-					{part.test.map((qg, i) => <QuestionGroup qg={qg} key={i}/>)}
+					{part.test.map((g, i) => <QuestionGroup g={g} key={i}/>)}
 					<br />
 				</div>)
 			}

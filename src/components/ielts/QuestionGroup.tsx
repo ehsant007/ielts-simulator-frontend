@@ -1,43 +1,45 @@
 "use client"
 
-import { QuestionGroupBase, NoteCompletionGroup, QuestionGroup as QuestionGroupType } from "@/client";
-import Markdown from "react-markdown";
+import { QuestionGroupBase as QuestionGroupBaseType, NoteCompletionGroup, QuestionGroup as QuestionGroupType } from "@/client";
 import { Content } from "./Content";
+import { Question } from "./Question";
+import { Box } from "@chakra-ui/react";
 
-export function QuestionGroup({ qg }: { qg: QuestionGroupType }) {
-	switch (qg.group_type) {
-		case "completion_note": return <NoteCompletion qg={qg} />
+export function QuestionGroup({ g }: { g: QuestionGroupType }) {
+
+	let ui
+
+	switch (g.group_type) {
+		case "basic": ui = <QuestionGroupBase g={g} />
+			break
+		case "completion_note": ui = <NoteCompletion g={g} />
+			break
 		default:
-			return <p>{qg.group_type}</p>
-	}
-}
-
-
-function injectPlaceholders(text: string) {
-	return text.replace(/\{\{q(\d+)\}\}/g, (_, group1) => {
-		return `<input id="q${group1}" placeholder="${group1}" style="text-align: center;"/>`
-	})
-}
-
-function deepReplace(obj: any): any {
-	if (typeof obj === "string") return injectPlaceholders(obj)
-
-	if (Array.isArray(obj)) return obj.map(deepReplace)
-
-	if (typeof obj === "object" && obj !== null) {
-		const result: any = {}
-		for (const key in obj) {
-			result[key] = deepReplace(obj[key])
-		}
-		return result
+			ui = <p>{g.group_type}</p>
 	}
 
-	return obj
+	return <Box p="6">
+		{ui}
+	</Box>
 }
 
-export function NoteCompletion({ qg }: { qg: NoteCompletionGroup }) {
+export function NoteCompletion({ g }: { g: NoteCompletionGroup }) {
 
-	const content = (qg.content)
+	const content = (g.content)
 	return <Content content={content} ></Content>
 
+}
+
+
+export function QuestionGroupBase({ g }: { g: QuestionGroupBaseType }) {
+
+	return <>
+		{
+			g.questions.map((q, i) => (
+				<Box py="4">
+					<Question key={i} question={q} />
+				</Box>
+			))
+		}
+	</>
 }

@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AddFilesToIeltsModuleData, AddFilesToIeltsModuleErrors, AddFilesToIeltsModuleResponses, CreateIeltsAttemptData, CreateIeltsAttemptErrors, CreateIeltsAttemptResponses, CreateIeltsExamData, CreateIeltsExamErrors, CreateIeltsExamResponses, CreateIeltsModuleData, CreateIeltsModuleErrors, CreateIeltsModuleResponses, CreateInvoiceData, CreateInvoiceErrors, CreateInvoiceResponses, CreateKycDocumentData, CreateKycDocumentErrors, CreateKycDocumentResponses, CreateKycDocumentTypeData, CreateKycDocumentTypeErrors, CreateKycDocumentTypeResponses, CreateOfferData, CreateOfferErrors, CreateOfferResponses, CreatePaymentData, CreatePaymentErrors, CreatePaymentResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, CreateTicketData, CreateTicketErrors, CreateTicketMessageData, CreateTicketMessageErrors, CreateTicketMessageResponses, CreateTicketResponses, CreateUserData, CreateUserErrors, CreateUserResponses, DeleteFileData, DeleteFileErrors, DeleteFileResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DeleteUserData, DeleteUserErrors, DeleteUserMeData, DeleteUserMeResponses, DeleteUserResponses, GetFileData, GetFileErrors, GetFileResponses, HealthCheckData, HealthCheckResponses, LockOfferData, LockOfferErrors, LockOfferResponses, LoginAccessTokenData, LoginAccessTokenErrors, LoginAccessTokenResponses, ReadCurrenciesData, ReadCurrenciesResponses, ReadCurrencyBySymbolData, ReadCurrencyBySymbolErrors, ReadCurrencyBySymbolResponses, ReadFileSetData, ReadFileSetErrors, ReadFileSetResponses, ReadIeltsExamByIdData, ReadIeltsExamByIdErrors, ReadIeltsExamByIdResponses, ReadIeltsExamsData, ReadIeltsExamsResponses, ReadIeltsModuleByIdData, ReadIeltsModuleByIdErrors, ReadIeltsModuleByIdResponses, ReadIeltsModulesData, ReadIeltsModulesResponses, ReadInvoiceByIdData, ReadInvoiceByIdErrors, ReadInvoiceByIdResponses, ReadInvoicesData, ReadInvoicesErrors, ReadInvoicesResponses, ReadKycDocumentsData, ReadKycDocumentsErrors, ReadKycDocumentsResponses, ReadKycDocumentTypesData, ReadKycDocumentTypesResponses, ReadMyIeltsAttemptsData, ReadMyIeltsAttemptsResponses, ReadMyKycDocumentsData, ReadMyKycDocumentsResponses, ReadOffersData, ReadOffersErrors, ReadOffersResponses, ReadPaymentsData, ReadPaymentsErrors, ReadPaymentsResponses, ReadPermissionsData, ReadPermissionsResponses, ReadReceiptByIdData, ReadReceiptByIdErrors, ReadReceiptByIdResponses, ReadRolesData, ReadRolesResponses, ReadSettingsData, ReadSettingsResponses, ReadTicketByIdData, ReadTicketByIdErrors, ReadTicketByIdResponses, ReadTicketMessagesData, ReadTicketMessagesErrors, ReadTicketMessagesResponses, ReadTicketsData, ReadTicketsErrors, ReadTicketsResponses, ReadUserByIdData, ReadUserByIdErrors, ReadUserByIdResponses, ReadUserMeData, ReadUserMeResponses, ReadUserOffersData, ReadUserOffersErrors, ReadUserOffersResponses, ReadUserRolesData, ReadUserRolesErrors, ReadUserRolesResponses, ReadUsersData, ReadUsersErrors, ReadUsersResponses, RecoverPasswordData, RecoverPasswordErrors, RecoverPasswordHtmlContentData, RecoverPasswordHtmlContentErrors, RecoverPasswordHtmlContentResponses, RecoverPasswordResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, ReviewKycDocumentData, ReviewKycDocumentErrors, ReviewKycDocumentResponses, SearchOffersData, SearchOffersErrors, SearchOffersResponses, SetRoleKycRequirementsData, SetRoleKycRequirementsErrors, SetRoleKycRequirementsResponses, TestEmailData, TestEmailErrors, TestEmailResponses, TestTokenData, TestTokenResponses, UpdateIeltsExamData, UpdateIeltsExamErrors, UpdateIeltsExamResponses, UpdatePasswordMeData, UpdatePasswordMeErrors, UpdatePasswordMeResponses, UpdatePaymentStatusData, UpdatePaymentStatusErrors, UpdatePaymentStatusResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateSettingsData, UpdateSettingsErrors, UpdateSettingsResponses, UpdateTicketData, UpdateTicketErrors, UpdateTicketResponses, UpdateUserData, UpdateUserErrors, UpdateUserMeData, UpdateUserMeErrors, UpdateUserMeResponses, UpdateUserResponses } from './types.gen';
+import type { AddFilesToIeltsModuleData, AddFilesToIeltsModuleErrors, AddFilesToIeltsModuleResponses, CreateIeltsAttemptData, CreateIeltsAttemptErrors, CreateIeltsAttemptResponses, CreateIeltsExamData, CreateIeltsExamErrors, CreateIeltsExamResponses, CreateIeltsModuleData, CreateIeltsModuleErrors, CreateIeltsModuleResponses, CreateInvoiceData, CreateInvoiceErrors, CreateInvoiceResponses, CreateKycDocumentData, CreateKycDocumentErrors, CreateKycDocumentResponses, CreateKycDocumentTypeData, CreateKycDocumentTypeErrors, CreateKycDocumentTypeResponses, CreateOfferData, CreateOfferErrors, CreateOfferResponses, CreatePaymentData, CreatePaymentErrors, CreatePaymentResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, CreateTicketData, CreateTicketErrors, CreateTicketMessageData, CreateTicketMessageErrors, CreateTicketMessageResponses, CreateTicketResponses, CreateUserData, CreateUserErrors, CreateUserResponses, DeleteFileData, DeleteFileErrors, DeleteFileResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DeleteUserData, DeleteUserErrors, DeleteUserMeData, DeleteUserMeResponses, DeleteUserResponses, GetFileData, GetFileErrors, GetFileResponses, HealthCheckData, HealthCheckResponses, LockOfferData, LockOfferErrors, LockOfferResponses, LoginAccessTokenData, LoginAccessTokenErrors, LoginAccessTokenResponses, ReadCurrenciesData, ReadCurrenciesResponses, ReadCurrencyBySymbolData, ReadCurrencyBySymbolErrors, ReadCurrencyBySymbolResponses, ReadFileSetData, ReadFileSetErrors, ReadFileSetResponses, ReadIeltsExamByIdData, ReadIeltsExamByIdErrors, ReadIeltsExamByIdResponses, ReadIeltsExamsData, ReadIeltsExamsResponses, ReadIeltsModuleByIdData, ReadIeltsModuleByIdErrors, ReadIeltsModuleByIdResponses, ReadIeltsModulesData, ReadIeltsModulesResponses, ReadInvoiceByIdData, ReadInvoiceByIdErrors, ReadInvoiceByIdResponses, ReadInvoicesData, ReadInvoicesErrors, ReadInvoicesResponses, ReadKycDocumentsData, ReadKycDocumentsErrors, ReadKycDocumentsResponses, ReadKycDocumentTypesData, ReadKycDocumentTypesResponses, ReadMyIeltsAttemptsData, ReadMyIeltsAttemptsResponses, ReadMyKycDocumentsData, ReadMyKycDocumentsResponses, ReadOffersData, ReadOffersErrors, ReadOffersResponses, ReadPaymentsData, ReadPaymentsErrors, ReadPaymentsResponses, ReadPermissionsData, ReadPermissionsResponses, ReadReceiptByIdData, ReadReceiptByIdErrors, ReadReceiptByIdResponses, ReadRolesData, ReadRolesResponses, ReadSettingsData, ReadSettingsResponses, ReadTicketByIdData, ReadTicketByIdErrors, ReadTicketByIdResponses, ReadTicketMessagesData, ReadTicketMessagesErrors, ReadTicketMessagesResponses, ReadTicketsData, ReadTicketsErrors, ReadTicketsResponses, ReadUserByIdData, ReadUserByIdErrors, ReadUserByIdResponses, ReadUserMeData, ReadUserMeResponses, ReadUserOffersData, ReadUserOffersErrors, ReadUserOffersResponses, ReadUserRolesData, ReadUserRolesErrors, ReadUserRolesResponses, ReadUsersData, ReadUsersErrors, ReadUsersResponses, RecoverPasswordData, RecoverPasswordErrors, RecoverPasswordHtmlContentData, RecoverPasswordHtmlContentErrors, RecoverPasswordHtmlContentResponses, RecoverPasswordResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, ReviewKycDocumentData, ReviewKycDocumentErrors, ReviewKycDocumentResponses, SearchOffersData, SearchOffersErrors, SearchOffersResponses, SetRoleKycRequirementsData, SetRoleKycRequirementsErrors, SetRoleKycRequirementsResponses, TestEmailData, TestEmailErrors, TestEmailResponses, TestTokenData, TestTokenResponses, UpdateIeltsExamData, UpdateIeltsExamErrors, UpdateIeltsExamResponses, UpdateIeltsModuleData, UpdateIeltsModuleErrors, UpdateIeltsModuleResponses, UpdatePasswordMeData, UpdatePasswordMeErrors, UpdatePasswordMeResponses, UpdatePaymentStatusData, UpdatePaymentStatusErrors, UpdatePaymentStatusResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateSettingsData, UpdateSettingsErrors, UpdateSettingsResponses, UpdateTicketData, UpdateTicketErrors, UpdateTicketResponses, UpdateUserData, UpdateUserErrors, UpdateUserMeData, UpdateUserMeErrors, UpdateUserMeResponses, UpdateUserResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -1061,6 +1061,36 @@ export const createIeltsModule = <ThrowOnError extends boolean = true>(options: 
 };
 
 /**
+ * Read Ielts Module By Id
+ */
+export const readIeltsModuleById = <ThrowOnError extends boolean = true>(options: Options<ReadIeltsModuleByIdData, ThrowOnError>) => {
+    return (options.client ?? client).get<ReadIeltsModuleByIdResponses, ReadIeltsModuleByIdErrors, ThrowOnError>({
+        url: '/api/v1/ielts/modules/{module_id}',
+        ...options
+    });
+};
+
+/**
+ * Update Ielts Module
+ */
+export const updateIeltsModule = <ThrowOnError extends boolean = true>(options: Options<UpdateIeltsModuleData, ThrowOnError>) => {
+    return (options.client ?? client).patch<UpdateIeltsModuleResponses, UpdateIeltsModuleErrors, ThrowOnError>({
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/ielts/modules/{module_id}',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
  * Add Files To Ielts Module
  */
 export const addFilesToIeltsModule = <ThrowOnError extends boolean = true>(options: Options<AddFilesToIeltsModuleData, ThrowOnError>) => {
@@ -1078,16 +1108,6 @@ export const addFilesToIeltsModule = <ThrowOnError extends boolean = true>(optio
             'Content-Type': null,
             ...options.headers
         }
-    });
-};
-
-/**
- * Read Ielts Module By Id
- */
-export const readIeltsModuleById = <ThrowOnError extends boolean = true>(options: Options<ReadIeltsModuleByIdData, ThrowOnError>) => {
-    return (options.client ?? client).get<ReadIeltsModuleByIdResponses, ReadIeltsModuleByIdErrors, ThrowOnError>({
-        url: '/api/v1/ielts/modules/{module_id}',
-        ...options
     });
 };
 

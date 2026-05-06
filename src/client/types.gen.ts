@@ -888,9 +888,9 @@ export type ModuleCreate = {
     /**
      * Questions
      */
-    questions?: {
+    questions: {
         [key: string]: Question;
-    } | null;
+    };
     content: ModuleContent;
 };
 
@@ -932,8 +932,30 @@ export type ModuleRead = {
      */
     questions: {
         [key: string]: Question;
-    } | null;
+    };
     content: ModuleContent;
+};
+
+/**
+ * ModuleUpdate
+ */
+export type ModuleUpdate = {
+    type?: IeltsModuleType | null;
+    /**
+     * Tag
+     */
+    tag?: string | null;
+    /**
+     * Duration Minutes
+     */
+    duration_minutes?: number | null;
+    /**
+     * Questions
+     */
+    questions: {
+        [key: string]: Question;
+    };
+    content?: ModuleContent | null;
 };
 
 /**
@@ -1275,6 +1297,10 @@ export type Question = {
      * Id
      */
     id: string;
+    /**
+     * Num
+     */
+    num: number | Array<number>;
     question_type: QuestionType;
     /**
      * Question
@@ -3585,36 +3611,6 @@ export type CreateIeltsModuleResponses = {
 
 export type CreateIeltsModuleResponse = CreateIeltsModuleResponses[keyof CreateIeltsModuleResponses];
 
-export type AddFilesToIeltsModuleData = {
-    body: BodyAddFilesToIeltsModule;
-    path: {
-        /**
-         * Module Id
-         */
-        module_id: string;
-    };
-    query?: never;
-    url: '/api/v1/ielts/modules/{module_id}/files';
-};
-
-export type AddFilesToIeltsModuleErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type AddFilesToIeltsModuleError = AddFilesToIeltsModuleErrors[keyof AddFilesToIeltsModuleErrors];
-
-export type AddFilesToIeltsModuleResponses = {
-    /**
-     * Successful Response
-     */
-    200: ModuleRead;
-};
-
-export type AddFilesToIeltsModuleResponse = AddFilesToIeltsModuleResponses[keyof AddFilesToIeltsModuleResponses];
-
 export type ReadIeltsModuleByIdData = {
     body?: never;
     path: {
@@ -3644,6 +3640,66 @@ export type ReadIeltsModuleByIdResponses = {
 };
 
 export type ReadIeltsModuleByIdResponse = ReadIeltsModuleByIdResponses[keyof ReadIeltsModuleByIdResponses];
+
+export type UpdateIeltsModuleData = {
+    body: ModuleUpdate;
+    path: {
+        /**
+         * Module Id
+         */
+        module_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/modules/{module_id}';
+};
+
+export type UpdateIeltsModuleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateIeltsModuleError = UpdateIeltsModuleErrors[keyof UpdateIeltsModuleErrors];
+
+export type UpdateIeltsModuleResponses = {
+    /**
+     * Successful Response
+     */
+    200: ModuleRead;
+};
+
+export type UpdateIeltsModuleResponse = UpdateIeltsModuleResponses[keyof UpdateIeltsModuleResponses];
+
+export type AddFilesToIeltsModuleData = {
+    body: BodyAddFilesToIeltsModule;
+    path: {
+        /**
+         * Module Id
+         */
+        module_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/modules/{module_id}/files';
+};
+
+export type AddFilesToIeltsModuleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AddFilesToIeltsModuleError = AddFilesToIeltsModuleErrors[keyof AddFilesToIeltsModuleErrors];
+
+export type AddFilesToIeltsModuleResponses = {
+    /**
+     * Successful Response
+     */
+    200: ModuleRead;
+};
+
+export type AddFilesToIeltsModuleResponse = AddFilesToIeltsModuleResponses[keyof AddFilesToIeltsModuleResponses];
 
 export type CreateIeltsAttemptData = {
     body: AttemptCreate;
