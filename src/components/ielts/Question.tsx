@@ -1,33 +1,63 @@
 "use client"
 import { Question as QuestionType } from "@/client"
-import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, RadioGroup, VStack } from "@chakra-ui/react"
-import { Text } from "@chakra-ui/react"
-import { useState } from "react"
+import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGroup, Separator, VStack } from "@chakra-ui/react"
+import { Text, Box } from "@chakra-ui/react"
+import { ChangeEventHandler, forwardRef, useEffect, useRef, useState } from "react"
 import { MD } from "./Content"
+import { useModule } from "./ModuleProvider"
 
-export function Question({ question }: { question: QuestionType }) {
-	switch (question.question_type) {
-		case "completion": return <Completion question={question} />
-		case "multiple_choice": return <MultipleChoice question={question} />
-	}
-	return <>
-		{question.type}
-	</>
+
+type QuestionProps = {
+	question: QuestionType
+	options?: Array<string> | undefined
+	onChange?: ChangeEventHandler<HTMLSelectElement> | undefined
 }
 
-export function Completion({ question }: { question: QuestionType }) {
+
+export function Question({ question, options, onChange }: QuestionProps) {
+	const { focus, focusTick } = useModule()
+	const ref = useRef<(any | null)>(null)
+
+	useEffect(() => {
+		if (focus === question.id) {
+			ref.current?.scrollIntoView({
+				behavior: "smooth",
+				block: "center",
+			})
+
+			ref.current?.focus()
+		}
+	}, [focus, focusTick])
+
+	let ui = <></>
+	switch (question.question_type) {
+		case "completion": ui = <Completion ref={ref} question={question} />
+			break
+		case "multiple_choice": ui = <MultipleChoice ref={ref} question={question} />
+			break
+		case "matching": ui = <Matching ref={ref} question={question} options={options} onChange={onChange} />
+			break
+		default:
+			ui = <Text>question type `{question.type}` not implemented!</Text>
+	}
+	return ui
+}
+
+export const Completion = forwardRef<HTMLInputElement, { question: QuestionType }>(({ question }, ref) => {
 	return <Input
 		id={`q${question.num}`}
-		w="auto"
 		textAlign="center"
 		placeholder={question.num.toString()}
-		m="2"
+		w="40"
+		h="8"
+		m="1"
+		fontSize="md"
+		variant="subtle"
+		ref={ref}
 	/>
-}
+})
 
-
-export function MultipleChoice({ question }: { question: QuestionType }) {
-
+export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
 	const [value, setValue] = useState<string | null>(null)
 	const [values, setValues] = useState<string[]>([])
 
@@ -38,8 +68,14 @@ export function MultipleChoice({ question }: { question: QuestionType }) {
 
 	return <>
 
-		<HStack alignItems="flex-start" pb="3">
-			<Text fontWeight="bold">{question.num}</Text>
+		<HStack alignItems="start" p="3" tabIndex={0} focusRing="outside" ref={ref}>
+			{/* {Array.isArray(question.num) &&
+				<Text fontWeight="bold">{question.num[0]}-{question.num[1]}</Text>
+			} */}
+			{!Array.isArray(question.num) &&
+				<Text fontWeight="bold">{question.num}</Text>
+			}
+
 			<VStack>
 				<MD>{question.question}</MD>
 
@@ -67,7 +103,7 @@ export function MultipleChoice({ question }: { question: QuestionType }) {
 
 				{Array.isArray(question.num) &&
 					<Fieldset.Root>
-						<CheckboxGroup name={question.id} value={values} onValueChange={setValues}>
+						<CheckboxGroup value={values} onValueChange={setValues}>
 							<Fieldset.Content>
 
 								{question.choices?.map((choice, i) => (
@@ -83,14 +119,24 @@ export function MultipleChoice({ question }: { question: QuestionType }) {
 					</Fieldset.Root>
 				}
 			</VStack>
-
-
-
 		</HStack>
-
-
-
-
-
 	</>
-}
+})
+
+
+export const Matching = forwardRef<HTMLSelectElement, QuestionProps>(({ question, options, onChange }, ref) => {
+	return <HStack>
+		<Text fontWeight="bold">{question.num}</Text>
+		<Text>{question.question}</Text>
+		<Separator flex="1" ps="10" />
+		<NativeSelect.Root size="sm" width="auto">
+			<NativeSelect.Field ref={ref} placeholder="----" onChange={onChange}>
+				{
+					options?.map((apt, i) => <option key={i} value={apt}>{apt}</option>)
+				}
+			</NativeSelect.Field>
+			<NativeSelect.Indicator />
+		</NativeSelect.Root>
+
+	</HStack>
+})

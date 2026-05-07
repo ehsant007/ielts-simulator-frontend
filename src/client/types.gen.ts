@@ -523,10 +523,6 @@ export type IdentifyInfoGroup = {
      */
     title?: string | null;
     /**
-     * Image
-     */
-    image?: string | null;
-    /**
      * Questions
      */
     questions: Array<Question>;
@@ -805,51 +801,6 @@ export type Maker = {
 };
 
 /**
- * Matching
- */
-export type Matching = {
-    /**
-     * Type
-     */
-    type: 'question_group';
-    /**
-     * Group Type
-     */
-    group_type: 'matching';
-    /**
-     * Question Range
-     */
-    question_range?: [
-        number,
-        number
-    ] | null;
-    /**
-     * Prompt
-     */
-    prompt?: Array<string> | null;
-    /**
-     * Title
-     */
-    title?: string | null;
-    /**
-     * Image
-     */
-    image?: string | null;
-    /**
-     * Questions
-     */
-    questions: Array<Question>;
-    /**
-     * Source Title
-     */
-    source_title?: string | null;
-    /**
-     * Source
-     */
-    source?: Array<string> | null;
-};
-
-/**
  * Message
  */
 export type Message = {
@@ -888,9 +839,9 @@ export type ModuleCreate = {
     /**
      * Questions
      */
-    questions: {
+    questions?: {
         [key: string]: Question;
-    };
+    } | null;
     content: ModuleContent;
 };
 
@@ -952,9 +903,9 @@ export type ModuleUpdate = {
     /**
      * Questions
      */
-    questions: {
+    questions?: {
         [key: string]: Question;
-    };
+    } | null;
     content?: ModuleContent | null;
 };
 
@@ -999,10 +950,6 @@ export type NoteCompletionGroup = {
      * Title
      */
     title?: string | null;
-    /**
-     * Image
-     */
-    image?: string | null;
     /**
      * Questions
      */
@@ -1326,12 +1273,14 @@ export type QuestionGroup = ({
 } & QuestionGroupMultiChoice) | ({
     group_type: 'identify_info';
 } & IdentifyInfoGroup) | ({
-    group_type: 'matching';
-} & Matching) | ({
+    group_type: 'sentence_matching';
+} & SentenceMatchingGroup) | ({
     group_type: 'completion_sentence';
 } & SentenceCompletionGroup) | ({
     group_type: 'completion_note';
-} & NoteCompletionGroup);
+} & NoteCompletionGroup) | ({
+    group_type: 'visual_labeling';
+} & QuestionGroupVisualLabeling);
 
 /**
  * QuestionGroupBase
@@ -1360,10 +1309,6 @@ export type QuestionGroupBase = {
      * Title
      */
     title?: string | null;
-    /**
-     * Image
-     */
-    image?: string | null;
     /**
      * Questions
      */
@@ -1398,13 +1343,50 @@ export type QuestionGroupMultiChoice = {
      */
     title?: string | null;
     /**
-     * Image
+     * Questions
      */
-    image?: string | null;
+    questions: Array<Question>;
+};
+
+/**
+ * QuestionGroupVisualLabeling
+ */
+export type QuestionGroupVisualLabeling = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'visual_labeling';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
     /**
      * Questions
      */
     questions: Array<Question>;
+    /**
+     * Labels
+     */
+    labels: Array<string>;
+    /**
+     * Image
+     */
+    image: string;
 };
 
 /**
@@ -1512,10 +1494,6 @@ export type SentenceCompletionGroup = {
      */
     title?: string | null;
     /**
-     * Image
-     */
-    image?: string | null;
-    /**
      * Questions
      */
     questions: Array<Question>;
@@ -1523,6 +1501,49 @@ export type SentenceCompletionGroup = {
      * Options
      */
     options?: Array<string> | null;
+};
+
+/**
+ * SentenceMatchingGroup
+ */
+export type SentenceMatchingGroup = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'sentence_matching';
+    /**
+     * Question Range
+     */
+    question_range?: [
+        number,
+        number
+    ] | null;
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+    /**
+     * Sentences Title
+     */
+    sentences_title?: string | null;
+    /**
+     * Sentences
+     */
+    sentences: {
+        [key: string]: string;
+    };
 };
 
 /**
@@ -3407,7 +3428,7 @@ export type DeleteFileResponses = {
 
 export type DeleteFileResponse = DeleteFileResponses[keyof DeleteFileResponses];
 
-export type GetFileData = {
+export type ReadFileByIdData = {
     body?: never;
     path: {
         /**
@@ -3419,16 +3440,16 @@ export type GetFileData = {
     url: '/api/v1/files/{file_id}';
 };
 
-export type GetFileErrors = {
+export type ReadFileByIdErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type GetFileError = GetFileErrors[keyof GetFileErrors];
+export type ReadFileByIdError = ReadFileByIdErrors[keyof ReadFileByIdErrors];
 
-export type GetFileResponses = {
+export type ReadFileByIdResponses = {
     /**
      * Successful Response
      */
@@ -3743,3 +3764,35 @@ export type ReadMyIeltsAttemptsResponses = {
 };
 
 export type ReadMyIeltsAttemptsResponse = ReadMyIeltsAttemptsResponses[keyof ReadMyIeltsAttemptsResponses];
+
+export type ReadFileByFilenameData = {
+    body?: never;
+    path: {
+        /**
+         * Module Id
+         */
+        module_id: string;
+        /**
+         * Filename
+         */
+        filename: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/modules/{module_id}/{filename}';
+};
+
+export type ReadFileByFilenameErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadFileByFilenameError = ReadFileByFilenameErrors[keyof ReadFileByFilenameErrors];
+
+export type ReadFileByFilenameResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};

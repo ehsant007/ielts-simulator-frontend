@@ -1,10 +1,16 @@
 "use client"
 
-import { createContext, useContext, useState } from "react";
+import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
 import { ModuleRead } from "@/client";
 
 type ModuleContextType = {
 	module: ModuleRead
+	section: number
+	setSection: Dispatch<SetStateAction<number>>
+	focus: string | undefined
+	setFocus: Dispatch<SetStateAction<string>>
+	focusTick: number
+	setFocusTick: Dispatch<SetStateAction<number>>
 }
 
 const ModuleContext = createContext<ModuleContextType | undefined>(undefined)
@@ -15,7 +21,11 @@ type ModuleContextProviderProps = {
 }
 
 export function ModuleContextProvider({ children, module }: ModuleContextProviderProps) {
-	return <ModuleContext.Provider value={{ module }}>
+	const [section, setSection] = useState<number>(0)
+	const [focus, setFocus] = useState<string>("")
+	const [focusTick, setFocusTick] = useState<number>(0)
+
+	return <ModuleContext.Provider value={{ module, section, focus, focusTick, setSection, setFocus, setFocusTick}}>
 		{children}
 	</ModuleContext.Provider>
 }

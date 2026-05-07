@@ -1,7 +1,7 @@
 "use client"
 
-import { Content as ContentType } from "@/client"
-import { Input, Text } from "@chakra-ui/react"
+import { Content as ContentType, Text as TextType} from "@/client"
+import { Box, Input, List, Text, VStack } from "@chakra-ui/react"
 import React from "react"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
@@ -16,7 +16,7 @@ export function MD({ children }: { children: string | string[] | null | undefine
 	else
 		data = children
 
-	return <Markdown components={{
+	return <Markdown rehypePlugins={[rehypeRaw]} components={{
 		h1({ children }) {
 			return <Text textStyle="4xl">{children}</Text>
 		},
@@ -38,6 +38,12 @@ export function MD({ children }: { children: string | string[] | null | undefine
 		p({ children }) {
 			return <Text>{children}</Text>
 		},
+		ul({ children }) {
+			return <List.Root ps="5">{children}</List.Root>
+		},
+		li({ children }) {
+			return <List.Item>{children}</List.Item>
+		},
 		code({ children }) {
 
 			if (typeof children !== "string") {
@@ -56,10 +62,18 @@ export function MD({ children }: { children: string | string[] | null | undefine
 }
 
 export function Content({ content }: { content: ContentType }) {
-	const { module } = useModule()
-
 	switch (content.type) {
-		case "text": return <MD>{content.text}</MD>
+		case "text": return <TextContent>{content}</TextContent>
 		case "table": return content.type
 	}
+}
+
+export function TextContent({children}: {children: TextType}){
+	return <VStack>
+		<Text textStyle="3xl" pb="3">{children.title}</Text>
+
+		<Box>
+			<MD>{children.text}</MD>
+		</Box>
+	</VStack>
 }
