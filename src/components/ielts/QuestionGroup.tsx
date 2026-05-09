@@ -44,12 +44,13 @@ export function NoteCompletion({ g }: { g: NoteCompletionGroup }) {
 
 
 export function QuestionGroupBase({ g }: { g: QuestionGroupBaseType }) {
+	const {getQuestion} = useModule()
 
 	return <VStack alignItems="stretch">
 		{
 			g.questions.map((q, i) => (
 				<Box key={i} mb="4">
-					<Question question={q} />
+					<Question question={getQuestion(q.num)} />
 				</Box>
 			))
 		}
@@ -58,7 +59,7 @@ export function QuestionGroupBase({ g }: { g: QuestionGroupBaseType }) {
 
 export function VisualLabelingGroup({ children: g }: { children: QuestionGroupVisualLabeling }) {
 
-	const { module } = useModule()
+	const { module, getQuestion } = useModule()
 	const { colorMode } = useColorMode()
 
 	return <VStack alignItems="start">
@@ -72,7 +73,7 @@ export function VisualLabelingGroup({ children: g }: { children: QuestionGroupVi
 		<VStack alignItems="stretch">
 			{
 				g.questions.map((question, i) => (
-				<Question key={i} question={question} options={g.labels} />
+				<Question key={i} question={getQuestion(question.num)} options={g.labels} />
 				))
 			}
 		</VStack>
@@ -83,6 +84,7 @@ export function VisualLabelingGroup({ children: g }: { children: QuestionGroupVi
 export function SentenceMatching({ children: g }: { children: SentenceMatchingGroup }) {
 
 	const [selected, setSelected] = useState<Record<string, number | number[]>>({})
+	const {getQuestion} = useModule()
 
 	return <VStack alignItems="start">
 
@@ -101,7 +103,7 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 		<VStack alignItems="stretch">
 			{
 				g.questions.map((question, i) => (
-					<Question key={i} question={question} options={Object.keys(g.sentences)} onChange={(e) => {
+					<Question key={i} question={getQuestion(question.num)} options={Object.keys(g.sentences)} onChange={(e) => {
 						const value = e.currentTarget.value
 						setSelected(prev => {
 							let new_state = Object.fromEntries(Object.entries(prev).filter(([_, val]) => val !== question.num))
