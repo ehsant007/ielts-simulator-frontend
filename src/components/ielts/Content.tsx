@@ -9,7 +9,7 @@ import { useModule } from "./ModuleProvider"
 import { Question } from "./Question"
 
 export function MD({ children }: { children: string | string[] | null | undefined }) {
-	const { module } = useModule()
+	const { getQuestion } = useModule()
 	let data
 	if (Array.isArray(children))
 		data = children.join("\n\n")
@@ -50,11 +50,11 @@ export function MD({ children }: { children: string | string[] | null | undefine
 				return children
 			}
 
-			const qid = children.match(/^\{\{(q\d+)\}\}/)?.[1]
-			if (!qid)
+			const question_num = children.match(/^\{\{q(\d+)\}\}/)?.[1]
+			if (!question_num)
 				return children
 
-			return <Question question={module.questions[qid]} />
+			return <Question question={getQuestion(Number.parseInt(question_num))} />
 		}
 	}} >
 		{data}

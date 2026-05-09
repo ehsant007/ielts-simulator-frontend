@@ -3,7 +3,7 @@
 import { QuestionGroupBase as QuestionGroupBaseType, NoteCompletionGroup, QuestionGroup as QuestionGroupType, QuestionGroupVisualLabeling, SentenceMatchingGroup } from "@/client";
 import { Content, MD } from "./Content";
 import { Question } from "./Question";
-import { Box, VStack, Text, Em, HStack, NativeSelect, Separator, Image, List } from "@chakra-ui/react";
+import { Box, VStack, Text, Em, HStack, NativeSelect, Separator, Image, List, Center } from "@chakra-ui/react";
 import { useModule } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";
 import { useState } from "react";
@@ -86,7 +86,9 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 
 	return <VStack alignItems="start">
 
+		
 		<VStack alignItems="stretch" ms="auto" border="md" p="6" borderStyle="groove" shadow="lg" borderRadius="md" mb="8">
+			<Center fontWeight="bold">{g.sentences_title}</Center>
 			{
 				Object.keys(g.sentences).map(key => <HStack key={key} bg={selected[key] ? "bg.emphasized" : "none"} mx="0" px="6">
 					<Text fontWeight="bold" fontFamily="mono" fontSize="lg">{key}</Text>

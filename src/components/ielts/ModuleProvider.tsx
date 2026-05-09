@@ -1,16 +1,18 @@
 "use client"
 
 import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
-import { ModuleRead } from "@/client";
+import { ModuleRead, Question } from "@/client";
 
 type ModuleContextType = {
 	module: ModuleRead
-	section: number
-	setSection: Dispatch<SetStateAction<number>>
-	focus: string | undefined
-	setFocus: Dispatch<SetStateAction<string>>
-	focusTick: number
-	setFocusTick: Dispatch<SetStateAction<number>>
+	part: number
+	setPart: Dispatch<SetStateAction<number>>
+	focusedQuestion: Question
+	focusQuestion: (num: number | Question, force?: boolean) => void
+	focusPrevQuestion: () => void
+	focusNextQuestion: () => void
+	tick: number
+	getQuestion: (num: number) => Question
 }
 
 const ModuleContext = createContext<ModuleContextType | undefined>(undefined)
@@ -21,11 +23,49 @@ type ModuleContextProviderProps = {
 }
 
 export function ModuleContextProvider({ children, module }: ModuleContextProviderProps) {
-	const [section, setSection] = useState<number>(0)
-	const [focus, setFocus] = useState<string>("")
-	const [focusTick, setFocusTick] = useState<number>(0)
+	const [part, setPart] = useState<number>(0)
+	const [focusedQuestion, _focusQuestion] = useState<Question>(module.questions[0])
+	const [tick, setTick] = useState<number>(0)
 
-	return <ModuleContext.Provider value={{ module, section, focus, focusTick, setSection, setFocus, setFocusTick}}>
+	const questions_map: { [key: number]: { question: Question; index: number; } } = {}
+	module.questions.forEach((question, index) => questions_map[question.num] = { question, index })
+
+	const getQuestion = (num: number) => questions_map[num].question
+	const getQuestionIndex = (question: Question) => questions_map[question.num].index
+
+	const focusQuestion = (question: number | Question, force: boolean = false) => {
+		let q: Question
+		if (typeof question === "number")
+			q = getQuestion(question)
+		else
+			q = getQuestion(question.num)
+
+		_focusQuestion(q)
+
+		if (q.part !== undefined) {
+			setPart(q.part)
+		}
+
+		if (force) {
+			setTick(prev => prev + 1)
+		}
+	}
+
+	const focusPrevQuestion = () => {
+		let prev_index = getQuestionIndex(focusedQuestion) - 1
+		if (prev_index < 0)
+			prev_index = 0
+		focusQuestion(module.questions[prev_index])
+	}
+
+	const focusNextQuestion = () => {
+		let next_index = getQuestionIndex(focusedQuestion) + 1
+		if (next_index >= module.questions.length)
+			next_index = module.questions.length - 1
+		focusQuestion(module.questions[next_index])
+	}
+
+	return <ModuleContext.Provider value={{ module, part, setPart, focusedQuestion, focusQuestion, tick, focusPrevQuestion, focusNextQuestion, getQuestion }}>
 		{children}
 	</ModuleContext.Provider>
 }

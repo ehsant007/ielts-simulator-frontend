@@ -761,13 +761,13 @@ export type ListeningContent = {
     /**
      * Parts
      */
-    parts: Array<ListeningSection>;
+    parts: Array<ListeningPart>;
 };
 
 /**
- * ListeningSection
+ * ListeningPart
  */
-export type ListeningSection = {
+export type ListeningPart = {
     /**
      * Question Range
      */
@@ -839,9 +839,7 @@ export type ModuleCreate = {
     /**
      * Questions
      */
-    questions?: {
-        [key: string]: Question;
-    } | null;
+    questions?: Array<Question> | null;
     content: ModuleContent;
 };
 
@@ -881,9 +879,7 @@ export type ModuleRead = {
     /**
      * Questions
      */
-    questions: {
-        [key: string]: Question;
-    };
+    questions: Array<Question>;
     content: ModuleContent;
 };
 
@@ -903,9 +899,7 @@ export type ModuleUpdate = {
     /**
      * Questions
      */
-    questions?: {
-        [key: string]: Question;
-    } | null;
+    questions?: Array<Question> | null;
     content?: ModuleContent | null;
 };
 
@@ -1241,13 +1235,17 @@ export type Question = {
      */
     type: 'question';
     /**
-     * Id
-     */
-    id: string;
-    /**
      * Num
      */
-    num: number | Array<number>;
+    num: number;
+    /**
+     * To Num
+     */
+    to_num?: number | null;
+    /**
+     * Part
+     */
+    part?: number;
     question_type: QuestionType;
     /**
      * Question
@@ -1405,13 +1403,13 @@ export type ReadingContent = {
     /**
      * Parts
      */
-    parts: Array<ReadingSection>;
+    parts: Array<ReadingPart>;
 };
 
 /**
- * ReadingSection
+ * ReadingPart
  */
-export type ReadingSection = {
+export type ReadingPart = {
     /**
      * Question Range
      */
@@ -1893,7 +1891,7 @@ export type Utterance = {
     /**
      * Questions
      */
-    questions?: Array<string> | null;
+    questions?: Array<number> | null;
 };
 
 /**

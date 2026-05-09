@@ -5,11 +5,10 @@ import { QuestionGroup } from "./QuestionGroup"
 import { Dispatch, SetStateAction, useState } from "react";
 import { useModule } from "./ModuleProvider";
 import { Wrap, Text, Button, VStack, Box, ScrollArea, Grid, GridItem, Flex, HStack } from "@chakra-ui/react";
+import React from "react";
 
 export function ListeningModule({ module }: { module: ModuleRead }) {
-
-	const { section } = useModule()
-
+	const { part } = useModule()
 	const content = module.content as ListeningContent
 
 	// {content.parts[section].test.map((g, i) => <QuestionGroup g={g} key={i} />)}
@@ -19,9 +18,9 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 			{/* Scrollable content area */}
 			<Box
 				h="100%"
-				//overflowY="auto"
-				//overscrollBehavior="contain"
-				//pb="300px" // reserve space for the fixed bottom nav
+			//overflowY="auto"
+			//overscrollBehavior="contain"
+			//pb="300px" // reserve space for the fixed bottom nav
 			>
 				<Box maxW="5xl" mx="auto" pb="25%">
 					<Text fontSize="2xl" fontWeight="bold" mb="4">
@@ -34,7 +33,7 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 						p="6"
 						minH="1200px"
 					>
-						{content.parts[section].test.map((g, i) => <QuestionGroup g={g} key={i} />)}
+						{content.parts[part].test.map((g, i) => <QuestionGroup g={g} key={i} />)}
 					</Box>
 				</Box>
 			</Box>
@@ -60,9 +59,9 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 						))}
 					</HStack> */}
 
-					 <ListeningModuleNav />
+					<ListeningModuleNav />
 
-					<Button colorScheme="blue">Submit</Button>
+					{/* <Button colorScheme="blue">Submit</Button> */}
 				</Flex>
 			</Box>
 		</Box>
@@ -70,33 +69,42 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 }
 
 export function ListeningModuleNav() {
-	const { module, setSection, setFocus, setFocusTick } = useModule()
+	const { module, setPart, focusQuestion, focusPrevQuestion, focusNextQuestion } = useModule()
 	const content = module.content as ListeningContent
 
-
-	return <Wrap>
-		{
-			content.parts.map((part, part_i) => <Wrap key={part_i}>
-				{
-					part.test.map((g, i) => <Wrap key={i}>
-						{
+	return <VStack>
+		<HStack>
+			<Button onClick={focusPrevQuestion}>{"<-"}</Button>
+			<Button onClick={focusNextQuestion}>{"->"}</Button>
+		</HStack>
+		<Wrap justify="center">
+			{
+				content.parts.map((part, part_i) => <Wrap gap="0.5" key={part_i}>
+					<Button
+						key={part_i}
+						size="xs"
+						variant="ghost"
+						onPointerUp={() => focusQuestion(part.test[0].questions[0])}
+					>
+						Part {part_i + 1}
+					</Button>
+					{
+						part.test.map((g, i) =>
 							g.questions.map((q, i) =>
 								<Button
 									key={i}
-									size="sm"
+									size="xs"
 									variant="outline"
-									onPointerUp={() => {
-										setSection(part_i)
-										setFocus(q.id)
-										setFocusTick(prev => prev + 1)
-									}}
+									onPointerUp={() => focusQuestion(q, true)}
 								>
-									{Array.isArray(q.num) ? `${q.num[0]}-${q.num[1]}` : q.num}
+									{q.to_num ? `${q.num} | ${q.to_num}` : q.num}
 								</Button>)
-						}
-					</Wrap>)
-				}
-			</Wrap>)
-		}
-	</Wrap>
+
+						)
+
+					}
+				</Wrap>)
+			}
+		</Wrap>
+	</VStack>
 }

@@ -15,11 +15,12 @@ type QuestionProps = {
 
 
 export function Question({ question, options, onChange }: QuestionProps) {
-	const { focus, focusTick } = useModule()
+	const { focusedQuestion, tick } = useModule()
 	const ref = useRef<(any | null)>(null)
-
+console.log(focusedQuestion.num)
 	useEffect(() => {
-		if (focus === question.id) {
+		if (focusedQuestion === question) {
+			console.log("only for ", question.num)
 			ref.current?.scrollIntoView({
 				behavior: "smooth",
 				block: "center",
@@ -27,7 +28,7 @@ export function Question({ question, options, onChange }: QuestionProps) {
 
 			ref.current?.focus()
 		}
-	}, [focus, focusTick])
+	}, [focusedQuestion, tick])
 
 	let ui = <></>
 	switch (question.question_type) {
@@ -69,17 +70,17 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 	return <>
 
 		<HStack alignItems="start" p="3" tabIndex={0} focusRing="outside" ref={ref}>
-			{/* {Array.isArray(question.num) &&
-				<Text fontWeight="bold">{question.num[0]}-{question.num[1]}</Text>
+			{/* question.to_num &&
+				<Text fontWeight="bold">{question.num}-{question.to_num}</Text>
 			} */}
-			{!Array.isArray(question.num) &&
+			{!question.to_num &&
 				<Text fontWeight="bold">{question.num}</Text>
 			}
 
 			<VStack>
 				<MD>{question.question}</MD>
 
-				{!Array.isArray(question.num) &&
+				{!question.to_num &&
 					<Fieldset.Root>
 						<RadioGroup.Root value={value}>
 							<VStack gap="2" align="start">
@@ -101,7 +102,7 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 					</Fieldset.Root>
 				}
 
-				{Array.isArray(question.num) &&
+				{question.to_num &&
 					<Fieldset.Root>
 						<CheckboxGroup value={values} onValueChange={setValues}>
 							<Fieldset.Content>
