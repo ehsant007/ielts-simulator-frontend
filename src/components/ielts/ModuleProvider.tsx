@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, Dispatch, SetStateAction, useContext, useState } from "react";
+import { createContext, Dispatch, RefObject, SetStateAction, useContext, useEffect, useMemo, useState } from "react";
 import { ModuleRead, Question } from "@/client";
 
 type ModuleContextType = {
@@ -13,6 +13,7 @@ type ModuleContextType = {
 	focusNextQuestion: () => void
 	tick: number
 	getQuestion: (num: number) => Question
+	setQuestionRef: (question: Question, ref: RefObject<any>) => void
 }
 
 const ModuleContext = createContext<ModuleContextType | undefined>(undefined)
@@ -27,8 +28,42 @@ export function ModuleContextProvider({ children, module }: ModuleContextProvide
 	const [focusedQuestion, _focusQuestion] = useState<Question>(module.questions[0])
 	const [tick, setTick] = useState<number>(0)
 
-	const questions_map: { [key: number]: { question: Question; index: number; } } = {}
-	module.questions.forEach((question, index) => questions_map[question.num] = { question, index })
+	console.log("ModuleProvider")
+
+	useEffect(() => {
+		const ref = questions_map[focusedQuestion.num].ref
+		if (!ref) {
+			return
+		}
+		ref.current?.scrollIntoView({
+			behavior: "smooth",
+			block: "center",
+		})
+
+		ref.current?.focus()
+	}, [focusedQuestion, tick])
+
+
+	const questions_map = useMemo(() => {
+		const map: { [key: number]: { question: Question; index: number; ref: RefObject<any> | null } } = {}
+		module.questions.forEach((question, index) => {
+			map[question.num] = {
+				question,
+				index,
+				ref: null,
+			}
+		})
+
+		return map
+	}, [module])
+
+	//const questions_map: { [key: number]: { question: Question; index: number; ref: RefObject<any> | null } } = {}
+	//module.questions.forEach((question, index) => questions_map[question.num] = { question, index, ref: null })
+
+	const setQuestionRef = (question: Question, ref: RefObject<any>) => {
+		console.log(`question ${question.num} ref was set`)
+		questions_map[question.num].ref = ref
+	}
 
 	const getQuestion = (num: number) => questions_map[num].question
 	const getQuestionIndex = (question: Question) => questions_map[question.num].index
@@ -65,7 +100,7 @@ export function ModuleContextProvider({ children, module }: ModuleContextProvide
 		focusQuestion(module.questions[next_index])
 	}
 
-	return <ModuleContext.Provider value={{ module, part, setPart, focusedQuestion, focusQuestion, tick, focusPrevQuestion, focusNextQuestion, getQuestion }}>
+	return <ModuleContext.Provider value={{ module, part, setPart, focusedQuestion, focusQuestion, tick, focusPrevQuestion, focusNextQuestion, getQuestion, setQuestionRef }}>
 		{children}
 	</ModuleContext.Provider>
 }

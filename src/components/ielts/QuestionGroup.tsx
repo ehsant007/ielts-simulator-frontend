@@ -2,13 +2,15 @@
 
 import { QuestionGroupBase as QuestionGroupBaseType, NoteCompletionGroup, QuestionGroup as QuestionGroupType, QuestionGroupVisualLabeling, SentenceMatchingGroup } from "@/client";
 import { Content, MD } from "./Content";
-import { Question } from "./Question";
+import { Completion, Question } from "./Question";
 import { Box, VStack, Text, Em, HStack, NativeSelect, Separator, Image, List, Center } from "@chakra-ui/react";
 import { useModule } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";
 import { useState } from "react";
 
 export function QuestionGroup({ g }: { g: QuestionGroupType }) {
+
+	console.log("QuestionGroup")
 
 	let ui
 	switch (g.group_type) {
@@ -36,20 +38,17 @@ export function QuestionGroup({ g }: { g: QuestionGroupType }) {
 }
 
 export function NoteCompletion({ g }: { g: NoteCompletionGroup }) {
-
-	const content = (g.content)
-	return <Content content={content} ></Content>
-
+	return <Content content={g.content} ></Content>
 }
 
 
 export function QuestionGroupBase({ g }: { g: QuestionGroupBaseType }) {
-	const {getQuestion} = useModule()
+	const { getQuestion } = useModule()
 
 	return <VStack alignItems="stretch">
 		{
 			g.questions.map((q, i) => (
-				<Box key={i} mb="4">
+				<Box key={q.num} mb="4">
 					<Question question={getQuestion(q.num)} />
 				</Box>
 			))
@@ -73,7 +72,7 @@ export function VisualLabelingGroup({ children: g }: { children: QuestionGroupVi
 		<VStack alignItems="stretch">
 			{
 				g.questions.map((question, i) => (
-				<Question key={i} question={getQuestion(question.num)} options={g.labels} />
+					<Question key={question.num} question={getQuestion(question.num)} options={g.labels} />
 				))
 			}
 		</VStack>
@@ -84,11 +83,11 @@ export function VisualLabelingGroup({ children: g }: { children: QuestionGroupVi
 export function SentenceMatching({ children: g }: { children: SentenceMatchingGroup }) {
 
 	const [selected, setSelected] = useState<Record<string, number | number[]>>({})
-	const {getQuestion} = useModule()
+	const { getQuestion } = useModule()
 
 	return <VStack alignItems="start">
 
-		
+
 		<VStack alignItems="stretch" ms="auto" border="md" p="6" borderStyle="groove" shadow="lg" borderRadius="md" mb="8">
 			<Center fontWeight="bold">{g.sentences_title}</Center>
 			{
@@ -103,7 +102,7 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 		<VStack alignItems="stretch">
 			{
 				g.questions.map((question, i) => (
-					<Question key={i} question={getQuestion(question.num)} options={Object.keys(g.sentences)} onChange={(e) => {
+					<Question key={question.num} question={getQuestion(question.num)} options={Object.keys(g.sentences)} onChange={(e) => {
 						const value = e.currentTarget.value
 						setSelected(prev => {
 							let new_state = Object.fromEntries(Object.entries(prev).filter(([_, val]) => val !== question.num))

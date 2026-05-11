@@ -16,6 +16,8 @@ export function MD({ children }: { children: string | string[] | null | undefine
 	else
 		data = children
 
+	console.log("Content")
+
 	return <Markdown rehypePlugins={[rehypeRaw]} components={{
 		h1({ children }) {
 			return <Text textStyle="4xl">{children}</Text>

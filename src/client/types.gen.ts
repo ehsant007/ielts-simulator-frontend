@@ -510,10 +510,10 @@ export type IdentifyInfoGroup = {
     /**
      * Question Range
      */
-    question_range?: [
+    question_range: [
         number,
         number
-    ] | null;
+    ];
     /**
      * Prompt
      */
@@ -932,10 +932,10 @@ export type NoteCompletionGroup = {
     /**
      * Question Range
      */
-    question_range?: [
+    question_range: [
         number,
         number
-    ] | null;
+    ];
     /**
      * Prompt
      */
@@ -1295,10 +1295,10 @@ export type QuestionGroupBase = {
     /**
      * Question Range
      */
-    question_range?: [
+    question_range: [
         number,
         number
-    ] | null;
+    ];
     /**
      * Prompt
      */
@@ -1328,10 +1328,10 @@ export type QuestionGroupMultiChoice = {
     /**
      * Question Range
      */
-    question_range?: [
+    question_range: [
         number,
         number
-    ] | null;
+    ];
     /**
      * Prompt
      */
@@ -1361,10 +1361,10 @@ export type QuestionGroupVisualLabeling = {
     /**
      * Question Range
      */
-    question_range?: [
+    question_range: [
         number,
         number
-    ] | null;
+    ];
     /**
      * Prompt
      */
@@ -1479,10 +1479,10 @@ export type SentenceCompletionGroup = {
     /**
      * Question Range
      */
-    question_range?: [
+    question_range: [
         number,
         number
-    ] | null;
+    ];
     /**
      * Prompt
      */
@@ -1516,10 +1516,10 @@ export type SentenceMatchingGroup = {
     /**
      * Question Range
      */
-    question_range?: [
+    question_range: [
         number,
         number
-    ] | null;
+    ];
     /**
      * Prompt
      */

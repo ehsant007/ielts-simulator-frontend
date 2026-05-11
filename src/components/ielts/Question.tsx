@@ -15,20 +15,28 @@ type QuestionProps = {
 
 
 export function Question({ question, options, onChange }: QuestionProps) {
+
+	// 	const { setQuestionRef } = useModule()
+	// const ref = useRef<(any | null)>(null)
+
+	// useEffect(() => {
+	// 	setQuestionRef(question, ref)
+	// }, [ref])
+
 	const { focusedQuestion, tick } = useModule()
 	const ref = useRef<(any | null)>(null)
-console.log(focusedQuestion.num)
 	useEffect(() => {
-		if (focusedQuestion === question) {
-			console.log("only for ", question.num)
+		if (focusedQuestion.num === question.num) {
 			ref.current?.scrollIntoView({
 				behavior: "smooth",
 				block: "center",
 			})
-
+			
 			ref.current?.focus()
 		}
 	}, [focusedQuestion, tick])
+	//console.log(focusedQuestion.num)
+	console.log(`Question ${question.num}`)
 
 	let ui = <></>
 	switch (question.question_type) {
@@ -45,7 +53,11 @@ console.log(focusedQuestion.num)
 }
 
 export const Completion = forwardRef<HTMLInputElement, { question: QuestionType }>(({ question }, ref) => {
+	const [value, setValue] = useState("")
+
 	return <Input
+		value={value}
+		onChange={(e)=>setValue(e.currentTarget.value)}
 		id={`q${question.num}`}
 		textAlign="center"
 		placeholder={question.num.toString()}

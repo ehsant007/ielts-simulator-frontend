@@ -7,6 +7,8 @@ import { ModuleContextProvider } from "./ModuleProvider";
 
 export function Module({ module }: { module: ModuleRead }) {
 
+	console.log("Module")
+	
 	let module_ui = null
 	switch (module.type) {
 		case "listening":
