@@ -2,9 +2,9 @@
 import { Question as QuestionType } from "@/client"
 import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGroup, Separator, VStack } from "@chakra-ui/react"
 import { Text, Box } from "@chakra-ui/react"
-import { ChangeEventHandler, forwardRef, useEffect, useRef, useState } from "react"
+import { ChangeEventHandler, forwardRef, RefObject, useCallback, useEffect, useRef, useState } from "react"
 import { MD } from "./Content"
-import { useModule } from "./ModuleProvider"
+import { useModule, useQuestionFucus } from "./ModuleProvider"
 
 
 type QuestionProps = {
@@ -16,35 +16,21 @@ type QuestionProps = {
 
 export function Question({ question, options, onChange }: QuestionProps) {
 
-	// 	const { setQuestionRef } = useModule()
-	// const ref = useRef<(any | null)>(null)
+	const { registerQuestionRef } = useModule()
+	const setRef = useCallback(
+		(el: any) => {
+			registerQuestionRef(question, el)
+		}, [registerQuestionRef, question])
 
-	// useEffect(() => {
-	// 	setQuestionRef(question, ref)
-	// }, [ref])
-
-	const { focusedQuestion, tick } = useModule()
-	const ref = useRef<(any | null)>(null)
-	useEffect(() => {
-		if (focusedQuestion.num === question.num) {
-			ref.current?.scrollIntoView({
-				behavior: "smooth",
-				block: "center",
-			})
-			
-			ref.current?.focus()
-		}
-	}, [focusedQuestion, tick])
-	//console.log(focusedQuestion.num)
 	console.log(`Question ${question.num}`)
 
 	let ui = <></>
 	switch (question.question_type) {
-		case "completion": ui = <Completion ref={ref} question={question} />
+		case "completion": ui = <Completion ref={setRef} question={question} />
 			break
-		case "multiple_choice": ui = <MultipleChoice ref={ref} question={question} />
+		case "multiple_choice": ui = <MultipleChoice ref={setRef} question={question} />
 			break
-		case "matching": ui = <Matching ref={ref} question={question} options={options} onChange={onChange} />
+		case "matching": ui = <Matching ref={setRef} question={question} options={options} onChange={onChange} />
 			break
 		default:
 			ui = <Text>question type `{question.type}` not implemented!</Text>
@@ -57,7 +43,7 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 
 	return <Input
 		value={value}
-		onChange={(e)=>setValue(e.currentTarget.value)}
+		onChange={(e) => setValue(e.currentTarget.value)}
 		id={`q${question.num}`}
 		textAlign="center"
 		placeholder={question.num.toString()}

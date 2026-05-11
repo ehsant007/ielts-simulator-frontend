@@ -1,22 +1,30 @@
 "use client"
 
-import { createContext, Dispatch, RefObject, SetStateAction, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, Dispatch, RefObject, SetStateAction, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ModuleRead, Question } from "@/client";
 
 type ModuleContextType = {
 	module: ModuleRead
-	part: number
-	setPart: Dispatch<SetStateAction<number>>
+	getQuestion: (num: number) => Question
+	registerQuestionRef: (question: Question, el: HTMLElement) => void
+}
+
+type QuestionFocusContextType = {
 	focusedQuestion: Question
 	focusQuestion: (num: number | Question, force?: boolean) => void
 	focusPrevQuestion: () => void
 	focusNextQuestion: () => void
 	tick: number
-	getQuestion: (num: number) => Question
-	setQuestionRef: (question: Question, ref: RefObject<any>) => void
+}
+
+type ModulePartContextType = {
+	part: number
+	setPart: Dispatch<SetStateAction<number>>
 }
 
 const ModuleContext = createContext<ModuleContextType | undefined>(undefined)
+const QuestionFocusContext = createContext<QuestionFocusContextType | undefined>(undefined)
+const ModulePartContext = createContext<ModulePartContextType | undefined>(undefined)
 
 type ModuleContextProviderProps = {
 	children: React.ReactNode,
@@ -27,48 +35,44 @@ export function ModuleContextProvider({ children, module }: ModuleContextProvide
 	const [part, setPart] = useState<number>(0)
 	const [focusedQuestion, _focusQuestion] = useState<Question>(module.questions[0])
 	const [tick, setTick] = useState<number>(0)
+	const questionRefs = useRef(new Map<number, HTMLElement | null>())
 
 	console.log("ModuleProvider")
 
 	useEffect(() => {
-		const ref = questions_map[focusedQuestion.num].ref
-		if (!ref) {
+		const el = questionRefs.current?.get(focusedQuestion.num)
+		if (!el)
 			return
-		}
-		ref.current?.scrollIntoView({
+
+		el.scrollIntoView({
 			behavior: "smooth",
 			block: "center",
 		})
 
-		ref.current?.focus()
+		el.focus()
 	}, [focusedQuestion, tick])
 
-
 	const questions_map = useMemo(() => {
-		const map: { [key: number]: { question: Question; index: number; ref: RefObject<any> | null } } = {}
+		const map: { [key: number]: { question: Question; index: number; } } = {}
 		module.questions.forEach((question, index) => {
 			map[question.num] = {
 				question,
-				index,
-				ref: null,
+				index
 			}
 		})
 
 		return map
 	}, [module])
 
-	//const questions_map: { [key: number]: { question: Question; index: number; ref: RefObject<any> | null } } = {}
-	//module.questions.forEach((question, index) => questions_map[question.num] = { question, index, ref: null })
+	const registerQuestionRef = useCallback((question: Question, el: HTMLElement | null) => {
+		console.log(`question ${question.num} ref was set to ${el}`)
+		questionRefs.current.set(question.num, el)
+	}, [])
 
-	const setQuestionRef = (question: Question, ref: RefObject<any>) => {
-		console.log(`question ${question.num} ref was set`)
-		questions_map[question.num].ref = ref
-	}
+	const getQuestion = useCallback((num: number) => questions_map[num].question, [questions_map])
+	const getQuestionIndex = useCallback((question: Question) => questions_map[question.num].index, [questions_map])
 
-	const getQuestion = (num: number) => questions_map[num].question
-	const getQuestionIndex = (question: Question) => questions_map[question.num].index
-
-	const focusQuestion = (question: number | Question, force: boolean = false) => {
+	const focusQuestion = useCallback((question: number | Question, force: boolean = false) => {
 		let q: Question
 		if (typeof question === "number")
 			q = getQuestion(question)
@@ -84,24 +88,32 @@ export function ModuleContextProvider({ children, module }: ModuleContextProvide
 		if (force) {
 			setTick(prev => prev + 1)
 		}
-	}
+	}, [getQuestion])
 
-	const focusPrevQuestion = () => {
+	const focusPrevQuestion = useCallback(() => {
 		let prev_index = getQuestionIndex(focusedQuestion) - 1
 		if (prev_index < 0)
 			prev_index = 0
 		focusQuestion(module.questions[prev_index])
-	}
+	}, [focusedQuestion, getQuestionIndex, focusQuestion, module.questions])
 
-	const focusNextQuestion = () => {
+	const focusNextQuestion = useCallback(() => {
 		let next_index = getQuestionIndex(focusedQuestion) + 1
 		if (next_index >= module.questions.length)
 			next_index = module.questions.length - 1
 		focusQuestion(module.questions[next_index])
-	}
+	}, [focusedQuestion, getQuestionIndex, focusQuestion, module.questions])
 
-	return <ModuleContext.Provider value={{ module, part, setPart, focusedQuestion, focusQuestion, tick, focusPrevQuestion, focusNextQuestion, getQuestion, setQuestionRef }}>
-		{children}
+	const module_context = useMemo(() => ({ module, getQuestion, registerQuestionRef }), [module, getQuestion, registerQuestionRef])
+	const focus_context = useMemo(() => ({ focusedQuestion, tick, focusQuestion, focusPrevQuestion, focusNextQuestion }), [focusQuestion, tick])
+	const part_context = useMemo(() => ({ part, setPart }), [part])
+
+	return <ModuleContext.Provider value={module_context}>
+		<ModulePartContext.Provider value={part_context}>
+			<QuestionFocusContext.Provider value={focus_context} >
+				{children}
+			</QuestionFocusContext.Provider>
+		</ModulePartContext.Provider>
 	</ModuleContext.Provider>
 }
 
@@ -109,6 +121,24 @@ export function useModule() {
 	const context = useContext(ModuleContext)
 	if (!context) {
 		throw new Error("useModule must be used within a ModuleContextProvider");
+	}
+
+	return context;
+}
+
+export function useQuestionFucus() {
+	const context = useContext(QuestionFocusContext)
+	if (!context) {
+		throw new Error("useQuestionFucus must be used within a ModuleContextProvider");
+	}
+
+	return context;
+}
+
+export function usePart() {
+	const context = useContext(ModulePartContext)
+	if (!context) {
+		throw new Error("usePart must be used within a ModuleContextProvider");
 	}
 
 	return context;

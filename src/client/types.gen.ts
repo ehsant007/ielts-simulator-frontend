@@ -771,10 +771,10 @@ export type ListeningPart = {
     /**
      * Question Range
      */
-    question_range?: [
+    question_range: [
         number,
         number
-    ] | null;
+    ];
     /**
      * Test
      */
@@ -1413,10 +1413,10 @@ export type ReadingPart = {
     /**
      * Question Range
      */
-    question_range?: [
+    question_range: [
         number,
         number
-    ] | null;
+    ];
     /**
      * Test
      */

@@ -3,12 +3,12 @@
 import { ModuleRead, ListeningContent } from "@/client";
 import { QuestionGroup } from "./QuestionGroup"
 import { Activity, Dispatch, SetStateAction, useEffect, useState } from "react";
-import { useModule } from "./ModuleProvider";
+import { useModule, usePart, useQuestionFucus } from "./ModuleProvider";
 import { Wrap, Text, Button, VStack, Box, ScrollArea, Grid, GridItem, Flex, HStack } from "@chakra-ui/react";
 import React from "react";
 
 export function ListeningModule({ module }: { module: ModuleRead }) {
-	const { part } = useModule()
+	const { part } = usePart()
 	const content = module.content as ListeningContent
 	console.log("ListeningModule")
 	// {content.parts[section].test.map((g, i) => <QuestionGroup g={g} key={i} />)}
@@ -24,7 +24,7 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 			>
 				<Box maxW="5xl" mx="auto" pb="40%">
 					<Text fontSize="2xl" fontWeight="bold" mb="4">
-						Part {part+1}
+						Part {part + 1}
 					</Text>
 
 					<Box
@@ -33,12 +33,13 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 						p="6"
 						minH="1200px"
 					>
-						{/* {
-							content.parts.map((_part, pi) => _part.test.map((g, gi) => <Activity key={gi} mode={part === pi ? "visible" : "hidden"}>
-								<QuestionGroup g={g} />
-							</Activity>))
-						} */}
-						{content.parts[part].test.map((g, i) => <QuestionGroup g={g} key={g.question_range.join("-")} />)}
+						{
+							content.parts.map((_part, pi) => <Activity key={_part.question_range.join("-")} mode={part === pi ? "visible" : "hidden"}>
+								{_part.test.map((g, gi) => <QuestionGroup key={g.question_range.join("-")} g={g} />)}
+							</Activity>)
+						}
+
+						{/* {content.parts[part].test.map((g, i) => <QuestionGroup g={g} key={g.question_range.join("-")} />)} */}
 					</Box>
 				</Box>
 			</Box>
@@ -74,7 +75,10 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 }
 
 export function ListeningModuleNav() {
-	const { module, setPart, focusQuestion, focusPrevQuestion, focusNextQuestion } = useModule()
+	const { module } = useModule()
+	const { setPart } = usePart()
+	const { focusQuestion, focusPrevQuestion, focusNextQuestion } = useQuestionFucus()
+
 	const content = module.content as ListeningContent
 
 	return <VStack>
