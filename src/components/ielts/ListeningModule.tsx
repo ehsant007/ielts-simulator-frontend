@@ -2,17 +2,15 @@
 
 import { ModuleRead, ListeningContent } from "@/client";
 import { QuestionGroup } from "./QuestionGroup"
-import { Activity, Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Activity } from "react";
 import { useModule, usePart, useQuestionFucus } from "./ModuleProvider";
-import { Wrap, Text, Button, VStack, Box, ScrollArea, Grid, GridItem, Flex, HStack } from "@chakra-ui/react";
-import React from "react";
+import { Wrap, Text, Button, VStack, Box, Flex, HStack } from "@chakra-ui/react";
 
 export function ListeningModule({ module }: { module: ModuleRead }) {
 	const { part } = usePart()
 	const content = module.content as ListeningContent
 	console.log("ListeningModule")
-	// {content.parts[section].test.map((g, i) => <QuestionGroup g={g} key={i} />)}
-	// <ListeningModuleNav />
+
 	return (
 		<Box h="100dvh" position="relative">
 			{/* Scrollable content area */}
@@ -33,13 +31,13 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 						p="6"
 						minH="1200px"
 					>
-						{
+						{/* {
 							content.parts.map((_part, pi) => <Activity key={_part.question_range.join("-")} mode={part === pi ? "visible" : "hidden"}>
 								{_part.test.map((g, gi) => <QuestionGroup key={g.question_range.join("-")} g={g} />)}
 							</Activity>)
-						}
+						} */}
 
-						{/* {content.parts[part].test.map((g, i) => <QuestionGroup g={g} key={g.question_range.join("-")} />)} */}
+						{content.parts[part].test.map((g, i) => <QuestionGroup g={g} key={g.question_range.join("-")} />)}
 					</Box>
 				</Box>
 			</Box>

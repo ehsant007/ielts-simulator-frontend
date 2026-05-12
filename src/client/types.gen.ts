@@ -1390,7 +1390,7 @@ export type QuestionGroupVisualLabeling = {
 /**
  * QuestionType
  */
-export type QuestionType = 'multiple_choice' | 'completion' | 'short_answer' | 'identify_info' | 'matching';
+export type QuestionType = 'multiple_choice' | 'single_choice' | 'completion' | 'short_answer' | 'identify_info' | 'matching';
 
 /**
  * ReadingContent

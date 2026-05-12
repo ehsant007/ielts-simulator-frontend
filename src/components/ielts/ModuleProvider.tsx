@@ -6,7 +6,7 @@ import { ModuleRead, Question } from "@/client";
 type ModuleContextType = {
 	module: ModuleRead
 	getQuestion: (num: number) => Question
-	registerQuestionRef: (question: Question, el: HTMLElement) => void
+	registerQuestionRef: (questionNum: number, el: HTMLElement) => void
 }
 
 type QuestionFocusContextType = {
@@ -22,9 +22,11 @@ type ModulePartContextType = {
 	setPart: Dispatch<SetStateAction<number>>
 }
 
+
 const ModuleContext = createContext<ModuleContextType | undefined>(undefined)
 const QuestionFocusContext = createContext<QuestionFocusContextType | undefined>(undefined)
 const ModulePartContext = createContext<ModulePartContextType | undefined>(undefined)
+const AnswersContext = createContext(new Map<number, string[]>())
 
 type ModuleContextProviderProps = {
 	children: React.ReactNode,
@@ -36,6 +38,7 @@ export function ModuleContextProvider({ children, module }: ModuleContextProvide
 	const [focusedQuestion, _focusQuestion] = useState<Question>(module.questions[0])
 	const [tick, setTick] = useState<number>(0)
 	const questionRefs = useRef(new Map<number, HTMLElement | null>())
+	const answers = useRef(new Map<number, string[]>())
 
 	console.log("ModuleProvider")
 
@@ -64,9 +67,9 @@ export function ModuleContextProvider({ children, module }: ModuleContextProvide
 		return map
 	}, [module])
 
-	const registerQuestionRef = useCallback((question: Question, el: HTMLElement | null) => {
-		console.log(`question ${question.num} ref was set to ${el}`)
-		questionRefs.current.set(question.num, el)
+	const registerQuestionRef = useCallback((questionNum: number, el: HTMLElement | null) => {
+		console.log(`question ${questionNum} ref was set to ${el}`)
+		questionRefs.current.set(questionNum, el)
 	}, [])
 
 	const getQuestion = useCallback((num: number) => questions_map[num].question, [questions_map])
@@ -104,14 +107,34 @@ export function ModuleContextProvider({ children, module }: ModuleContextProvide
 		focusQuestion(module.questions[next_index])
 	}, [focusedQuestion, getQuestionIndex, focusQuestion, module.questions])
 
-	const module_context = useMemo(() => ({ module, getQuestion, registerQuestionRef }), [module, getQuestion, registerQuestionRef])
-	const focus_context = useMemo(() => ({ focusedQuestion, tick, focusQuestion, focusPrevQuestion, focusNextQuestion }), [focusQuestion, tick])
-	const part_context = useMemo(() => ({ part, setPart }), [part])
+
+	// Context values
+
+	const module_context = useMemo(() => ({
+		module,
+		getQuestion,
+		registerQuestionRef
+	}), [module, getQuestion, registerQuestionRef])
+
+	const focus_context = useMemo(() => ({
+		focusedQuestion,
+		tick,
+		focusQuestion,
+		focusPrevQuestion,
+		focusNextQuestion
+	}), [focusQuestion, tick, focusQuestion, focusPrevQuestion, focusNextQuestion])
+
+	const part_context = useMemo(() => ({
+		part,
+		setPart
+	}), [part])
 
 	return <ModuleContext.Provider value={module_context}>
 		<ModulePartContext.Provider value={part_context}>
 			<QuestionFocusContext.Provider value={focus_context} >
-				{children}
+				<AnswersContext.Provider value={answers.current} >
+					{children}
+				</AnswersContext.Provider>
 			</QuestionFocusContext.Provider>
 		</ModulePartContext.Provider>
 	</ModuleContext.Provider>
@@ -139,6 +162,15 @@ export function usePart() {
 	const context = useContext(ModulePartContext)
 	if (!context) {
 		throw new Error("usePart must be used within a ModuleContextProvider");
+	}
+
+	return context;
+}
+
+export function useAnswers() {
+	const context = useContext(AnswersContext)
+	if (!context) {
+		throw new Error("useAnswers must be used within a ModuleContextProvider");
 	}
 
 	return context;
