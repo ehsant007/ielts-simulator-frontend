@@ -9,9 +9,6 @@ export type ModuleStore = {
 	getQuestion: (num: number) => Question
 	getQuestionIndex: (num: number) => number
 
-	questionRefs: Map<number, HTMLElement | null>
-	registerQuestionRef: (questionNum: number, el: HTMLElement) => void
-
 	focusedQuestion: Question
 	focusQuestion: (num: number, force?: boolean) => void
 	focusPrevQuestion: () => void
@@ -30,9 +27,6 @@ export function createModuleStore(module: ModuleRead, questionsMeta: Record<numb
 		questionsMeta,
 		getQuestion: (num: number) => get().module.questions[questionsMeta[num].index],
 		getQuestionIndex: (num: number) => get().questionsMeta[num].index,
-
-		questionRefs: new Map<number, HTMLElement | null>(),
-		registerQuestionRef: (questionNum, el) => get().questionRefs.set(questionNum, el),
 
 		part: 0,
 		setPart: (part) => set(() => ({ part })),
