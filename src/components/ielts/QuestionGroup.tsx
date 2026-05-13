@@ -2,16 +2,13 @@
 
 import { QuestionGroupBase as QuestionGroupBaseType, NoteCompletionGroup, QuestionGroup as QuestionGroupType, QuestionGroupVisualLabeling, SentenceMatchingGroup } from "@/client";
 import { Content, MD } from "./Content";
-import { Completion, Question } from "./Question";
-import { Box, VStack, Text, Em, HStack, NativeSelect, Separator, Image, List, Center } from "@chakra-ui/react";
+import { Question } from "./Question";
+import { Box, VStack, Text, Em, HStack, Image, Center } from "@chakra-ui/react";
 import { useModuleStore } from "./ModuleProvider";
-import { useColorMode } from "../ui/color-mode";
+//import { useColorMode } from "../ui/color-mode";
 import { useState } from "react";
 
 export function QuestionGroup({ g }: { g: QuestionGroupType }) {
-
-	console.log("QuestionGroup")
-
 	let ui
 	switch (g.group_type) {
 		case "basic": ui = <QuestionGroupBase g={g} />
@@ -59,7 +56,7 @@ export function QuestionGroupBase({ g }: { g: QuestionGroupBaseType }) {
 export function VisualLabelingGroup({ children: g }: { children: QuestionGroupVisualLabeling }) {
 	const module = useModuleStore((state) => state.module)
 	const getQuestion = useModuleStore((state) => state.getQuestion)
-	const { colorMode } = useColorMode()
+	//const { colorMode } = useColorMode()
 
 	return <VStack alignItems="start">
 

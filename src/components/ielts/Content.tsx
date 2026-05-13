@@ -1,8 +1,7 @@
 "use client"
 
 import { Content as ContentType, Text as TextType} from "@/client"
-import { Box, Input, List, Text, VStack } from "@chakra-ui/react"
-import React from "react"
+import { Box, List, Text, VStack } from "@chakra-ui/react"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import { useModuleStore } from "./ModuleProvider"
@@ -15,8 +14,6 @@ export function MD({ children }: { children: string | string[] | null | undefine
 		data = children.join("\n\n")
 	else
 		data = children
-
-	console.log("Content")
 
 	return <Markdown rehypePlugins={[rehypeRaw]} components={{
 		h1({ children }) {

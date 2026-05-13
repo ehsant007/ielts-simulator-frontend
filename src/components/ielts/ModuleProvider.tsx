@@ -20,7 +20,8 @@ export function ModuleContextProvider({ children, module }: ModuleContextProvide
 		module.questions.forEach((question, index) => {
 			map[question.num] = {
 				index,
-				focused: question.num == 0
+				focused: question.num === 1,
+				focusCount: 0,
 			}
 		})
 
@@ -30,8 +31,6 @@ export function ModuleContextProvider({ children, module }: ModuleContextProvide
 	if (!store.current) {
 		store.current = createModuleStore(module, questionsMeta)
 	}
-
-	console.log("ModuleProvider")
 
 	return <ModuleContext.Provider value={store.current} >
 		{children}

@@ -9,7 +9,6 @@ import { Wrap, Text, Button, VStack, Box, Flex, HStack } from "@chakra-ui/react"
 export function ListeningModule({ module }: { module: ModuleRead }) {
 	const part = useModuleStore((state) => state.part)
 	const content = module.content as ListeningContent
-	console.log("ListeningModule")
 
 	return (
 		<Box h="100dvh" position="relative">
@@ -103,7 +102,7 @@ export function ListeningModuleNav() {
 									key={i}
 									size="xs"
 									variant="outline"
-									onPointerUp={() => focusQuestion(q.num, true)}
+									onPointerUp={() => focusQuestion(q.num)}
 								>
 									{q.to_num ? `${q.num} | ${q.to_num}` : q.num}
 								</Button>)

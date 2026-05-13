@@ -1,8 +1,7 @@
 "use client"
 import { Question as QuestionType } from "@/client"
-import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGroup, Separator, VStack } from "@chakra-ui/react"
-import { Text, Box } from "@chakra-ui/react"
-import { ChangeEvent, ChangeEventHandler, forwardRef, RefObject, useCallback, useEffect, useRef, useState } from "react"
+import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGroup, Separator, VStack, Text } from "@chakra-ui/react"
+import { ChangeEventHandler, forwardRef, useEffect, useRef } from "react"
 import { MD } from "./Content"
 import { useModuleStore } from "./ModuleProvider"
 
@@ -14,25 +13,30 @@ type QuestionProps = {
 
 
 export function Question({ question, options, onChange }: QuestionProps) {
-	const focused = useModuleStore((state) => state.questionsMeta[question.num].focused)
+	const focused = useModuleStore((state) => { return state.questionsMeta[question.num].focused })
+	const focusCount = useModuleStore((state) => state.questionsMeta[question.num].focusCount)
 	const ref = useRef<any>(null)
 
 	useEffect(() => {
 		if (!focused)
 			return
+
 		const el = ref.current
 		if (!el)
 			return
+
+		/*	To avoid infinite loop make sure the question is not already focused, because when a question is focused,
+			it's onFocus event might refocus again to capture a focus that comes from user actions */
+		if (document.activeElement === el) {
+			return
+		}
 
 		el.scrollIntoView({
 			behavior: "smooth",
 			block: "center",
 		})
-
 		el.focus()
-	}, [focused])
-
-	console.log(`Question ${question.num}`)
+	}, [focused, focusCount])
 
 	let ui = <></>
 	switch (question.question_type) {
@@ -75,7 +79,7 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const answer = useModuleStore((state) => state.answers[question.num])?.[0]
 	const setAnswer = useModuleStore((state) => state.setAnswer)
-	console.log("answer: ", answer)
+
 	function toLetter(index: number) {
 		return String.fromCharCode(65 + index);
 	}

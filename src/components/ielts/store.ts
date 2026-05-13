@@ -1,7 +1,7 @@
 import { ModuleRead, Question } from "@/client";
 import { createStore } from "zustand/vanilla"
 
-export type QuestionMeta = { index: number, focused: boolean }
+export type QuestionMeta = { index: number, focused: boolean, focusCount: number }
 
 export type ModuleStore = {
 	module: ModuleRead
@@ -10,7 +10,7 @@ export type ModuleStore = {
 	getQuestionIndex: (num: number) => number
 
 	focusedQuestion: Question
-	focusQuestion: (num: number, force?: boolean) => void
+	focusQuestion: (num: number) => void
 	focusPrevQuestion: () => void
 	focusNextQuestion: () => void
 
@@ -25,49 +25,47 @@ export function createModuleStore(module: ModuleRead, questionsMeta: Record<numb
 	return createStore<ModuleStore>((set, get) => ({
 		module,
 		questionsMeta,
-		getQuestion: (num: number) => get().module.questions[questionsMeta[num].index],
+		getQuestion: (num: number) => get().module.questions[get().questionsMeta[num].index],
 		getQuestionIndex: (num: number) => get().questionsMeta[num].index,
 
 		part: 0,
 		setPart: (part) => set(() => ({ part })),
 
 		focusedQuestion: module.questions[0],
-		focusQuestion: (num: number, force: boolean = false) => {
-			const s = get()
-			const q0 = s.getQuestion(s.focusedQuestion.num)
-			const meta0 = s.questionsMeta[num]
-			const q1 = s.getQuestion(num)
-			const meta1 = s.questionsMeta[num]
+		focusQuestion: (num: number) => set((state) => {
+			const q0 = state.getQuestion(state.focusedQuestion.num)
+			const meta0 = state.questionsMeta[state.focusedQuestion.num]
+			const q1 = state.getQuestion(num)
+			const meta1 = state.questionsMeta[num]
 
 			if (q1.part !== undefined) {
-				get().setPart(q1.part)
+				state.setPart(q1.part)
 			}
 
-			set(() => ({
+			return {
 				focusedQuestion: q1,
 				questionsMeta: {
-					...questionsMeta,
-					[q0.num]: { ...meta0, focused: false },
-					[q1.num]: { ...meta1, focused: true },
+					...state.questionsMeta,
+					[q0.num]: { ...meta0, focused: false, },
+					[q1.num]: { ...meta1, focused: true, focusCount: meta1.focusCount + 1 },
 				}
-
-			}))
-		},
+			}
+		}),
 
 		focusPrevQuestion: () => {
 			const state = get()
 			let prev_index = state.getQuestionIndex(state.focusedQuestion.num) - 1
 			if (prev_index < 0)
 				prev_index = 0
-			state.focusQuestion(module.questions[prev_index].num)
+			state.focusQuestion(state.module.questions[prev_index].num)
 		},
 
 		focusNextQuestion: () => {
 			const state = get()
 			let next_index = state.getQuestionIndex(state.focusedQuestion.num) + 1
-			if (next_index >= module.questions.length)
-				next_index = module.questions.length - 1
-			state.focusQuestion(module.questions[next_index].num)
+			if (next_index >= state.module.questions.length)
+				next_index = state.module.questions.length - 1
+			state.focusQuestion(state.module.questions[next_index].num)
 		},
 
 		answers: {},
