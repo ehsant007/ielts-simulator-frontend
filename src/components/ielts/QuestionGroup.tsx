@@ -4,7 +4,7 @@ import { QuestionGroupBase as QuestionGroupBaseType, NoteCompletionGroup, Questi
 import { Content, MD } from "./Content";
 import { Completion, Question } from "./Question";
 import { Box, VStack, Text, Em, HStack, NativeSelect, Separator, Image, List, Center } from "@chakra-ui/react";
-import { useModule, useModuleStore } from "./ModuleProvider";
+import { useModuleStore } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";
 import { useState } from "react";
 
@@ -43,7 +43,7 @@ export function NoteCompletion({ g }: { g: NoteCompletionGroup }) {
 
 
 export function QuestionGroupBase({ g }: { g: QuestionGroupBaseType }) {
-	const { getQuestion } = useModule()
+	const getQuestion = useModuleStore((state) => state.getQuestion)
 
 	return <VStack alignItems="stretch">
 		{
@@ -57,8 +57,8 @@ export function QuestionGroupBase({ g }: { g: QuestionGroupBaseType }) {
 }
 
 export function VisualLabelingGroup({ children: g }: { children: QuestionGroupVisualLabeling }) {
-
-	const { module, getQuestion } = useModule()
+	const module = useModuleStore((state) => state.module)
+	const getQuestion = useModuleStore((state) => state.getQuestion)
 	const { colorMode } = useColorMode()
 
 	return <VStack alignItems="start">
@@ -83,7 +83,7 @@ export function VisualLabelingGroup({ children: g }: { children: QuestionGroupVi
 export function SentenceMatching({ children: g }: { children: SentenceMatchingGroup }) {
 
 	const [selected, setSelected] = useState<Record<string, number>>({})
-	const { getQuestion } = useModule()
+	const getQuestion = useModuleStore((state) => state.getQuestion)
 	console.log(selected)
 	return <VStack alignItems="start">
 

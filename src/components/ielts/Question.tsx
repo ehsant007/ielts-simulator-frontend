@@ -4,7 +4,7 @@ import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGr
 import { Text, Box } from "@chakra-ui/react"
 import { ChangeEvent, ChangeEventHandler, forwardRef, RefObject, useCallback, useEffect, useRef, useState } from "react"
 import { MD } from "./Content"
-import { useModule, useQuestionFucus, useModuleStore } from "./ModuleProvider"
+import { useModuleStore } from "./ModuleProvider"
 
 type QuestionProps = {
 	question: QuestionType
@@ -14,24 +14,35 @@ type QuestionProps = {
 
 
 export function Question({ question, options, onChange }: QuestionProps) {
+	const focused = useModuleStore((state) => state.questionsMeta[question.num].focused)
+	const ref = useRef<any>(null)
 
-	const { registerQuestionRef } = useModule()
-	const setRef = useCallback(
-		(el: any) => {
-			registerQuestionRef(question.num, el)
-		}, [registerQuestionRef, question.num])
+	useEffect(() => {
+		if (!focused)
+			return
+		const el = ref.current
+		if (!el)
+			return
+
+		el.scrollIntoView({
+			behavior: "smooth",
+			block: "center",
+		})
+
+		el.focus()
+	}, [focused])
 
 	console.log(`Question ${question.num}`)
 
 	let ui = <></>
 	switch (question.question_type) {
-		case "completion": ui = <Completion ref={setRef} question={question} />
+		case "completion": ui = <Completion ref={ref} question={question} />
 			break
-		case "single_choice": ui = <SingleChoice ref={setRef} question={question} />
+		case "single_choice": ui = <SingleChoice ref={ref} question={question} />
 			break
-		case "multiple_choice": ui = <MultipleChoice ref={setRef} question={question} />
+		case "multiple_choice": ui = <MultipleChoice ref={ref} question={question} />
 			break
-		case "matching": ui = <Matching ref={setRef} question={question} options={options} onChange={onChange} />
+		case "matching": ui = <Matching ref={ref} question={question} options={options} onChange={onChange} />
 			break
 		default:
 			ui = <Text>question type `{question.type}` not implemented!</Text>
@@ -41,6 +52,7 @@ export function Question({ question, options, onChange }: QuestionProps) {
 
 export const Completion = forwardRef<HTMLInputElement, { question: QuestionType }>(({ question }, ref) => {
 	const answer = useModuleStore((state) => state.answers[question.num]) ?? ""
+	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 
 	return <Input
@@ -54,11 +66,13 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 		m="1"
 		fontSize="md"
 		variant="subtle"
+		onFocus={() => focusQuestion(question.num)}
 		ref={ref}
 	/>
 })
 
 export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
+	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const answer = useModuleStore((state) => state.answers[question.num])?.[0]
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 	console.log("answer: ", answer)
@@ -68,7 +82,7 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 
 	return <>
 
-		<HStack alignItems="start" p="3" tabIndex={0} focusRing="outside" ref={ref}>
+		<HStack alignItems="start" p="3" onFocus={() => focusQuestion(question.num)} tabIndex={0} focusRing="outside" ref={ref}>
 
 			<Text fontWeight="bold">{question.num}</Text>
 
@@ -105,6 +119,7 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 
 
 export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
+	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const answer = useModuleStore((state) => state.answers[question.num]) ?? []
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 
@@ -115,7 +130,7 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 
 	return <>
 
-		<HStack alignItems="start" p="3" tabIndex={0} focusRing="outside" ref={ref}>
+		<HStack alignItems="start" p="3" onFocus={() => focusQuestion(question.num)} tabIndex={0} focusRing="outside" ref={ref}>
 
 			<Text fontWeight="bold">{question.num}</Text>
 
@@ -147,6 +162,7 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 
 
 export const Matching = forwardRef<HTMLSelectElement, QuestionProps>(({ question, options }, ref) => {
+	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const answer = useModuleStore((state) => state.answers[question.num])?.[0]
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 
@@ -155,7 +171,7 @@ export const Matching = forwardRef<HTMLSelectElement, QuestionProps>(({ question
 		<Text>{question.question}</Text>
 		<Separator flex="1" ps="10" />
 		<NativeSelect.Root size="sm" width="auto">
-			<NativeSelect.Field ref={ref} value={answer} placeholder="----" onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}>
+			<NativeSelect.Field onFocus={() => focusQuestion(question.num)} ref={ref} value={answer} placeholder="----" onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}>
 				{
 					options?.map((apt, i) => <option key={i} value={apt}>{apt}</option>)
 				}

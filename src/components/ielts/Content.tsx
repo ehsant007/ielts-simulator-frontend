@@ -5,11 +5,11 @@ import { Box, Input, List, Text, VStack } from "@chakra-ui/react"
 import React from "react"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
-import { useModule } from "./ModuleProvider"
+import { useModuleStore } from "./ModuleProvider"
 import { Question } from "./Question"
 
 export function MD({ children }: { children: string | string[] | null | undefined }) {
-	const { getQuestion } = useModule()
+	const getQuestion = useModuleStore((state) => state.getQuestion)
 	let data
 	if (Array.isArray(children))
 		data = children.join("\n\n")

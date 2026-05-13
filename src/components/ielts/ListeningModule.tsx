@@ -3,11 +3,11 @@
 import { ModuleRead, ListeningContent } from "@/client";
 import { QuestionGroup } from "./QuestionGroup"
 import { Activity } from "react";
-import { useModule, usePart, useQuestionFucus } from "./ModuleProvider";
+import { useModuleStore } from "./ModuleProvider";
 import { Wrap, Text, Button, VStack, Box, Flex, HStack } from "@chakra-ui/react";
 
 export function ListeningModule({ module }: { module: ModuleRead }) {
-	const { part } = usePart()
+	const part = useModuleStore((state) => state.part)
 	const content = module.content as ListeningContent
 	console.log("ListeningModule")
 
@@ -73,9 +73,10 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 }
 
 export function ListeningModuleNav() {
-	const { module } = useModule()
-	const { setPart } = usePart()
-	const { focusQuestion, focusPrevQuestion, focusNextQuestion } = useQuestionFucus()
+	const module = useModuleStore((state) => state.module)
+	const focusQuestion = useModuleStore((state) => state.focusQuestion)
+	const focusPrevQuestion = useModuleStore((state) => state.focusPrevQuestion)
+	const focusNextQuestion = useModuleStore((state) => state.focusNextQuestion)
 
 	const content = module.content as ListeningContent
 
@@ -91,7 +92,7 @@ export function ListeningModuleNav() {
 						key={part_i}
 						size="xs"
 						variant="ghost"
-						onPointerUp={() => focusQuestion(part.test[0].questions[0])}
+						onPointerUp={() => focusQuestion(part.test[0].questions[0].num)}
 					>
 						Part {part_i + 1}
 					</Button>
@@ -102,7 +103,7 @@ export function ListeningModuleNav() {
 									key={i}
 									size="xs"
 									variant="outline"
-									onPointerUp={() => focusQuestion(q, true)}
+									onPointerUp={() => focusQuestion(q.num, true)}
 								>
 									{q.to_num ? `${q.num} | ${q.to_num}` : q.num}
 								</Button>)
