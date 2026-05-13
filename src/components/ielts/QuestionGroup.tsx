@@ -7,6 +7,7 @@ import { Box, VStack, Text, Em, HStack, NativeSelect, Separator, Image, List, Ce
 import { useModule } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";
 import { useState } from "react";
+import { useAnswers } from "./store";
 
 export function QuestionGroup({ g }: { g: QuestionGroupType }) {
 
@@ -82,9 +83,9 @@ export function VisualLabelingGroup({ children: g }: { children: QuestionGroupVi
 
 export function SentenceMatching({ children: g }: { children: SentenceMatchingGroup }) {
 
-	const [selected, setSelected] = useState<Record<string, number | number[]>>({})
+	const [selected, setSelected] = useState<Record<string, number>>({})
 	const { getQuestion } = useModule()
-
+	console.log(selected)
 	return <VStack alignItems="start">
 
 
@@ -102,16 +103,20 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 		<VStack alignItems="stretch">
 			{
 				g.questions.map((question, i) => (
-					<Question key={question.num} question={getQuestion(question.num)} options={Object.keys(g.sentences)} onChange={(e) => {
-						const value = e.currentTarget.value
-						setSelected(prev => {
-							let new_state = Object.fromEntries(Object.entries(prev).filter(([_, val]) => val !== question.num))
-							if (value) {
-								new_state = { ...new_state, [value]: question.num }
-							}
-							return new_state
-						})
-					}} />
+					<Question
+						key={question.num}
+						question={getQuestion(question.num)}
+						options={Object.keys(g.sentences)}
+						onChange={(e) => {
+							const value = e.currentTarget.value
+							setSelected(prev => {
+								let new_state = Object.fromEntries(Object.entries(prev).filter(([_, val]) => val !== question.num))
+								if (value) {
+									new_state = { ...new_state, [value]: question.num }
+								}
+								return new_state
+							})
+						}} />
 				))
 			}
 		</VStack>

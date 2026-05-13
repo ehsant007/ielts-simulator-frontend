@@ -4,8 +4,8 @@ import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGr
 import { Text, Box } from "@chakra-ui/react"
 import { ChangeEvent, ChangeEventHandler, forwardRef, RefObject, useCallback, useEffect, useRef, useState } from "react"
 import { MD } from "./Content"
-import { useAnswers, useModule, useQuestionFucus } from "./ModuleProvider"
-
+import { useModule, useQuestionFucus } from "./ModuleProvider"
+import { useAnswers } from "./store"
 
 type QuestionProps = {
 	question: QuestionType
@@ -41,11 +41,12 @@ export function Question({ question, options, onChange }: QuestionProps) {
 }
 
 export const Completion = forwardRef<HTMLInputElement, { question: QuestionType }>(({ question }, ref) => {
-	const answers = useAnswers()
+	const answer = useAnswers((state) => state.answers[question.num]) ?? ""
+	const setAnswer = useAnswers((state) => state.setAnswer)
 
 	return <Input
-		defaultValue={answers.get(question.num)?.[0]}
-		onChange={(e) => answers.set(question.num, [e.currentTarget.value])}
+		value={answer}
+		onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}
 		id={`q${question.num}`}
 		textAlign="center"
 		placeholder={question.num.toString()}
@@ -59,8 +60,9 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 })
 
 export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
-	const answers = useAnswers()
-
+	const answer = useAnswers((state) => state.answers[question.num])?.[0]
+	const setAnswer = useAnswers((state) => state.setAnswer)
+	console.log("answer: ", answer)
 	function toLetter(index: number) {
 		return String.fromCharCode(65 + index);
 	}
@@ -75,7 +77,7 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 				<MD>{question.question}</MD>
 
 				<Fieldset.Root>
-					<RadioGroup.Root defaultValue={answers.get(question.num)?.[0]}>
+					<RadioGroup.Root value={answer ?? null}>
 						<VStack gap="2" align="start">
 							{
 								question.choices?.map((choice, i) => (
@@ -84,12 +86,7 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 										value={toLetter(i)}
 										onPointerUp={() => {
 											const item_value = toLetter(i)
-											const prev = answers.get(question.num)?.[0]
-											if (prev === item_value) {
-												answers.delete(question.num)
-											} else {
-												answers.set(question.num, [item_value])
-											}
+											setAnswer(question.num, answer == item_value ? undefined : [item_value])
 										}}
 									>
 										<RadioGroup.ItemHiddenInput />
@@ -109,16 +106,11 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 
 
 export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
-	const answers = useAnswers()
-	const [values, setValues] = useState<string[]>(answers.get(question.num) ?? [])
+	const answer = useAnswers((state) => state.answers[question.num]) ?? []
+	const setAnswer = useAnswers((state) => state.setAnswer)
 
 	function toLetter(index: number) {
 		return String.fromCharCode(65 + index);
-	}
-
-	const setAnswer = (answer: string[]) => {
-		setValues(answer)
-		answers.set(question.num, answer)
 	}
 
 
@@ -132,12 +124,14 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 				<MD>{question.question}</MD>
 
 				<Fieldset.Root>
-					<CheckboxGroup value={values} onValueChange={setAnswer}>
+					<CheckboxGroup
+						value={answer}
+						onValueChange={(answer) => setAnswer(question.num, answer)}>
 						<Fieldset.Content>
 
 							{question.choices?.map((choice, i) => (
 								<Checkbox.Root key={i} value={toLetter(i)} pb="0">
-									<Checkbox.HiddenInput disabled={values.length >= 2 && !values.includes(toLetter(i))} />
+									<Checkbox.HiddenInput disabled={answer.length >= 2 && !answer.includes(toLetter(i))} />
 									<Checkbox.Control />
 									<Checkbox.Label>{choice}</Checkbox.Label>
 								</Checkbox.Root>
@@ -153,20 +147,16 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 })
 
 
-export const Matching = forwardRef<HTMLSelectElement, QuestionProps>(({ question, options, onChange }, ref) => {
-	const answers = useAnswers()
-
-	const setAnswer = (e: ChangeEvent<HTMLSelectElement>) => {
-		answers.set(question.num, [e.currentTarget.value])
-		onChange?.(e)
-	}
+export const Matching = forwardRef<HTMLSelectElement, QuestionProps>(({ question, options }, ref) => {
+	const answer = useAnswers((state) => state.answers[question.num])?.[0]
+	const setAnswer = useAnswers((state) => state.setAnswer)
 
 	return <HStack>
 		<Text fontWeight="bold">{question.num}</Text>
 		<Text>{question.question}</Text>
 		<Separator flex="1" ps="10" />
 		<NativeSelect.Root size="sm" width="auto">
-			<NativeSelect.Field ref={ref} defaultValue={answers.get(question.num)?.[0]} placeholder="----" onChange={setAnswer}>
+			<NativeSelect.Field ref={ref} value={answer} placeholder="----" onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}>
 				{
 					options?.map((apt, i) => <option key={i} value={apt}>{apt}</option>)
 				}
