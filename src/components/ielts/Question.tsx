@@ -4,8 +4,7 @@ import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGr
 import { Text, Box } from "@chakra-ui/react"
 import { ChangeEvent, ChangeEventHandler, forwardRef, RefObject, useCallback, useEffect, useRef, useState } from "react"
 import { MD } from "./Content"
-import { useModule, useQuestionFucus } from "./ModuleProvider"
-import { useAnswers } from "./store"
+import { useModule, useQuestionFucus, useModuleStore } from "./ModuleProvider"
 
 type QuestionProps = {
 	question: QuestionType
@@ -41,8 +40,8 @@ export function Question({ question, options, onChange }: QuestionProps) {
 }
 
 export const Completion = forwardRef<HTMLInputElement, { question: QuestionType }>(({ question }, ref) => {
-	const answer = useAnswers((state) => state.answers[question.num]) ?? ""
-	const setAnswer = useAnswers((state) => state.setAnswer)
+	const answer = useModuleStore((state) => state.answers[question.num]) ?? ""
+	const setAnswer = useModuleStore((state) => state.setAnswer)
 
 	return <Input
 		value={answer}
@@ -60,8 +59,8 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 })
 
 export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
-	const answer = useAnswers((state) => state.answers[question.num])?.[0]
-	const setAnswer = useAnswers((state) => state.setAnswer)
+	const answer = useModuleStore((state) => state.answers[question.num])?.[0]
+	const setAnswer = useModuleStore((state) => state.setAnswer)
 	console.log("answer: ", answer)
 	function toLetter(index: number) {
 		return String.fromCharCode(65 + index);
@@ -106,8 +105,8 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 
 
 export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
-	const answer = useAnswers((state) => state.answers[question.num]) ?? []
-	const setAnswer = useAnswers((state) => state.setAnswer)
+	const answer = useModuleStore((state) => state.answers[question.num]) ?? []
+	const setAnswer = useModuleStore((state) => state.setAnswer)
 
 	function toLetter(index: number) {
 		return String.fromCharCode(65 + index);
@@ -148,8 +147,8 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 
 
 export const Matching = forwardRef<HTMLSelectElement, QuestionProps>(({ question, options }, ref) => {
-	const answer = useAnswers((state) => state.answers[question.num])?.[0]
-	const setAnswer = useAnswers((state) => state.setAnswer)
+	const answer = useModuleStore((state) => state.answers[question.num])?.[0]
+	const setAnswer = useModuleStore((state) => state.setAnswer)
 
 	return <HStack>
 		<Text fontWeight="bold">{question.num}</Text>

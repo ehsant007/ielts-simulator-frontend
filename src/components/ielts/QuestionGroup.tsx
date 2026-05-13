@@ -4,10 +4,9 @@ import { QuestionGroupBase as QuestionGroupBaseType, NoteCompletionGroup, Questi
 import { Content, MD } from "./Content";
 import { Completion, Question } from "./Question";
 import { Box, VStack, Text, Em, HStack, NativeSelect, Separator, Image, List, Center } from "@chakra-ui/react";
-import { useModule } from "./ModuleProvider";
+import { useModule, useModuleStore } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";
 import { useState } from "react";
-import { useAnswers } from "./store";
 
 export function QuestionGroup({ g }: { g: QuestionGroupType }) {
 
