@@ -4,6 +4,7 @@ import { createStore } from "zustand/vanilla"
 export type QuestionMeta = { index: number, focused: boolean, focusCount: number }
 
 export type ModuleStore = {
+	key: string
 	module: ModuleRead
 	questionsMeta: Record<number, QuestionMeta>
 	getQuestion: (num: number) => Question
@@ -17,12 +18,13 @@ export type ModuleStore = {
 	part: number
 	setPart: (part: number) => void
 
-	answers: Record<number, string[] | undefined>
-	setAnswer: (questionNum: number, answer: string[] | undefined) => void
+	answers: Record<number, string[]>
+	setAnswer: (questionNum: number, answer: string[]) => void
 }
 
 export function createModuleStore(module: ModuleRead, questionsMeta: Record<number, QuestionMeta>) {
 	return createStore<ModuleStore>((set, get) => ({
+		key: crypto.randomUUID(),
 		module,
 		questionsMeta,
 		getQuestion: (num: number) => get().module.questions[get().questionsMeta[num].index],

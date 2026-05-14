@@ -103,7 +103,7 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 										value={toLetter(i)}
 										onPointerUp={() => {
 											const item_value = toLetter(i)
-											setAnswer(question.num, answer == item_value ? undefined : [item_value])
+											setAnswer(question.num, answer == item_value ? [] : [item_value])
 										}}
 									>
 										<RadioGroup.ItemHiddenInput />

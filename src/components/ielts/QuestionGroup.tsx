@@ -7,6 +7,7 @@ import { Box, VStack, Text, Em, HStack, Image, Center } from "@chakra-ui/react";
 import { useModuleStore } from "./ModuleProvider";
 //import { useColorMode } from "../ui/color-mode";
 import { useState } from "react";
+import { getModuleFile } from "./utils";
 
 export function QuestionGroup({ g }: { g: QuestionGroupType }) {
 	let ui
@@ -61,7 +62,7 @@ export function VisualLabelingGroup({ children: g }: { children: QuestionGroupVi
 	return <VStack alignItems="start">
 
 		<Image
-			src={`/api/v1/ielts/modules/${module.id}/${g.image}`}
+			src={getModuleFile(module.id, g.image)}
 			// filter={`invert(${colorMode === "dark" ? 1 : 0})`}
 			mb="6"
 		/>
@@ -81,9 +82,8 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 
 	const [selected, setSelected] = useState<Record<string, number>>({})
 	const getQuestion = useModuleStore((state) => state.getQuestion)
-	console.log(selected)
-	return <VStack alignItems="start">
 
+	return <VStack alignItems="start">
 
 		<VStack alignItems="stretch" ms="auto" border="md" p="6" borderStyle="groove" shadow="lg" borderRadius="md" mb="8">
 			<Center fontWeight="bold">{g.sentences_title}</Center>
@@ -94,7 +94,6 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 				</HStack>)
 			}
 		</VStack>
-
 
 		<VStack alignItems="stretch">
 			{

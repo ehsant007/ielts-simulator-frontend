@@ -1,8 +1,9 @@
 import { readIeltsExamById } from "@/client";
 import { HStack } from "@chakra-ui/react";
 import Link from "next/link";
+import {Exam} from "@/components/ielts/Exam"
 
-export default async function Exam({ params }: { params: Promise<{ id: string }> }) {
+export default async function ExamId({ params }: { params: Promise<{ id: string }> }) {
 	const examId = (await params).id;
 
 
@@ -12,17 +13,19 @@ export default async function Exam({ params }: { params: Promise<{ id: string }>
 	})).data
 
 
-	return (
-		<>
-			<h1>
-				{ exam.title }
-			</h1>
-			<HStack p="10" gap="5">
-				<Link href={`/ielts/modules/${exam.listening_id}`}>Listening</Link>
-				<Link href={`/ielts/modules/${exam.reading_id}`}>Reading</Link>
-				<Link href={`/ielts/modules/${exam.writing_id}`}>Writing</Link>
-				<Link href={`/ielts/modules/${exam.speaking_id}`}>Speaking</Link>
-			</HStack>
-		</>
-	)
+	return <Exam exam={exam}/>
+
+	// return (
+	// 	<>
+	// 		<h1>
+	// 			{ exam.title }
+	// 		</h1>
+	// 		<HStack p="10" gap="5">
+	// 			<Link href={`/ielts/modules/${exam.listening_id}`}>Listening</Link>
+	// 			<Link href={`/ielts/modules/${exam.reading_id}`}>Reading</Link>
+	// 			<Link href={`/ielts/modules/${exam.writing_id}`}>Writing</Link>
+	// 			<Link href={`/ielts/modules/${exam.speaking_id}`}>Speaking</Link>
+	// 		</HStack>
+	// 	</>
+	// )
 }

@@ -19,6 +19,193 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 /**
+ * Read Ielts Exams
+ */
+export const readIeltsExams = <ThrowOnError extends boolean = true>(options?: Options<ReadIeltsExamsData, ThrowOnError>) => {
+    return (options?.client ?? client).get<ReadIeltsExamsResponses, unknown, ThrowOnError>({
+        url: '/api/v1/ielts/exams',
+        ...options
+    });
+};
+
+/**
+ * Create Ielts Exam
+ */
+export const createIeltsExam = <ThrowOnError extends boolean = true>(options: Options<CreateIeltsExamData, ThrowOnError>) => {
+    return (options.client ?? client).post<CreateIeltsExamResponses, CreateIeltsExamErrors, ThrowOnError>({
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/ielts/exams',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Read Ielts Exam By Id
+ */
+export const readIeltsExamById = <ThrowOnError extends boolean = true>(options: Options<ReadIeltsExamByIdData, ThrowOnError>) => {
+    return (options.client ?? client).get<ReadIeltsExamByIdResponses, ReadIeltsExamByIdErrors, ThrowOnError>({
+        url: '/api/v1/ielts/exams/{exam_id}',
+        ...options
+    });
+};
+
+/**
+ * Update Ielts Exam
+ */
+export const updateIeltsExam = <ThrowOnError extends boolean = true>(options: Options<UpdateIeltsExamData, ThrowOnError>) => {
+    return (options.client ?? client).patch<UpdateIeltsExamResponses, UpdateIeltsExamErrors, ThrowOnError>({
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/ielts/exams/{exam_id}',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Read Ielts Modules
+ */
+export const readIeltsModules = <ThrowOnError extends boolean = true>(options?: Options<ReadIeltsModulesData, ThrowOnError>) => {
+    return (options?.client ?? client).get<ReadIeltsModulesResponses, unknown, ThrowOnError>({
+        url: '/api/v1/ielts/modules',
+        ...options
+    });
+};
+
+/**
+ * Create Ielts Module
+ */
+export const createIeltsModule = <ThrowOnError extends boolean = true>(options: Options<CreateIeltsModuleData, ThrowOnError>) => {
+    return (options.client ?? client).post<CreateIeltsModuleResponses, CreateIeltsModuleErrors, ThrowOnError>({
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/ielts/modules',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Read Ielts Module By Id
+ */
+export const readIeltsModuleById = <ThrowOnError extends boolean = true>(options: Options<ReadIeltsModuleByIdData, ThrowOnError>) => {
+    return (options.client ?? client).get<ReadIeltsModuleByIdResponses, ReadIeltsModuleByIdErrors, ThrowOnError>({
+        url: '/api/v1/ielts/modules/{module_id}',
+        ...options
+    });
+};
+
+/**
+ * Update Ielts Module
+ */
+export const updateIeltsModule = <ThrowOnError extends boolean = true>(options: Options<UpdateIeltsModuleData, ThrowOnError>) => {
+    return (options.client ?? client).patch<UpdateIeltsModuleResponses, UpdateIeltsModuleErrors, ThrowOnError>({
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/ielts/modules/{module_id}',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Add Files To Ielts Module
+ */
+export const addFilesToIeltsModule = <ThrowOnError extends boolean = true>(options: Options<AddFilesToIeltsModuleData, ThrowOnError>) => {
+    return (options.client ?? client).post<AddFilesToIeltsModuleResponses, AddFilesToIeltsModuleErrors, ThrowOnError>({
+        ...formDataBodySerializer,
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/ielts/modules/{module_id}/files',
+        ...options,
+        headers: {
+            'Content-Type': null,
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Create Ielts Attempt
+ */
+export const createIeltsAttempt = <ThrowOnError extends boolean = true>(options: Options<CreateIeltsAttemptData, ThrowOnError>) => {
+    return (options.client ?? client).post<CreateIeltsAttemptResponses, CreateIeltsAttemptErrors, ThrowOnError>({
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/ielts/attempts',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Read My Ielts Attempts
+ */
+export const readMyIeltsAttempts = <ThrowOnError extends boolean = true>(options?: Options<ReadMyIeltsAttemptsData, ThrowOnError>) => {
+    return (options?.client ?? client).get<ReadMyIeltsAttemptsResponses, unknown, ThrowOnError>({
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/ielts/attempts/me',
+        ...options
+    });
+};
+
+/**
+ * Download a module file by filename
+ */
+export const readFileByFilename = <ThrowOnError extends boolean = true>(options: Options<ReadFileByFilenameData, ThrowOnError>) => {
+    return (options.client ?? client).get<ReadFileByFilenameResponses, ReadFileByFilenameErrors, ThrowOnError>({
+        url: '/api/v1/ielts/modules/{module_id}/{filename}',
+        ...options
+    });
+};
+
+/**
  * Read Settings
  */
 export const readSettings = <ThrowOnError extends boolean = true>(options?: Options<ReadSettingsData, ThrowOnError>) => {
@@ -966,193 +1153,6 @@ export const readFileSet = <ThrowOnError extends boolean = true>(options: Option
             }
         ],
         url: '/api/v1/files/set/{file_set_id}',
-        ...options
-    });
-};
-
-/**
- * Read Ielts Exams
- */
-export const readIeltsExams = <ThrowOnError extends boolean = true>(options?: Options<ReadIeltsExamsData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ReadIeltsExamsResponses, unknown, ThrowOnError>({
-        url: '/api/v1/ielts/exams',
-        ...options
-    });
-};
-
-/**
- * Create Ielts Exam
- */
-export const createIeltsExam = <ThrowOnError extends boolean = true>(options: Options<CreateIeltsExamData, ThrowOnError>) => {
-    return (options.client ?? client).post<CreateIeltsExamResponses, CreateIeltsExamErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/ielts/exams',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Read Ielts Exam By Id
- */
-export const readIeltsExamById = <ThrowOnError extends boolean = true>(options: Options<ReadIeltsExamByIdData, ThrowOnError>) => {
-    return (options.client ?? client).get<ReadIeltsExamByIdResponses, ReadIeltsExamByIdErrors, ThrowOnError>({
-        url: '/api/v1/ielts/exams/{exam_id}',
-        ...options
-    });
-};
-
-/**
- * Update Ielts Exam
- */
-export const updateIeltsExam = <ThrowOnError extends boolean = true>(options: Options<UpdateIeltsExamData, ThrowOnError>) => {
-    return (options.client ?? client).patch<UpdateIeltsExamResponses, UpdateIeltsExamErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/ielts/exams/{exam_id}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Read Ielts Modules
- */
-export const readIeltsModules = <ThrowOnError extends boolean = true>(options?: Options<ReadIeltsModulesData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ReadIeltsModulesResponses, unknown, ThrowOnError>({
-        url: '/api/v1/ielts/modules',
-        ...options
-    });
-};
-
-/**
- * Create Ielts Module
- */
-export const createIeltsModule = <ThrowOnError extends boolean = true>(options: Options<CreateIeltsModuleData, ThrowOnError>) => {
-    return (options.client ?? client).post<CreateIeltsModuleResponses, CreateIeltsModuleErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/ielts/modules',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Read Ielts Module By Id
- */
-export const readIeltsModuleById = <ThrowOnError extends boolean = true>(options: Options<ReadIeltsModuleByIdData, ThrowOnError>) => {
-    return (options.client ?? client).get<ReadIeltsModuleByIdResponses, ReadIeltsModuleByIdErrors, ThrowOnError>({
-        url: '/api/v1/ielts/modules/{module_id}',
-        ...options
-    });
-};
-
-/**
- * Update Ielts Module
- */
-export const updateIeltsModule = <ThrowOnError extends boolean = true>(options: Options<UpdateIeltsModuleData, ThrowOnError>) => {
-    return (options.client ?? client).patch<UpdateIeltsModuleResponses, UpdateIeltsModuleErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/ielts/modules/{module_id}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Add Files To Ielts Module
- */
-export const addFilesToIeltsModule = <ThrowOnError extends boolean = true>(options: Options<AddFilesToIeltsModuleData, ThrowOnError>) => {
-    return (options.client ?? client).post<AddFilesToIeltsModuleResponses, AddFilesToIeltsModuleErrors, ThrowOnError>({
-        ...formDataBodySerializer,
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/ielts/modules/{module_id}/files',
-        ...options,
-        headers: {
-            'Content-Type': null,
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Create Ielts Attempt
- */
-export const createIeltsAttempt = <ThrowOnError extends boolean = true>(options: Options<CreateIeltsAttemptData, ThrowOnError>) => {
-    return (options.client ?? client).post<CreateIeltsAttemptResponses, CreateIeltsAttemptErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/ielts/attempts',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Read My Ielts Attempts
- */
-export const readMyIeltsAttempts = <ThrowOnError extends boolean = true>(options?: Options<ReadMyIeltsAttemptsData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ReadMyIeltsAttemptsResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/ielts/attempts/me',
-        ...options
-    });
-};
-
-/**
- * Download a module file by filename
- */
-export const readFileByFilename = <ThrowOnError extends boolean = true>(options: Options<ReadFileByFilenameData, ThrowOnError>) => {
-    return (options.client ?? client).get<ReadFileByFilenameResponses, ReadFileByFilenameErrors, ThrowOnError>({
-        url: '/api/v1/ielts/modules/{module_id}/{filename}',
         ...options
     });
 };

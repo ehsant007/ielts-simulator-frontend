@@ -76,14 +76,6 @@ export type AppSettings = {
  */
 export type AttemptCreate = {
     /**
-     * User Id
-     */
-    user_id: string;
-    /**
-     * Exam Id
-     */
-    exam_id?: string | null;
-    /**
      * Module Id
      */
     module_id: string;
@@ -91,7 +83,7 @@ export type AttemptCreate = {
      * Answers
      */
     answers: {
-        [key: string]: string;
+        [key: string]: Array<string>;
     };
     /**
      * Idempotency Key
@@ -117,7 +109,7 @@ export type AttemptRead = {
      * Answers
      */
     answers: {
-        [key: string]: string;
+        [key: string]: Array<string>;
     };
     /**
      * Score
@@ -384,22 +376,10 @@ export type ExamRead = {
      * Description
      */
     description: string | null;
-    /**
-     * Listening Id
-     */
-    listening_id: string | null;
-    /**
-     * Reading Id
-     */
-    reading_id: string | null;
-    /**
-     * Writing Id
-     */
-    writing_id: string | null;
-    /**
-     * Speaking Id
-     */
-    speaking_id: string | null;
+    listening: ModuleInfo | null;
+    reading: ModuleInfo | null;
+    writing: ModuleInfo | null;
+    speaking: ModuleInfo | null;
 };
 
 /**
@@ -856,6 +836,10 @@ export type ModuleInfo = {
      * Tag
      */
     tag: string | null;
+    /**
+     * Duration Minutes
+     */
+    duration_minutes: number;
 };
 
 /**
@@ -1946,6 +1930,317 @@ export type WritingTask = {
      * Sample Answer
      */
     sample_answer: Array<string>;
+};
+
+export type ReadIeltsExamsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ielts/exams';
+};
+
+export type ReadIeltsExamsResponses = {
+    /**
+     * Response Read Ielts Exams
+     *
+     * Successful Response
+     */
+    200: Array<ExamRead>;
+};
+
+export type ReadIeltsExamsResponse = ReadIeltsExamsResponses[keyof ReadIeltsExamsResponses];
+
+export type CreateIeltsExamData = {
+    body: ExamCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ielts/exams';
+};
+
+export type CreateIeltsExamErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateIeltsExamError = CreateIeltsExamErrors[keyof CreateIeltsExamErrors];
+
+export type CreateIeltsExamResponses = {
+    /**
+     * Successful Response
+     */
+    200: ExamRead;
+};
+
+export type CreateIeltsExamResponse = CreateIeltsExamResponses[keyof CreateIeltsExamResponses];
+
+export type ReadIeltsExamByIdData = {
+    body?: never;
+    path: {
+        /**
+         * Exam Id
+         */
+        exam_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/exams/{exam_id}';
+};
+
+export type ReadIeltsExamByIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadIeltsExamByIdError = ReadIeltsExamByIdErrors[keyof ReadIeltsExamByIdErrors];
+
+export type ReadIeltsExamByIdResponses = {
+    /**
+     * Successful Response
+     */
+    200: ExamRead;
+};
+
+export type ReadIeltsExamByIdResponse = ReadIeltsExamByIdResponses[keyof ReadIeltsExamByIdResponses];
+
+export type UpdateIeltsExamData = {
+    body: ExamUpdate;
+    path: {
+        /**
+         * Exam Id
+         */
+        exam_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/exams/{exam_id}';
+};
+
+export type UpdateIeltsExamErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateIeltsExamError = UpdateIeltsExamErrors[keyof UpdateIeltsExamErrors];
+
+export type UpdateIeltsExamResponses = {
+    /**
+     * Successful Response
+     */
+    200: ExamRead;
+};
+
+export type UpdateIeltsExamResponse = UpdateIeltsExamResponses[keyof UpdateIeltsExamResponses];
+
+export type ReadIeltsModulesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ielts/modules';
+};
+
+export type ReadIeltsModulesResponses = {
+    /**
+     * Response Read Ielts Modules
+     *
+     * Successful Response
+     */
+    200: Array<ModuleInfo>;
+};
+
+export type ReadIeltsModulesResponse = ReadIeltsModulesResponses[keyof ReadIeltsModulesResponses];
+
+export type CreateIeltsModuleData = {
+    body: ModuleCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ielts/modules';
+};
+
+export type CreateIeltsModuleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateIeltsModuleError = CreateIeltsModuleErrors[keyof CreateIeltsModuleErrors];
+
+export type CreateIeltsModuleResponses = {
+    /**
+     * Successful Response
+     */
+    200: ModuleRead;
+};
+
+export type CreateIeltsModuleResponse = CreateIeltsModuleResponses[keyof CreateIeltsModuleResponses];
+
+export type ReadIeltsModuleByIdData = {
+    body?: never;
+    path: {
+        /**
+         * Module Id
+         */
+        module_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/modules/{module_id}';
+};
+
+export type ReadIeltsModuleByIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadIeltsModuleByIdError = ReadIeltsModuleByIdErrors[keyof ReadIeltsModuleByIdErrors];
+
+export type ReadIeltsModuleByIdResponses = {
+    /**
+     * Successful Response
+     */
+    200: ModuleRead;
+};
+
+export type ReadIeltsModuleByIdResponse = ReadIeltsModuleByIdResponses[keyof ReadIeltsModuleByIdResponses];
+
+export type UpdateIeltsModuleData = {
+    body: ModuleUpdate;
+    path: {
+        /**
+         * Module Id
+         */
+        module_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/modules/{module_id}';
+};
+
+export type UpdateIeltsModuleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateIeltsModuleError = UpdateIeltsModuleErrors[keyof UpdateIeltsModuleErrors];
+
+export type UpdateIeltsModuleResponses = {
+    /**
+     * Successful Response
+     */
+    200: ModuleRead;
+};
+
+export type UpdateIeltsModuleResponse = UpdateIeltsModuleResponses[keyof UpdateIeltsModuleResponses];
+
+export type AddFilesToIeltsModuleData = {
+    body: BodyAddFilesToIeltsModule;
+    path: {
+        /**
+         * Module Id
+         */
+        module_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/modules/{module_id}/files';
+};
+
+export type AddFilesToIeltsModuleErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AddFilesToIeltsModuleError = AddFilesToIeltsModuleErrors[keyof AddFilesToIeltsModuleErrors];
+
+export type AddFilesToIeltsModuleResponses = {
+    /**
+     * Successful Response
+     */
+    200: ModuleRead;
+};
+
+export type AddFilesToIeltsModuleResponse = AddFilesToIeltsModuleResponses[keyof AddFilesToIeltsModuleResponses];
+
+export type CreateIeltsAttemptData = {
+    body: AttemptCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ielts/attempts';
+};
+
+export type CreateIeltsAttemptErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateIeltsAttemptError = CreateIeltsAttemptErrors[keyof CreateIeltsAttemptErrors];
+
+export type CreateIeltsAttemptResponses = {
+    /**
+     * Successful Response
+     */
+    200: AttemptRead;
+};
+
+export type CreateIeltsAttemptResponse = CreateIeltsAttemptResponses[keyof CreateIeltsAttemptResponses];
+
+export type ReadMyIeltsAttemptsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ielts/attempts/me';
+};
+
+export type ReadMyIeltsAttemptsResponses = {
+    /**
+     * Response Read My Ielts Attempts
+     *
+     * Successful Response
+     */
+    200: Array<AttemptRead>;
+};
+
+export type ReadMyIeltsAttemptsResponse = ReadMyIeltsAttemptsResponses[keyof ReadMyIeltsAttemptsResponses];
+
+export type ReadFileByFilenameData = {
+    body?: never;
+    path: {
+        /**
+         * Module Id
+         */
+        module_id: string;
+        /**
+         * Filename
+         */
+        filename: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/modules/{module_id}/{filename}';
+};
+
+export type ReadFileByFilenameErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadFileByFilenameError = ReadFileByFilenameErrors[keyof ReadFileByFilenameErrors];
+
+export type ReadFileByFilenameResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
 };
 
 export type ReadSettingsData = {
@@ -3483,314 +3778,3 @@ export type ReadFileSetResponses = {
 };
 
 export type ReadFileSetResponse = ReadFileSetResponses[keyof ReadFileSetResponses];
-
-export type ReadIeltsExamsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/ielts/exams';
-};
-
-export type ReadIeltsExamsResponses = {
-    /**
-     * Response Read Ielts Exams
-     *
-     * Successful Response
-     */
-    200: Array<ExamRead>;
-};
-
-export type ReadIeltsExamsResponse = ReadIeltsExamsResponses[keyof ReadIeltsExamsResponses];
-
-export type CreateIeltsExamData = {
-    body: ExamCreate;
-    path?: never;
-    query?: never;
-    url: '/api/v1/ielts/exams';
-};
-
-export type CreateIeltsExamErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateIeltsExamError = CreateIeltsExamErrors[keyof CreateIeltsExamErrors];
-
-export type CreateIeltsExamResponses = {
-    /**
-     * Successful Response
-     */
-    200: ExamRead;
-};
-
-export type CreateIeltsExamResponse = CreateIeltsExamResponses[keyof CreateIeltsExamResponses];
-
-export type ReadIeltsExamByIdData = {
-    body?: never;
-    path: {
-        /**
-         * Exam Id
-         */
-        exam_id: string;
-    };
-    query?: never;
-    url: '/api/v1/ielts/exams/{exam_id}';
-};
-
-export type ReadIeltsExamByIdErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadIeltsExamByIdError = ReadIeltsExamByIdErrors[keyof ReadIeltsExamByIdErrors];
-
-export type ReadIeltsExamByIdResponses = {
-    /**
-     * Successful Response
-     */
-    200: ExamRead;
-};
-
-export type ReadIeltsExamByIdResponse = ReadIeltsExamByIdResponses[keyof ReadIeltsExamByIdResponses];
-
-export type UpdateIeltsExamData = {
-    body: ExamUpdate;
-    path: {
-        /**
-         * Exam Id
-         */
-        exam_id: string;
-    };
-    query?: never;
-    url: '/api/v1/ielts/exams/{exam_id}';
-};
-
-export type UpdateIeltsExamErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateIeltsExamError = UpdateIeltsExamErrors[keyof UpdateIeltsExamErrors];
-
-export type UpdateIeltsExamResponses = {
-    /**
-     * Successful Response
-     */
-    200: ExamRead;
-};
-
-export type UpdateIeltsExamResponse = UpdateIeltsExamResponses[keyof UpdateIeltsExamResponses];
-
-export type ReadIeltsModulesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/ielts/modules';
-};
-
-export type ReadIeltsModulesResponses = {
-    /**
-     * Response Read Ielts Modules
-     *
-     * Successful Response
-     */
-    200: Array<ModuleInfo>;
-};
-
-export type ReadIeltsModulesResponse = ReadIeltsModulesResponses[keyof ReadIeltsModulesResponses];
-
-export type CreateIeltsModuleData = {
-    body: ModuleCreate;
-    path?: never;
-    query?: never;
-    url: '/api/v1/ielts/modules';
-};
-
-export type CreateIeltsModuleErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateIeltsModuleError = CreateIeltsModuleErrors[keyof CreateIeltsModuleErrors];
-
-export type CreateIeltsModuleResponses = {
-    /**
-     * Successful Response
-     */
-    200: ModuleRead;
-};
-
-export type CreateIeltsModuleResponse = CreateIeltsModuleResponses[keyof CreateIeltsModuleResponses];
-
-export type ReadIeltsModuleByIdData = {
-    body?: never;
-    path: {
-        /**
-         * Module Id
-         */
-        module_id: string;
-    };
-    query?: never;
-    url: '/api/v1/ielts/modules/{module_id}';
-};
-
-export type ReadIeltsModuleByIdErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadIeltsModuleByIdError = ReadIeltsModuleByIdErrors[keyof ReadIeltsModuleByIdErrors];
-
-export type ReadIeltsModuleByIdResponses = {
-    /**
-     * Successful Response
-     */
-    200: ModuleRead;
-};
-
-export type ReadIeltsModuleByIdResponse = ReadIeltsModuleByIdResponses[keyof ReadIeltsModuleByIdResponses];
-
-export type UpdateIeltsModuleData = {
-    body: ModuleUpdate;
-    path: {
-        /**
-         * Module Id
-         */
-        module_id: string;
-    };
-    query?: never;
-    url: '/api/v1/ielts/modules/{module_id}';
-};
-
-export type UpdateIeltsModuleErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateIeltsModuleError = UpdateIeltsModuleErrors[keyof UpdateIeltsModuleErrors];
-
-export type UpdateIeltsModuleResponses = {
-    /**
-     * Successful Response
-     */
-    200: ModuleRead;
-};
-
-export type UpdateIeltsModuleResponse = UpdateIeltsModuleResponses[keyof UpdateIeltsModuleResponses];
-
-export type AddFilesToIeltsModuleData = {
-    body: BodyAddFilesToIeltsModule;
-    path: {
-        /**
-         * Module Id
-         */
-        module_id: string;
-    };
-    query?: never;
-    url: '/api/v1/ielts/modules/{module_id}/files';
-};
-
-export type AddFilesToIeltsModuleErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type AddFilesToIeltsModuleError = AddFilesToIeltsModuleErrors[keyof AddFilesToIeltsModuleErrors];
-
-export type AddFilesToIeltsModuleResponses = {
-    /**
-     * Successful Response
-     */
-    200: ModuleRead;
-};
-
-export type AddFilesToIeltsModuleResponse = AddFilesToIeltsModuleResponses[keyof AddFilesToIeltsModuleResponses];
-
-export type CreateIeltsAttemptData = {
-    body: AttemptCreate;
-    path?: never;
-    query?: never;
-    url: '/api/v1/ielts/attempts';
-};
-
-export type CreateIeltsAttemptErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateIeltsAttemptError = CreateIeltsAttemptErrors[keyof CreateIeltsAttemptErrors];
-
-export type CreateIeltsAttemptResponses = {
-    /**
-     * Successful Response
-     */
-    200: AttemptRead;
-};
-
-export type CreateIeltsAttemptResponse = CreateIeltsAttemptResponses[keyof CreateIeltsAttemptResponses];
-
-export type ReadMyIeltsAttemptsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/ielts/attempts/me';
-};
-
-export type ReadMyIeltsAttemptsResponses = {
-    /**
-     * Response Read My Ielts Attempts
-     *
-     * Successful Response
-     */
-    200: Array<AttemptRead>;
-};
-
-export type ReadMyIeltsAttemptsResponse = ReadMyIeltsAttemptsResponses[keyof ReadMyIeltsAttemptsResponses];
-
-export type ReadFileByFilenameData = {
-    body?: never;
-    path: {
-        /**
-         * Module Id
-         */
-        module_id: string;
-        /**
-         * Filename
-         */
-        filename: string;
-    };
-    query?: never;
-    url: '/api/v1/ielts/modules/{module_id}/{filename}';
-};
-
-export type ReadFileByFilenameErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadFileByFilenameError = ReadFileByFilenameErrors[keyof ReadFileByFilenameErrors];
-
-export type ReadFileByFilenameResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};

@@ -45,3 +45,9 @@ export function useModuleStore<T>(selector: (state: ModuleStore) => T) {
 
 	return useStore(store, selector);
 }
+
+export function useModuleStoreApi() {
+	const store = useContext(ModuleContext)
+	if (!store) throw new Error("useModuleStoreApi must be used within a ModuleContextProvider")
+	return store
+}

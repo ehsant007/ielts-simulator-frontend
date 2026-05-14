@@ -1,16 +1,60 @@
 "use client"
 
-import { ModuleRead, ListeningContent } from "@/client";
+import { ModuleRead, ListeningContent, createIeltsAttempt } from "@/client";
 import { QuestionGroup } from "./QuestionGroup"
-import { useModuleStore } from "./ModuleProvider";
+import { useModuleStore, useModuleStoreApi } from "./ModuleProvider";
 import { Wrap, Text, Button, VStack, Box, Flex, HStack } from "@chakra-ui/react";
+import { HiArrowLeft, HiArrowRight } from "react-icons/hi";
+import { useEffect, useRef } from "react";
+import { getModuleFile } from "./utils";
+import { useAuth } from "@/auth";
 
 export function ListeningModule({ module }: { module: ModuleRead }) {
 	const part = useModuleStore((state) => state.part)
+	const files = useModuleStore((state) => state.module.file_set)
 	const content = module.content as ListeningContent
+
+	const playlist = [
+		getModuleFile(module.id, "part1.mp3"),
+		getModuleFile(module.id, "part2.mp3"),
+		getModuleFile(module.id, "part3.mp3"),
+		getModuleFile(module.id, "part4.mp3"),
+	]
+
+	const audioRef = useRef<HTMLAudioElement>(null);
+	useEffect(() => {
+		const audio = audioRef.current;
+		if (!audio)
+			return
+
+		let index = 0;
+
+		audio.src = playlist[index];
+
+
+		function handleEnded() {
+			index++;
+			if (!audio)
+				return
+			if (index < playlist.length) {
+				audio.src = playlist[index]
+				audio.play()
+			}
+		}
+
+		audio.addEventListener("ended", handleEnded);
+
+		return () => {
+			audio.removeEventListener("ended", handleEnded);
+		};
+	}, []);
+
 
 	return (
 		<Box h="100dvh" position="relative">
+			<Button onClick={() => audioRef.current?.play()}>Start</Button>
+
+			<audio controls ref={audioRef} />
 			{/* Scrollable content area */}
 			<Box
 				h="100%"
@@ -27,7 +71,7 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 						borderWidth="1px"
 						rounded="xl"
 						p="6"
-						minH="1200px"
+					//minH="1200px"
 					>
 						{/* {
 							content.parts.map((_part, pi) => <Activity key={_part.question_range.join("-")} mode={part === pi ? "visible" : "hidden"}>
@@ -76,12 +120,39 @@ export function ListeningModuleNav() {
 	const focusPrevQuestion = useModuleStore((state) => state.focusPrevQuestion)
 	const focusNextQuestion = useModuleStore((state) => state.focusNextQuestion)
 
+	const store = useModuleStoreApi()
+
+	const submit = async () => {
+		const state = store.getState()
+
+		await createIeltsAttempt({
+			body: {
+				module_id: state.module.id,
+				answers: state.answers,
+				idempotency_key: state.key,
+			}
+		})
+
+	}
+
 	const content = module.content as ListeningContent
 
 	return <VStack>
 		<HStack>
-			<Button onClick={focusPrevQuestion}>{"<-"}</Button>
-			<Button onClick={focusNextQuestion}>{"->"}</Button>
+			<Button
+				onClick={focusPrevQuestion}
+				variant="outline"
+				size="sm">
+				<HiArrowLeft />
+			</Button>
+			<Button
+				onClick={focusNextQuestion}
+				variant="outline"
+				size="sm">
+				<HiArrowRight />
+			</Button>
+
+			<Button onClick={submit}>Submit</Button>
 		</HStack>
 		<Wrap justify="center">
 			{
