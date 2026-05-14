@@ -2,7 +2,6 @@
 
 import { ModuleRead, ListeningContent } from "@/client";
 import { QuestionGroup } from "./QuestionGroup"
-import { Activity } from "react";
 import { useModuleStore } from "./ModuleProvider";
 import { Wrap, Text, Button, VStack, Box, Flex, HStack } from "@chakra-ui/react";
 
