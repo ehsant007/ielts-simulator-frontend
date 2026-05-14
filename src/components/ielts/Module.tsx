@@ -12,7 +12,7 @@ export function Module({ module }: { module: ModuleRead }) {
 			module_ui = <ListeningModule module={module} />
 	}
 
-	return <ModuleContextProvider module={module}>
+	return <ModuleContextProvider key={module.id} module={module}>
 		{module_ui}
 	</ModuleContextProvider>
 }
