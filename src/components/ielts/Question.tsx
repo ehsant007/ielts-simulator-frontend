@@ -48,8 +48,10 @@ export function Question({ question, options, onChange }: QuestionProps) {
 			break
 		case "matching": ui = <Matching ref={ref} question={question} options={options} onChange={onChange} />
 			break
+		case "identify_info": ui = <Matching ref={ref} question={question} options={options} onChange={onChange} />
+			break
 		default:
-			ui = <Text>question type `{question.type}` not implemented!</Text>
+			ui = <Text>question type `{question.question_type}` not implemented!</Text>
 	}
 	return ui
 }
@@ -90,7 +92,7 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 
 			<Text fontWeight="bold">{question.num}</Text>
 
-			<VStack>
+			<VStack alignItems="start">
 				<MD>{question.question}</MD>
 
 				<Fieldset.Root>
@@ -134,21 +136,19 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 
 	return <>
 
-		<HStack alignItems="start" p="3" onFocus={() => focusQuestion(question.num)} tabIndex={0} focusRing="outside" ref={ref}>
-
-			<Text fontWeight="bold">{question.num}</Text>
-
+		<HStack alignItems="start" p="0" onFocus={() => focusQuestion(question.num)} tabIndex={0} focusRing="outside" ref={ref}>
 			<VStack>
+
 				<MD>{question.question}</MD>
 
-				<Fieldset.Root>
+				<Fieldset.Root mt="2">
 					<CheckboxGroup
 						value={answer}
 						onValueChange={(answer) => setAnswer(question.num, answer)}>
 						<Fieldset.Content>
 
 							{question.choices?.map((choice, i) => (
-								<Checkbox.Root key={i} value={toLetter(i)} pb="0">
+								<Checkbox.Root key={i} value={toLetter(i)}>
 									<Checkbox.HiddenInput disabled={answer.length >= 2 && !answer.includes(toLetter(i))} />
 									<Checkbox.Control />
 									<Checkbox.Label>{choice}</Checkbox.Label>

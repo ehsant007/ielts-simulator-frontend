@@ -1,17 +1,15 @@
 "use client"
 
-import { ModuleRead, ListeningContent, createIeltsAttempt } from "@/client";
+import { ModuleRead, ListeningContent} from "@/client";
 import { QuestionGroup } from "./QuestionGroup"
-import { useModuleStore, useModuleStoreApi } from "./ModuleProvider";
-import { Wrap, Text, Button, VStack, Box, Flex, HStack } from "@chakra-ui/react";
-import { HiArrowLeft, HiArrowRight } from "react-icons/hi";
+import { useModuleStore } from "./ModuleProvider";
+import { Text, Button, Box, Flex } from "@chakra-ui/react";
 import { useEffect, useRef } from "react";
 import { getModuleFile } from "./utils";
-import { useAuth } from "@/auth";
+import { QuestionNav } from "./QuestionNav";
 
 export function ListeningModule({ module }: { module: ModuleRead }) {
 	const part = useModuleStore((state) => state.part)
-	const files = useModuleStore((state) => state.module.file_set)
 	const content = module.content as ListeningContent
 
 	const playlist = [
@@ -105,7 +103,7 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 						))}
 					</HStack> */}
 
-					<ListeningModuleNav />
+					<QuestionNav />
 
 					{/* <Button colorScheme="blue">Submit</Button> */}
 				</Flex>
@@ -114,74 +112,3 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 	)
 }
 
-export function ListeningModuleNav() {
-	const module = useModuleStore((state) => state.module)
-	const focusQuestion = useModuleStore((state) => state.focusQuestion)
-	const focusPrevQuestion = useModuleStore((state) => state.focusPrevQuestion)
-	const focusNextQuestion = useModuleStore((state) => state.focusNextQuestion)
-
-	const store = useModuleStoreApi()
-
-	const submit = async () => {
-		const state = store.getState()
-
-		await createIeltsAttempt({
-			body: {
-				module_id: state.module.id,
-				answers: state.answers,
-				idempotency_key: state.key,
-			}
-		})
-
-	}
-
-	const content = module.content as ListeningContent
-
-	return <VStack>
-		<HStack>
-			<Button
-				onClick={focusPrevQuestion}
-				variant="outline"
-				size="sm">
-				<HiArrowLeft />
-			</Button>
-			<Button
-				onClick={focusNextQuestion}
-				variant="outline"
-				size="sm">
-				<HiArrowRight />
-			</Button>
-
-			<Button onClick={submit}>Submit</Button>
-		</HStack>
-		<Wrap justify="center">
-			{
-				content.parts.map((part, part_i) => <Wrap gap="0.5" key={part_i}>
-					<Button
-						key={part_i}
-						size="xs"
-						variant="ghost"
-						onPointerUp={() => focusQuestion(part.test[0].questions[0].num)}
-					>
-						Part {part_i + 1}
-					</Button>
-					{
-						part.test.map((g, i) =>
-							g.questions.map((q, i) =>
-								<Button
-									key={i}
-									size="xs"
-									variant="outline"
-									onPointerUp={() => focusQuestion(q.num)}
-								>
-									{q.to_num ? `${q.num} | ${q.to_num}` : q.num}
-								</Button>)
-
-						)
-
-					}
-				</Wrap>)
-			}
-		</Wrap>
-	</VStack>
-}

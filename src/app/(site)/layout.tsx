@@ -8,7 +8,7 @@ export default async function SiteLayout({
 }>) {
 	return (
 		<>
-			<Navbar />
+			{/* <Navbar /> */}
 			{children}
 			{/* <Footer /> */}
 		</>

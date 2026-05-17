@@ -103,7 +103,6 @@ export type AttemptRead = {
      * User Id
      */
     user_id: string;
-    exam: ExamRead;
     module: ModuleInfo;
     /**
      * Answers
@@ -513,9 +512,11 @@ export type IdentifyInfoGroup = {
     /**
      * Options
      */
-    options: {
-        [key: string]: string;
-    };
+    options: Array<string>;
+    /**
+     * Option Descriptions
+     */
+    option_descriptions: Array<string>;
 };
 
 /**
@@ -888,6 +889,39 @@ export type ModuleUpdate = {
 };
 
 /**
+ * MultiChoiceGroup
+ */
+export type MultiChoiceGroup = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'multiple_choice';
+    /**
+     * Question Range
+     */
+    question_range: [
+        number,
+        number
+    ];
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+};
+
+/**
  * NewPassword
  */
 export type NewPassword = {
@@ -1060,6 +1094,39 @@ export type PageKycDocumentRead = {
      * Pages
      */
     pages: number;
+};
+
+/**
+ * ParagraphMatchingGroup
+ */
+export type ParagraphMatchingGroup = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'paragraph_matching';
+    /**
+     * Question Range
+     */
+    question_range: [
+        number,
+        number
+    ];
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
 };
 
 /**
@@ -1252,7 +1319,7 @@ export type QuestionGroup = ({
     group_type: 'basic';
 } & QuestionGroupBase) | ({
     group_type: 'multiple_choice';
-} & QuestionGroupMultiChoice) | ({
+} & MultiChoiceGroup) | ({
     group_type: 'identify_info';
 } & IdentifyInfoGroup) | ({
     group_type: 'sentence_matching';
@@ -1262,7 +1329,9 @@ export type QuestionGroup = ({
     group_type: 'completion_note';
 } & NoteCompletionGroup) | ({
     group_type: 'visual_labeling';
-} & QuestionGroupVisualLabeling);
+} & VisualLabelingGroup) | ({
+    group_type: 'paragraph_matching';
+} & ParagraphMatchingGroup);
 
 /**
  * QuestionGroupBase
@@ -1295,80 +1364,6 @@ export type QuestionGroupBase = {
      * Questions
      */
     questions: Array<Question>;
-};
-
-/**
- * QuestionGroupMultiChoice
- */
-export type QuestionGroupMultiChoice = {
-    /**
-     * Type
-     */
-    type: 'question_group';
-    /**
-     * Group Type
-     */
-    group_type: 'multiple_choice';
-    /**
-     * Question Range
-     */
-    question_range: [
-        number,
-        number
-    ];
-    /**
-     * Prompt
-     */
-    prompt?: Array<string> | null;
-    /**
-     * Title
-     */
-    title?: string | null;
-    /**
-     * Questions
-     */
-    questions: Array<Question>;
-};
-
-/**
- * QuestionGroupVisualLabeling
- */
-export type QuestionGroupVisualLabeling = {
-    /**
-     * Type
-     */
-    type: 'question_group';
-    /**
-     * Group Type
-     */
-    group_type: 'visual_labeling';
-    /**
-     * Question Range
-     */
-    question_range: [
-        number,
-        number
-    ];
-    /**
-     * Prompt
-     */
-    prompt?: Array<string> | null;
-    /**
-     * Title
-     */
-    title?: string | null;
-    /**
-     * Questions
-     */
-    questions: Array<Question>;
-    /**
-     * Labels
-     */
-    labels: Array<string>;
-    /**
-     * Image
-     */
-    image: string;
 };
 
 /**
@@ -1894,6 +1889,47 @@ export type ValidationError = {
      * Error Type
      */
     type: string;
+};
+
+/**
+ * VisualLabelingGroup
+ */
+export type VisualLabelingGroup = {
+    /**
+     * Type
+     */
+    type: 'question_group';
+    /**
+     * Group Type
+     */
+    group_type: 'visual_labeling';
+    /**
+     * Question Range
+     */
+    question_range: [
+        number,
+        number
+    ];
+    /**
+     * Prompt
+     */
+    prompt?: Array<string> | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
+     * Questions
+     */
+    questions: Array<Question>;
+    /**
+     * Labels
+     */
+    labels: Array<string>;
+    /**
+     * Image
+     */
+    image: string;
 };
 
 /**

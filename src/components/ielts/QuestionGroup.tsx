@@ -1,15 +1,15 @@
 "use client"
 
-import { QuestionGroupBase as QuestionGroupBaseType, NoteCompletionGroup, QuestionGroup as QuestionGroupType, QuestionGroupVisualLabeling, SentenceMatchingGroup } from "@/client";
+import type { QuestionGroupBase, NoteCompletionGroup, QuestionGroup, VisualLabelingGroup, SentenceMatchingGroup, IdentifyInfoGroup, ParagraphMatchingGroup, ReadingContent } from "@/client";
 import { Content, MD } from "./Content";
 import { Question } from "./Question";
-import { Box, VStack, Text, Em, HStack, Image, Center } from "@chakra-ui/react";
+import { Box, VStack, Text, Em, HStack, Image, Center, Table } from "@chakra-ui/react";
 import { useModuleStore } from "./ModuleProvider";
 //import { useColorMode } from "../ui/color-mode";
 import { useState } from "react";
 import { getModuleFile } from "./utils";
 
-export function QuestionGroup({ g }: { g: QuestionGroupType }) {
+export function QuestionGroup({ g }: { g: QuestionGroup }) {
 	let ui
 	switch (g.group_type) {
 		case "basic": ui = <QuestionGroupBase g={g} />
@@ -20,12 +20,18 @@ export function QuestionGroup({ g }: { g: QuestionGroupType }) {
 			break
 		case "sentence_matching": ui = <SentenceMatching>{g}</SentenceMatching>
 			break
+		case "identify_info": ui = <IdentifyInfoGroup>{g}</IdentifyInfoGroup>
+			break
+		case "paragraph_matching": ui = <ParagraphMatchingGroup>{g}</ParagraphMatchingGroup>
+			break
 		default:
 			ui = <p>{g.group_type}</p>
 	}
 
-	return <VStack p="6" alignItems="start">
-		<Text><Em>Questions {g.question_range?.[0]}-{g.question_range?.[1]}</Em></Text>
+	return <VStack alignItems="start">
+		<Text fontStyle="italic">
+			Questions {g.question_range?.[0]}-{g.question_range?.[1]}
+		</Text>
 		<Box mb="4">
 			<Em>
 				<MD>{g.prompt}</MD>
@@ -40,7 +46,7 @@ export function NoteCompletion({ g }: { g: NoteCompletionGroup }) {
 }
 
 
-export function QuestionGroupBase({ g }: { g: QuestionGroupBaseType }) {
+export function QuestionGroupBase({ g }: { g: QuestionGroupBase }) {
 	const getQuestion = useModuleStore((state) => state.getQuestion)
 
 	return <VStack alignItems="stretch">
@@ -54,7 +60,7 @@ export function QuestionGroupBase({ g }: { g: QuestionGroupBaseType }) {
 	</VStack>
 }
 
-export function VisualLabelingGroup({ children: g }: { children: QuestionGroupVisualLabeling }) {
+export function VisualLabelingGroup({ children: g }: { children: VisualLabelingGroup }) {
 	const module = useModuleStore((state) => state.module)
 	const getQuestion = useModuleStore((state) => state.getQuestion)
 	//const { colorMode } = useColorMode()
@@ -88,10 +94,16 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 		<VStack alignItems="stretch" ms="auto" border="md" p="6" borderStyle="groove" shadow="lg" borderRadius="md" mb="8">
 			<Center fontWeight="bold">{g.sentences_title}</Center>
 			{
-				Object.keys(g.sentences).map(key => <HStack key={key} bg={selected[key] ? "bg.emphasized" : "none"} mx="0" px="6">
-					<Text fontWeight="bold" fontFamily="mono" fontSize="lg">{key}</Text>
-					<Text>{g.sentences[key]}</Text>
-				</HStack>)
+				Object.keys(g.sentences).map(key =>
+					<HStack
+						key={key}
+						bg={selected[key] ? "bg.emphasized" : "none"}
+						mx="0"
+						px="6"
+					>
+						<Text fontWeight="bold" fontFamily="mono" fontSize="lg">{key}</Text>
+						<Text>{g.sentences[key]}</Text>
+					</HStack>)
 			}
 		</VStack>
 
@@ -112,6 +124,62 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 								return new_state
 							})
 						}} />
+				))
+			}
+		</VStack>
+	</VStack>
+}
+
+
+
+export function IdentifyInfoGroup({ children: group }: { children: IdentifyInfoGroup }) {
+	const getQuestion = useModuleStore((state) => state.getQuestion)
+
+	return <VStack alignItems="start">
+
+		<VStack alignItems="start" mb="10">
+			<Text>{group.options_prompt}</Text>
+			<Table.Root ms="6">
+				<Table.Body>
+					{
+						group.options.map((option, i) => (
+							<Table.Row key={option}>
+								<Table.Cell fontWeight="bold">{option}</Table.Cell>
+								<Table.Cell>{group.option_descriptions[i]}</Table.Cell>
+							</Table.Row>
+						))
+					}
+				</Table.Body>
+			</Table.Root>
+		</VStack>
+
+		<VStack alignItems="stretch">
+			{
+				group.questions.map((question, i) => (
+					<Question key={question.num} question={getQuestion(question.num)} options={group.options} />
+				))
+			}
+		</VStack>
+	</VStack>
+}
+
+
+export function ParagraphMatchingGroup({ children: group }: { children: ParagraphMatchingGroup }) {
+	const module = useModuleStore((state) => state.module)
+	const getQuestion = useModuleStore((state) => state.getQuestion)
+
+	const part = useModuleStore((state) => state.part)
+	const content = module.content as ReadingContent
+
+	const labels: string[] = []
+	content.parts[part].passage.sections.forEach((section) => labels.push(section.label ?? ""))
+
+	return <VStack alignItems="start">
+
+		<VStack alignItems="stretch">
+			{
+				group.questions.map((question, i) => (
+					<Question key={question.num} question={getQuestion(question.num)} options={labels} />
 				))
 			}
 		</VStack>
