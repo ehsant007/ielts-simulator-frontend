@@ -5,7 +5,7 @@ import { Content, MD } from "./Content";
 import { Question } from "./Question";
 import { Box, VStack, Text, Em, HStack, Image, Center, Table } from "@chakra-ui/react";
 import { useModuleStore } from "./ModuleProvider";
-//import { useColorMode } from "../ui/color-mode";
+import { useColorMode } from "../ui/color-mode";
 import { useState } from "react";
 import { getModuleFile } from "./utils";
 
@@ -29,20 +29,22 @@ export function QuestionGroup({ g }: { g: QuestionGroup }) {
 	}
 
 	return <VStack alignItems="start">
-		<Text fontStyle="italic">
+		<Text fontStyle="italic" fontWeight="bold">
 			Questions {g.question_range?.[0]}-{g.question_range?.[1]}
 		</Text>
-		<Box mb="4">
-			<Em>
-				<MD>{g.prompt}</MD>
-			</Em>
+		<Box mb="4" fontStyle="italic">
+			<MD>{g.prompt}</MD>
 		</Box>
 		{ui}
 	</VStack>
 }
 
 export function NoteCompletion({ g }: { g: NoteCompletionGroup }) {
-	return <Content content={g.content} ></Content>
+	return (
+		<Box p="3">
+			<Content content={g.content} ></Content>
+		</Box>
+	)
 }
 
 
@@ -63,13 +65,13 @@ export function QuestionGroupBase({ g }: { g: QuestionGroupBase }) {
 export function VisualLabelingGroup({ children: g }: { children: VisualLabelingGroup }) {
 	const module = useModuleStore((state) => state.module)
 	const getQuestion = useModuleStore((state) => state.getQuestion)
-	//const { colorMode } = useColorMode()
+	const { colorMode } = useColorMode()
 
 	return <VStack alignItems="start">
 
 		<Image
 			src={getModuleFile(module.id, g.image)}
-			// filter={`invert(${colorMode === "dark" ? 1 : 0})`}
+			filter={`invert(${colorMode === "dark" ? 1 : 0})`}
 			mb="6"
 		/>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Box, Flex, VStack, Tabs } from "@chakra-ui/react";
 import { QuestionNav } from "./QuestionNav";
 import Navbar from "../common/Navbar";
@@ -39,45 +39,17 @@ export const Layout: LayoutComponent = ({ children, sectionTitles }) => {
 			<Navbar />
 
 			<Flex flex="1" minH="0" overflow="hidden">
-				<Tabs.Root defaultValue="both" h="full" w="full">
-					<Flex direction="column" h="full" minH="0" overflow="hidden">
-						{sectionTitles &&
-							<Tabs.List flexShrink={0}>
-								<Tabs.Trigger value="pane0" ms="auto">{sectionTitles[0]}</Tabs.Trigger>
-								<Tabs.Trigger value="both">{sectionTitles[1]}</Tabs.Trigger>
-								<Tabs.Trigger value="pane1" me="auto">{sectionTitles[2]}</Tabs.Trigger>
-							</Tabs.List>
-						}
 
-						<Box flex="1" minH="0" overflow="hidden">
+				<Box flex="1" minW="0" minH="0" overflowY="auto" overflowX="hidden">
+					{panes[0]?.props.children}
+				</Box>
 
-							<Tabs.Content value="pane0" h="full" m={0} p={0}>
-								<Box h="full" minH="0" overflowY="auto" overflowX="hidden">
-									{panes[0]?.props.children}
-								</Box>
-							</Tabs.Content>
+				{panes[1] &&
+					<Box flex="1" minW="0" minH="0" overflowY="auto" overflowX="hidden">
+						{panes[1]?.props.children}
+					</Box>
+				}
 
-							<Tabs.Content value="both" h="full" m={0} p={0}>
-								<Flex h="full" minH="0" gap={0} overflow="hidden">
-									<Box flex="1" minW="0" minH="0" overflowY="auto" overflowX="hidden">
-										{panes[0]?.props.children}
-									</Box>
-									<Box flex="1" minW="0" minH="0" overflowY="auto" overflowX="hidden">
-										{panes[1]?.props.children}
-									</Box>
-								</Flex>
-							</Tabs.Content>
-
-							<Tabs.Content value="pane1" h="full" m={0} p={0}>
-								<Box h="full" minH="0" overflowY="auto" overflowX="hidden">
-									{panes[1]?.props.children}
-								</Box>
-							</Tabs.Content>
-
-						</Box>
-
-					</Flex>
-				</Tabs.Root>
 			</Flex>
 
 			<Box flexShrink={0} py="3" px="6" w="full">

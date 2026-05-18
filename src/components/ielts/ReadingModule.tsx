@@ -6,6 +6,7 @@ import { useModuleStore } from "./ModuleProvider";
 import { Layout } from "./Layout";
 import { Passage } from "./Passage";
 import { Test } from "./Test";
+import { Box, VStack } from "@chakra-ui/react";
 
 export function ReadingModule({ module }: { module: ModuleRead }) {
 	const pi = useModuleStore((state) => state.part);
@@ -15,12 +16,29 @@ export function ReadingModule({ module }: { module: ModuleRead }) {
 	return (
 		<Layout sectionTitles={["Passage", "Both", "Questions"]}>
 			<Layout.ViewPort>
-				<Passage {...part.passage}/>
+				<Box
+					px="5"
+					py="10"
+					shadow="md"
+					mx="3"
+					mt="3"
+					mb="40"
+				>
+					<Passage {...part.passage} />
+				</Box>
 			</Layout.ViewPort>
 
 			<Layout.ViewPort>
-				<Test test={part.test}/>
+				<VStack
+					alignItems="stretch"
+					gap="6"
+					mx="3"
+					mt="3"
+					mb="40"
+				>
+					<Test test={part.test} />
+				</VStack>
 			</Layout.ViewPort>
-		</Layout>
+		</Layout >
 	);
 }

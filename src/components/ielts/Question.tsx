@@ -136,7 +136,14 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 
 	return <>
 
-		<HStack alignItems="start" p="0" onFocus={() => focusQuestion(question.num)} tabIndex={0} focusRing="outside" ref={ref}>
+		<HStack
+			alignItems="start"
+			p="3"
+			onFocus={() => focusQuestion(question.num)}
+			tabIndex={0}
+			focusRing="outside"
+			ref={ref}
+		>
 			<VStack>
 
 				<MD>{question.question}</MD>
@@ -165,23 +172,40 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 })
 
 
-export const Matching = forwardRef<HTMLSelectElement, QuestionProps>(({ question, options }, ref) => {
+export const Matching = forwardRef<HTMLDivElement, QuestionProps>(({ question, options }, ref) => {
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const answer = useModuleStore((state) => state.answers[question.num])?.[0]
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 
-	return <HStack>
-		<Text fontWeight="bold">{question.num}</Text>
-		<Text>{question.question}</Text>
-		<Separator flex="1" ps="10" />
-		<NativeSelect.Root size="sm" width="auto">
-			<NativeSelect.Field onFocus={() => focusQuestion(question.num)} ref={ref} value={answer} placeholder="----" onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}>
-				{
-					options?.map((apt, i) => <option key={i} value={apt}>{apt}</option>)
-				}
-			</NativeSelect.Field>
-			<NativeSelect.Indicator />
-		</NativeSelect.Root>
+	return (
+		<HStack
+			onFocus={() => focusQuestion(question.num)}
+			tabIndex={0}
+			focusRing="outside"
+			ref={ref}
+			px="3"
+			py="1"
+		>
+			<HStack alignItems="start">
+				<Text fontWeight="bold">{question.num}</Text>
+				<Text>{question.question}</Text>
+			</HStack>
 
-	</HStack>
+			<Separator flex="1" ps="5" />
+			<NativeSelect.Root size="sm" width="auto" minWidth="fit" fontWeight="bold">
+				<NativeSelect.Field
+					value={answer}
+					placeholder="----"
+					onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}
+				>
+					{
+						options?.map((apt, i) => <option key={i} value={apt}>{apt}</option>)
+					}
+				</NativeSelect.Field>
+				<NativeSelect.Indicator />
+			</NativeSelect.Root>
+
+
+		</HStack>
+	)
 })

@@ -2,6 +2,7 @@ import { ModuleRead, Question } from "@/client";
 import { createStore } from "zustand/vanilla"
 
 export type QuestionMeta = { index: number, focused: boolean, focusCount: number }
+export type ModuleMode = "test" | "review"
 
 export type ModuleStore = {
 	key: string
@@ -20,6 +21,9 @@ export type ModuleStore = {
 
 	answers: Record<number, string[]>
 	setAnswer: (questionNum: number, answer: string[]) => void
+
+	mode: ModuleMode
+	setMode: (mode: ModuleMode) => void
 }
 
 export function createModuleStore(module: ModuleRead, questionsMeta: Record<number, QuestionMeta>) {
@@ -72,5 +76,8 @@ export function createModuleStore(module: ModuleRead, questionsMeta: Record<numb
 
 		answers: {},
 		setAnswer: (questionNum, answer) => set((state) => ({ answers: { ...state.answers, [questionNum]: answer } })),
+
+		mode: "test",
+		setMode: (mode) => set(() => ({ mode }))
 	}))
 }
