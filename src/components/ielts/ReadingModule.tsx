@@ -14,8 +14,8 @@ export function ReadingModule({ module }: { module: ModuleRead }) {
 	const part = content.parts[pi]
 
 	return (
-		<Layout sectionTitles={["Passage", "Both", "Questions"]}>
-			<Layout.ViewPort>
+		<Layout>
+			<Layout.ViewPort title="Passage">
 				<Box
 					px="5"
 					py="10"
@@ -28,7 +28,7 @@ export function ReadingModule({ module }: { module: ModuleRead }) {
 				</Box>
 			</Layout.ViewPort>
 
-			<Layout.ViewPort>
+			<Layout.ViewPort title="Questions">
 				<VStack
 					alignItems="stretch"
 					gap="6"

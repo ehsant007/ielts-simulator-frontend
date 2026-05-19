@@ -2,24 +2,18 @@
 
 import {
 	HStack,
-	Button,
 	Link as CLink,
 	Spacer,
 	Container,
-	Avatar,
-	Menu,
-	Portal,
 	Box
 } from "@chakra-ui/react"
 
 import { ColorModeButton } from "@/components/ui/color-mode";
-import { useAuth } from "@/auth";
 import Link from "next/link";
 import { LocaleSwitcher } from "@/i18n";
+import { UserMenu } from "./UserMenu";
 
 export default function Navbar() {
-	const { user, logout } = useAuth();
-
 	return (
 		<Box
 			bg="purple.emphasized"
@@ -53,40 +47,7 @@ export default function Navbar() {
 				<HStack gap="4">
 					<LocaleSwitcher />
 					<ColorModeButton />
-
-					{
-						user &&
-						<Menu.Root positioning={{ placement: "right-end" }}>
-							<Menu.Trigger rounded="full" focusRing="outside">
-								<Avatar.Root size="sm">
-									<Avatar.Fallback name={user?.username} />
-									<Avatar.Image src={user?.profile?.avatar || "#"} />
-								</Avatar.Root>
-							</Menu.Trigger>
-							<Portal>
-								<Menu.Positioner>
-									<Menu.Content>
-										<Menu.Item value="dashboard" asChild>
-											<Link href="/dashboard">Dashboard</Link>
-										</Menu.Item>
-										<Menu.Item value="settings">Settings</Menu.Item>
-										<Menu.Item value="logout" onClick={() => logout()}>Logout</Menu.Item>
-									</Menu.Content>
-								</Menu.Positioner>
-							</Portal>
-						</Menu.Root>
-					}
-
-
-					{
-						!user &&
-						<Button variant="ghost" size="sm" asChild>
-							<Link href="/login">
-								Log In
-							</Link>
-						</Button>
-					}
-
+					<UserMenu />
 				</HStack>
 			</Container>
 		</Box>

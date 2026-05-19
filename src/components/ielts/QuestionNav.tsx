@@ -1,14 +1,10 @@
 "use client"
 
-import { createIeltsAttempt } from "@/client";
 import type { ListeningContent } from "@/client";
-import { useModuleStore, useModuleStoreApi } from "./ModuleProvider";
-import { Wrap, Button, VStack, HStack, Box, Icon, Collapsible, useCollapsible } from "@chakra-ui/react";
+import { useModuleStore } from "./ModuleProvider";
+import { Wrap, Button, VStack, HStack, Icon, Collapsible } from "@chakra-ui/react";
 import { HiArrowLeft, HiArrowRight } from "react-icons/hi";
 import { BiCollapse, BiExpand } from "react-icons/bi";
-import { LuChevronDown, LuChevronRight } from "react-icons/lu";
-import { MdMinimize } from "react-icons/md";
-import { CiLollipop } from "react-icons/ci";
 import { useState } from "react";
 
 export function QuestionNav() {
@@ -16,22 +12,7 @@ export function QuestionNav() {
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const focusPrevQuestion = useModuleStore((state) => state.focusPrevQuestion)
 	const focusNextQuestion = useModuleStore((state) => state.focusNextQuestion)
-	const [open, setOpen] = useState(false)
-
-	const store = useModuleStoreApi()
-
-	const submit = async () => {
-		const state = store.getState()
-
-		await createIeltsAttempt({
-			body: {
-				module_id: state.module.id,
-				answers: state.answers,
-				idempotency_key: state.key,
-			}
-		})
-
-	}
+	const [navExpand, setNavExpand] = useState(false)
 
 	const content = module.content as ListeningContent
 
@@ -66,18 +47,17 @@ export function QuestionNav() {
 					</Wrap>)
 				}
 
-				<Button size="sm" variant="outline" onClick={submit}>Submit</Button>
 				<Button
 					ms="auto"
 					size="sm"
 					variant="outline"
-					onClick={() => setOpen(prev => !prev)}
+					onClick={() => setNavExpand(prev => !prev)}
 				>
-					<Icon>{open ? <BiCollapse /> : <BiExpand />}</Icon>
+					<Icon>{navExpand ? <BiCollapse /> : <BiExpand />}</Icon>
 				</Button>
 			</HStack>
 
-			<Collapsible.Root open={open}>
+			<Collapsible.Root open={navExpand}>
 				<Collapsible.Content>
 					<Wrap justify="center">
 						{
@@ -101,17 +81,14 @@ export function QuestionNav() {
 											>
 												{q.to_num ? `${q.num} | ${q.to_num}` : q.num}
 											</Button>)
-
 									)
-
 								}
 							</Wrap>)
 						}
 					</Wrap>
 				</Collapsible.Content>
 			</Collapsible.Root>
-
-
+			
 		</VStack >
 	)
 }

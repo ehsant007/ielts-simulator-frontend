@@ -24,6 +24,9 @@ export type ModuleStore = {
 
 	mode: ModuleMode
 	setMode: (mode: ModuleMode) => void
+
+	timer: { remainingMs: number; expired: boolean; endTime: number; }
+	setTimerRemaining: (durationMs: number) => void
 }
 
 export function createModuleStore(module: ModuleRead, questionsMeta: Record<number, QuestionMeta>) {
@@ -78,6 +81,9 @@ export function createModuleStore(module: ModuleRead, questionsMeta: Record<numb
 		setAnswer: (questionNum, answer) => set((state) => ({ answers: { ...state.answers, [questionNum]: answer } })),
 
 		mode: "test",
-		setMode: (mode) => set(() => ({ mode }))
+		setMode: (mode) => set(() => ({ mode })),
+
+		timer: { remainingMs: 0, expired: false, endTime: 0 },
+		setTimerRemaining: (durationMs) => set((state) => ({ timer: { ...state.timer, remainingMs: durationMs } })),
 	}))
 }

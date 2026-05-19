@@ -1,76 +1,88 @@
 "use client"
 
 import { ModuleRead, ListeningContent } from "@/client";
-import { QuestionGroup } from "./QuestionGroup"
 import { useModuleStore } from "./ModuleProvider";
-import { Text, Button, Box, Flex, VStack, HStack, ButtonGroup } from "@chakra-ui/react";
-import { useEffect, useRef } from "react";
+import { Box, VStack } from "@chakra-ui/react";
+import { useEffect, useRef, useMemo } from "react";
 import { getModuleFile } from "./utils";
-import { QuestionNav } from "./QuestionNav";
 import { Layout } from "./Layout";
 import { Test } from "./Test";
-import { MD } from "./Content";
 import { AudioScript } from "./AudioScript";
+import { ExamTimer } from "./ExamTimer";
 
 export function ListeningModule({ module }: { module: ModuleRead }) {
-	const mode = useModuleStore((state) => state.mode)
-	const pi = useModuleStore((state) => state.part)
-	const content = module.content as ListeningContent
-	const part = content.parts[pi]
-	const audioScript = content.parts[pi].audio_script
+	const mode = useModuleStore((state) => state.mode);
+	const pi = useModuleStore((state) => state.part);
+	const content = module.content as ListeningContent;
+	const part = content.parts[pi];
+	const audioScript = part.audio_script;
 
-	const playlist = [
-		getModuleFile(module.id, "part1.mp3"),
-		getModuleFile(module.id, "part2.mp3"),
-		getModuleFile(module.id, "part3.mp3"),
-		getModuleFile(module.id, "part4.mp3"),
-	]
+	const playlist = useMemo(
+		() => [
+			getModuleFile(module.id, "part1.mp3"),
+			getModuleFile(module.id, "part2.mp3"),
+			getModuleFile(module.id, "part3.mp3"),
+			getModuleFile(module.id, "part4.mp3"),
+		],
+		[module.id]
+	);
 
 	const audioRef = useRef<HTMLAudioElement>(null);
+
 	useEffect(() => {
 		const audio = audioRef.current;
-		if (!audio)
-			return
+		if (!audio) return;
 
 		let index = 0;
+		let cancelled = false;
 
-		audio.src = playlist[index];
+		const playTrack = (i: number) => {
+			if (cancelled || i >= playlist.length) return;
 
+			audio.src = playlist[i];
+			audio.load();
 
-		function handleEnded() {
-			index++;
-			if (!audio)
-				return
-			if (index < playlist.length) {
-				audio.src = playlist[index]
-				audio.play()
-			}
-		}
+			const start = async () => {
+				try {
+					await audio.play();
+				} catch (err) {
+					if (!cancelled) console.error("Audio play failed:", err);
+				}
+			};
+
+			audio.addEventListener("canplaythrough", start, { once: true });
+		};
+
+		const handleEnded = () => {
+			index += 1;
+			playTrack(index);
+		};
 
 		audio.addEventListener("ended", handleEnded);
+		playTrack(0);
 
 		return () => {
+			cancelled = true;
+			audio.pause();
 			audio.removeEventListener("ended", handleEnded);
+			audio.removeAttribute("src");
+			audio.load();
 		};
-	}, []);
-
-	<audio controls ref={audioRef} />
+	}, [playlist]);
 
 	return (
-		<Layout sectionTitles={["Passage", "Both", "Questions"]}>
-
-			{mode == "review" &&
+		<Layout>
+			{mode === "review" && (
 				<Layout.ViewPort>
 					<VStack alignItems="stretch" gap="6" mx="3" mt="3" mb="40">
 						<AudioScript script={audioScript} />
 					</VStack>
 				</Layout.ViewPort>
-			}
+			)}
 
 			<Layout.ViewPort>
-				<Button onClick={() => audioRef.current?.play()}>Start</Button>
 				<audio controls ref={audioRef} />
-
+				
 
 				<VStack
 					alignItems="stretch"
@@ -83,10 +95,7 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 				>
 					<Test test={part.test} />
 				</VStack>
-
-
 			</Layout.ViewPort>
-		</Layout >
-	)
+		</Layout>
+	);
 }
-
