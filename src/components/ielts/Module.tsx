@@ -6,7 +6,6 @@ import { ListeningModule } from "./ListeningModule";
 import { ModuleContextProvider } from "./ModuleProvider";
 import { ReadingModule } from "./ReadingModule";
 import { useState } from "react";
-import { Box } from "@chakra-ui/react";
 import { StartPageListening } from "./StartPage";
 
 export function Module({ module }: { module: ModuleRead }) {

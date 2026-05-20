@@ -1,12 +1,14 @@
-import { Box, Button, HStack } from "@chakra-ui/react";
+import { Text, Button, HStack, Stack } from "@chakra-ui/react";
 import { ColorModeButton } from "../ui/color-mode";
 import { UserMenu } from "../common/UserMenu";
 import { ExamTimer } from "./ExamTimer";
 import { useModuleStore, useModuleStoreApi } from "./ModuleProvider";
 import { createIeltsAttempt } from "@/client";
+import { useAuth } from "@/auth";
 
 
 export function TopBar() {
+	const { user } = useAuth();
 	const module = useModuleStore((state) => state.module)
 	const store = useModuleStoreApi()
 
@@ -24,17 +26,24 @@ export function TopBar() {
 	}
 
 	return (
-		<HStack>
-			<HStack gap="4">
+		<HStack px="6" py="2">
+			<HStack gap="6" >
 				<ColorModeButton />
-				<UserMenu />
+
+				<HStack key={user?.email} gap="4">
+					<UserMenu />
+					<Stack gap="0">
+						<Text fontWeight="medium">{user?.profile?.first_name} {user?.profile?.last_name}</Text>
+						<Text color="fg.muted" textStyle="sm">
+							{user?.email}
+						</Text>
+					</Stack>
+				</HStack>
+
 			</HStack>
 
-			<HStack ms="auto" me="5" gap="5">
-				<ExamTimer
-					durationMin={module.duration_minutes}
-					onExpire={() => submit}
-				/>
+			<HStack ms="auto" gap="6">
+				<ExamTimer onExpire={() => submit}/>
 				<Button size="sm" variant="outline" onClick={submit}>Submit</Button>
 			</HStack>
 

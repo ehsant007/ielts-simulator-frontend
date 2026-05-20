@@ -1,38 +1,43 @@
 import { useEffect, useRef, useState } from "react";
 import { Text } from "@chakra-ui/react";
+import { useModuleStore } from "./ModuleProvider";
 
 export function ExamTimer({
-	durationMin,
 	onExpire,
 }: {
-	durationMin: number;
 	onExpire: () => void;
 }) {
-	const durationMs = durationMin * 60 * 1000;
-	const [remainingMs, setRemainingMs] = useState(durationMs);
-	const expiredRef = useRef(false);
-	const endTimeRef = useRef<number | null>(null);
+	const durationMs = useModuleStore((state) => state.module.duration_minutes) * 60 * 1000;
+	const startTime = useModuleStore((state) => state.startTime);
+
+	const getRemaining = () => Math.max(0, startTime + durationMs - Date.now())
+
+	const [remainingMs, setRemainingMs] = useState(getRemaining);
+	const expired = useRef(false)
+	const count = useRef(0)
+
 
 	useEffect(() => {
-		endTimeRef.current = Date.now() + durationMs;
+		count.current++;
+		console.log("useEffect", count.current)
+		if (getRemaining() <= 0)
+			return;
 
 		const tick = () => {
-			if (!endTimeRef.current) return;
-
-			const left = Math.max(0, endTimeRef.current - Date.now());
+			const left = getRemaining();
 			setRemainingMs(left);
 
-			if (left === 0 && !expiredRef.current) {
-				expiredRef.current = true;
+			if (left <= 0 && !expired.current) {
+				expired.current = true;
 				onExpire();
 			}
 		};
 
 		tick();
-		const id = window.setInterval(tick, 1000);
+		const id = setInterval(tick, 1000);
 
-		return () => window.clearInterval(id);
-	}, [durationMs, onExpire]);
+		return () => clearInterval(id);
+	}, [startTime, durationMs, onExpire]);
 
 	const minutes = Math.floor(remainingMs / 60000);
 	const seconds = Math.floor((remainingMs % 60000) / 1000);
