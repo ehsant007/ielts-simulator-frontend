@@ -76,6 +76,7 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 		ref={ref}
 	/>
 })
+Completion.displayName = "Completion"
 
 export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
@@ -122,6 +123,7 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 		</HStack>
 	</>
 })
+SingleChoice.displayName = "SingleChoice"
 
 
 export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
@@ -170,7 +172,7 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 		</HStack>
 	</>
 })
-
+MultipleChoice.displayName = "MultipleChoice"
 
 export const Matching = forwardRef<HTMLDivElement, QuestionProps>(({ question, options }, ref) => {
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
@@ -209,3 +211,4 @@ export const Matching = forwardRef<HTMLDivElement, QuestionProps>(({ question, o
 		</HStack>
 	)
 })
+Matching.displayName = "Matching"

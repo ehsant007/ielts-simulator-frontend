@@ -1,6 +1,6 @@
 "use client"
 
-import type { ListeningContent, ReadingContent, WritingContent } from "@/client";
+import type { ListeningContent, ReadingContent } from "@/client";
 import { useModuleStore } from "./ModuleProvider";
 import { Wrap, Button, VStack, HStack, Icon, Collapsible, Group, SegmentGroup } from "@chakra-ui/react";
 import { HiArrowLeft, HiArrowRight } from "react-icons/hi";
@@ -25,10 +25,8 @@ export function QuestionNav() {
 
 
 export function WritingTaskNav() {
-	const module = useModuleStore((state) => state.module)
 	const task_i = useModuleStore((state) => state.task)
 	const setTask = useModuleStore((state) => state.setTask)
-	const content = module.content as WritingContent
 
 	return (
 		<HStack>
@@ -56,14 +54,14 @@ export function WritingTaskNav() {
 }
 
 export function ListeningReadingQuestionNav() {
-	const module = useModuleStore((state) => state.module)
+	const module1 = useModuleStore((state) => state.module)
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const focusPrevQuestion = useModuleStore((state) => state.focusPrevQuestion)
 	const focusNextQuestion = useModuleStore((state) => state.focusNextQuestion)
 	const [navExpand, setNavExpand] = useState(false)
 	const part_i = useModuleStore((state) => state.part)
 
-	const content = module.content as (ListeningContent | ReadingContent)
+	const content = module1.content as (ListeningContent | ReadingContent)
 
 	return (
 		<VStack width="full" >
@@ -152,10 +150,10 @@ export function ListeningReadingQuestionNav() {
 									Part {part_i + 1}
 								</Button>
 								{
-									part.test.map((g, i) =>
-										g.questions.map((q, i) =>
+									part.test.map((g) =>
+										g.questions.map((q) =>
 											<Button
-												key={i}
+												key={q.num}
 												size="xs"
 												variant="outline"
 												onPointerUp={() => focusQuestion(q.num)}

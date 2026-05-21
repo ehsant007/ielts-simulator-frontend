@@ -81,7 +81,6 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 
 			<Layout.ViewPort>
 				<audio controls ref={audioRef} />
-				
 
 				<VStack
 					alignItems="stretch"
@@ -90,7 +89,6 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 					mt="3"
 					mb="40"
 					maxW="5xl"
-					border="md"
 				>
 					<Test test={part.test} />
 				</VStack>

@@ -53,7 +53,7 @@ export function QuestionGroupBase({ g }: { g: QuestionGroupBase }) {
 
 	return <VStack alignItems="stretch">
 		{
-			g.questions.map((q, i) => (
+			g.questions.map((q) => (
 				<Box key={q.num} mb="4">
 					<Question question={getQuestion(q.num)} />
 				</Box>
@@ -63,21 +63,22 @@ export function QuestionGroupBase({ g }: { g: QuestionGroupBase }) {
 }
 
 export function VisualLabelingGroup({ children: g }: { children: VisualLabelingGroup }) {
-	const module = useModuleStore((state) => state.module)
+	const module1 = useModuleStore((state) => state.module)
 	const getQuestion = useModuleStore((state) => state.getQuestion)
 	const { colorMode } = useColorMode()
 
 	return <VStack alignItems="start">
 
 		<Image
-			src={getModuleFile(module.id, g.image)}
+			src={getModuleFile(module1.id, g.image)}
 			filter={`invert(${colorMode === "dark" ? 1 : 0})`}
 			mb="6"
+			alt="ielts_img"
 		/>
 
 		<VStack alignItems="stretch">
 			{
-				g.questions.map((question, i) => (
+				g.questions.map((question) => (
 					<Question key={question.num} question={getQuestion(question.num)} options={g.labels} />
 				))
 			}
@@ -111,7 +112,7 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 
 		<VStack alignItems="stretch">
 			{
-				g.questions.map((question, i) => (
+				g.questions.map((question) => (
 					<Question
 						key={question.num}
 						question={getQuestion(question.num)}
@@ -119,7 +120,7 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 						onChange={(e) => {
 							const value = e.currentTarget.value
 							setSelected(prev => {
-								let new_state = Object.fromEntries(Object.entries(prev).filter(([_, val]) => val !== question.num))
+								let new_state = Object.fromEntries(Object.entries(prev).filter(([, val]) => val !== question.num))
 								if (value) {
 									new_state = { ...new_state, [value]: question.num }
 								}
@@ -157,7 +158,7 @@ export function IdentifyInfoGroup({ children: group }: { children: IdentifyInfoG
 
 		<VStack alignItems="stretch">
 			{
-				group.questions.map((question, i) => (
+				group.questions.map((question) => (
 					<Question key={question.num} question={getQuestion(question.num)} options={group.options} />
 				))
 			}
@@ -167,11 +168,11 @@ export function IdentifyInfoGroup({ children: group }: { children: IdentifyInfoG
 
 
 export function ParagraphMatchingGroup({ children: group }: { children: ParagraphMatchingGroup }) {
-	const module = useModuleStore((state) => state.module)
+	const module1 = useModuleStore((state) => state.module)
 	const getQuestion = useModuleStore((state) => state.getQuestion)
 
 	const part = useModuleStore((state) => state.part)
-	const content = module.content as ReadingContent
+	const content = module1.content as ReadingContent
 
 	const labels: string[] = []
 	content.parts[part].passage.sections.forEach((section) => labels.push(section.label ?? ""))
@@ -180,7 +181,7 @@ export function ParagraphMatchingGroup({ children: group }: { children: Paragrap
 
 		<VStack alignItems="stretch">
 			{
-				group.questions.map((question, i) => (
+				group.questions.map((question) => (
 					<Question key={question.num} question={getQuestion(question.num)} options={labels} />
 				))
 			}

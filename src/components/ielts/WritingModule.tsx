@@ -7,10 +7,10 @@ import { Visual } from "./Visual";
 
 
 export function WritingModule() {
-	const module = useModuleStore((state) => state.module)
+	const module1 = useModuleStore((state) => state.module)
 	const task_i = useModuleStore((state) => state.task)
 
-	const content = module.content as WritingContent
+	const content = module1.content as WritingContent
 	const task = content.tasks[task_i]
 
 	const answer = useModuleStore((state) => state.answers[task_i]) ?? ""

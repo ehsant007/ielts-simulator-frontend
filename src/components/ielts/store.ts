@@ -88,6 +88,6 @@ export function createModuleStore(module: ModuleRead, questionsMeta: Record<numb
 		startTime: Date.now(),
 
 		task: 0,
-		setTask: (index) => set((state) => ({ task: index }))
+		setTask: (index) => set(() => ({ task: index }))
 	}))
 }

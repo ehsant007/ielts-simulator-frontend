@@ -1,11 +1,8 @@
 //import Image from "next/image";
 //import styles from "./page.module.css";
-import { VStack, Text } from "@chakra-ui/react";
-import HeroSection from "@/components/home/HeroSection";
-import OnboardingTimeline from "@/components/home/OnboardingTimeline";
+import { VStack } from "@chakra-ui/react";
 import { readIeltsExams } from "@/client";
 import Link from "next/link";
-import Markdown from "react-markdown";
 
 export default async function Home() {
 

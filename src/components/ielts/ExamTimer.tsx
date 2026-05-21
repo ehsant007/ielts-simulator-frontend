@@ -9,13 +9,12 @@ export function ExamTimer({
 }) {
 	const durationMs = useModuleStore((state) => state.module.duration_minutes) * 60 * 1000;
 	const startTime = useModuleStore((state) => state.startTime);
-
-	const getRemaining = () => Math.max(0, startTime + durationMs - Date.now())
-
-	const [remainingMs, setRemainingMs] = useState(getRemaining);
+	const [remainingMs, setRemainingMs] = useState(0);
 	const expired = useRef(false)
-
+	
 	useEffect(() => {
+		const getRemaining = () => Math.max(0, startTime + durationMs - Date.now())
+		
 		if (getRemaining() <= 0)
 			return;
 
