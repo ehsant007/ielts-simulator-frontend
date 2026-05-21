@@ -761,10 +761,6 @@ export type ListeningPart = {
      */
     test: Array<QuestionGroup>;
     /**
-     * Audio File
-     */
-    audio_file: string;
-    /**
      * Audio Script
      */
     audio_script: Array<Utterance>;

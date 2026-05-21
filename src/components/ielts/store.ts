@@ -31,7 +31,7 @@ export type ModuleStore = {
 	setTask: (index: number) => void
 }
 
-export function createModuleStore(module: ModuleRead, questionsMeta: Record<number, QuestionMeta>) {
+export function createModuleStore(module: ModuleRead, mode: ModuleMode, questionsMeta: Record<number, QuestionMeta>) {
 	return createStore<ModuleStore>((set, get) => ({
 		key: crypto.randomUUID(),
 		module,
@@ -82,8 +82,8 @@ export function createModuleStore(module: ModuleRead, questionsMeta: Record<numb
 		answers: {},
 		setAnswer: (questionNum, answer) => set((state) => ({ answers: { ...state.answers, [questionNum]: answer } })),
 
-		mode: "test",
-		setMode: (mode) => set(() => ({ mode })),
+		mode,
+		setMode: (value) => set(() => ({ mode: value })),
 
 		startTime: Date.now(),
 

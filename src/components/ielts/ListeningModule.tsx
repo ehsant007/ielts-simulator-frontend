@@ -1,6 +1,6 @@
 "use client"
 
-import { ModuleRead, ListeningContent } from "@/client";
+import { ListeningContent } from "@/client";
 import { useModuleStore } from "./ModuleProvider";
 import { VStack } from "@chakra-ui/react";
 import { useEffect, useRef, useMemo } from "react";
@@ -9,21 +9,22 @@ import { Layout } from "./Layout";
 import { Test } from "./Test";
 import { AudioScript } from "./AudioScript";
 
-export function ListeningModule({ module }: { module: ModuleRead }) {
+export function ListeningModule() {
+	const module1 = useModuleStore((state) => state.module);
 	const mode = useModuleStore((state) => state.mode);
 	const pi = useModuleStore((state) => state.part);
-	const content = module.content as ListeningContent;
+	const content = module1.content as ListeningContent;
 	const part = content.parts[pi];
 	const audioScript = part.audio_script;
 
 	const playlist = useMemo(
 		() => [
-			getModuleFile(module.id, "part1.mp3"),
-			getModuleFile(module.id, "part2.mp3"),
-			getModuleFile(module.id, "part3.mp3"),
-			getModuleFile(module.id, "part4.mp3"),
+			getModuleFile(module1.id, "part1.mp3"),
+			getModuleFile(module1.id, "part2.mp3"),
+			getModuleFile(module1.id, "part3.mp3"),
+			getModuleFile(module1.id, "part4.mp3"),
 		],
-		[module.id]
+		[module1.id]
 	);
 
 	const audioRef = useRef<HTMLAudioElement>(null);
@@ -71,16 +72,8 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 
 	return (
 		<Layout>
-			{mode === "review" && (
-				<Layout.ViewPort>
-					<VStack alignItems="stretch" gap="6" mx="3" mt="3" mb="40">
-						<AudioScript script={audioScript} />
-					</VStack>
-				</Layout.ViewPort>
-			)}
-
 			<Layout.ViewPort>
-				<audio controls ref={audioRef} />
+				<audio ref={audioRef} />
 
 				<VStack
 					alignItems="stretch"
@@ -93,6 +86,15 @@ export function ListeningModule({ module }: { module: ModuleRead }) {
 					<Test test={part.test} />
 				</VStack>
 			</Layout.ViewPort>
+
+			{mode === "review" && (
+				<Layout.ViewPort>
+					<VStack alignItems="stretch" gap="6" mx="3" mt="3" mb="40">
+						<AudioScript script={audioScript} />
+					</VStack>
+				</Layout.ViewPort>
+			)}
+
 		</Layout>
 	);
 }

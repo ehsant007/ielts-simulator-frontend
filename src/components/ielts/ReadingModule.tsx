@@ -1,6 +1,5 @@
 "use client"
 
-import { ModuleRead } from "@/client";
 import type { ReadingContent } from "@/client";
 import { useModuleStore } from "./ModuleProvider";
 import { Layout } from "./Layout";
@@ -8,9 +7,10 @@ import { Passage } from "./Passage";
 import { Test } from "./Test";
 import { Box, VStack } from "@chakra-ui/react";
 
-export function ReadingModule({ module }: { module: ModuleRead }) {
+export function ReadingModule() {
+	const module1 = useModuleStore((state) => state.module);
 	const pi = useModuleStore((state) => state.part);
-	const content = module.content as ReadingContent;
+	const content = module1.content as ReadingContent;
 	const part = content.parts[pi]
 
 	return (

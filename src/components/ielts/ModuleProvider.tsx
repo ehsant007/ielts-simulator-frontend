@@ -3,16 +3,17 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import { ModuleRead } from "@/client";
 import { useStore } from "zustand";
-import { createModuleStore, ModuleStore, QuestionMeta } from "./store"
+import { createModuleStore, ModuleMode, ModuleStore, QuestionMeta } from "./store"
 
 const ModuleContext = createContext<ReturnType<typeof createModuleStore> | undefined>(undefined)
 
 type ModuleContextProviderProps = {
 	children: React.ReactNode,
-	module: ModuleRead
+	module: ModuleRead,
+	mode: ModuleMode,
 }
 
-export function ModuleContextProvider({ children, module }: ModuleContextProviderProps) {
+export function ModuleContextProvider({ children, module, mode }: ModuleContextProviderProps) {
 	const questionsMeta = useMemo(() => {
 		const map: Record<number, QuestionMeta> = {}
 		module.questions.forEach((question, index) => {
@@ -26,7 +27,7 @@ export function ModuleContextProvider({ children, module }: ModuleContextProvide
 		return map
 	}, [module])
 
-	const [store] = useState(() => createModuleStore(module, questionsMeta));
+	const [store] = useState(() => createModuleStore(module, mode, questionsMeta));
 
 	return <ModuleContext.Provider value={store} >
 		{children}
