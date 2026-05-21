@@ -1,6 +1,5 @@
 import type { Image as ImageVisual, Visual } from "@/client";
-import { table } from "console";
-import { Image, VStack, Text, Center } from "@chakra-ui/react"
+import { Image, VStack, Center } from "@chakra-ui/react"
 import { getModuleFile } from "./utils";
 import { useModuleStore } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";

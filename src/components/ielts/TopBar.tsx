@@ -2,14 +2,13 @@ import { Text, Button, HStack, Stack } from "@chakra-ui/react";
 import { ColorModeButton } from "../ui/color-mode";
 import { UserMenu } from "../common/UserMenu";
 import { ExamTimer } from "./ExamTimer";
-import { useModuleStore, useModuleStoreApi } from "./ModuleProvider";
+import { useModuleStoreApi } from "./ModuleProvider";
 import { createIeltsAttempt } from "@/client";
 import { useAuth } from "@/auth";
 
 
 export function TopBar() {
 	const { user } = useAuth();
-	const module = useModuleStore((state) => state.module)
 	const store = useModuleStoreApi()
 
 	const submit = async () => {

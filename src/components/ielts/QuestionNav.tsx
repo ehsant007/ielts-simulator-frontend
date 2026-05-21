@@ -5,7 +5,7 @@ import { useModuleStore } from "./ModuleProvider";
 import { Wrap, Button, VStack, HStack, Icon, Collapsible, Group, SegmentGroup } from "@chakra-ui/react";
 import { HiArrowLeft, HiArrowRight } from "react-icons/hi";
 import { BiCollapse, BiExpand } from "react-icons/bi";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 
 

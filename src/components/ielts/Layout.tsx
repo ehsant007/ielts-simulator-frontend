@@ -1,12 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Box, Flex, VStack, Tabs, HStack, Button, Collapsible, ButtonGroup, Icon } from "@chakra-ui/react";
+import { Box, Flex, VStack } from "@chakra-ui/react";
 import { QuestionNav } from "./QuestionNav";
-import Navbar from "../common/Navbar";
-import { ExamTimer } from "./ExamTimer";
-import { useModuleStore } from "./ModuleProvider";
-import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { TopBar } from "./TopBar";
 
 type ViewPortProps = {

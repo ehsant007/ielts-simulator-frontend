@@ -2,13 +2,12 @@
 
 import { ModuleRead, ListeningContent } from "@/client";
 import { useModuleStore } from "./ModuleProvider";
-import { Box, VStack } from "@chakra-ui/react";
+import { VStack } from "@chakra-ui/react";
 import { useEffect, useRef, useMemo } from "react";
 import { getModuleFile } from "./utils";
 import { Layout } from "./Layout";
 import { Test } from "./Test";
 import { AudioScript } from "./AudioScript";
-import { ExamTimer } from "./ExamTimer";
 
 export function ListeningModule({ module }: { module: ModuleRead }) {
 	const mode = useModuleStore((state) => state.mode);

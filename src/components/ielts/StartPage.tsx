@@ -5,9 +5,7 @@ import {
 	List,
 	Button,
 	VStack,
-	HStack,
 } from '@chakra-ui/react';
-import { MdOutlineInfo } from 'react-icons/md';
 
 export function StartPageListening({ onStart }: { onStart: () => void }) {
 	return (

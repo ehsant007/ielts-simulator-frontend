@@ -3,7 +3,7 @@
 import type { QuestionGroupBase, NoteCompletionGroup, QuestionGroup, VisualLabelingGroup, SentenceMatchingGroup, IdentifyInfoGroup, ParagraphMatchingGroup, ReadingContent } from "@/client";
 import { Content, MD } from "./Content";
 import { Question } from "./Question";
-import { Box, VStack, Text, Em, HStack, Image, Center, Table } from "@chakra-ui/react";
+import { Box, VStack, Text, HStack, Image, Center, Table } from "@chakra-ui/react";
 import { useModuleStore } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";
 import { useState } from "react";
