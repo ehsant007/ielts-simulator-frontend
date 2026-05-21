@@ -2248,6 +2248,36 @@ export type ReadMyIeltsAttemptsResponses = {
 
 export type ReadMyIeltsAttemptsResponse = ReadMyIeltsAttemptsResponses[keyof ReadMyIeltsAttemptsResponses];
 
+export type ReadLastAttemptData = {
+    body?: never;
+    path: {
+        /**
+         * Module Id
+         */
+        module_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ielts/{module_id}/last-attempt/';
+};
+
+export type ReadLastAttemptErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadLastAttemptError = ReadLastAttemptErrors[keyof ReadLastAttemptErrors];
+
+export type ReadLastAttemptResponses = {
+    /**
+     * Successful Response
+     */
+    200: AttemptRead;
+};
+
+export type ReadLastAttemptResponse = ReadLastAttemptResponses[keyof ReadLastAttemptResponses];
+
 export type ReadFileByFilenameData = {
     body?: never;
     path: {

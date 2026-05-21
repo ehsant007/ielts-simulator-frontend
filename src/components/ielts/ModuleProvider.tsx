@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useMemo, useState } from "react";
-import { ModuleRead } from "@/client";
+import { ModuleRead, readLastAttempt } from "@/client";
 import { useStore } from "zustand";
 import { createModuleStore, ModuleMode, ModuleStore, QuestionMeta } from "./store"
 
@@ -11,9 +11,10 @@ type ModuleContextProviderProps = {
 	children: React.ReactNode,
 	module: ModuleRead,
 	mode: ModuleMode,
+	answers: Record<number, string[]> | undefined,
 }
 
-export function ModuleContextProvider({ children, module, mode }: ModuleContextProviderProps) {
+export function ModuleContextProvider({ children, module, mode, answers }: ModuleContextProviderProps) {
 	const questionsMeta = useMemo(() => {
 		const map: Record<number, QuestionMeta> = {}
 		module.questions.forEach((question, index) => {
@@ -27,7 +28,8 @@ export function ModuleContextProvider({ children, module, mode }: ModuleContextP
 		return map
 	}, [module])
 
-	const [store] = useState(() => createModuleStore(module, mode, questionsMeta));
+
+	const [store] = useState(() => createModuleStore(module, mode, questionsMeta, answers));
 
 	return <ModuleContext.Provider value={store} >
 		{children}
