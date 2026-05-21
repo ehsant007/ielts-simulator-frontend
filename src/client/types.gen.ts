@@ -546,9 +546,9 @@ export type Image = {
      */
     description?: string | null;
     /**
-     * File
+     * Filename
      */
-    file: string;
+    filename: string;
 };
 
 /**
@@ -1892,6 +1892,15 @@ export type ValidationError = {
 };
 
 /**
+ * Visual
+ */
+export type Visual = ({
+    type: 'image';
+} & Image) | ({
+    type: 'table';
+} & Table);
+
+/**
  * VisualLabelingGroup
  */
 export type VisualLabelingGroup = {
@@ -1957,11 +1966,7 @@ export type WritingTask = {
     /**
      * Visuals
      */
-    visuals?: Array<({
-        type: 'image';
-    } & Image) | ({
-        type: 'table';
-    } & Table)> | null;
+    visuals?: Array<Visual> | null;
     /**
      * Sample Answer
      */

@@ -1,13 +1,61 @@
 "use client"
 
-import type { ListeningContent } from "@/client";
+import type { ListeningContent, ReadingContent, WritingContent } from "@/client";
 import { useModuleStore } from "./ModuleProvider";
 import { Wrap, Button, VStack, HStack, Icon, Collapsible, Group, SegmentGroup } from "@chakra-ui/react";
 import { HiArrowLeft, HiArrowRight } from "react-icons/hi";
 import { BiCollapse, BiExpand } from "react-icons/bi";
 import { useMemo, useState } from "react";
 
+
+
 export function QuestionNav() {
+	const moduleType = useModuleStore((state) => state.module.type)
+
+	switch (moduleType) {
+		case "listening":
+		case "reading":
+			return <ListeningReadingQuestionNav />
+		case "writing":
+			return <WritingTaskNav />
+		case "speaking":
+			return null
+	}
+}
+
+
+export function WritingTaskNav() {
+	const module = useModuleStore((state) => state.module)
+	const task_i = useModuleStore((state) => state.task)
+	const setTask = useModuleStore((state) => state.setTask)
+	const content = module.content as WritingContent
+
+	return (
+		<HStack>
+			<SegmentGroup.Root
+				mx="auto"
+				value={`${task_i}`}
+			>
+				<SegmentGroup.Indicator />
+				{
+					[0, 1].map((task) =>
+						<SegmentGroup.Item
+							cursor="pointer"
+							value={`${task}`}
+							key={task}
+							onClick={() => setTask(task)}
+						>
+							Task {task + 1}
+						</SegmentGroup.Item>
+					)
+				}
+
+			</SegmentGroup.Root>
+		</HStack>
+	)
+}
+
+export function ListeningReadingQuestionNav() {
 	const module = useModuleStore((state) => state.module)
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const focusPrevQuestion = useModuleStore((state) => state.focusPrevQuestion)
@@ -15,7 +63,7 @@ export function QuestionNav() {
 	const [navExpand, setNavExpand] = useState(false)
 	const part_i = useModuleStore((state) => state.part)
 
-	const content = module.content as ListeningContent
+	const content = module.content as (ListeningContent | ReadingContent)
 
 	return (
 		<VStack width="full" >
@@ -47,7 +95,6 @@ export function QuestionNav() {
 				<SegmentGroup.Root
 					ms="auto"
 					value={`${part_i}`}
-					onValueChange={(e) => focusQuestion(content.parts[(e.value ?? 0) as number].test[0].questions[0].num)}
 				>
 					<SegmentGroup.Indicator />
 					{
@@ -56,7 +103,7 @@ export function QuestionNav() {
 								cursor="pointer"
 								value={`${pi}`}
 								key={pi}
-								onPointerUp={() => focusQuestion(part.test[0].questions[0].num)}
+								onClick={() => focusQuestion(part.test[0].questions[0].num)}
 							>
 								Part {pi + 1}
 							</SegmentGroup.Item>

@@ -7,6 +7,7 @@ import { ModuleContextProvider } from "./ModuleProvider";
 import { ReadingModule } from "./ReadingModule";
 import { useState } from "react";
 import { StartPageListening } from "./StartPage";
+import { WritingModule } from "./WritingModule";
 
 export function Module({ module }: { module: ModuleRead }) {
 
@@ -19,6 +20,9 @@ export function Module({ module }: { module: ModuleRead }) {
 			break
 		case "reading":
 			module_ui = <ReadingModule module={module} />
+			break
+		case "writing":
+			module_ui = <WritingModule/>
 			break
 	}
 

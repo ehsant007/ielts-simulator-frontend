@@ -14,12 +14,8 @@ export function ExamTimer({
 
 	const [remainingMs, setRemainingMs] = useState(getRemaining);
 	const expired = useRef(false)
-	const count = useRef(0)
-
 
 	useEffect(() => {
-		count.current++;
-		console.log("useEffect", count.current)
 		if (getRemaining() <= 0)
 			return;
 

@@ -1,9 +1,9 @@
 import { ExamRead, ModuleInfo } from "@/client";
-import { Button, Link, Text, VStack, Wrap } from "@chakra-ui/react";
-import { BsEar, BsQuestion } from "react-icons/bs";
+import { Link, Text, VStack, Wrap } from "@chakra-ui/react";
+import { BsQuestion } from "react-icons/bs";
 import { FcReading, FcSpeaker } from "react-icons/fc";
-import { GoRead } from "react-icons/go";
-import { PiPen } from "react-icons/pi";
+import { GiTalk } from "react-icons/gi";
+import { PiPencil} from "react-icons/pi";
 
 
 export function ModuleCard({ module }: { module: ModuleInfo | null }) {
@@ -11,8 +11,8 @@ export function ModuleCard({ module }: { module: ModuleInfo | null }) {
 	const icon = {
 		listening: <FcSpeaker size={iconSize} />,
 		reading: <FcReading size={iconSize} />,
-		writing: <PiPen size={iconSize} />,
-		speaking: <FcSpeaker size={iconSize} />,
+		writing: <PiPencil size={iconSize} />,
+		speaking: <GiTalk size={iconSize} />,
 		default: <BsQuestion size={iconSize} />
 	}
 

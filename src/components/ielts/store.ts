@@ -26,6 +26,9 @@ export type ModuleStore = {
 	setMode: (mode: ModuleMode) => void
 
 	startTime: number
+
+	task: number
+	setTask: (index: number) => void
 }
 
 export function createModuleStore(module: ModuleRead, questionsMeta: Record<number, QuestionMeta>) {
@@ -83,5 +86,8 @@ export function createModuleStore(module: ModuleRead, questionsMeta: Record<numb
 		setMode: (mode) => set(() => ({ mode })),
 
 		startTime: Date.now(),
+
+		task: 0,
+		setTask: (index) => set((state) => ({ task: index }))
 	}))
 }
