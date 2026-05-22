@@ -1,6 +1,6 @@
 "use client"
 import { Question as QuestionType } from "@/client"
-import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGroup, Separator, VStack, Text } from "@chakra-ui/react"
+import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGroup, Separator, VStack, Text, Box } from "@chakra-ui/react"
 import { ChangeEventHandler, forwardRef, useEffect, useRef } from "react"
 import { MD } from "./Content"
 import { useModuleStore } from "./ModuleProvider"
@@ -60,21 +60,69 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 	const answer = useModuleStore((state) => state.answers[question.num]) ?? ""
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const setAnswer = useModuleStore((state) => state.setAnswer)
+	const mode = useModuleStore((state) => state.mode)
 
-	return <Input
-		value={answer}
-		onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}
-		id={`q${question.num}`}
-		textAlign="center"
-		placeholder={question.num.toString()}
-		w="40"
-		h="8"
-		m="1"
-		fontSize="md"
-		variant="subtle"
-		onFocus={() => focusQuestion(question.num)}
-		ref={ref}
-	/>
+	const userAnswer = answer[0] ?? "";
+	const correctAnswer = question.answer[0]; // change this to your real field
+	const isCorrect = userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+
+	if (mode === "test") {
+		return <Input
+			value={answer}
+			onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}
+			id={`q${question.num}`}
+			textAlign="center"
+			placeholder={question.num.toString()}
+			w="40"
+			h="8"
+			m="1"
+			fontWeight="medium"
+			fontSize="md"
+			variant="subtle"
+			onFocus={() => focusQuestion(question.num)}
+			ref={ref}
+		/>
+	}
+
+	return (
+		<HStack
+			as="span"
+			m="1"
+			display="inline-flex"
+			minH="8"
+			minW="40"
+			px="3"
+			borderWidth="1px"
+			borderRadius="md"
+			alignItems="center"
+			justifyContent="center"
+			bg={isCorrect ? "bg.success" : "bg.error"}
+			borderColor={isCorrect ? "border.success" : "border.error"}
+			fontWeight="medium"
+			fontSize="md"
+			gap={2}
+		>
+
+			{userAnswer &&
+				<Box
+					as="span"
+					color={isCorrect ? "fg.success" : "fg.error"}
+					textDecor={isCorrect ? "none" : "line-through"}
+					>
+					{userAnswer}
+				</Box>
+			}
+
+			{!isCorrect && (
+				<Box
+					as="span"
+					color="fg.info">
+					{correctAnswer}
+				</Box>
+			)}
+		</HStack>
+	)
+
 })
 Completion.displayName = "Completion"
 

@@ -1305,7 +1305,7 @@ export type Question = {
     /**
      * Answer
      */
-    answer?: Array<string> | string | null;
+    answer: Array<string>;
 };
 
 /**
