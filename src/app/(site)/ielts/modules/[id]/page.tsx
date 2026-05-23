@@ -11,15 +11,15 @@ export default async function ModulePage({ params }: { params: Promise<{ id: str
 		path: { module_id: moduleId },
 	})).data
 
-	const lastAttempt = await readLastAttempt({
+	const lastAttempt = (await readLastAttempt({
 		path: {
 			module_id: module1.id,
 		},
 		throwOnError: false,
 		auth: token,
-	})
+	})).data
 
 	return (
-		<Module module={module1} userAnswers={lastAttempt.data?.answers}></Module>
+		<Module module={module1} lastAttempt={lastAttempt}></Module>
 	)
 }

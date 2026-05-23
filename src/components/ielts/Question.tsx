@@ -61,10 +61,11 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 	const mode = useModuleStore((state) => state.mode)
+	const result = useModuleStore((state) => state.result[question.num])
 
 	const userAnswer = answer[0] ?? "";
-	const correctAnswer = question.answer[0]; // change this to your real field
-	const isCorrect = userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase();
+	const correctAnswer = question.correct_answer[0];
+	const isCorrect = result?.[0] > 0
 
 	if (mode === "test") {
 		return <Input
@@ -108,7 +109,7 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 					as="span"
 					color={isCorrect ? "fg.success" : "fg.error"}
 					textDecor={isCorrect ? "none" : "line-through"}
-					>
+				>
 					{userAnswer}
 				</Box>
 			}

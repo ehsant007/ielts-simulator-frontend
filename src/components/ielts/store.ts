@@ -1,4 +1,4 @@
-import { ModuleRead, Question } from "@/client";
+import { AttemptRead, ModuleRead, Question } from "@/client";
 import { createStore } from "zustand/vanilla"
 
 export type QuestionMeta = { index: number, focused: boolean, focusCount: number }
@@ -29,13 +29,15 @@ export type ModuleStore = {
 
 	task: number
 	setTask: (index: number) => void
+
+	result: Record<number, number[]>
 }
 
 export function createModuleStore(
 	module: ModuleRead,
 	mode: ModuleMode,
 	questionsMeta: Record<number, QuestionMeta>,
-	answers: Record<number, string[]> = {},
+	lastAttempt: AttemptRead | undefined,
 ) {
 	return createStore<ModuleStore>((set, get) => ({
 		key: crypto.randomUUID(),
@@ -84,7 +86,7 @@ export function createModuleStore(
 			state.focusQuestion(state.module.questions[next_index].num)
 		},
 
-		answers,
+		answers: lastAttempt?.answers ?? {},
 		setAnswer: (questionNum, answer) => set((state) => ({ answers: { ...state.answers, [questionNum]: answer } })),
 
 		mode,
@@ -93,6 +95,8 @@ export function createModuleStore(
 		startTime: Date.now(),
 
 		task: 0,
-		setTask: (index) => set(() => ({ task: index }))
+		setTask: (index) => set(() => ({ task: index })),
+
+		result: lastAttempt?.result ?? {},
 	}))
 }

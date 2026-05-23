@@ -1,6 +1,6 @@
 "use client"
 
-import { ModuleRead } from "@/client";
+import { AttemptRead, ModuleRead } from "@/client";
 import { ListeningModule } from "./ListeningModule";
 
 import { ModuleContextProvider } from "./ModuleProvider";
@@ -14,10 +14,10 @@ import { ModuleMode } from "./store";
 
 type ModuleProps = {
 	module: ModuleRead,
-	userAnswers: Record<number, string[]> | undefined,
+	lastAttempt: AttemptRead | undefined,
 }
 
-export function Module({ module, userAnswers }: ModuleProps) {
+export function Module({ module, lastAttempt }: ModuleProps) {
 	const [mode, setMode] = useState<ModuleMode>()
 
 	let module_ui = null
@@ -46,13 +46,11 @@ export function Module({ module, userAnswers }: ModuleProps) {
 		)
 	}
 
-	console.log(userAnswers)
-
 	return <ModuleContextProvider
 		key={module.id}
 		module={module}
 		mode={mode}
-		answers={mode === "review" ? userAnswers : undefined}
+		lastAttempt={mode === "review" ? lastAttempt : undefined}
 	>
 		{module_ui}
 	</ModuleContextProvider>

@@ -111,6 +111,12 @@ export type AttemptRead = {
         [key: string]: Array<string>;
     };
     /**
+     * Result
+     */
+    result: {
+        [key: string]: Array<number>;
+    };
+    /**
      * Score
      */
     score: number | null;
@@ -1303,9 +1309,9 @@ export type Question = {
      */
     choices?: Array<string> | null;
     /**
-     * Answer
+     * Correct Answer
      */
-    answer: Array<string>;
+    correct_answer: Array<string>;
 };
 
 /**
@@ -1365,7 +1371,7 @@ export type QuestionGroupBase = {
 /**
  * QuestionType
  */
-export type QuestionType = 'multiple_choice' | 'single_choice' | 'completion' | 'short_answer' | 'identify_info' | 'matching';
+export type QuestionType = 'multiple_choice' | 'single_choice' | 'completion' | 'identify_info' | 'matching';
 
 /**
  * ReadingContent
