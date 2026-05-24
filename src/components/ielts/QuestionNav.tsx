@@ -60,7 +60,8 @@ export function ListeningReadingQuestionNav() {
 	const focusNextQuestion = useModuleStore((state) => state.focusNextQuestion)
 	const [navExpand, setNavExpand] = useState(false)
 	const part_i = useModuleStore((state) => state.part)
-
+	const result = useModuleStore((state) => state.result)
+	const mode = useModuleStore((state) => state.mode)
 	const content = module1.content as (ListeningContent | ReadingContent)
 
 	return (
@@ -102,6 +103,7 @@ export function ListeningReadingQuestionNav() {
 								value={`${pi}`}
 								key={pi}
 								onClick={() => focusQuestion(part.test[0].questions[0].num)}
+								fontWeight="semibold"
 							>
 								Part {pi + 1}
 							</SegmentGroup.Item>
@@ -151,15 +153,30 @@ export function ListeningReadingQuestionNav() {
 								</Button>
 								{
 									part.test.map((g) =>
-										g.questions.map((q) =>
-											<Button
-												key={q.num}
-												size="xs"
-												variant="outline"
-												onPointerUp={() => focusQuestion(q.num)}
-											>
-												{q.to_num ? `${q.num} | ${q.to_num}` : q.num}
-											</Button>)
+										g.questions.map((q) => {
+
+											let props = {}
+											if (mode === "review") {
+												if (result?.[q.num]?.includes(0)) {
+													props = { colorPalette: "red" }
+												}
+											}
+
+											return (
+												<Button
+													key={q.num}
+													size="xs"
+													variant="outline"
+													onPointerUp={() => focusQuestion(q.num)}
+													fontFamily="mono"
+													fontWeight="semibold"
+													{...props}
+												>
+													{q.to_num ? `${q.num} | ${q.to_num}` : q.num}
+												</Button>
+											)
+										}
+										)
 									)
 								}
 							</Wrap>)

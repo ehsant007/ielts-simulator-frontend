@@ -1,9 +1,10 @@
 "use client"
 import { Question as QuestionType } from "@/client"
-import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGroup, Separator, VStack, Text, Box } from "@chakra-ui/react"
+import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGroup, Separator, VStack, Text, Box, Radiomark, Checkmark } from "@chakra-ui/react"
 import { ChangeEventHandler, forwardRef, useEffect, useRef } from "react"
 import { MD } from "./Content"
 import { useModuleStore } from "./ModuleProvider"
+import { useDroppable } from '@dnd-kit/react';
 
 type QuestionProps = {
 	question: QuestionType
@@ -57,15 +58,16 @@ export function Question({ question, options, onChange }: QuestionProps) {
 }
 
 export const Completion = forwardRef<HTMLInputElement, { question: QuestionType }>(({ question }, ref) => {
-	const answer = useModuleStore((state) => state.answers[question.num]) ?? ""
+	const answer = useModuleStore((state) => state.answers[question.num])?.[0] ?? ""
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 	const mode = useModuleStore((state) => state.mode)
 	const result = useModuleStore((state) => state.result[question.num])
 
-	const userAnswer = answer[0] ?? "";
 	const correctAnswer = question.correct_answer[0];
 	const isCorrect = result?.[0] > 0
+
+	const { ref: dropRef } = useDroppable({ id: question.num });
 
 	if (mode === "test") {
 		return <Input
@@ -73,15 +75,23 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 			onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}
 			id={`q${question.num}`}
 			textAlign="center"
-			placeholder={question.num.toString()}
-			w="40"
-			h="8"
+			placeholder={question.num.toString()}	
+			w={`${Math.max(answer.length, 17)}ch`}
+			h="9"
 			m="1"
 			fontWeight="medium"
 			fontSize="md"
 			variant="subtle"
+			color="purple.solid"
 			onFocus={() => focusQuestion(question.num)}
-			ref={ref}
+			ref={(node) => {
+				if (typeof ref === 'function') {
+					ref(node);
+				} else if (ref) {
+					ref.current = node;
+				}
+				dropRef(node);
+			}}
 		/>
 	}
 
@@ -97,20 +107,24 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 			borderRadius="md"
 			alignItems="center"
 			justifyContent="center"
-			bg={isCorrect ? "bg.success" : "bg.error"}
-			borderColor={isCorrect ? "border.success" : "border.error"}
+			bg={isCorrect ? "bg.success" : answer ? "bg.error" : "bg.info"}
+			borderColor={isCorrect ? "border.success" : answer ? "border.error" : "border.info"}
 			fontWeight="medium"
 			fontSize="md"
 			gap={2}
+			onFocus={() => focusQuestion(question.num)}
+			ref={ref}
+			tabIndex={0}
+			focusRing="outside"
 		>
 
-			{userAnswer &&
+			{answer &&
 				<Box
 					as="span"
 					color={isCorrect ? "fg.success" : "fg.error"}
 					textDecor={isCorrect ? "none" : "line-through"}
 				>
-					{userAnswer}
+					{answer}
 				</Box>
 			}
 
@@ -131,6 +145,7 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const answer = useModuleStore((state) => state.answers[question.num])?.[0]
 	const setAnswer = useModuleStore((state) => state.setAnswer)
+	const mode = useModuleStore((state) => state.mode)
 
 	function toLetter(index: number) {
 		return String.fromCharCode(65 + index);
@@ -145,28 +160,61 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 			<VStack alignItems="start">
 				<MD>{question.question}</MD>
 
-				<Fieldset.Root>
-					<RadioGroup.Root value={answer ?? null}>
-						<VStack gap="2" align="start">
-							{
-								question.choices?.map((choice, i) => (
-									<RadioGroup.Item
-										key={choice}
-										value={toLetter(i)}
-										onPointerUp={() => {
-											const item_value = toLetter(i)
-											setAnswer(question.num, answer == item_value ? [] : [item_value])
-										}}
-									>
-										<RadioGroup.ItemHiddenInput />
-										<RadioGroup.ItemIndicator />
-										<RadioGroup.ItemText>{choice}</RadioGroup.ItemText>
-									</RadioGroup.Item>
-								))
+				{mode === "test" &&
+					<Fieldset.Root>
+						<RadioGroup.Root value={answer ?? null}>
+							<VStack gap="2" align="start" >
+								{
+									question.choices?.map((choice, i) => (
+										<RadioGroup.Item
+											key={choice}
+											value={toLetter(i)}
+											onPointerUp={() => {
+												const item_value = toLetter(i)
+												setAnswer(question.num, answer == item_value ? [] : [item_value])
+											}}
+										>
+											<RadioGroup.ItemHiddenInput />
+											<RadioGroup.ItemIndicator />
+											<RadioGroup.ItemText>{choice}</RadioGroup.ItemText>
+										</RadioGroup.Item>
+									))
+								}
+							</VStack>
+						</RadioGroup.Root>
+					</Fieldset.Root>
+				}
+
+				{mode === "review" && (
+					<VStack gap="2" align="start">
+						{question.choices?.map((choice, i) => {
+							const letter = toLetter(i)
+
+							const isSelected = answer === letter
+							const isCorrectChoice = question.correct_answer[0] === letter
+
+							let markProps = {}
+
+							if (isSelected) {
+								markProps = isCorrectChoice
+									? { borderColor: "border.success", bg: "bg.success", color: "fg.success", checked: true }
+									: { borderColor: "border.error", bg: "bg.error", color: "fg.error", checked: true }
 							}
-						</VStack>
-					</RadioGroup.Root>
-				</Fieldset.Root>
+							else if (isCorrectChoice) {
+								markProps = { borderColor: "border.info", bg: "bg.info", color: "fg.info", checked: true }
+							}
+
+							return (
+								<HStack key={letter}>
+									<Radiomark {...markProps} />
+									<Text ms="0.5" fontSize="sm" fontWeight="medium">
+										{choice}
+									</Text>
+								</HStack>
+							)
+						})}
+					</VStack>
+				)}
 
 			</VStack>
 		</HStack>
@@ -179,11 +227,11 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const answer = useModuleStore((state) => state.answers[question.num]) ?? []
 	const setAnswer = useModuleStore((state) => state.setAnswer)
+	const mode = useModuleStore((state) => state.mode)
 
 	function toLetter(index: number) {
 		return String.fromCharCode(65 + index);
 	}
-
 
 	return <>
 
@@ -199,23 +247,57 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 
 				<MD>{question.question}</MD>
 
-				<Fieldset.Root mt="2">
-					<CheckboxGroup
-						value={answer}
-						onValueChange={(answer) => setAnswer(question.num, answer)}>
-						<Fieldset.Content>
+				{mode === "test" &&
+					<Fieldset.Root mt="2">
+						<CheckboxGroup
+							value={answer}
+							onValueChange={(answer) => setAnswer(question.num, answer)}>
+							<Fieldset.Content>
 
-							{question.choices?.map((choice, i) => (
-								<Checkbox.Root key={i} value={toLetter(i)}>
-									<Checkbox.HiddenInput disabled={answer.length >= 2 && !answer.includes(toLetter(i))} />
-									<Checkbox.Control />
-									<Checkbox.Label>{choice}</Checkbox.Label>
-								</Checkbox.Root>
-							))}
+								{question.choices?.map((choice, i) => (
+									<Checkbox.Root key={i} value={toLetter(i)}>
+										<Checkbox.HiddenInput disabled={answer.length >= 2 && !answer.includes(toLetter(i))} />
+										<Checkbox.Control />
+										<Checkbox.Label>{choice}</Checkbox.Label>
+									</Checkbox.Root>
+								))}
 
-						</Fieldset.Content>
-					</CheckboxGroup>
-				</Fieldset.Root>
+							</Fieldset.Content>
+						</CheckboxGroup>
+					</Fieldset.Root>
+				}
+
+
+				{mode === "review" && (
+					<VStack gap="2" align="start">
+						{question.choices?.map((choice, i) => {
+							const letter = toLetter(i)
+
+							const isSelected = answer.includes(letter)
+							const isCorrectChoice = question.correct_answer.includes(letter)
+
+							let markProps = {}
+
+							if (isSelected) {
+								markProps = isCorrectChoice
+									? { borderColor: "border.success", bg: "bg.success", color: "fg.success", checked: true }
+									: { borderColor: "border.error", bg: "bg.error", color: "fg.error", checked: true }
+							}
+							else if (isCorrectChoice) {
+								markProps = { borderColor: "border.info", bg: "bg.info", color: "fg.info", checked: true }
+							}
+
+							return (
+								<HStack key={letter}>
+									<Checkmark {...markProps} />
+									<Text ms="0.5" fontSize="sm" fontWeight="medium">
+										{choice}
+									</Text>
+								</HStack>
+							)
+						})}
+					</VStack>
+				)}
 
 			</VStack>
 		</HStack>
@@ -227,6 +309,11 @@ export const Matching = forwardRef<HTMLDivElement, QuestionProps>(({ question, o
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const answer = useModuleStore((state) => state.answers[question.num])?.[0]
 	const setAnswer = useModuleStore((state) => state.setAnswer)
+	const mode = useModuleStore((state) => state.mode)
+	const result = useModuleStore((state) => state.result[question.num])
+
+	const correctAnswer = question.correct_answer[0];
+	const isCorrect = result?.[0] > 0
 
 	return (
 		<HStack
@@ -242,19 +329,73 @@ export const Matching = forwardRef<HTMLDivElement, QuestionProps>(({ question, o
 				<Text>{question.question}</Text>
 			</HStack>
 
-			<Separator flex="1" ps="5" />
-			<NativeSelect.Root size="sm" width="auto" minWidth="fit" fontWeight="bold">
-				<NativeSelect.Field
-					value={answer}
-					placeholder="----"
-					onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}
-				>
-					{
-						options?.map((apt, i) => <option key={i} value={apt}>{apt}</option>)
-					}
-				</NativeSelect.Field>
-				<NativeSelect.Indicator />
-			</NativeSelect.Root>
+			{mode === "test" && (
+				<>
+					<Separator flex="1" ps="5" />
+
+					<NativeSelect.Root
+						size="sm"
+						width="auto"
+						minWidth="fit"
+						fontWeight="medium"
+					>
+						<NativeSelect.Field
+							value={answer}
+							placeholder="----"
+							onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}
+						>
+							{
+								options?.map((apt, i) => <option key={i} value={apt}>{apt}</option>)
+							}
+						</NativeSelect.Field>
+						<NativeSelect.Indicator />
+					</NativeSelect.Root>
+				</>
+			)
+			}
+
+			{mode === "review" && (
+				<>
+					<Separator flex="1" ps="5" borderColor={isCorrect ? "border.success" : answer ? "border.error" : "border.info"} />
+					<HStack
+						as="span"
+						m="1"
+						display="inline-flex"
+						minH="8"
+						minW="40"
+						px="3"
+						borderWidth="1px"
+						borderRadius="md"
+						alignItems="center"
+						justifyContent="center"
+						bg={isCorrect ? "bg.success" : answer ? "bg.error" : "bg.info"}
+						borderColor={isCorrect ? "border.success" : answer ? "border.error" : "border.info"}
+						fontWeight="medium"
+						fontSize="sm"
+						gap={2}
+					>
+
+						{answer &&
+							<Box
+								as="span"
+								color={isCorrect ? "fg.success" : "fg.error"}
+								textDecor={isCorrect ? "none" : "line-through"}
+							>
+								{answer}
+							</Box>
+						}
+
+						{!isCorrect && (
+							<Box
+								as="span"
+								color="fg.info">
+								{correctAnswer}
+							</Box>
+						)}
+					</HStack>
+				</>
+			)
+			}
 
 
 		</HStack>

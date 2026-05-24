@@ -3,26 +3,33 @@
 import type { QuestionGroupBase, NoteCompletionGroup, QuestionGroup, VisualLabelingGroup, SentenceMatchingGroup, IdentifyInfoGroup, ParagraphMatchingGroup, ReadingContent } from "@/client";
 import { Content, MD } from "./Content";
 import { Question } from "./Question";
-import { Box, VStack, Text, HStack, Image, Center, Table } from "@chakra-ui/react";
-import { useModuleStore } from "./ModuleProvider";
+import { Box, VStack, Text, HStack, Image, Center, Table, Wrap } from "@chakra-ui/react";
+import { useModuleStore, useModuleStoreApi } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getModuleFile } from "./utils";
+import { useDraggable, DragOverlay, DragDropProvider } from '@dnd-kit/react';
 
 export function QuestionGroup({ g }: { g: QuestionGroup }) {
 	let ui
 	switch (g.group_type) {
-		case "basic": ui = <QuestionGroupBase g={g} />
+		case "basic":
+			ui = <QuestionGroupBase g={g} />
 			break
-		case "completion_note": ui = <NoteCompletion g={g} />
+		case "completion_note":
+			ui = g.options ? <NoteCompletionWithOptions g={g} /> : <NoteCompletion g={g} />
 			break
-		case "visual_labeling": ui = <VisualLabelingGroup>{g}</VisualLabelingGroup>
+		case "visual_labeling":
+			ui = <VisualLabelingGroup>{g}</VisualLabelingGroup>
 			break
-		case "sentence_matching": ui = <SentenceMatching>{g}</SentenceMatching>
+		case "sentence_matching":
+			ui = <SentenceMatching>{g}</SentenceMatching>
 			break
-		case "identify_info": ui = <IdentifyInfoGroup>{g}</IdentifyInfoGroup>
+		case "identify_info":
+			ui = <IdentifyInfoGroup>{g}</IdentifyInfoGroup>
 			break
-		case "paragraph_matching": ui = <ParagraphMatchingGroup>{g}</ParagraphMatchingGroup>
+		case "paragraph_matching":
+			ui = <ParagraphMatchingGroup>{g}</ParagraphMatchingGroup>
 			break
 		default:
 			ui = <p>{g.group_type}</p>
@@ -45,6 +52,91 @@ export function NoteCompletion({ g }: { g: NoteCompletionGroup }) {
 			<Content content={g.content} ></Content>
 		</Box>
 	)
+}
+
+
+export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
+
+	const answers = useModuleStoreApi().getState().answers
+	const setAnswer = useModuleStore((state) => state.setAnswer)
+
+	const [selected, setSelected] = useState<Record<number, string>>({})
+	const select = (questionNum: number, option: string) => {
+		setSelected(prev => ({ ...prev, [questionNum]: option }))
+	}
+
+
+	useEffect(() => {
+		g.questions.forEach((q) => {
+			if (answers[q.num])
+				select(q.num, answers[q.num][0])
+		})
+	}, [])
+
+	// Draggable Option
+	function Option({ children: option }: { children: string }) {
+		const { ref } = useDraggable({ id: option });
+
+		const isSelected = Object.values(selected).includes(option)
+
+
+
+		return (
+			<Box shadow="md">
+				
+					<Text
+						ref={isSelected? undefined : ref}
+						cursor="pointer"
+						
+						px="3"
+						py="2"
+						bg={isSelected ? "transparent" : "bg"}
+						border="md"
+						borderColor={isSelected ? "transparent" : "fg.subtle"}
+						color={isSelected ? "fg.subtle" : "fg"}
+					>
+						{option}
+					</Text>
+				
+			</Box>
+		);
+	}
+
+
+
+	return (
+		<DragDropProvider
+			onDragEnd={(event) => {
+				if (event.canceled)
+					return;
+
+				const { target, source } = event.operation;
+
+				if (target && source) {
+					const qNum = Number(target.id)
+					setAnswer(qNum, [source.id.toString() ?? ""])
+					select(qNum, source.id.toString())
+				}
+			}}
+		>
+
+			<Box p="3">
+				{g.options &&
+					<Wrap mb="10" justifyContent="center">
+						{
+							g.options.map((option) => (
+
+								<Option key={option}>{option}</Option>
+							)
+							)
+						}
+					</Wrap>
+				}
+				<Content content={g.content} ></Content>
+			</Box>
+
+		</DragDropProvider>
+	);
 }
 
 
