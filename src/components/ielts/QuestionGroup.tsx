@@ -11,6 +11,7 @@ import { getModuleFile } from "./utils";
 import { useDraggable, DragDropProvider, useDroppable } from '@dnd-kit/react';
 import { move } from '@dnd-kit/helpers';
 import { Nothing_You_Could_Do } from "next/font/google";
+import { QuestionGroupProvider } from "./QuestionGroupProvider";
 
 export function QuestionGroup({ g }: { g: QuestionGroup }) {
 	let ui
@@ -37,15 +38,19 @@ export function QuestionGroup({ g }: { g: QuestionGroup }) {
 			ui = <p>{g.group_type}</p>
 	}
 
-	return <VStack alignItems="start">
-		<Text fontStyle="italic" fontWeight="bold">
-			Questions {g.question_range?.[0]}-{g.question_range?.[1]}
-		</Text>
-		<Box mb="4" fontStyle="italic">
-			<MD>{g.prompt}</MD>
-		</Box>
-		{ui}
-	</VStack>
+	return (
+		<QuestionGroupProvider group={g}>
+			<VStack alignItems="start">
+				<Text fontStyle="italic" fontWeight="bold">
+					Questions {g.question_range?.[0]}-{g.question_range?.[1]}
+				</Text>
+				<Box mb="4" fontStyle="italic">
+					<MD>{g.prompt}</MD>
+				</Box>
+				{ui}
+			</VStack>
+		</QuestionGroupProvider>
+	)
 }
 
 export function NoteCompletion({ g }: { g: NoteCompletionGroup }) {
@@ -77,10 +82,8 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 	const swap = (qNum1: number, qNum2: number) => {
 		const answers = store.getState().answers
 		const temp = answers[qNum1]
-		console.log("swap", [qNum1, qNum2], answers[qNum1], answers[qNum2])
 		setAnswer(qNum1, answers[qNum2])
 		setAnswer(qNum2, temp)
-		console.log("swap", [qNum1, qNum2], answers[qNum1], answers[qNum2])
 	}
 
 	useEffect(() => {
@@ -91,7 +94,6 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 		})
 	}, [])
 
-	const optionsAreaId = g.question_range.join("-")
 
 	// Draggable Option
 	function Option({ children: option }: { children: string }) {
@@ -104,32 +106,32 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 				shadow="md"
 			>
 				<Text
-					ref={isSelected ? undefined : ref}
+					ref={ref}
 					cursor="pointer"
 					px="3"
 					py="2"
 					bg={isSelected ? "transparent" : "bg"}
 					border="md"
 					borderColor={isSelected ? "transparent" : "fg.subtle"}
-					color={isSelected ? "fg.subtle" : "fg"}
+					color={isSelected ? "fg.muted" : "fg"}
 				>
 					{option}
 				</Text>
 
 			</Box>
-		);
+		)
 	}
 
 	// Options Area
 	function OptionsArea() {
-		const { ref } = useDroppable({ id: optionsAreaId, type: "options-area", accept: ["question"] });
-
+		const { ref } = useDroppable({ id: g.question_range.join("-"), type: "options-area", accept: ["question"] });
 		return (
 			<Wrap
+				p="6"
 				mb="10"
-				p="20"
 				justifyContent="center"
-				border={"md"}
+				border="md"
+				borderColor="fg.subtle"
 				ref={ref}
 			>
 				{
@@ -141,9 +143,7 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 				}
 			</Wrap>
 		)
-
 	}
-
 
 	return (
 		<DragDropProvider
@@ -167,18 +167,10 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 					}
 				}
 
-				// If user was dragging the answer back
-				// if (target.id === optionsAreaId) {
-
-				// 	if (target.data.type === "option")
-				// 		return
-
-				// 	const qNum = Number(source.id)
-				// 	deselect(qNum)
-				// } else {
-				// 	const qNum = Number(target.id)
-				// 	select(qNum, source.id.toString())
-				// }
+				if (target.type === "options-area") {
+					const sourceQuestionNum = Number(source.id)
+					deselect(sourceQuestionNum)
+				}
 			}}
 
 			onDragOver={(event) => {
@@ -187,24 +179,12 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 				if (!target || !source)
 					return
 
-				if (target.id === optionsAreaId)
+				if (target.type === "options-area")
 					return
-
 
 				const qNum = Number(target.id)
 				focusQuestion(qNum)
-
-				if (target.type === "question") {
-			
-
-					if (source.type == "question") {
-						//move()
-					}
-				}
-
 			}}
-
-
 		>
 
 			<Box p="3">
@@ -213,7 +193,7 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 			</Box>
 
 		</DragDropProvider>
-	);
+	)
 }
 
 

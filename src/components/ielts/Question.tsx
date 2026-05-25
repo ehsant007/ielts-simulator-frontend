@@ -1,10 +1,11 @@
 "use client"
-import { Question as QuestionType } from "@/client"
+import { NoteCompletionGroup, Question as QuestionType, SentenceCompletionGroup } from "@/client"
 import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGroup, Separator, VStack, Text, Box, Radiomark, Checkmark } from "@chakra-ui/react"
 import { ChangeEventHandler, forwardRef, useEffect, useRef } from "react"
 import { MD } from "./Content"
 import { useModuleStore } from "./ModuleProvider"
 import { useDraggable, useDroppable } from '@dnd-kit/react';
+import { useQuestionGroup } from "./QuestionGroupProvider"
 
 type QuestionProps = {
 	question: QuestionType
@@ -17,6 +18,7 @@ export function Question({ question, options, onChange }: QuestionProps) {
 	const focused = useModuleStore((state) => { return state.questionsMeta[question.num].focused })
 	const focusCount = useModuleStore((state) => state.questionsMeta[question.num].focusCount)
 	const ref = useRef<any>(null)
+	const { group } = useQuestionGroup()
 
 	useEffect(() => {
 		if (!focused)
@@ -41,15 +43,22 @@ export function Question({ question, options, onChange }: QuestionProps) {
 
 	let ui = <></>
 	switch (question.question_type) {
-		case "completion": ui = <Completion ref={ref} question={question} />
+		case "completion":
+			ui = (group as NoteCompletionGroup | SentenceCompletionGroup).options
+				? <CompletionWithOption ref={ref} question={question} />
+				: <Completion ref={ref} question={question} />
 			break
-		case "single_choice": ui = <SingleChoice ref={ref} question={question} />
+		case "single_choice":
+			ui = <SingleChoice ref={ref} question={question} />
 			break
-		case "multiple_choice": ui = <MultipleChoice ref={ref} question={question} />
+		case "multiple_choice":
+			ui = <MultipleChoice ref={ref} question={question} />
 			break
-		case "matching": ui = <Matching ref={ref} question={question} options={options} onChange={onChange} />
+		case "matching":
+			ui = <Matching ref={ref} question={question} options={options} onChange={onChange} />
 			break
-		case "identify_info": ui = <Matching ref={ref} question={question} options={options} onChange={onChange} />
+		case "identify_info":
+			ui = <Matching ref={ref} question={question} options={options} onChange={onChange} />
 			break
 		default:
 			ui = <Text>question type `{question.question_type}` not implemented!</Text>
@@ -57,60 +66,12 @@ export function Question({ question, options, onChange }: QuestionProps) {
 	return ui
 }
 
-export const Completion = forwardRef<HTMLInputElement, { question: QuestionType }>(({ question }, ref) => {
+export const CompletionReview = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
 	const answer = useModuleStore((state) => state.answers[question.num])?.[0] ?? ""
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
-	const setAnswer = useModuleStore((state) => state.setAnswer)
-	const mode = useModuleStore((state) => state.mode)
 	const result = useModuleStore((state) => state.result[question.num])
-
 	const correctAnswer = question.correct_answer[0];
 	const isCorrect = result?.[0] > 0
-
-	const { ref: dropRef } = useDroppable({ id: question.num, type: "question", accept: ["question", "option"] });
-	const { ref: dragRef } = useDraggable({ id: question.num, type: "question" })
-
-	if (mode === "test") {
-		return (
-			<Box
-				as="span"
-				ref={answer ? dragRef : undefined}
-			>
-				<Box
-					as="span"
-					cursor={answer ? "pointer" : "default"}
-					display="inline-flex"
-					id={`q${question.num}`}
-					textAlign="center"
-					w={`${Math.max(answer.length, 17)}ch`}
-					h="9"
-					m="1"
-					fontWeight="medium"
-					fontSize="md"
-					color={answer ? "purple.solid" : "fg.muted"}
-					alignItems="center"
-					justifyContent="center"
-					borderRadius="md"
-
-					onFocus={() => focusQuestion(question.num)}
-					bg="bg.muted"
-					ref={(node: any) => {
-
-						if (typeof ref === "function")
-							ref(node)
-						else if (ref)
-							ref.current = node
-
-						dropRef(node)
-					}}
-					tabIndex={0}
-					focusRing="outside"
-				>
-					{answer ? answer : question.num}
-				</Box>
-			</Box>
-		)
-	}
 
 	return (
 		<HStack
@@ -156,7 +117,100 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 	)
 
 })
+CompletionReview.displayName = "CompletionReview"
+
+
+export const Completion = forwardRef<HTMLInputElement, { question: QuestionType }>(({ question }, ref) => {
+	const answer = useModuleStore((state) => state.answers[question.num])?.[0] ?? ""
+	const focusQuestion = useModuleStore((state) => state.focusQuestion)
+	const setAnswer = useModuleStore((state) => state.setAnswer)
+	const mode = useModuleStore((state) => state.mode)
+
+	if (mode === "review") {
+		return (
+			<CompletionReview ref={ref} question={question} />
+		)
+	}
+
+	return (
+		<Input
+			value={answer}
+			onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}
+			id={`q${question.num}`}
+			textAlign="center"
+			placeholder={question.num.toString()}
+			w={`${Math.max(answer.length, 17)}ch`}
+			h="9"
+			m="1"
+			fontWeight="medium"
+			fontSize="md"
+			variant="subtle"
+			color="purple.solid"
+			onFocus={() => focusQuestion(question.num)}
+			ref={ref}
+		/>
+	)
+})
 Completion.displayName = "Completion"
+
+
+export const CompletionWithOption = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
+	const answer = useModuleStore((state) => state.answers[question.num])?.[0] ?? ""
+	const focusQuestion = useModuleStore((state) => state.focusQuestion)
+	const mode = useModuleStore((state) => state.mode)
+
+	const { ref: dropRef } = useDroppable({ id: question.num, type: "question", accept: ["question", "option"] });
+	const { ref: dragRef } = useDraggable({ id: question.num, type: "question" })
+
+	if (mode === "review") {
+		return (
+			<CompletionReview ref={ref} question={question} />
+		)
+	}
+
+	return (
+		<Box
+			as="span"
+			ref={answer ? dragRef : undefined}
+		>
+			<Box
+				as="span"
+				cursor={answer ? "pointer" : "default"}
+				display="inline-flex"
+				id={`q${question.num}`}
+				textAlign="center"
+				w={`${Math.max(answer.length, 17)}ch`}
+				h="9"
+				m="1"
+				fontWeight="medium"
+				fontSize="md"
+				color={answer ? "purple.solid" : "fg.muted"}
+				alignItems="center"
+				justifyContent="center"
+				borderRadius="md"
+
+				onFocus={() => focusQuestion(question.num)}
+				bg="bg.muted"
+				ref={(node: any) => {
+
+					if (typeof ref === "function")
+						ref(node)
+					else if (ref)
+						ref.current = node
+
+					dropRef(node)
+				}}
+				tabIndex={0}
+				focusRing="outside"
+			>
+				{answer ? answer : question.num}
+			</Box>
+		</Box>
+	)
+})
+CompletionWithOption.displayName = "CompletionWithOption"
+
+
 
 export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
