@@ -3,14 +3,12 @@
 import type { QuestionGroupBase, NoteCompletionGroup, QuestionGroup, VisualLabelingGroup, SentenceMatchingGroup, IdentifyInfoGroup, ParagraphMatchingGroup, ReadingContent } from "@/client";
 import { Content, MD } from "./Content";
 import { Question } from "./Question";
-import { Box, VStack, Text, HStack, Image, Center, Table, Wrap, Input } from "@chakra-ui/react";
+import { Box, VStack, Text, HStack, Image, Center, Table, Wrap } from "@chakra-ui/react";
 import { useModuleStore, useModuleStoreApi } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";
 import { useEffect, useState } from "react";
 import { getModuleFile } from "./utils";
 import { useDraggable, DragDropProvider, useDroppable } from '@dnd-kit/react';
-import { move } from '@dnd-kit/helpers';
-import { Nothing_You_Could_Do } from "next/font/google";
 import { QuestionGroupProvider } from "./QuestionGroupProvider";
 
 export function QuestionGroup({ g }: { g: QuestionGroup }) {
@@ -135,7 +133,7 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 				ref={ref}
 			>
 				{
-					g.options?.map((option, i) => (
+					g.options?.map((option) => (
 
 						<Option key={option}>{option}</Option>
 					)

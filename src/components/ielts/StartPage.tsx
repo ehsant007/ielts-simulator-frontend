@@ -9,9 +9,7 @@ import {
 	Icon,
 } from '@chakra-ui/react';
 import { IeltsModuleType } from '@/client';
-import { MdFactCheck, MdReviews, MdStart } from 'react-icons/md';
-import { PiExam } from 'react-icons/pi';
-import { FcStart } from 'react-icons/fc';
+import { MdFactCheck } from 'react-icons/md';
 import { FiPlay } from 'react-icons/fi';
 
 type StartPageProps = {
