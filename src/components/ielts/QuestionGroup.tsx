@@ -3,12 +3,14 @@
 import type { QuestionGroupBase, NoteCompletionGroup, QuestionGroup, VisualLabelingGroup, SentenceMatchingGroup, IdentifyInfoGroup, ParagraphMatchingGroup, ReadingContent } from "@/client";
 import { Content, MD } from "./Content";
 import { Question } from "./Question";
-import { Box, VStack, Text, HStack, Image, Center, Table, Wrap } from "@chakra-ui/react";
+import { Box, VStack, Text, HStack, Image, Center, Table, Wrap, Input } from "@chakra-ui/react";
 import { useModuleStore, useModuleStoreApi } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";
 import { useEffect, useState } from "react";
 import { getModuleFile } from "./utils";
-import { useDraggable, DragOverlay, DragDropProvider } from '@dnd-kit/react';
+import { useDraggable, DragDropProvider, useDroppable } from '@dnd-kit/react';
+import { move } from '@dnd-kit/helpers';
+import { Nothing_You_Could_Do } from "next/font/google";
 
 export function QuestionGroup({ g }: { g: QuestionGroup }) {
 	let ui
@@ -57,51 +59,90 @@ export function NoteCompletion({ g }: { g: NoteCompletionGroup }) {
 
 export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 
-	const answers = useModuleStoreApi().getState().answers
+	const store = useModuleStoreApi()
 	const setAnswer = useModuleStore((state) => state.setAnswer)
+	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 
-	const [selected, setSelected] = useState<Record<number, string>>({})
+	const [selected, setSelected] = useState<Record<number, string | undefined>>({})
 	const select = (questionNum: number, option: string) => {
+		setAnswer(questionNum, [option])
 		setSelected(prev => ({ ...prev, [questionNum]: option }))
 	}
 
+	const deselect = (questionNum: number) => {
+		setAnswer(questionNum, [""])
+		setSelected(prev => ({ ...prev, [questionNum]: undefined }))
+	}
+
+	const swap = (qNum1: number, qNum2: number) => {
+		const answers = store.getState().answers
+		const temp = answers[qNum1]
+		console.log("swap", [qNum1, qNum2], answers[qNum1], answers[qNum2])
+		setAnswer(qNum1, answers[qNum2])
+		setAnswer(qNum2, temp)
+		console.log("swap", [qNum1, qNum2], answers[qNum1], answers[qNum2])
+	}
 
 	useEffect(() => {
 		g.questions.forEach((q) => {
+			const answers = store.getState().answers
 			if (answers[q.num])
 				select(q.num, answers[q.num][0])
 		})
 	}, [])
 
+	const optionsAreaId = g.question_range.join("-")
+
 	// Draggable Option
 	function Option({ children: option }: { children: string }) {
-		const { ref } = useDraggable({ id: option });
+		const { ref } = useDraggable({ id: option, type: "option" });
 
 		const isSelected = Object.values(selected).includes(option)
 
-
-
 		return (
-			<Box shadow="md">
-				
-					<Text
-						ref={isSelected? undefined : ref}
-						cursor="pointer"
-						
-						px="3"
-						py="2"
-						bg={isSelected ? "transparent" : "bg"}
-						border="md"
-						borderColor={isSelected ? "transparent" : "fg.subtle"}
-						color={isSelected ? "fg.subtle" : "fg"}
-					>
-						{option}
-					</Text>
-				
+			<Box
+				shadow="md"
+			>
+				<Text
+					ref={isSelected ? undefined : ref}
+					cursor="pointer"
+					px="3"
+					py="2"
+					bg={isSelected ? "transparent" : "bg"}
+					border="md"
+					borderColor={isSelected ? "transparent" : "fg.subtle"}
+					color={isSelected ? "fg.subtle" : "fg"}
+				>
+					{option}
+				</Text>
+
 			</Box>
 		);
 	}
 
+	// Options Area
+	function OptionsArea() {
+		const { ref } = useDroppable({ id: optionsAreaId, type: "options-area", accept: ["question"] });
+
+		return (
+			<Wrap
+				mb="10"
+				p="20"
+				justifyContent="center"
+				border={"md"}
+				ref={ref}
+			>
+				{
+					g.options?.map((option, i) => (
+
+						<Option key={option}>{option}</Option>
+					)
+					)
+				}
+			</Wrap>
+		)
+
+	}
 
 
 	return (
@@ -112,26 +153,62 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 
 				const { target, source } = event.operation;
 
-				if (target && source) {
-					const qNum = Number(target.id)
-					setAnswer(qNum, [source.id.toString() ?? ""])
-					select(qNum, source.id.toString())
+				if (!target || !source)
+					return
+
+				if (target.type === "question") {
+					const targetQuestionNum = Number(target.id)
+
+					if (source.type === "option")
+						select(targetQuestionNum, source.id.toString())
+					else if (source.type == "question") {
+						const sourceQuestionNum = Number(source.id)
+						swap(targetQuestionNum, sourceQuestionNum)
+					}
 				}
+
+				// If user was dragging the answer back
+				// if (target.id === optionsAreaId) {
+
+				// 	if (target.data.type === "option")
+				// 		return
+
+				// 	const qNum = Number(source.id)
+				// 	deselect(qNum)
+				// } else {
+				// 	const qNum = Number(target.id)
+				// 	select(qNum, source.id.toString())
+				// }
 			}}
+
+			onDragOver={(event) => {
+				const { target, source } = event.operation;
+
+				if (!target || !source)
+					return
+
+				if (target.id === optionsAreaId)
+					return
+
+
+				const qNum = Number(target.id)
+				focusQuestion(qNum)
+
+				if (target.type === "question") {
+			
+
+					if (source.type == "question") {
+						//move()
+					}
+				}
+
+			}}
+
+
 		>
 
 			<Box p="3">
-				{g.options &&
-					<Wrap mb="10" justifyContent="center">
-						{
-							g.options.map((option) => (
-
-								<Option key={option}>{option}</Option>
-							)
-							)
-						}
-					</Wrap>
-				}
+				<OptionsArea />
 				<Content content={g.content} ></Content>
 			</Box>
 

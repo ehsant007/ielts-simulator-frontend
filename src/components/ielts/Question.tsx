@@ -4,7 +4,7 @@ import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGr
 import { ChangeEventHandler, forwardRef, useEffect, useRef } from "react"
 import { MD } from "./Content"
 import { useModuleStore } from "./ModuleProvider"
-import { useDroppable } from '@dnd-kit/react';
+import { useDraggable, useDroppable } from '@dnd-kit/react';
 
 type QuestionProps = {
 	question: QuestionType
@@ -67,32 +67,49 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 	const correctAnswer = question.correct_answer[0];
 	const isCorrect = result?.[0] > 0
 
-	const { ref: dropRef } = useDroppable({ id: question.num });
+	const { ref: dropRef } = useDroppable({ id: question.num, type: "question", accept: ["question", "option"] });
+	const { ref: dragRef } = useDraggable({ id: question.num, type: "question" })
 
 	if (mode === "test") {
-		return <Input
-			value={answer}
-			onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}
-			id={`q${question.num}`}
-			textAlign="center"
-			placeholder={question.num.toString()}	
-			w={`${Math.max(answer.length, 17)}ch`}
-			h="9"
-			m="1"
-			fontWeight="medium"
-			fontSize="md"
-			variant="subtle"
-			color="purple.solid"
-			onFocus={() => focusQuestion(question.num)}
-			ref={(node) => {
-				if (typeof ref === 'function') {
-					ref(node);
-				} else if (ref) {
-					ref.current = node;
-				}
-				dropRef(node);
-			}}
-		/>
+		return (
+			<Box
+				as="span"
+				ref={answer ? dragRef : undefined}
+			>
+				<Box
+					as="span"
+					cursor={answer ? "pointer" : "default"}
+					display="inline-flex"
+					id={`q${question.num}`}
+					textAlign="center"
+					w={`${Math.max(answer.length, 17)}ch`}
+					h="9"
+					m="1"
+					fontWeight="medium"
+					fontSize="md"
+					color={answer ? "purple.solid" : "fg.muted"}
+					alignItems="center"
+					justifyContent="center"
+					borderRadius="md"
+
+					onFocus={() => focusQuestion(question.num)}
+					bg="bg.muted"
+					ref={(node: any) => {
+
+						if (typeof ref === "function")
+							ref(node)
+						else if (ref)
+							ref.current = node
+
+						dropRef(node)
+					}}
+					tabIndex={0}
+					focusRing="outside"
+				>
+					{answer ? answer : question.num}
+				</Box>
+			</Box>
+		)
 	}
 
 	return (
