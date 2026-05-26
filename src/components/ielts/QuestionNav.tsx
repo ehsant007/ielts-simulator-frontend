@@ -1,6 +1,6 @@
 "use client"
 
-import type { ListeningContent, ReadingContent } from "@/client";
+import type { ListeningContent, Question, ReadingContent } from "@/client";
 import { useModuleStore } from "./ModuleProvider";
 import { Wrap, Button, VStack, HStack, Icon, Collapsible, Group, SegmentGroup } from "@chakra-ui/react";
 import { HiArrowLeft, HiArrowRight } from "react-icons/hi";
@@ -58,10 +58,8 @@ export function ListeningReadingQuestionNav() {
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const focusPrevQuestion = useModuleStore((state) => state.focusPrevQuestion)
 	const focusNextQuestion = useModuleStore((state) => state.focusNextQuestion)
-	const [navExpand, setNavExpand] = useState(false)
+	const [navExpand, setNavExpand] = useState(true)
 	const part_i = useModuleStore((state) => state.part)
-	const result = useModuleStore((state) => state.result)
-	const mode = useModuleStore((state) => state.mode)
 	const content = module1.content as (ListeningContent | ReadingContent)
 
 	return (
@@ -153,30 +151,7 @@ export function ListeningReadingQuestionNav() {
 								</Button>
 								{
 									part.test.map((g) =>
-										g.questions.map((q) => {
-
-											let props = {}
-											if (mode === "review") {
-												if (result?.[q.num]?.includes(0)) {
-													props = { colorPalette: "red" }
-												}
-											}
-
-											return (
-												<Button
-													key={q.num}
-													size="xs"
-													variant="outline"
-													onPointerUp={() => focusQuestion(q.num)}
-													fontFamily="mono"
-													fontWeight="semibold"
-													{...props}
-												>
-													{q.to_num ? `${q.num} | ${q.to_num}` : q.num}
-												</Button>
-											)
-										}
-										)
+										g.questions.map((q) => <QuestionNavButton key={q.num} question={q} />)
 									)
 								}
 							</Wrap>)
@@ -186,5 +161,41 @@ export function ListeningReadingQuestionNav() {
 			</Collapsible.Root>
 
 		</VStack >
+	)
+}
+
+
+export function QuestionNavButton({ question }: { question: Question }) {
+	const focusQuestion = useModuleStore((state) => state.focusQuestion)
+	const result = useModuleStore((state) => state.result[question.num]) ?? []
+	const answer = useModuleStore((state) => state.answers[question.num]) ?? []
+	const mode = useModuleStore((state) => state.mode)
+
+	let props = {}
+	if (mode === "test") {
+		props = answer?.[0]
+			? { colorPalette: "purple" }
+			: {}
+	} else {
+
+		props = result.includes(0)
+			? { colorPalette: "red" }
+			: result.includes(1)
+				? { colorPalette: "green" }
+				: {}
+	}
+
+	return (
+		<Button
+			key={question.num}
+			size="xs"
+			variant="outline"
+			onPointerUp={() => focusQuestion(question.num)}
+			fontFamily="mono"
+			fontWeight="semibold"
+			{...props}
+		>
+			{question.to_num ? `${question.num} | ${question.to_num}` : question.num}
+		</Button>
 	)
 }

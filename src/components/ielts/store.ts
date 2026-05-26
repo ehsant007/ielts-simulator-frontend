@@ -31,6 +31,11 @@ export type ModuleStore = {
 	setTask: (index: number) => void
 
 	result: Record<number, number[]>
+
+	audioPlay: boolean
+	setAudioPlay: (value: boolean) => void
+	audioVolume: number
+	setAudioVolume: (value: number) => void
 }
 
 export function createModuleStore(
@@ -98,5 +103,11 @@ export function createModuleStore(
 		setTask: (index) => set(() => ({ task: index })),
 
 		result: lastAttempt?.result ?? {},
+
+		audioPlay: false,
+		setAudioPlay: (value) => set(() => ({ audioPlay: value })),
+
+		audioVolume: 100,
+		setAudioVolume: (value) => set(() => ({ audioVolume: value }))
 	}))
 }
