@@ -314,7 +314,7 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 			focusRing="outside"
 			ref={ref}
 		>
-			<VStack>
+			<VStack alignItems="start">
 
 				<MD>{question.question}</MD>
 

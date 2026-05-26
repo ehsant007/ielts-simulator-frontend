@@ -129,22 +129,19 @@ export function AudioReview(props: StackProps) {
 	const [time, setTime] = useState(0)
 	const [duration, setDuration] = useState(0)
 
-	
-
 	useEffect(() => {
 		if (!playerRef.current)
 			return
 		const player = playerRef.current
 
 		player.volume = audioVolume / 100.0
-		setDuration(player.duration)
-
+	
 		if (audioPlay)
 			player.play()
 		else
 			player.pause()
 
-	}, [audioVolume, audioPlay, playerRef.current])
+	}, [audioVolume, audioPlay])
 
 	return (
 		<>
@@ -154,6 +151,7 @@ export function AudioReview(props: StackProps) {
 				controlsList="nodownload"
 				autoPlay={audioPlay}
 				onTimeUpdate={(e) => setTime(e.currentTarget.currentTime)}
+				onLoadedMetadata={(e)=>setDuration(e.currentTarget.duration)}
 			/>
 
 			<HStack {...props} >
@@ -198,21 +196,3 @@ export function AudioReview(props: StackProps) {
 	);
 }
 
-
-
-/*		
-<Box
-	as="audio"
-	ref={player}
-	w="full"
-	h="8"
-	{...{
-		controls: true,
-		src: getModuleFile(module1.id, `part${pi + 1}.mp3`),
-		controlsList: "nodownload",
-		autoPlay: audioPlay,
-		onPlay: () => setAudioPlay(true),
-		onPause: () => setAudioPlay(false),
-	}}
-/>
- */

@@ -3,10 +3,10 @@
 import type { QuestionGroupBase, NoteCompletionGroup, QuestionGroup, VisualLabelingGroup, SentenceMatchingGroup, IdentifyInfoGroup, ParagraphMatchingGroup, ReadingContent } from "@/client";
 import { Content, MD } from "./Content";
 import { Question } from "./Question";
-import { Box, VStack, Text, HStack, Image, Center, Table, Wrap } from "@chakra-ui/react";
+import { Box, VStack, Text, HStack, Image, Table, Wrap } from "@chakra-ui/react";
 import { useModuleStore, useModuleStoreApi } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getModuleFile } from "./utils";
 import { useDraggable, DragDropProvider, useDroppable } from '@dnd-kit/react';
 import { QuestionGroupProvider } from "./QuestionGroupProvider";
@@ -67,10 +67,10 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 
 	const [selected, setSelected] = useState<Record<number, string | undefined>>({})
-	const select = (questionNum: number, option: string) => {
+	const select = useCallback((questionNum: number, option: string) => {
 		setAnswer(questionNum, [option])
 		setSelected(prev => ({ ...prev, [questionNum]: option }))
-	}
+	}, [setAnswer])
 
 	const deselect = (questionNum: number) => {
 		setAnswer(questionNum, [""])
@@ -90,7 +90,7 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 			if (answers[q.num])
 				select(q.num, answers[q.num][0])
 		})
-	}, [])
+	}, [g.questions, select, store])
 
 
 	// Draggable Option
@@ -239,45 +239,56 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 	const [selected, setSelected] = useState<Record<string, number>>({})
 	const getQuestion = useModuleStore((state) => state.getQuestion)
 
-	return <VStack alignItems="start">
+	return (
+		<VStack>
 
-		<VStack alignItems="stretch" ms="auto" border="md" p="6" borderStyle="groove" shadow="lg" borderRadius="md" mb="8">
-			<Center fontWeight="bold">{g.sentences_title}</Center>
-			{
-				Object.keys(g.sentences).map(key =>
-					<HStack
-						key={key}
-						bg={selected[key] ? "bg.emphasized" : "none"}
-						mx="0"
-						px="6"
-					>
-						<Text fontWeight="bold" fontFamily="mono" fontSize="lg">{key}</Text>
-						<Text>{g.sentences[key]}</Text>
-					</HStack>)
-			}
-		</VStack>
+			<VStack
+				alignItems="start"
+				justifySelf="center"
+				mb="8"
+				p="6"
+				border="md"
+				borderStyle="groove"
+				shadow="lg"
+				borderRadius="md"
+			>
+				<Text fontWeight="bold" mx="auto">{g.sentences_title}</Text>
+				{
+					Object.keys(g.sentences).map(key =>
+						<HStack
+							key={key}
+							bg={selected[key] ? "bg.emphasized" : "none"}
+							mx="0"
+							px="6"
+						>
+							<Text fontWeight="bold" fontFamily="mono" fontSize="lg">{key}</Text>
+							<Text>{g.sentences[key]}</Text>
+						</HStack>)
+				}
+			</VStack>
 
-		<VStack alignItems="stretch">
-			{
-				g.questions.map((question) => (
-					<Question
-						key={question.num}
-						question={getQuestion(question.num)}
-						options={Object.keys(g.sentences)}
-						onChange={(e) => {
-							const value = e.currentTarget.value
-							setSelected(prev => {
-								let new_state = Object.fromEntries(Object.entries(prev).filter(([, val]) => val !== question.num))
-								if (value) {
-									new_state = { ...new_state, [value]: question.num }
-								}
-								return new_state
-							})
-						}} />
-				))
-			}
+			<VStack alignItems="stretch">
+				{
+					g.questions.map((question) => (
+						<Question
+							key={question.num}
+							question={getQuestion(question.num)}
+							options={Object.keys(g.sentences)}
+							onChange={(e) => {
+								const value = e.currentTarget.value
+								setSelected(prev => {
+									let new_state = Object.fromEntries(Object.entries(prev).filter(([, val]) => val !== question.num))
+									if (value) {
+										new_state = { ...new_state, [value]: question.num }
+									}
+									return new_state
+								})
+							}} />
+					))
+				}
+			</VStack>
 		</VStack>
-	</VStack>
+	)
 }
 
 

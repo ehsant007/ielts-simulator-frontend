@@ -40,8 +40,8 @@ export function ExamTimer({
 	return (
 		<Text
 			color={minutes < 2 ? "red" : "fg"}
-			fontSize="3xl"
-			fontWeight="bold"
+			fontSize="2xl"
+			//fontWeight="bold"
 			fontFamily="mono"
 		>
 			{String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}

@@ -20,8 +20,9 @@ export function ListeningModule() {
 			<Layout.ViewPort>
 				<VStack
 					alignItems="stretch"
+					justifySelf="center"
+					mx="6"
 					gap="6"
-					mx="auto"
 					mt="3"
 					mb="40"
 					maxW="5xl"
@@ -32,7 +33,15 @@ export function ListeningModule() {
 
 			{mode === "review" && (
 				<Layout.ViewPort>
-					<VStack alignItems="stretch" gap="6" mx="3" mt="3" mb="40">
+					<VStack
+						alignItems="stretch"
+						justifySelf="center"
+						mx="6"
+						gap="6"
+						mt="3"
+						mb="40"
+						maxW="5xl"
+					>
 						<AudioScript script={audioScript} />
 					</VStack>
 				</Layout.ViewPort>

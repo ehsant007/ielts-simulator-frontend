@@ -26,7 +26,6 @@ export function ImageVisual({ visual }: { visual: ImageVisual }) {
 				src={getModuleFile(module1.id, visual.filename)}
 				filter={`invert(${colorMode === "dark" ? 1 : 0})`}
 				alt="ielts_img"
-				maxW={900}
 			/>
 			<Center mx="auto" maxW={800} fontSize="md" textAlign="center">{visual.description}</Center>
 		</VStack>
