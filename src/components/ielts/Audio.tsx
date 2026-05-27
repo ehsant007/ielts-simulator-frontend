@@ -1,7 +1,7 @@
 "use client"
 
 import { useModuleStore } from "./ModuleProvider";
-import { Box, Button, Center, HStack, Popover, Portal, Progress, Slider, Spinner, StackProps, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Center, HStack, Popover, Portal, Progress, Slider, StackProps, Text, VStack } from "@chakra-ui/react";
 import { useEffect, useRef, useMemo, useState } from "react";
 import { getModuleFile } from "./utils";
 
