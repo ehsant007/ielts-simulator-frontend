@@ -23,6 +23,12 @@ export function ModuleContextProvider({ children, module, mode, lastAttempt }: M
 				focused: question.num === 1,
 				focusCount: 0,
 			}
+
+			if (question.to_num) {
+				for (let n = question.num + 1; n <= question.to_num; n++) {
+					map[n] = map[question.num]
+				}
+			}
 		})
 
 		return map
