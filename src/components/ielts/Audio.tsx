@@ -141,8 +141,10 @@ function Time({ value }: { value: number }) {
 
 
 export function PlaybackRateControl({ value, onChange }: { value: number, onChange: (value: number) => void }) {
+	const [open, setOpen] = useState(false)
+
 	return (
-		<Popover.Root>
+		<Popover.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
 			<Popover.Trigger asChild>
 				<Button
 					size="sm"
@@ -173,7 +175,10 @@ export function PlaybackRateControl({ value, onChange }: { value: number, onChan
 											colorPalette={value === rate ? "purple" : "fg"}
 											fontFamily="mono"
 											fontWeight="bold"
-											onClick={() => onChange(rate)}
+											onClick={() => {
+												onChange(rate)
+												setOpen(false)
+											}}
 										>
 											{rate}x
 										</Button>
