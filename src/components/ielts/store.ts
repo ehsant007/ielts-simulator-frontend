@@ -36,6 +36,8 @@ export type ModuleStore = {
 	setAudioPlay: (value: boolean) => void
 	audioVolume: number
 	setAudioVolume: (value: number) => void
+	audioMute: boolean
+	setAudioMute: (value: boolean) => void
 }
 
 export function createModuleStore(
@@ -108,6 +110,9 @@ export function createModuleStore(
 		setAudioPlay: (value) => set(() => ({ audioPlay: value })),
 
 		audioVolume: 100,
-		setAudioVolume: (value) => set(() => ({ audioVolume: value }))
+		setAudioVolume: (value) => set(() => ({ audioVolume: value })),
+
+		audioMute: false,
+		setAudioMute: (value) => set(() => ({ audioMute: value })),
 	}))
 }

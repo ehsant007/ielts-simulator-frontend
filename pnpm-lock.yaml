@@ -56,6 +56,9 @@ importers:
       rehype-raw:
         specifier: ^7.0.0
         version: 7.0.0
+      wavesurfer.js:
+        specifier: ^7.12.7
+        version: 7.12.7
       zustand:
         specifier: ^5.0.13
         version: 5.0.13(@types/react@19.2.2)(react@19.2.0)
@@ -2755,6 +2758,9 @@ packages:
 
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
+
+  wavesurfer.js@7.12.7:
+    resolution: {integrity: sha512-TIe7hB6OCZysNOZ2cn2NR8Qpko22POWel6rauNcqOammFoH65NYQUM35unNLLMIlUMVYvjJ6w/TTl/G/m+w0nA==}
 
   web-namespaces@2.0.1:
     resolution: {integrity: sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==}
@@ -6423,6 +6429,8 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
+
+  wavesurfer.js@7.12.7: {}
 
   web-namespaces@2.0.1: {}
 
