@@ -28,7 +28,7 @@ export function TopBar() {
 	}
 
 	return (
-		<VStack px="6" py="2">
+		<VStack px="6" py="2" w="full">
 			<HStack w="full">
 				<HStack gap="6" >
 					<ColorModeButton />

@@ -47,10 +47,10 @@ export const Layout: LayoutComponent = ({ children }) => {
 	}
 
 	return (
-		<VStack h="100dvh" gap={0} align="stretch" overflow="hidden">
+		<VStack h="100dvh" gap={0} overflow="hidden">
 			<TopBar />
 
-			<Flex flex="1" minH="0" overflow="hidden">
+			<Flex flex="1" minH="0" overflow="hidden" w="full">
 				{
 					panes.map((pane, i) => {
 						if (!paneVisibility[i])
