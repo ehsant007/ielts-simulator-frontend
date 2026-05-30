@@ -2,7 +2,7 @@
 
 import type { ListeningContent, Question, ReadingContent } from "@/client";
 import { useModuleStore } from "./ModuleProvider";
-import { Wrap, Button, VStack, HStack, Icon, Collapsible, Group, SegmentGroup } from "@chakra-ui/react";
+import { Wrap, Button, VStack, HStack, Icon, Collapsible, Group, SegmentGroup, useBreakpointValue, Box } from "@chakra-ui/react";
 import { HiArrowLeft, HiArrowRight } from "react-icons/hi";
 import { BiCollapse, BiExpand } from "react-icons/bi";
 import { useState } from "react";
@@ -61,59 +61,63 @@ export function ListeningReadingQuestionNav() {
 	const [navExpand, setNavExpand] = useState(true)
 	const part_i = useModuleStore((state) => state.part)
 	const content = module1.content as (ListeningContent | ReadingContent)
+	const isMobile = useBreakpointValue({ base: true, md: false, })
 
 	return (
-		<VStack width="full" >
+		<VStack width="full">
 
-			<Wrap width="full">
+			<Wrap width="full" maxW="5xl">
 
-				<Group visibility="hidden">
-					<Button
-						variant="outline"
-						size="sm">
-						<HiArrowLeft />
-					</Button>
+				{!isMobile && (
+					<>
+						<Group visibility="hidden">
+							<Button
+								size="xs">
+								<HiArrowLeft />
+							</Button>
 
-					<Button
-						variant="outline"
-						size="sm">
-						<HiArrowRight />
-					</Button>
-				</Group>
+							<Button
+								size="xs">
+								<HiArrowRight />
+							</Button>
+						</Group>
 
-				<Button
-					visibility="hidden"
-					size="sm"
-					variant="outline"
-				>
-					<Icon> <BiExpand /> </Icon>
-				</Button>
+						<Button
+							visibility="hidden"
+							size="xs"
+						>
+							<Icon> <BiExpand /> </Icon>
+						</Button>
+					</>
+				)
+				}
+				<Box ms="auto">
+					<SegmentGroup.Root
+						size="sm"
+						value={`${part_i}`}
+					>
+						<SegmentGroup.Indicator />
+						{
+							content.parts.map((part, pi) =>
+								<SegmentGroup.Item
+									cursor="pointer"
+									value={`${pi}`}
+									key={pi}
+									onClick={() => focusQuestion(part.test[0].questions[0].num)}
+									fontWeight="semibold"
+								>
+									Part {pi + 1}
+								</SegmentGroup.Item>
+							)
+						}
+					</SegmentGroup.Root>
+				</Box>
 
-				<SegmentGroup.Root
-					ms="auto"
-					value={`${part_i}`}
-				>
-					<SegmentGroup.Indicator />
-					{
-						content.parts.map((part, pi) =>
-							<SegmentGroup.Item
-								cursor="pointer"
-								value={`${pi}`}
-								key={pi}
-								onClick={() => focusQuestion(part.test[0].questions[0].num)}
-								fontWeight="semibold"
-							>
-								Part {pi + 1}
-							</SegmentGroup.Item>
-						)
-					}
-				</SegmentGroup.Root>
-
-				<Group ms="auto" me="5" >
+				<Group ms="auto" me="5" p="0" alignItems="start">
 					<Button
 						onClick={focusPrevQuestion}
 						variant="outline"
-						size="sm"
+						size="xs"
 					>
 						<HiArrowLeft />
 					</Button>
@@ -121,25 +125,34 @@ export function ListeningReadingQuestionNav() {
 					<Button
 						onClick={focusNextQuestion}
 						variant="outline"
-						size="sm"
+						size="xs"
 					>
 						<HiArrowRight />
 					</Button>
 				</Group>
 
-				<Button
-					size="sm"
-					variant="outline"
-					onClick={() => setNavExpand(prev => !prev)}
-				>
-					<Icon>{navExpand ? <BiCollapse /> : <BiExpand />}</Icon>
-				</Button>
+			
+					<Button
+						size="xs"
+						variant="outline"
+						p="0"
+						onClick={() => setNavExpand(prev => !prev)}
+					>
+						<Icon>{navExpand ? <BiCollapse /> : <BiExpand />}</Icon>
+					</Button>
+
 			</Wrap>
 
 			<Collapsible.Root open={navExpand}>
 				<Collapsible.Content>
 					<Wrap justify="center">
-						{
+						{isMobile ?
+							content.parts.map((part) => part.test.map((g) => g.questions.map((q) =>
+								<QuestionNavButton key={q.num} question={q} />
+							)))
+
+							:
+
 							content.parts.map((part, part_i) => <Wrap gap="0.5" key={part_i}>
 								<Button
 									key={part_i}

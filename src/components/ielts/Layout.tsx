@@ -38,7 +38,7 @@ export const Layout: LayoutComponent = ({ children }) => {
 	);
 
 	const [paneVisibility, _setPaneVisibility] = useState(Array(panes.length).fill(true),)
-	const scrollPosition = useRef<Array<number>>(Array(panes.length).fill(0))
+	const scrollPosition = useRef<Array<number>>(Array(panes.length,4).fill(0))
 
 	const isMobile = useBreakpointValue({ base: true, md: false, })
 
@@ -81,7 +81,7 @@ export const Layout: LayoutComponent = ({ children }) => {
 						"--segment-indicator-bg": "colors.purple.muted",
 					}}
 				>
-					<SegmentGroup.Indicator/>
+					<SegmentGroup.Indicator />
 
 					<SegmentGroup.Item
 						cursor="pointer"
@@ -127,7 +127,7 @@ export const Layout: LayoutComponent = ({ children }) => {
 			}
 
 
-			<Flex flex="1" minH="0" overflow="hidden" w="full">
+			<Flex flex="1" minH="0" overflow="hidden" w="full" justifyContent={"center"}>
 				<AnimatePresence initial={false} mode="popLayout">
 					{panes.map((pane, i) =>
 						paneVisibility[i] ? (
@@ -144,7 +144,13 @@ export const Layout: LayoutComponent = ({ children }) => {
 				</AnimatePresence>
 			</Flex>
 
-			<Box flexShrink={0} py="3" px="6" w="full">
+			<Box
+				flexShrink={0}
+				pb="3"
+				pt="1"
+				px="6"
+				w="full"
+			>
 				<QuestionNav />
 			</Box>
 		</VStack>
@@ -186,6 +192,7 @@ const Pane = forwardRef<HTMLDivElement, { children: React.ReactNode, scroll: num
 				exit={{ opacity: 0, scaleX: 0.98 }}
 				transition={{ duration: 0.2 }}
 				onScroll={(e) => (onScroll(e.currentTarget.scrollTop))}
+				maxW="5xl"
 			>
 				{children}
 

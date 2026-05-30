@@ -17,7 +17,7 @@ export function ListeningModule() {
 
 	return (
 		<Layout>
-			<Layout.ViewPort>
+			<Layout.ViewPort title="Questions">
 				<VStack
 					alignItems="stretch"
 					justifySelf="center"
@@ -25,14 +25,13 @@ export function ListeningModule() {
 					gap="6"
 					mt="3"
 					mb="40"
-					maxW="5xl"
 				>
 					<Test test={part.test} />
 				</VStack>
 			</Layout.ViewPort>
 
 			{mode === "review" && (
-				<Layout.ViewPort>
+				<Layout.ViewPort title="Utterances">
 					<VStack
 						alignItems="stretch"
 						justifySelf="center"
@@ -40,7 +39,6 @@ export function ListeningModule() {
 						gap="6"
 						mt="3"
 						mb="40"
-						maxW="5xl"
 					>
 						<AudioScript script={audioScript} />
 					</VStack>
