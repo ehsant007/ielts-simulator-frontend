@@ -17,7 +17,7 @@ export function ReadingModule() {
 		<Layout>
 			<Layout.ViewPort
 				title="Passage"
-				key={`reading-questions-part${pi}`}
+				key={`reading-passage-part${pi}`}
 			>
 				<Box
 					px="5"
@@ -33,7 +33,7 @@ export function ReadingModule() {
 
 			<Layout.ViewPort
 				title="Questions"
-				key={`reading-passage-part${pi}`}
+				key={`reading-questions-part${pi}`}
 			>
 				<VStack
 					alignItems="stretch"
