@@ -17,7 +17,10 @@ export function ListeningModule() {
 
 	return (
 		<Layout>
-			<Layout.ViewPort title="Questions">
+			<Layout.ViewPort
+				title="Questions"
+				key={`listening-questions-part${pi}`}
+			>
 				<VStack
 					alignItems="stretch"
 					justifySelf="center"
@@ -31,7 +34,10 @@ export function ListeningModule() {
 			</Layout.ViewPort>
 
 			{mode === "review" && (
-				<Layout.ViewPort title="Utterances">
+				<Layout.ViewPort
+					title="Utterances"
+					key={`listening-audio-script-part${pi}`}
+				>
 					<VStack
 						alignItems="stretch"
 						justifySelf="center"

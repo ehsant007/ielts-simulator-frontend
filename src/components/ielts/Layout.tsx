@@ -1,6 +1,6 @@
 "use client";
 
-import React, { forwardRef, useLayoutEffect, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Box, Button, ButtonGroup, Flex, HStack, Icon, SegmentGroup, useBreakpoint, useBreakpointValue, VStack } from "@chakra-ui/react";
 import { QuestionNav } from "./QuestionNav";
 import { TopBar } from "./TopBar";
@@ -38,7 +38,7 @@ export const Layout: LayoutComponent = ({ children }) => {
 	);
 
 	const [paneVisibility, _setPaneVisibility] = useState(Array(panes.length).fill(true),)
-	const scrollPosition = useRef<Array<number>>(Array(panes.length,4).fill(0))
+	const scrollPosition = useRef<Map<string, number>>(new Map<string, number>())
 
 	const isMobile = useBreakpointValue({ base: true, md: false, })
 
@@ -49,18 +49,42 @@ export const Layout: LayoutComponent = ({ children }) => {
 			return next;
 		});
 
-	const toggleExpand = (pane_i: number) => {
-		for (let i = 0; i < panes.length; i++)
-			setPaneVisibility(i, !paneVisibility[i] || pane_i === i)
-	}
 
 	const expand = (pane_i: number) => {
 		for (let i = 0; i < panes.length; i++)
 			setPaneVisibility(i, pane_i === i)
 	}
 
-	const [paneSwitch, setPaneSwitch] = useState(isMobile ? () => { expand(0); return "left" } : "both")
+	const [mode, setMode] = useState("both")
 
+	const changeMode = (value: string) => {
+		switch (value) {
+			case "left":
+				expand(0)
+				setMode("left")
+				break
+			case "right":
+				expand(1)
+				setMode("right")
+				break
+			case "both":
+				setPaneVisibility(0, true)
+				setPaneVisibility(1, true)
+				setMode("both")
+				break
+		}
+	}
+
+	useEffect(() => {
+		if (isMobile)
+		{
+			if (mode === "both")
+				changeMode("left")
+		}
+		else
+			changeMode("both")
+
+	}, [isMobile])
 
 	if (panes.length > 2) {
 		throw new Error("Layout expects at most two <Layout.ViewPort> children.");
@@ -74,7 +98,7 @@ export const Layout: LayoutComponent = ({ children }) => {
 			{panes.length > 1 &&
 				<SegmentGroup.Root
 					mx="auto"
-					value={paneSwitch}
+					value={mode}
 					size="xs"
 					mb="0.5"
 					css={{
@@ -86,10 +110,7 @@ export const Layout: LayoutComponent = ({ children }) => {
 					<SegmentGroup.Item
 						cursor="pointer"
 						value="left"
-						onClick={() => {
-							expand(0)
-							setPaneSwitch("left")
-						}}
+						onClick={() => changeMode("left")}
 						fontWeight="semibold"
 					>
 						{panes[0].props.title}
@@ -99,11 +120,7 @@ export const Layout: LayoutComponent = ({ children }) => {
 						<SegmentGroup.Item
 							cursor="pointer"
 							value="both"
-							onClick={() => {
-								setPaneVisibility(0, true)
-								setPaneVisibility(1, true)
-								setPaneSwitch("both")
-							}}
+							onClick={() => changeMode("both")}
 							fontWeight="semibold"
 						>
 							Both
@@ -113,10 +130,7 @@ export const Layout: LayoutComponent = ({ children }) => {
 					<SegmentGroup.Item
 						cursor="pointer"
 						value="right"
-						onClick={() => {
-							expand(1)
-							setPaneSwitch("right")
-						}}
+						onClick={() => changeMode("right")}
 						fontWeight="semibold"
 					>
 						{panes[1].props.title}
@@ -127,15 +141,15 @@ export const Layout: LayoutComponent = ({ children }) => {
 			}
 
 
-			<Flex flex="1" minH="0" overflow="hidden" w="full" justifyContent={"center"}>
+			<Flex flex="1" minH="0" overflow="hidden" w="full">
 				<AnimatePresence initial={false} mode="popLayout">
 					{panes.map((pane, i) =>
 						paneVisibility[i] ? (
 							<Pane
 								key={pane.key}
-								scroll={scrollPosition.current[i]}
-								onScroll={(value) => scrollPosition.current[i] = value}
-								onAction={() => toggleExpand(i)}
+								scroll={scrollPosition.current.get(pane.key ?? "nokey") ?? 0}
+								onScroll={(value) => scrollPosition.current.set(pane.key ?? "nokey", value)}
+								align={mode === "both" ? ["end", "start"][i] : "center"}
 							>
 								{pane.props.children}
 							</Pane>
@@ -160,10 +174,9 @@ export const Layout: LayoutComponent = ({ children }) => {
 Layout.ViewPort = ViewPort;
 
 
-const Pane = forwardRef<HTMLDivElement, { children: React.ReactNode, scroll: number, onScroll: (value: number) => void, onAction: () => void }>(
-	function Pane({ children, scroll, onScroll, onAction }, forwardRef) {
+const Pane = forwardRef<HTMLDivElement, { children: React.ReactNode, scroll: number, onScroll: (value: number) => void, align: string }>(
+	function Pane({ children, scroll, onScroll, align }, forwardRef) {
 		const ref = useRef<HTMLDivElement>(null)
-		const [navExpand, setNavExpand] = useState(false)
 
 		useLayoutEffect(() => {
 			if (!ref.current) return
@@ -192,9 +205,10 @@ const Pane = forwardRef<HTMLDivElement, { children: React.ReactNode, scroll: num
 				exit={{ opacity: 0, scaleX: 0.98 }}
 				transition={{ duration: 0.2 }}
 				onScroll={(e) => (onScroll(e.currentTarget.scrollTop))}
-				maxW="5xl"
 			>
-				{children}
+				<Box maxW="5xl" w="full" justifySelf={align}>
+					{children}
+				</Box>
 
 			</MotionBox>
 		)

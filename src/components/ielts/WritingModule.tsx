@@ -18,8 +18,10 @@ export function WritingModule() {
 
 	return (
 		<Layout>
-			<Layout.ViewPort>
-				<VStack maxW="5xl" mt="6" gap="6" alignItems="start" justifySelf="center" mx="6" mb="40%">
+			<Layout.ViewPort
+				key={`writing-questions-task${task_i}`}
+			>
+				<VStack mt="6" gap="6" alignItems="start" mx="6" mb="40%">
 					<Box>
 						<Text fontSize="lg" fontWeight="bold">WRITING TASK {task_i + 1}</Text>
 						<Text fontStyle="italic">You should spend about {task_i === 0 ? 20 : 40} minutes on this task.</Text>
