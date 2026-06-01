@@ -1,13 +1,11 @@
 "use client";
 
-import React, { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Box, Button, ButtonGroup, Flex, HStack, Icon, SegmentGroup, useBreakpoint, useBreakpointValue, VStack } from "@chakra-ui/react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Box, Flex,  ScrollArea, SegmentGroup, useBreakpointValue, VStack } from "@chakra-ui/react";
 import { QuestionNav } from "./QuestionNav";
 import { TopBar } from "./TopBar";
-import { MdDoubleArrow, MdSwitchLeft, MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { AnimatePresence, motion } from "motion/react"
-import { BiCollapse, BiExpand } from "react-icons/bi";
-import { GoArrowSwitch } from "react-icons/go";
+
 
 const MotionBox = motion.create(Box)
 
@@ -76,8 +74,7 @@ export const Layout: LayoutComponent = ({ children }) => {
 	}
 
 	useEffect(() => {
-		if (isMobile)
-		{
+		if (isMobile) {
 			if (mode === "both")
 				changeMode("left")
 		}
@@ -145,14 +142,24 @@ export const Layout: LayoutComponent = ({ children }) => {
 				<AnimatePresence initial={false} mode="popLayout">
 					{panes.map((pane, i) =>
 						paneVisibility[i] ? (
-							<Pane
+							<MotionBox
 								key={pane.key}
-								scroll={scrollPosition.current.get(pane.key ?? "nokey") ?? 0}
-								onScroll={(value) => scrollPosition.current.set(pane.key ?? "nokey", value)}
-								align={mode === "both" ? ["end", "start"][i] : "center"}
+								flex="1"
+								minH="0"
+								overflow="hidden"
+								w="full"
+								layout
+								transition={{ duration: 0.2 }}
+								exit={{ opacity: 0, scaleX: 0.98 }}
 							>
-								{pane.props.children}
-							</Pane>
+								<Pane
+									scroll={scrollPosition.current.get(pane.key ?? "nokey") ?? 0}
+									onScroll={(value) => scrollPosition.current.set(pane.key ?? "nokey", value)}
+									align={mode === "both" ? ["end", "start"][i] : "center"}
+								>
+									{pane.props.children}
+								</Pane>
+							</MotionBox>
 						) : null
 					)}
 				</AnimatePresence>
@@ -174,43 +181,38 @@ export const Layout: LayoutComponent = ({ children }) => {
 Layout.ViewPort = ViewPort;
 
 
-const Pane = forwardRef<HTMLDivElement, { children: React.ReactNode, scroll: number, onScroll: (value: number) => void, align: string }>(
-	function Pane({ children, scroll, onScroll, align }, forwardRef) {
-		const ref = useRef<HTMLDivElement>(null)
+type PaneProps = {
+	children: React.ReactNode,
+	scroll: number,
+	onScroll: (value: number) => void,
+	align: string,
+}
 
-		useLayoutEffect(() => {
-			if (!ref.current) return
-			ref.current.scrollTop = scroll
-		}, [scroll])
+function Pane({ children, onScroll, align, scroll }: PaneProps) {
 
-		const setRef = (el: HTMLDivElement) => {
-			ref.current = el
+	const ref = useRef<HTMLDivElement>(null)
 
-			if (typeof forwardRef === "function")
-				forwardRef(el)
-			else if (forwardRef)
-				forwardRef.current = el
-		}
+	useLayoutEffect(() => {
+		if (!ref.current) return
+		ref.current.scrollTop = scroll
+	}, [scroll])
 
-		return (
-			<MotionBox
-				ref={setRef}
-				bg="bg"
-				layout
-				flex="1"
-				minW="0"
-				minH="0"
-				overflowY="auto"
-				overflowX="hidden"
-				exit={{ opacity: 0, scaleX: 0.98 }}
-				transition={{ duration: 0.2 }}
+	return (
+		<ScrollArea.Root
+			bg="bg"
+			variant="always"
+		>
+			<ScrollArea.Viewport
+				ref={ref}
 				onScroll={(e) => (onScroll(e.currentTarget.scrollTop))}
 			>
-				<Box maxW="5xl" w="full" justifySelf={align}>
-					{children}
-				</Box>
-
-			</MotionBox>
-		)
-	}
-)
+				<ScrollArea.Content>
+					<Box maxW="5xl" w="full" justifySelf={align}>
+						{children}
+					</Box>
+				</ScrollArea.Content>
+			</ScrollArea.Viewport>
+			<ScrollArea.Scrollbar />
+		</ScrollArea.Root>
+	)
+}
