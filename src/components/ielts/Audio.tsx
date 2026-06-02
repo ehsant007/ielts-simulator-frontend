@@ -250,7 +250,7 @@ export function AudioReview(props: StackProps) {
 		})
 
 		ws.on("timeupdate", (value) => {
-			setTime(value)
+			setTime(Math.floor(value))
 		})
 
 		playerRef.current = ws
