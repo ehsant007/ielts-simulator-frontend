@@ -56,7 +56,7 @@ export function TopBar() {
 					{mode === "test" && (
 						<>
 							<ExamTimer onExpire={() => submit} />
-							<Button size="sm" variant="outline" onClick={submit}>Submit</Button>
+							<Button size="sm" onClick={submit}>Submit</Button>
 						</>
 					)}
 				</HStack>

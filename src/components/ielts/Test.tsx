@@ -7,7 +7,7 @@ export function Test({ test }: { test: Array<QuestionGroupType> }) {
 		<>
 			{
 				test.map((g) => (
-					<Box key={g.question_range.join("-")} shadow="md" p="5">
+					<Box key={g.question_range.join("-")} shadow="md" p="5" bg="content.bg">
 						<QuestionGroup g={g} />
 					</Box>
 				))

@@ -144,10 +144,12 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 			m="1"
 			fontWeight="medium"
 			fontSize="md"
-			variant="subtle"
-			color="purple.solid"
+			variant="outline"
+			color="answer"
+			bg="bg.emphasized"
 			onFocus={() => focusQuestion(question.num)}
 			ref={ref}
+			focusRingColor="question.focusRing"
 		/>
 	)
 })
@@ -202,6 +204,7 @@ export const CompletionWithOption = forwardRef<HTMLDivElement, { question: Quest
 				}}
 				tabIndex={0}
 				focusRing="outside"
+				focusRingColor="question.focusRing"
 			>
 				{answer ? answer : question.num}
 			</Box>
@@ -224,7 +227,15 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 
 	return <>
 
-		<HStack alignItems="start" p="3" onFocus={() => focusQuestion(question.num)} tabIndex={0} focusRing="outside" ref={ref}>
+		<HStack
+			alignItems="start"
+			p="3"
+			onFocus={() => focusQuestion(question.num)}
+			tabIndex={0}
+			focusRing="outside"
+			ref={ref}
+			focusRingColor="question.focusRing"
+		>
 
 			<Text fontWeight="bold">{question.num}</Text>
 
@@ -233,7 +244,10 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 
 				{mode === "test" &&
 					<Fieldset.Root>
-						<RadioGroup.Root value={answer ?? null}>
+						<RadioGroup.Root
+							value={answer ?? null}
+							colorPalette="answer"
+						>
 							<VStack gap="2" align="start" >
 								{
 									question.choices?.map((choice, i) => (
@@ -313,6 +327,7 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 			tabIndex={0}
 			focusRing="outside"
 			ref={ref}
+			focusRingColor="question.focusRing"
 		>
 			<VStack alignItems="start">
 
@@ -322,7 +337,9 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 					<Fieldset.Root mt="2">
 						<CheckboxGroup
 							value={answer}
-							onValueChange={(answer) => setAnswer(question.num, answer)}>
+							onValueChange={(answer) => setAnswer(question.num, answer)}
+							colorPalette="answer"
+						>
 							<Fieldset.Content>
 
 								{question.choices?.map((choice, i) => (
@@ -392,6 +409,7 @@ export const Matching = forwardRef<HTMLDivElement, QuestionProps>(({ question, o
 			tabIndex={0}
 			focusRing="outside"
 			ref={ref}
+			focusRingColor="question.focusRing"
 			px="3"
 			py="1"
 		>
@@ -402,15 +420,17 @@ export const Matching = forwardRef<HTMLDivElement, QuestionProps>(({ question, o
 
 			{mode === "test" && (
 				<>
-					<Separator flex="1" ps="5" />
+					<Separator flex="1" ps="5" borderColor={answer ? "answer.border" : "border"} />
 
 					<NativeSelect.Root
 						size="sm"
 						width="auto"
 						minWidth="fit"
-						fontWeight="medium"
 					>
 						<NativeSelect.Field
+							fontWeight={answer ? "bold" : "medium"}
+							color={answer ? "answer" : "fg"}
+							borderColor={answer ? "answer.border" : "border"}
 							value={answer}
 							placeholder="----"
 							onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}

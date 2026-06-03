@@ -41,7 +41,7 @@ export function ExamTimer({
 		<Text
 			color={minutes < 2 ? "red" : "fg"}
 			fontSize="2xl"
-			//fontWeight="bold"
+			fontWeight="bold"
 			fontFamily="mono"
 		>
 			{String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}

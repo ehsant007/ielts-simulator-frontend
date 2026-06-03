@@ -33,6 +33,10 @@ export function WritingTaskNav() {
 			<SegmentGroup.Root
 				mx="auto"
 				value={`${task_i}`}
+				css={{
+					"--segment-indicator-bg": "colors.purple.muted",
+				}}
+				bg="none"
 			>
 				<SegmentGroup.Indicator />
 				{
@@ -42,6 +46,7 @@ export function WritingTaskNav() {
 							value={`${task}`}
 							key={task}
 							onClick={() => setTask(task)}
+							fontWeight="medium"
 						>
 							Task {task + 1}
 						</SegmentGroup.Item>
@@ -95,6 +100,10 @@ export function ListeningReadingQuestionNav() {
 					<SegmentGroup.Root
 						size="sm"
 						value={`${part_i}`}
+						css={{
+							"--segment-indicator-bg": "colors.purple.muted",
+						}}
+						bg="none"
 					>
 						<SegmentGroup.Indicator />
 						{
@@ -116,7 +125,7 @@ export function ListeningReadingQuestionNav() {
 				<Group ms="auto" me="5" p="0" alignItems="start">
 					<Button
 						onClick={focusPrevQuestion}
-						variant="outline"
+						//variant="outline"
 						size="xs"
 					>
 						<HiArrowLeft />
@@ -124,22 +133,22 @@ export function ListeningReadingQuestionNav() {
 
 					<Button
 						onClick={focusNextQuestion}
-						variant="outline"
+						//variant="outline"
 						size="xs"
 					>
 						<HiArrowRight />
 					</Button>
 				</Group>
 
-			
-					<Button
-						size="xs"
-						variant="outline"
-						p="0"
-						onClick={() => setNavExpand(prev => !prev)}
-					>
-						<Icon>{navExpand ? <BiCollapse /> : <BiExpand />}</Icon>
-					</Button>
+
+				<Button
+					size="xs"
+					variant="outline"
+					p="0"
+					onClick={() => setNavExpand(prev => !prev)}
+				>
+					<Icon>{navExpand ? <BiCollapse /> : <BiExpand />}</Icon>
+				</Button>
 
 			</Wrap>
 
@@ -184,18 +193,18 @@ export function QuestionNavButton({ question }: { question: Question }) {
 	const answer = useModuleStore((state) => state.answers[question.num]) ?? []
 	const mode = useModuleStore((state) => state.mode)
 
-	let props = {}
+	let props = { colorPalette: "gray" }
 	if (mode === "test") {
 		props = answer?.[0]
-			? { colorPalette: "purple" }
-			: {}
+			? { colorPalette: "answer" }
+			: props
 	} else {
 
 		props = result.includes(0)
 			? { colorPalette: "red" }
 			: result.includes(1)
 				? { colorPalette: "green" }
-				: {}
+				: props
 	}
 
 	return (

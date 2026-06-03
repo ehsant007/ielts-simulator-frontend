@@ -1,6 +1,6 @@
 "use client"
 
-import { Content as ContentType, Text as TextType} from "@/client"
+import { Content as ContentType, Text as TextType } from "@/client"
 import { Box, List, Text, VStack } from "@chakra-ui/react"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
@@ -54,7 +54,10 @@ export function MD({ children }: { children: string | string[] | null | undefine
 				return children
 
 			return <Question question={getQuestion(Number.parseInt(question_num))} />
-		}
+		},
+		strong({ children }) {
+			return <Text as="span" fontWeight="bold" color="question.strong">{children}</Text>
+		},
 	}} >
 		{data}
 	</Markdown>
@@ -67,7 +70,7 @@ export function Content({ content }: { content: ContentType }) {
 	}
 }
 
-export function TextContent({children}: {children: TextType}){
+export function TextContent({ children }: { children: TextType }) {
 	return <VStack>
 		<Text textStyle="3xl" pb="3">{children.title}</Text>
 

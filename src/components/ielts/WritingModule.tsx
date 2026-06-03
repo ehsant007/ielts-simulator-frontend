@@ -21,9 +21,9 @@ export function WritingModule() {
 			<Layout.ViewPort
 				key={`writing-questions-task${task_i}`}
 			>
-				<VStack mt="6" gap="6" alignItems="start" mx="6" mb="40%">
+				<VStack mt="6" gap="6" alignItems="start" mx="6" mb="40%" bg="content.bg" p ="6" shadow="md">
 					<Box>
-						<Text fontSize="lg" fontWeight="bold">WRITING TASK {task_i + 1}</Text>
+						<Text fontSize="lg" fontWeight="bold" color="primary">WRITING TASK {task_i + 1}</Text>
 						<Text fontStyle="italic">You should spend about {task_i === 0 ? 20 : 40} minutes on this task.</Text>
 					</Box>
 
@@ -31,7 +31,7 @@ export function WritingModule() {
 						{task_i === 1 &&
 							<Text mb="2" fontStyle="italic">Write about the following topic:</Text>
 						}
-						<Box shadow="md" p="6" border="md" borderRadius="md" borderColor="fg.subtle">
+						<Box shadow="md" p="6" border="md" borderRadius="md" borderColor="fg.subtle" fontWeight="medium">
 							<MD>{task.question}</MD>
 						</Box>
 					</Box>

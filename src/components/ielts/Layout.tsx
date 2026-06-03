@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Box, Flex,  ScrollArea, SegmentGroup, useBreakpointValue, VStack } from "@chakra-ui/react";
+import { Box, Flex, ScrollArea, SegmentGroup, useBreakpointValue, VStack } from "@chakra-ui/react";
 import { QuestionNav } from "./QuestionNav";
 import { TopBar } from "./TopBar";
 import { AnimatePresence, motion } from "motion/react"
@@ -89,7 +89,7 @@ export const Layout: LayoutComponent = ({ children }) => {
 
 
 	return (
-		<VStack h="100dvh" gap={0} overflow="hidden">
+		<VStack h="100dvh" gap={0} overflow="hidden" bg="layout.bg">
 			<TopBar />
 
 			{panes.length > 1 &&
@@ -101,6 +101,7 @@ export const Layout: LayoutComponent = ({ children }) => {
 					css={{
 						"--segment-indicator-bg": "colors.purple.muted",
 					}}
+					bg="none"
 				>
 					<SegmentGroup.Indicator />
 
@@ -155,7 +156,7 @@ export const Layout: LayoutComponent = ({ children }) => {
 								<Pane
 									scroll={scrollPosition.current.get(pane.key ?? "nokey") ?? 0}
 									onScroll={(value) => scrollPosition.current.set(pane.key ?? "nokey", value)}
-									align={mode === "both" ? ["end", "start"][i] : "center"}
+									align={(panes.length > 1 && mode === "both") ? ["end", "start"][i] : "center"}
 								>
 									{pane.props.children}
 								</Pane>
@@ -199,7 +200,6 @@ function Pane({ children, onScroll, align, scroll }: PaneProps) {
 
 	return (
 		<ScrollArea.Root
-			bg="bg"
 			variant="always"
 		>
 			<ScrollArea.Viewport
