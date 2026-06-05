@@ -15,6 +15,7 @@ type QuestionProps = {
 
 
 export function Question({ question, options, onChange }: QuestionProps) {
+	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const focused = useModuleStore((state) => { return state.questionsMeta[question.num].focused })
 	const focusCount = useModuleStore((state) => state.questionsMeta[question.num].focusCount)
 	const ref = useRef<any>(null)
@@ -47,23 +48,35 @@ export function Question({ question, options, onChange }: QuestionProps) {
 			ui = (group as NoteCompletionGroup | SentenceCompletionGroup).options
 				? <CompletionWithOption ref={ref} question={question} />
 				: <Completion ref={ref} question={question} />
-			break
+			return ui
 		case "single_choice":
-			ui = <SingleChoice ref={ref} question={question} />
+			ui = <SingleChoice question={question} />
 			break
 		case "multiple_choice":
-			ui = <MultipleChoice ref={ref} question={question} />
+			ui = <MultipleChoice question={question} />
 			break
 		case "matching":
-			ui = <Matching ref={ref} question={question} options={options} onChange={onChange} />
+			ui = <Matching question={question} options={options} onChange={onChange} />
 			break
 		case "identify_info":
-			ui = <Matching ref={ref} question={question} options={options} onChange={onChange} />
+			ui = <Matching question={question} options={options} onChange={onChange} />
 			break
 		default:
 			ui = <Text>question type `{question.question_type}` not implemented!</Text>
 	}
-	return ui
+
+	return (
+		<Box
+			onFocus={() => focusQuestion(question.num)}
+			tabIndex={0}
+			focusRing="outside"
+			ref={ref}
+			focusRingColor="question.focusRing"
+			p="1"
+		>
+			{ui}
+		</Box>
+	)
 }
 
 export const CompletionReview = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
@@ -216,7 +229,6 @@ CompletionWithOption.displayName = "CompletionWithOption"
 
 
 export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
-	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const answer = useModuleStore((state) => state.answers[question.num])?.[0]
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 	const mode = useModuleStore((state) => state.mode)
@@ -227,14 +239,7 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 
 	return <>
 
-		<HStack
-			alignItems="start"
-			onFocus={() => focusQuestion(question.num)}
-			tabIndex={0}
-			focusRing="outside"
-			ref={ref}
-			focusRingColor="question.focusRing"
-		>
+		<HStack ref={ref} alignItems="start">
 
 			<Text fontWeight="bold">{question.num}</Text>
 
@@ -308,7 +313,6 @@ SingleChoice.displayName = "SingleChoice"
 
 
 export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionType }>(({ question }, ref) => {
-	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const answer = useModuleStore((state) => state.answers[question.num]) ?? []
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 	const mode = useModuleStore((state) => state.mode)
@@ -319,14 +323,7 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 
 	return <>
 
-		<HStack
-			alignItems="start"
-			onFocus={() => focusQuestion(question.num)}
-			tabIndex={0}
-			focusRing="outside"
-			ref={ref}
-			focusRingColor="question.focusRing"
-		>
+		<HStack ref={ref} alignItems="start">
 			<VStack alignItems="start">
 
 				<MD>{question.question}</MD>
@@ -392,7 +389,6 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 MultipleChoice.displayName = "MultipleChoice"
 
 export const Matching = forwardRef<HTMLDivElement, QuestionProps>(({ question, options }, ref) => {
-	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const answer = useModuleStore((state) => state.answers[question.num])?.[0]
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 	const mode = useModuleStore((state) => state.mode)
@@ -402,13 +398,7 @@ export const Matching = forwardRef<HTMLDivElement, QuestionProps>(({ question, o
 	const isCorrect = result?.[0] > 0
 
 	return (
-		<HStack
-			onFocus={() => focusQuestion(question.num)}
-			tabIndex={0}
-			focusRing="outside"
-			ref={ref}
-			focusRingColor="question.focusRing"
-		>
+		<HStack ref={ref}>
 			<HStack alignItems="start">
 				<Text fontWeight="bold">{question.num}</Text>
 				<Text>{question.question}</Text>
