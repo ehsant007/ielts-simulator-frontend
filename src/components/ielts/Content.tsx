@@ -17,22 +17,22 @@ export function MD({ children }: { children: string | string[] | null | undefine
 
 	return <Markdown rehypePlugins={[rehypeRaw]} components={{
 		h1({ children }) {
-			return <Text textStyle="4xl">{children}</Text>
+			return <Text textStyle="4xl" color="question.strong">{children}</Text>
 		},
 		h2({ children }) {
-			return <Text textStyle="3xl">{children}</Text>
+			return <Text textStyle="3xl" color="question.strong">{children}</Text>
 		},
 		h3({ children }) {
-			return <Text textStyle="2xl">{children}</Text>
+			return <Text textStyle="2xl" color="question.strong">{children}</Text>
 		},
 		h4({ children }) {
-			return <Text textStyle="xl">{children}</Text>
+			return <Text textStyle="xl" color="question.strong">{children}</Text>
 		},
 		h5({ children }) {
-			return <Text textStyle="lg">{children}</Text>
+			return <Text textStyle="lg" color="question.strong">{children}</Text>
 		},
 		h6({ children }) {
-			return <Text textStyle="md">{children}</Text>
+			return <Text textStyle="md" color="question.strong">{children}</Text>
 		},
 		p({ children }) {
 			return <Text>{children}</Text>

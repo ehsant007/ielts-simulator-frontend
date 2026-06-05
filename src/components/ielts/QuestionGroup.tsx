@@ -42,9 +42,11 @@ export function QuestionGroup({ g }: { g: QuestionGroup }) {
 				<Text fontStyle="italic" fontWeight="bold">
 					Questions {g.question_range?.[0]}-{g.question_range?.[1]}
 				</Text>
-				<Box mb="4" fontStyle="italic">
-					<MD>{g.prompt}</MD>
-				</Box>
+				{g.prompt &&
+					<Box mb="4" fontStyle="italic">
+						<MD>{g.prompt}</MD>
+					</Box>
+				}
 				{ui}
 			</VStack>
 		</QuestionGroupProvider>
