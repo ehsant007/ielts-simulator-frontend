@@ -75,18 +75,18 @@ const config = defineConfig({
 				},
 
 				appBg: {
-					value: { base: "{colors.white}", _dark: "{colors.gray.900}" },
+					value: { base: "{colors.white}", _dark: "{colors.gray.950}" },
 				},
 				appFg: {
 					value: { base: "{colors.gray.900}", _dark: "{colors.gray.300}" },
 				},
 
 				content: {
-					bg: { value: { base: "{colors.white}", _dark: "{colors.gray.900}" } },
+					bg: { value: { base: "{colors.white}", _dark: "{colors.gray.950}" } },
 				},
 
 				layout: {
-					bg: { value: { base: "{colors.purple.50}", _dark: "{colors.blue.900}" } },
+					bg: { value: { base: "{colors.purple.50}", _dark: "{colors.blue.950}" } },
 				},
 
 				question: {

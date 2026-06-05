@@ -15,6 +15,7 @@ export function AudioScript({ script }: { script: Array<Utterance> }) {
 						shadow="md"
 						p="5"
 						alignItems="start"
+						bg="content.bg"
 					>
 						{utterance.speaker &&
 							<Text
