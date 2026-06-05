@@ -47,7 +47,13 @@ export function QuestionGroup({ g }: { g: QuestionGroup }) {
 						<MD>{g.prompt}</MD>
 					</Box>
 				}
-				{ui}
+
+				<Box
+					width="full"
+					p="3" 
+				>
+					{ui}
+				</Box>
 			</VStack>
 		</QuestionGroupProvider>
 	)
@@ -242,7 +248,7 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 	const getQuestion = useModuleStore((state) => state.getQuestion)
 
 	return (
-		<VStack>
+		<VStack alignItems="start">
 
 			<VStack
 				alignItems="start"
@@ -251,6 +257,7 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 				p="6"
 				border="md"
 				borderStyle="groove"
+				borderColor="fg.subtle"
 				shadow="lg"
 				borderRadius="md"
 			>
@@ -306,7 +313,7 @@ export function IdentifyInfoGroup({ children: group }: { children: IdentifyInfoG
 				<Table.Body>
 					{
 						group.options.map((option, i) => (
-							<Table.Row key={option}>
+							<Table.Row key={option} bg="none">
 								<Table.Cell fontWeight="bold">{option}</Table.Cell>
 								<Table.Cell>{group.option_descriptions[i]}</Table.Cell>
 							</Table.Row>

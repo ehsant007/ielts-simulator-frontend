@@ -78,7 +78,7 @@ export const CompletionReview = forwardRef<HTMLDivElement, { question: QuestionT
 			as="span"
 			m="1"
 			display="inline-flex"
-			minH="8"
+			minH="7"
 			minW="40"
 			px="3"
 			borderWidth="1px"
@@ -140,7 +140,7 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 			textAlign="center"
 			placeholder={question.num.toString()}
 			w={`${Math.max(answer.length, 17)}ch`}
-			h="9"
+			h="7"
 			m="1"
 			fontWeight="medium"
 			fontSize="md"
@@ -182,7 +182,7 @@ export const CompletionWithOption = forwardRef<HTMLDivElement, { question: Quest
 				id={`q${question.num}`}
 				textAlign="center"
 				w={`${Math.max(answer.length, 17)}ch`}
-				h="9"
+				h="7"
 				m="1"
 				fontWeight="medium"
 				fontSize="md"
@@ -229,7 +229,6 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 
 		<HStack
 			alignItems="start"
-			p="3"
 			onFocus={() => focusQuestion(question.num)}
 			tabIndex={0}
 			focusRing="outside"
@@ -322,7 +321,6 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 
 		<HStack
 			alignItems="start"
-			p="3"
 			onFocus={() => focusQuestion(question.num)}
 			tabIndex={0}
 			focusRing="outside"
@@ -410,8 +408,6 @@ export const Matching = forwardRef<HTMLDivElement, QuestionProps>(({ question, o
 			focusRing="outside"
 			ref={ref}
 			focusRingColor="question.focusRing"
-			px="3"
-			py="1"
 		>
 			<HStack alignItems="start">
 				<Text fontWeight="bold">{question.num}</Text>

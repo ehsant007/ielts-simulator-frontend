@@ -20,7 +20,7 @@ export function ReadingModule() {
 				key={`reading-passage-part${pi}`}
 			>
 				<Box
-					px="5"
+					px="6"
 					py="10"
 					shadow="md"
 					mx="3"

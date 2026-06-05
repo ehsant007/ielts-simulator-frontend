@@ -22,12 +22,12 @@ export function ListeningModule() {
 				key={`listening-questions-part${pi}`}
 			>
 				<VStack
-					alignItems="stretch"
 					justifySelf="center"
 					mx="6"
 					gap="6"
 					mt="3"
 					mb="40"
+					width="full"
 				>
 					<Test test={part.test} />
 				</VStack>

@@ -1,7 +1,7 @@
 "use client"
 
-import { Content as ContentType, Text as TextType } from "@/client"
-import { Box, List, Text, VStack } from "@chakra-ui/react"
+import { Content as ContentType, Table as TableType, Text as TextType } from "@/client"
+import { Box, Center, List, Table, Text, VStack } from "@chakra-ui/react"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import { useModuleStore } from "./ModuleProvider"
@@ -58,6 +58,9 @@ export function MD({ children }: { children: string | string[] | null | undefine
 		strong({ children }) {
 			return <Text as="span" fontWeight="bold" color="question.strong">{children}</Text>
 		},
+		center({ children }) {
+			return <Center as="span">{children}</Center>
+		},
 	}} >
 		{data}
 	</Markdown>
@@ -66,7 +69,7 @@ export function MD({ children }: { children: string | string[] | null | undefine
 export function Content({ content }: { content: ContentType }) {
 	switch (content.type) {
 		case "text": return <TextContent>{content}</TextContent>
-		case "table": return content.type
+		case "table": return <TableContent>{content}</TableContent>
 	}
 }
 
@@ -77,5 +80,33 @@ export function TextContent({ children }: { children: TextType }) {
 		<Box>
 			<MD>{children.text}</MD>
 		</Box>
+	</VStack>
+}
+
+export function TableContent({ children }: { children: TableType }) {
+
+	const columnCount = Math.max(...children.rows.map((row) => row.length));
+
+	return <VStack>
+		<Text textStyle="3xl" pb="3">{children.title}</Text>
+
+		<Table.Root border="md" borderColor="bg.emphasized" fontSize="md" showColumnBorder>
+			<Table.Body>
+				{
+					children.rows.map((row, i) => (
+						<Table.Row key={i} bg="none">
+							{
+								row.map((cell, j) => (
+									<Table.Cell key={j} colSpan={columnCount - row.length + 1}>
+										<MD>{cell}</MD>
+									</Table.Cell>
+								))
+							}
+						</Table.Row>
+					))
+				}
+			</Table.Body>
+		</Table.Root>
+
 	</VStack>
 }
