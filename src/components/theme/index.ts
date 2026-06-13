@@ -93,6 +93,10 @@ const config = defineConfig({
 					focusRing: { value: { base: "{colors.primary.500}", _dark: "{colors.primary.700}" }, },
 					strong: { value: "{colors.primary}" },
 				},
+
+				highlight:{
+					value: { base: "{colors.yellow.solid}", _dark: "{colors.yellow.800}" },
+				},
 			}
 		}
 	},

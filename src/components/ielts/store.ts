@@ -38,6 +38,9 @@ export type ModuleStore = {
 	setAudioVolume: (value: number) => void
 	audioMute: boolean
 	setAudioMute: (value: boolean) => void
+
+	wordQuery: string
+	setWordQuery: (value: string) => void
 }
 
 export function createModuleStore(
@@ -114,5 +117,8 @@ export function createModuleStore(
 
 		audioMute: false,
 		setAudioMute: (value) => set(() => ({ audioMute: value })),
+
+		wordQuery: "",
+		setWordQuery: (value) => set(() => ({ wordQuery: value })),
 	}))
 }
