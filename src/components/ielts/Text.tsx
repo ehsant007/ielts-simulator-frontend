@@ -105,11 +105,12 @@ export function Highlighter({ children }: { children: React.ReactNode }) {
 	useEffect(() => {
 		const onPointerUp = () => {
 			const root = rootRef.current
-			if (!root) return
+			if (!root)
+				return
 
 			const range = selectionToRange(root)
-			console.log(range)
-			if (!range) return
+			if (!range)
+				return
 
 			setRanges((prev) => normalizeRanges([...prev, range]))
 		}
