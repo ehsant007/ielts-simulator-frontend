@@ -1,11 +1,10 @@
 "use client"
 
-import React, {useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Box, Text as ChakraText, TextProps } from "@chakra-ui/react"
 import { useModuleStore } from "./ModuleProvider"
 
 function wrapText(text: string) {
-
 	const setWordQuery = useModuleStore((state) => state.setWordQuery)
 
 	return text.split(/(\s+)/).map((part, index) => {
@@ -15,6 +14,7 @@ function wrapText(text: string) {
 		return (
 			<span
 				key={index}
+				data-token-index={index}
 				data-word={part}
 				onPointerEnter={() => setWordQuery(part)}
 			>
@@ -45,16 +45,13 @@ function tokenize(children: React.ReactNode): React.ReactNode {
 export function Text({ children, ...props }: TextProps) {
 	return (
 		<ChakraText {...props}>
-			<Highlighter>
-				{tokenize(children)}
-			</Highlighter>
+			<Highlighter>{tokenize(children)}</Highlighter>
 		</ChakraText>
 	)
 }
 
-
 type TextRange = {
-	from: number,
+	from: number
 	to: number
 }
 
@@ -79,13 +76,47 @@ function normalizeRanges(ranges: TextRange[]) {
 	return merged
 }
 
+function selectionToRange(root: HTMLElement): TextRange | null {
+	const selection = window.getSelection()
+
+	if (!selection || selection.rangeCount === 0 || selection.isCollapsed)
+		return null
+
+	const nativeRange = selection.getRangeAt(0)
+	// if (!root.contains(nativeRange.commonAncestorContainer))
+	// 	return null
+
+	const tokens = Array.from(root.querySelectorAll<HTMLElement>("[data-token-index]"))
+	const selected = tokens.filter((node) => nativeRange.intersectsNode(node))
+
+	if (selected.length === 0)
+		return null
+
+	const from = Number(selected[0].dataset.tokenIndex)
+	const to = Number(selected[selected.length - 1].dataset.tokenIndex)
+
+	return { from, to }
+}
 
 export function Highlighter({ children }: { children: React.ReactNode }) {
-	const [ranges, setRanges] = useState<TextRange[]>([{ from: 0, to: 2 }])
+	const [ranges, setRanges] = useState<TextRange[]>([])
+	const rootRef = React.useRef<HTMLSpanElement>(null)
 
-	const addHighlight = (range: TextRange) => {
-		setRanges(prev => normalizeRanges([...prev, range]))
-	}
+	useEffect(() => {
+		const onPointerUp = () => {
+			const root = rootRef.current
+			if (!root) return
+
+			const range = selectionToRange(root)
+			console.log(range)
+			if (!range) return
+
+			setRanges((prev) => normalizeRanges([...prev, range]))
+		}
+
+		document.addEventListener("pointerup", onPointerUp)
+		return () => document.removeEventListener("pointerup", onPointerUp)
+	}, [])
 
 	const childrenArray = React.Children.toArray(children)
 	const result: React.ReactNode[] = []
@@ -106,7 +137,9 @@ export function Highlighter({ children }: { children: React.ReactNode }) {
 
 	result.push(...childrenArray.slice(j))
 
-	return <>
-		{result}
-	</>
+	return (
+		<Box as="span" ref={rootRef}>
+			{result}
+		</Box>
+	)
 }
