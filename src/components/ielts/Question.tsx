@@ -244,7 +244,7 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 			<Text fontWeight="bold">{question.num}</Text>
 
 			<VStack alignItems="start">
-				<MD>{question.question}</MD>
+				<MD id={`q${question.num}-question`}>{question.question}</MD>
 
 				{mode === "test" &&
 					<Fieldset.Root>
@@ -326,7 +326,7 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 		<HStack ref={ref} alignItems="start">
 			<VStack alignItems="start">
 
-				<MD>{question.question}</MD>
+				<MD id={`q${question.num}-question`}>{question.question}</MD>
 
 				{mode === "test" &&
 					<Fieldset.Root mt="2">
@@ -341,7 +341,11 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 									<Checkbox.Root key={i} value={toLetter(i)}>
 										<Checkbox.HiddenInput disabled={answer.length >= 2 && !answer.includes(toLetter(i))} />
 										<Checkbox.Control />
-										<Checkbox.Label>{choice}</Checkbox.Label>
+										<Checkbox.Label>
+											<Box as="span" userSelect="text">
+												<MD id={`q${question.num}-choice${i}`}>{choice}</MD>
+											</Box>
+										</Checkbox.Label>
 									</Checkbox.Root>
 								))}
 
@@ -401,7 +405,7 @@ export const Matching = forwardRef<HTMLDivElement, QuestionProps>(({ question, o
 		<HStack ref={ref}>
 			<HStack alignItems="start">
 				<Text fontWeight="bold">{question.num}</Text>
-				<Text>{question.question}</Text>
+				<MD id={`q${question.num}-question`}>{question.question}</MD>
 			</HStack>
 
 			{mode === "test" && (

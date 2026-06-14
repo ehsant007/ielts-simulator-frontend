@@ -4,6 +4,8 @@ import { createStore } from "zustand/vanilla"
 export type QuestionMeta = { index: number, focused: boolean, focusCount: number }
 export type ModuleMode = "test" | "review"
 
+export type Highlight = { from: number, to: number }
+
 export type ModuleStore = {
 	key: string
 	module: ModuleRead
@@ -41,6 +43,12 @@ export type ModuleStore = {
 
 	wordQuery: string
 	setWordQuery: (value: string) => void
+
+	highlights: Record<string, Array<Highlight>>,
+	setHighlights: (
+		blockId: string,
+		highlights: Array<Highlight> | ((prev: Array<Highlight>) => Array<Highlight>)
+	) => void
 }
 
 export function createModuleStore(
@@ -120,5 +128,8 @@ export function createModuleStore(
 
 		wordQuery: "",
 		setWordQuery: (value) => set(() => ({ wordQuery: value })),
+
+		highlights: {},
+		setHighlights: (id, highlights) => set((state) => ({ highlights: { ...state.highlights, [id]: typeof highlights === "function" ? highlights(state.highlights[id] ?? []) : highlights } }))
 	}))
 }

@@ -1,14 +1,14 @@
 "use client"
 
 import { Content as ContentType, Table as TableType, Text as TextType } from "@/client"
-import { Box, Center, List, Table, VStack } from "@chakra-ui/react"
+import { Box, Center, List, Table, VStack, Text } from "@chakra-ui/react"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import { useModuleStore } from "./ModuleProvider"
 import { Question } from "./Question"
-import { Text } from "./Text"
+import { Text as AdvText } from "./Text"
 
-export function MD({ children }: { children: string | string[] | null | undefined }) {
+export function MD({ children, id }: { children: string | string[] | null | undefined, id: string }) {
 	const getQuestion = useModuleStore((state) => state.getQuestion)
 	let data
 	if (Array.isArray(children))
@@ -18,25 +18,25 @@ export function MD({ children }: { children: string | string[] | null | undefine
 
 	return <Markdown rehypePlugins={[rehypeRaw]} components={{
 		h1({ children }) {
-			return <Text textStyle="4xl" color="question.strong">{children}</Text>
+			return <AdvText id={id} textStyle="4xl" color="question.strong">{children}</AdvText>
 		},
 		h2({ children }) {
-			return <Text textStyle="3xl" color="question.strong">{children}</Text>
+			return <AdvText id={id} textStyle="3xl" color="question.strong">{children}</AdvText>
 		},
 		h3({ children }) {
-			return <Text textStyle="2xl" color="question.strong">{children}</Text>
+			return <AdvText id={id} textStyle="2xl" color="question.strong">{children}</AdvText>
 		},
 		h4({ children }) {
-			return <Text textStyle="xl" color="question.strong">{children}</Text>
+			return <AdvText id={id} textStyle="xl" color="question.strong">{children}</AdvText>
 		},
 		h5({ children }) {
-			return <Text textStyle="lg" color="question.strong">{children}</Text>
+			return <AdvText id={id} textStyle="lg" color="question.strong">{children}</AdvText>
 		},
 		h6({ children }) {
-			return <Text textStyle="md" color="question.strong">{children}</Text>
+			return <AdvText id={id} textStyle="md" color="question.strong">{children}</AdvText>
 		},
 		p({ children }) {
-			return <Text>{children}</Text>
+			return <AdvText id={id}>{children}</AdvText>
 		},
 		ul({ children }) {
 			return <List.Root ps="5">{children}</List.Root>
@@ -67,29 +67,29 @@ export function MD({ children }: { children: string | string[] | null | undefine
 	</Markdown>
 }
 
-export function Content({ content }: { content: ContentType }) {
+export function Content({ content, id }: { content: ContentType, id: string }) {
 	switch (content.type) {
-		case "text": return <TextContent>{content}</TextContent>
-		case "table": return <TableContent>{content}</TableContent>
+		case "text": return <TextContent id={id}>{content}</TextContent>
+		case "table": return <TableContent id={id}>{content}</TableContent>
 	}
 }
 
-export function TextContent({ children }: { children: TextType }) {
+export function TextContent({ children, id }: { children: TextType, id: string }) {
 	return <VStack>
-		<Text textStyle="3xl" pb="3">{children.title}</Text>
+		<AdvText id={`${id}_title`} textStyle="3xl" pb="3">{children.title}</AdvText>
 
 		<Box>
-			<MD>{children.text}</MD>
+			<MD id={id}>{children.text}</MD>
 		</Box>
 	</VStack>
 }
 
-export function TableContent({ children }: { children: TableType }) {
+export function TableContent({ children, id }: { children: TableType, id: string }) {
 
 	const columnCount = Math.max(...children.rows.map((row) => row.length));
 
 	return <VStack>
-		<Text textStyle="3xl" pb="3">{children.title}</Text>
+		<AdvText id={`${id}_title`} textStyle="3xl" pb="3">{children.title}</AdvText>
 
 		<Table.Root border="md" borderColor="bg.emphasized" fontSize="md" showColumnBorder>
 			<Table.Body>
@@ -99,7 +99,7 @@ export function TableContent({ children }: { children: TableType }) {
 							{
 								row.map((cell, j) => (
 									<Table.Cell key={j} colSpan={columnCount - row.length + 1}>
-										<MD>{cell}</MD>
+										<MD id={`${id}_table_${i}_${j}`}>{cell}</MD>
 									</Table.Cell>
 								))
 							}

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { Box, Text as ChakraText, TextProps } from "@chakra-ui/react"
 import { useModuleStore } from "./ModuleProvider"
 
@@ -42,10 +42,14 @@ function tokenize(children: React.ReactNode): React.ReactNode {
 	})
 }
 
-export function Text({ children, ...props }: TextProps) {
+export function Text({ children, id, ...props }: TextProps) {
 	return (
 		<ChakraText {...props}>
-			<Highlighter>{tokenize(children)}</Highlighter>
+			{id ?
+				<Highlighter id={id}>{tokenize(children)}</Highlighter>
+				:
+				tokenize(children)
+			}
 		</ChakraText>
 	)
 }
@@ -55,7 +59,7 @@ type TextRange = {
 	to: number
 }
 
-function normalizeRanges(ranges: TextRange[]) {
+function normalizeHighlights(ranges: TextRange[]) {
 	if (ranges.length === 0)
 		return []
 
@@ -98,8 +102,10 @@ function selectionToRange(root: HTMLElement): TextRange | null {
 	return { from, to }
 }
 
-export function Highlighter({ children }: { children: React.ReactNode }) {
-	const [ranges, setRanges] = useState<TextRange[]>([])
+export function Highlighter({ children, id }: { children: React.ReactNode, id: string }) {
+	const highlights = useModuleStore((state) => state.highlights[id]) ?? []
+	const setHighlights = useModuleStore((state) => state.setHighlights)
+
 	const rootRef = React.useRef<HTMLSpanElement>(null)
 
 	useEffect(() => {
@@ -112,7 +118,7 @@ export function Highlighter({ children }: { children: React.ReactNode }) {
 			if (!range)
 				return
 
-			setRanges((prev) => normalizeRanges([...prev, range]))
+			setHighlights(id, prev => normalizeHighlights([...prev, range]))
 		}
 
 		document.addEventListener("pointerup", onPointerUp)
@@ -124,16 +130,16 @@ export function Highlighter({ children }: { children: React.ReactNode }) {
 
 	let j = 0
 
-	for (let i = 0; i < ranges.length; i++) {
-		result.push(...childrenArray.slice(j, ranges[i].from))
+	for (let i = 0; i < highlights.length; i++) {
+		result.push(...childrenArray.slice(j, highlights[i].from))
 
 		result.push(
 			<Box as="span" bg="highlight" key={i}>
-				{childrenArray.slice(ranges[i].from, ranges[i].to + 1)}
+				{childrenArray.slice(highlights[i].from, highlights[i].to + 1)}
 			</Box>
 		)
 
-		j = ranges[i].to + 1
+		j = highlights[i].to + 1
 	}
 
 	result.push(...childrenArray.slice(j))

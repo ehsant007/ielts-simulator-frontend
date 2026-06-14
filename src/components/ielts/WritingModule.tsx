@@ -32,7 +32,7 @@ export function WritingModule() {
 							<Text mb="2" fontStyle="italic">Write about the following topic:</Text>
 						}
 						<Box shadow="md" p="6" border="md" borderRadius="md" borderColor="fg.subtle" fontWeight="medium">
-							<MD>{task.question}</MD>
+							<MD id={`task${task_i}-question`}>{task.question}</MD>
 						</Box>
 					</Box>
 

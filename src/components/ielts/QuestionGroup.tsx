@@ -44,13 +44,13 @@ export function QuestionGroup({ g }: { g: QuestionGroup }) {
 				</Text>
 				{g.prompt &&
 					<Box mb="4" fontStyle="italic">
-						<MD>{g.prompt}</MD>
+						<MD id={`qg${g.question_range[0]}-${g.question_range[1]}-prompt`}>{g.prompt}</MD>
 					</Box>
 				}
 
 				<Box
 					width="full"
-					p="3" 
+					p="3"
 				>
 					{ui}
 				</Box>
@@ -60,16 +60,21 @@ export function QuestionGroup({ g }: { g: QuestionGroup }) {
 }
 
 export function NoteCompletion({ g }: { g: NoteCompletionGroup }) {
+	const pi = useModuleStore((state) => state.part)
+
 	return (
 		<Box p="3">
-			<Content content={g.content} ></Content>
+			<Content
+				id={`part${pi}-nc-qg${g.question_range[0]}-${g.question_range[1]}`}
+				content={g.content}
+			/>
 		</Box>
 	)
 }
 
 
 export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
-
+	const pi = useModuleStore((state) => state.part)
 	const store = useModuleStoreApi()
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
@@ -195,7 +200,10 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 
 			<Box p="3">
 				<OptionsArea />
-				<Content content={g.content} ></Content>
+				<Content
+					id={`part${pi}-nc-qg${g.question_range[0]}-${g.question_range[1]}`}
+					content={g.content}
+				/>
 			</Box>
 
 		</DragDropProvider>

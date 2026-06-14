@@ -4,6 +4,7 @@ import { MD } from "./Content";
 import { useModuleStore } from "./ModuleProvider";
 
 export function AudioScript({ script }: { script: Array<Utterance> }) {
+	const pi = useModuleStore((state) => state.part)
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 
 	return (
@@ -27,7 +28,7 @@ export function AudioScript({ script }: { script: Array<Utterance> }) {
 							</Text>
 						}
 						<Box>
-							<MD>{utterance.text}</MD>
+							<MD id={`part${pi}-dialog${i}`}>{utterance.text}</MD>
 						</Box>
 						<ButtonGroup ms="auto" orientation="vertical">
 							{

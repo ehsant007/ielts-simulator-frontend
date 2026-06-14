@@ -13,6 +13,7 @@ export function TopBar() {
 	const mode = useModuleStore((state) => state.mode)
 	const { user } = useAuth();
 	const store = useModuleStoreApi()
+	const query = useModuleStore(state => state.wordQuery)
 
 	const submit = async () => {
 		const state = store.getState()
@@ -42,7 +43,9 @@ export function TopBar() {
 							</Text>
 						</Stack>
 					</HStack>
-
+<Text>
+	{query}
+</Text>
 				</HStack>
 
 
