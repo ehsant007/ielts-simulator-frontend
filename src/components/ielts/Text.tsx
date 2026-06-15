@@ -4,19 +4,27 @@ import React, { useEffect } from "react"
 import { Box, Text as ChakraText, TextProps } from "@chakra-ui/react"
 import { useModuleStore } from "./ModuleProvider"
 
-function wrapText(text: string) {
-	const setWordQuery = useModuleStore((state) => state.setWordQuery)
-
-	return text.split(/(\s+)/).map((part, index) => {
-		if (/^\s+$/.test(part))
-			return part
+function wrapText(
+	text: string,
+	nextTokenIndex: () => number,
+	setWordQuery: (value: string) => void,
+) {
+	return text.match(/\s+|[\p{L}\p{N}]+|[^\p{L}\p{N}\s]/gu)?.map((part) => {
+		const isWord = !/^\s+$/.test(part)
+		const tokenIndex = nextTokenIndex()
 
 		return (
 			<span
-				key={index}
-				data-token-index={index}
-				data-word={part}
-				onPointerEnter={() => setWordQuery(part)}
+				key={tokenIndex}
+				data-token-index={tokenIndex}
+				{...(isWord ?
+					{
+						"data-word": part,
+						onPointerEnter: () => setWordQuery(part),
+					}
+					: {}
+				)
+				}
 			>
 				{part}
 			</span>
@@ -24,17 +32,21 @@ function wrapText(text: string) {
 	})
 }
 
-function tokenize(children: React.ReactNode): React.ReactNode {
+function tokenize(
+	children: React.ReactNode,
+	nextTokenIndex: () => number,
+	setWordQuery: (value: string) => void,
+): React.ReactNode {
 	return React.Children.map(children, (child) => {
 		if (typeof child === "string" || typeof child === "number") {
-			return wrapText(String(child))
+			return wrapText(String(child), nextTokenIndex, setWordQuery)
 		}
 
 		if (React.isValidElement(child)) {
 			const element = child as React.ReactElement<{ children?: React.ReactNode }>
 
 			return React.cloneElement(element, {
-				children: tokenize(element.props.children),
+				children: tokenize(element.props.children, nextTokenIndex, setWordQuery),
 			})
 		}
 
@@ -43,13 +55,27 @@ function tokenize(children: React.ReactNode): React.ReactNode {
 }
 
 export function Text({ children, id, ...props }: TextProps) {
+	const setWordQuery = useModuleStore((state) => state.setWordQuery)
+	const highlights = useModuleStore((state) => state.highlights)
+	const setHighlights = useModuleStore((state) => state.setHighlights)
+
+	const tokenIndex = React.useRef(0)
+	tokenIndex.current = 0
+	const nextTokenIndex = () => tokenIndex.current++
+
 	return (
 		<ChakraText {...props}>
-			{id ?
-				<Highlighter id={id}>{tokenize(children)}</Highlighter>
-				:
-				tokenize(children)
-			}
+			{id ? (
+				<Highlighter
+					id={id}
+					highlights={highlights}
+					setHighlights={setHighlights}
+				>
+					{tokenize(children, nextTokenIndex, setWordQuery)}
+				</Highlighter>
+			) : (
+				tokenize(children, nextTokenIndex, setWordQuery)
+			)}
 		</ChakraText>
 	)
 }
@@ -102,10 +128,13 @@ function selectionToRange(root: HTMLElement): TextRange | null {
 	return { from, to }
 }
 
-export function Highlighter({ children, id }: { children: React.ReactNode, id: string }) {
-	const highlights = useModuleStore((state) => state.highlights[id]) ?? []
-	const setHighlights = useModuleStore((state) => state.setHighlights)
+type HighlighterProps = {
+	children: React.ReactNode
+	id: string
+} & HighlightSlice
 
+export function Highlighter({ children, id, highlights, setHighlights }: HighlighterProps) {
+	const myHighlights = highlights[id] ?? []
 	const rootRef = React.useRef<HTMLSpanElement>(null)
 
 	useEffect(() => {
@@ -130,16 +159,16 @@ export function Highlighter({ children, id }: { children: React.ReactNode, id: s
 
 	let j = 0
 
-	for (let i = 0; i < highlights.length; i++) {
-		result.push(...childrenArray.slice(j, highlights[i].from))
+	for (let i = 0; i < myHighlights.length; i++) {
+		result.push(...childrenArray.slice(j, myHighlights[i].from))
 
 		result.push(
 			<Box as="span" bg="highlight" key={i}>
-				{childrenArray.slice(highlights[i].from, highlights[i].to + 1)}
+				{childrenArray.slice(myHighlights[i].from, myHighlights[i].to + 1)}
 			</Box>
 		)
 
-		j = highlights[i].to + 1
+		j = myHighlights[i].to + 1
 	}
 
 	result.push(...childrenArray.slice(j))
@@ -149,4 +178,26 @@ export function Highlighter({ children, id }: { children: React.ReactNode, id: s
 			{result}
 		</Box>
 	)
+}
+
+
+type Highlight = { from: number, to: number }
+
+type HighlightSlice = {
+	highlights: Record<string, Array<Highlight>>,
+	setHighlights: (
+		id: string,
+		highlights: Array<Highlight> | ((prev: Array<Highlight>) => Array<Highlight>)
+	) => void
+}
+
+
+export function createHighlightSlice(
+	set: (fn: (state: HighlightSlice) => Pick<HighlightSlice, "highlights">) => void,
+	get: () => { highlights: Record<string, Array<Highlight>> },
+): HighlightSlice {
+	return {
+		highlights: {},
+		setHighlights: (id, highlights) => set((state) => ({ highlights: { ...state.highlights, [id]: typeof highlights === "function" ? highlights(state.highlights[id] ?? []) : highlights } }))
+	}
 }

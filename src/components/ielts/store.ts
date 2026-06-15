@@ -46,7 +46,7 @@ export type ModuleStore = {
 
 	highlights: Record<string, Array<Highlight>>,
 	setHighlights: (
-		blockId: string,
+		id: string,
 		highlights: Array<Highlight> | ((prev: Array<Highlight>) => Array<Highlight>)
 	) => void
 }
