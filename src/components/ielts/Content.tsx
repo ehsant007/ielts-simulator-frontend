@@ -6,7 +6,7 @@ import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import { useModuleStore } from "./ModuleProvider"
 import { Question } from "./Question"
-import { Text as AdvText } from "./Text"
+import { AdvText } from "./AdvText"
 
 export function MD({ children, id }: { children: string | string[] | null | undefined, id: string }) {
 	const getQuestion = useModuleStore((state) => state.getQuestion)

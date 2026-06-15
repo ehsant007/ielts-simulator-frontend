@@ -251,7 +251,7 @@ export function VisualLabelingGroup({ children: g }: { children: VisualLabelingG
 
 
 export function SentenceMatching({ children: g }: { children: SentenceMatchingGroup }) {
-
+	
 	const [selected, setSelected] = useState<Record<string, number>>({})
 	const getQuestion = useModuleStore((state) => state.getQuestion)
 
