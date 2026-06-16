@@ -178,7 +178,7 @@ export function applyHighlights(root: React.ReactNode, highlights: Highlight[]):
 		// If this is a token but we reached it via the "Single Element" path,
 		// it means it's either already grouped or isolated. 
 		// We only need to handle the recursive step for its children here.
-		if (props.children) {
+		if (props.children != null) {
 			return React.cloneElement(element, {
 				children: applyHighlights(props.children, highlights),
 			});
