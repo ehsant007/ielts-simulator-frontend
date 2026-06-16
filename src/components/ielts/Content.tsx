@@ -16,27 +16,30 @@ export function MD({ children, id }: { children: string | string[] | null | unde
 	else
 		data = children
 
+	let count = 0
+	const getId = () => `${id}-n${count++}`
+
 	return <Markdown rehypePlugins={[rehypeRaw]} components={{
 		h1({ children }) {
-			return <AdvText id={id} textStyle="4xl" color="question.strong">{children}</AdvText>
+			return <AdvText id={getId()} textStyle="4xl" color="question.strong">{children}</AdvText>
 		},
 		h2({ children }) {
-			return <AdvText id={id} textStyle="3xl" color="question.strong">{children}</AdvText>
+			return <AdvText id={getId()} textStyle="3xl" color="question.strong">{children}</AdvText>
 		},
 		h3({ children }) {
-			return <AdvText id={id} textStyle="2xl" color="question.strong">{children}</AdvText>
+			return <AdvText id={getId()} textStyle="2xl" color="question.strong">{children}</AdvText>
 		},
 		h4({ children }) {
-			return <AdvText id={id} textStyle="xl" color="question.strong">{children}</AdvText>
+			return <AdvText id={getId()} textStyle="xl" color="question.strong">{children}</AdvText>
 		},
 		h5({ children }) {
-			return <AdvText id={id} textStyle="lg" color="question.strong">{children}</AdvText>
+			return <AdvText id={getId()} textStyle="lg" color="question.strong">{children}</AdvText>
 		},
 		h6({ children }) {
-			return <AdvText id={id} textStyle="md" color="question.strong">{children}</AdvText>
+			return <AdvText id={getId()} textStyle="md" color="question.strong">{children}</AdvText>
 		},
 		p({ children }) {
-			return <AdvText id={id}>{children}</AdvText>
+			return <AdvText id={getId()}>{children}</AdvText>
 		},
 		ul({ children }) {
 			return <List.Root ps="5">{children}</List.Root>

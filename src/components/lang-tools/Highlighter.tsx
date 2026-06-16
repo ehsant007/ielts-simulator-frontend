@@ -74,30 +74,89 @@ export function Highlighter({ children, id, highlights, setHighlights }: Highlig
 		return () => document.removeEventListener("pointerup", onPointerUp)
 	}, [])
 
-	const childrenArray = React.Children.toArray(children)
-	const result: React.ReactNode[] = []
-
-	let j = 0
-
-	for (let i = 0; i < myHighlights.length; i++) {
-		result.push(...childrenArray.slice(j, myHighlights[i].from))
-
-		result.push(
-			<Box as="span" bg="highlight" key={i}>
-				{childrenArray.slice(myHighlights[i].from, myHighlights[i].to + 1)}
-			</Box>
-		)
-
-		j = myHighlights[i].to + 1
-	}
-
-	result.push(...childrenArray.slice(j))
 
 	return (
 		<Box as="span" ref={rootRef}>
-			{result}
+			{applyHighlights(children, myHighlights)}
 		</Box>
 	)
 }
 
+type TokenProps = {
+	children?: React.ReactNode
+	"data-token-index"?: string | number
+}
 
+function isHighlightedToken(node: any, highlights: Highlight[]): boolean {
+	if (!React.isValidElement<TokenProps>(node)) return false;
+	const index = node.props["data-token-index"];
+	if (typeof index !== "number")
+		return false;
+
+	return highlights.some((h) => index >= h.from && index <= h.to);
+}
+
+export function applyHighlights(root: React.ReactNode, highlights: Highlight[]): React.ReactNode {
+	// 1. Check for primitives and nulls
+	if (
+		root == null ||
+		typeof root === "boolean" ||
+		typeof root === "string" ||
+		typeof root === "number"
+	) {
+		return root;
+	}
+
+	// 2. Handle Arrays of children with Grouping Logic
+	if (Array.isArray(root)) {
+		const result: React.ReactNode[] = [];
+		let i = 0;
+
+		while (i < root.length) {
+			const child = root[i];
+
+			if (isHighlightedToken(child, highlights)) {
+				// --- GROUPING START ---
+				const group: React.ReactNode[] = [];
+
+				// Collect all contiguous siblings that are also highlighted tokens
+				while (i < root.length && isHighlightedToken(root[i], highlights)) {
+					// We recurse into the token itself just in case it has children 
+					// that need highlighting deep inside, though typically tokens are leaves.
+					group.push(applyHighlights(root[i], highlights));
+					i++;
+				}
+
+				// Wrap the entire contiguous group in a single Box
+				result.push(
+					<Box as="span" bg="highlight" key={`hl-group-${i}`}>
+						{group}
+					</Box>
+				);
+				// --- GROUPING END ---
+			} else {
+				// Not a highlighted token, just process it recursively and move on
+				result.push(applyHighlights(child, highlights));
+				i++;
+			}
+		}
+		return result;
+	}
+
+	// 3. Handle Single React Elements
+	if (React.isValidElement(root)) {
+		const element = root as React.ReactElement<any>;
+		const { props } = element;
+
+		// If this is a token but we reached it via the "Single Element" path,
+		// it means it's either already grouped or isolated. 
+		// We only need to handle the recursive step for its children here.
+		if (props.children) {
+			return React.cloneElement(element, {
+				children: applyHighlights(props.children, highlights),
+			});
+		}
+	}
+
+	return root;
+}

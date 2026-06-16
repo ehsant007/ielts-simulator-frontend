@@ -15,6 +15,12 @@ export function createHighlightSlice(
 ): HighlightSlice {
 	return {
 		highlights: {},
-		setHighlights: (id, highlights) => set((state) => ({ highlights: { ...state.highlights, [id]: typeof highlights === "function" ? highlights(state.highlights[id] ?? []) : highlights } }))
+		setHighlights: (id, highlights) => set((state) => ({
+			highlights: {
+				...state.highlights,
+				[id]: typeof highlights === "function" ? highlights(state.highlights[id] ?? []) : highlights
+			}
+		}
+		))
 	}
 }

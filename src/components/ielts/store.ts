@@ -1,5 +1,6 @@
 import { AttemptRead, ModuleRead, Question } from "@/client";
 import { createStore } from "zustand/vanilla"
+import { HighlightSlice, createHighlightSlice } from "../lang-tools/types";
 
 export type QuestionMeta = { index: number, focused: boolean, focusCount: number }
 export type ModuleMode = "test" | "review"
@@ -43,13 +44,7 @@ export type ModuleStore = {
 
 	wordQuery: string
 	setWordQuery: (value: string) => void
-
-	highlights: Record<string, Array<Highlight>>,
-	setHighlights: (
-		id: string,
-		highlights: Array<Highlight> | ((prev: Array<Highlight>) => Array<Highlight>)
-	) => void
-}
+} & HighlightSlice
 
 export function createModuleStore(
 	module: ModuleRead,
@@ -129,7 +124,6 @@ export function createModuleStore(
 		wordQuery: "",
 		setWordQuery: (value) => set(() => ({ wordQuery: value })),
 
-		highlights: {},
-		setHighlights: (id, highlights) => set((state) => ({ highlights: { ...state.highlights, [id]: typeof highlights === "function" ? highlights(state.highlights[id] ?? []) : highlights } }))
+		...createHighlightSlice(set, get),
 	}))
 }
