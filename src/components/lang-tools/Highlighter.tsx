@@ -87,13 +87,40 @@ type TokenProps = {
 	"data-token-index"?: string | number
 }
 
-function isHighlightedToken(node: any, highlights: Highlight[]): boolean {
+/**
+ * Optimized lookup using Binary Search.
+ * Leverages the fact that highlights are sorted and merged (non-overlapping).
+ */
+function isIndexHighlighted(index: number, highlights: Highlight[]): boolean {
+	let low = 0;
+	let high = highlights.length - 1;
+
+	while (low <= high) {
+		const mid = Math.floor((low + high) / 2);
+		const range = highlights[mid];
+
+		if (index >= range.from && index <= range.to) {
+			return true; // Found the range containing this token
+		} else if (index < range.from) {
+			high = mid - 1; // Look in the left half
+		} else {
+			low = mid + 1; // Look in the right half
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Helper to check if a React node is a token and should be highlighted.
+ */
+function isHighlightedToken(node: React.ReactNode, highlights: Highlight[]): boolean {
 	if (!React.isValidElement<TokenProps>(node)) return false;
 	const index = node.props["data-token-index"];
 	if (typeof index !== "number")
 		return false;
 
-	return highlights.some((h) => index >= h.from && index <= h.to);
+	return isIndexHighlighted(index, highlights);
 }
 
 export function applyHighlights(root: React.ReactNode, highlights: Highlight[]): React.ReactNode {
