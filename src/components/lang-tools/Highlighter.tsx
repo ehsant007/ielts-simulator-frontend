@@ -72,7 +72,7 @@ export function Highlighter({ children, id, highlights, setHighlights }: Highlig
 
 		document.addEventListener("pointerup", onPointerUp)
 		return () => document.removeEventListener("pointerup", onPointerUp)
-	}, [])
+	}, [id])
 
 
 	return (
@@ -172,7 +172,7 @@ export function applyHighlights(root: React.ReactNode, highlights: Highlight[]):
 
 	// 3. Handle Single React Elements
 	if (React.isValidElement(root)) {
-		const element = root as React.ReactElement<any>;
+		const element = root as React.ReactElement<{children?: React.ReactNode}>;
 		const { props } = element;
 
 		// If this is a token but we reached it via the "Single Element" path,

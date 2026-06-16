@@ -8,7 +8,7 @@ import React, {
 	useState,
 	useEffect
 } from "react";
-import { Box, Portal, VStack, BoxProps } from "@chakra-ui/react";
+import { Box, Portal } from "@chakra-ui/react";
 
 // --- Types ---
 

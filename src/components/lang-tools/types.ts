@@ -11,7 +11,7 @@ export type HighlightSlice = {
 
 export function createHighlightSlice(
 	set: (fn: (state: HighlightSlice) => Pick<HighlightSlice, "highlights">) => void,
-	get: () => { highlights: Record<string, Array<Highlight>> },
+	//get: () => { highlights: Record<string, Array<Highlight>> },
 ): HighlightSlice {
 	return {
 		highlights: {},

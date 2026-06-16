@@ -11,9 +11,8 @@ type AdvTextProps = {
 } & TextProps & HighlightSlice
 
 export function AdvText({ children, id, onWordPointed, highlights, setHighlights, ...props }: AdvTextProps) {
-	const tokenIndex = React.useRef(0)
-	tokenIndex.current = 0
-	const nextTokenIndex = () => tokenIndex.current++
+	let tokenIndex = 0
+	const nextTokenIndex = () => tokenIndex++
 
 	return (
 		<ChakraText {...props}>

@@ -124,6 +124,6 @@ export function createModuleStore(
 		wordQuery: "",
 		setWordQuery: (value) => set(() => ({ wordQuery: value })),
 
-		...createHighlightSlice(set, get),
+		...createHighlightSlice(set),
 	}))
 }
