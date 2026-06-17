@@ -13,7 +13,10 @@ export function TopBar() {
 	const mode = useModuleStore((state) => state.mode)
 	const { user } = useAuth();
 	const store = useModuleStoreApi()
+
 	const query = useModuleStore(state => state.wordQuery)
+	const highlighting = useModuleStore(state => state.highlightingEnabled)
+	const setHighlighting = useModuleStore(state => state.setHighlightingEnabled)
 
 	const submit = async () => {
 		const state = store.getState()
@@ -43,9 +46,14 @@ export function TopBar() {
 							</Text>
 						</Stack>
 					</HStack>
-<Text>
-	{query}
-</Text>
+
+					<Text>
+						{query}
+					</Text>
+					<Button onClick={() => setHighlighting(prev => !prev)}>
+						{highlighting ? 1 : 0}
+					</Button>
+					
 				</HStack>
 
 
@@ -65,7 +73,7 @@ export function TopBar() {
 				</HStack>
 			</HStack>
 			{module1.type === "listening" &&
-				<Audio w="full"/>
+				<Audio w="full" />
 			}
 		</VStack>
 	)

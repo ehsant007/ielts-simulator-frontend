@@ -1,23 +1,26 @@
 "use client"
 
 import { Text as ChakraText, TextProps } from "@chakra-ui/react"
-import { HighlightSlice } from "./types"
+import { LangToolsSlice } from "./store"
 import { Highlighter } from "./Highlighter"
 import { tokenizer } from "./tokenizer"
 import { createContext, forwardRef, useContext } from "react"
-
+import { StoreApi } from "zustand"
+import { LangToolsContext, useLangToolStore } from "./hooks"
 
 const AdvTextContext = createContext<boolean>(false);
 
+
 type AdvTextProps = {
-	onWordPointed: (value: string) => void
-} & TextProps & HighlightSlice
+	store: StoreApi<LangToolsSlice>
+} & TextProps
 
-export const AdvText = forwardRef<HTMLDivElement, AdvTextProps>(({ children, id, onWordPointed, highlights, setHighlights, ...props }, ref) => {
+export const AdvText = forwardRef<HTMLDivElement, AdvTextProps>(({
+	children,
+	store,
+	...props
+}, ref) => {
 	const insideAdvText = useContext(AdvTextContext)
-
-	let tokenIndex = 0
-	const nextTokenIndex = () => tokenIndex++
 
 	if (insideAdvText) {
 		return <ChakraText ref={ref} {...props}>{children}</ChakraText>
@@ -25,21 +28,41 @@ export const AdvText = forwardRef<HTMLDivElement, AdvTextProps>(({ children, id,
 
 	return (
 		<AdvTextContext.Provider value={true}>
-			<ChakraText ref={ref} {...props}>
-				{id ? (
-					<Highlighter
-						id={id}
-						highlights={highlights}
-						setHighlights={setHighlights}
-					>
-						{tokenizer(children, nextTokenIndex, onWordPointed)}
-					</Highlighter>
-				) : (
-					tokenizer(children, nextTokenIndex, onWordPointed)
-				)}
-			</ChakraText>
+			<LangToolsContext.Provider value={store}>
+				<AdvTextInner
+					ref={ref}
+					{...props}
+				>
+					{children}
+				</AdvTextInner>
+			</LangToolsContext.Provider>
 		</AdvTextContext.Provider>
 	)
 })
 
 AdvText.displayName = "AdvText"
+
+
+const AdvTextInner = forwardRef<HTMLDivElement, TextProps>(({
+	children,
+	id,
+	...props
+}, ref) => {
+	const setWordQuery = useLangToolStore((state) => state.setWordQuery)
+	let tokenIndex = 0
+	const nextTokenIndex = () => tokenIndex++
+
+	return (
+		<ChakraText ref={ref} {...props}>
+			{id? (
+				<Highlighter id={id}>
+					{tokenizer(children, nextTokenIndex, setWordQuery)}
+				</Highlighter>
+			) : (
+				tokenizer(children, nextTokenIndex, setWordQuery)
+			)}
+		</ChakraText>
+	)
+})
+
+AdvTextInner.displayName = "AdvTextInner"

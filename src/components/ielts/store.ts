@@ -1,6 +1,6 @@
 import { AttemptRead, ModuleRead, Question } from "@/client";
 import { createStore } from "zustand/vanilla"
-import { HighlightSlice, createHighlightSlice } from "../lang-tools/types";
+import { LangToolsSlice, createLangToolsSlice } from "../lang-tools/store";
 
 export type QuestionMeta = { index: number, focused: boolean, focusCount: number }
 export type ModuleMode = "test" | "review"
@@ -42,9 +42,7 @@ export type ModuleStore = {
 	audioMute: boolean
 	setAudioMute: (value: boolean) => void
 
-	wordQuery: string
-	setWordQuery: (value: string) => void
-} & HighlightSlice
+} & LangToolsSlice
 
 export function createModuleStore(
 	module: ModuleRead,
@@ -121,9 +119,6 @@ export function createModuleStore(
 		audioMute: false,
 		setAudioMute: (value) => set(() => ({ audioMute: value })),
 
-		wordQuery: "",
-		setWordQuery: (value) => set(() => ({ wordQuery: value })),
-
-		...createHighlightSlice(set),
+		...createLangToolsSlice(set),
 	}))
 }

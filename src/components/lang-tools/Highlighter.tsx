@@ -2,7 +2,8 @@
 
 import React, { useEffect } from "react"
 import { Box } from "@chakra-ui/react"
-import { Highlight, HighlightSlice } from "./types"
+import { Highlight, LangToolsSlice } from "./store"
+import { useLangToolStore } from "./hooks"
 
 
 function normalizeHighlights(ranges: Highlight[]) {
@@ -51,13 +52,19 @@ function selectionToHighlight(root: HTMLElement): Highlight | null {
 type HighlighterProps = {
 	children: React.ReactNode
 	id: string
-} & HighlightSlice
+}
 
-export function Highlighter({ children, id, highlights, setHighlights }: HighlighterProps) {
-	const myHighlights = highlights[id] ?? []
+export function Highlighter({ children, id }: HighlighterProps) {
+	const highlightingEnabled = useLangToolStore((state) => state.highlightingEnabled)
+	const highlights = useLangToolStore((s) => s.highlights)[id] ?? []
+	const setHighlights = useLangToolStore((s) => s.setHighlights)
+
 	const rootRef = React.useRef<HTMLSpanElement>(null)
 
 	useEffect(() => {
+		if(!highlightingEnabled)
+			return
+
 		const onPointerUp = () => {
 			const root = rootRef.current
 			if (!root)
@@ -72,12 +79,12 @@ export function Highlighter({ children, id, highlights, setHighlights }: Highlig
 
 		document.addEventListener("pointerup", onPointerUp)
 		return () => document.removeEventListener("pointerup", onPointerUp)
-	}, [id])
+	}, [id, highlightingEnabled])
 
 
 	return (
 		<Box as="span" ref={rootRef}>
-			{applyHighlights(children, myHighlights)}
+			{applyHighlights(children, highlights)}
 		</Box>
 	)
 }
