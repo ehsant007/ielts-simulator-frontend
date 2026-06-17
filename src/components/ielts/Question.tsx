@@ -6,6 +6,7 @@ import { MD } from "./Content"
 import { useModuleStore } from "./ModuleProvider"
 import { useDraggable, useDroppable } from '@dnd-kit/react';
 import { useQuestionGroup } from "./QuestionGroupProvider"
+import { AdvText } from "./AdvText"
 
 type QuestionProps = {
 	question: QuestionType
@@ -232,6 +233,7 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 	const answer = useModuleStore((state) => state.answers[question.num])?.[0]
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 	const mode = useModuleStore((state) => state.mode)
+	const baseId = `q${question.num}`
 
 	function toLetter(index: number) {
 		return String.fromCharCode(65 + index);
@@ -241,10 +243,10 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 
 		<HStack ref={ref} alignItems="start">
 
-			<Text fontWeight="bold">{question.num}</Text>
+			<AdvText id={`${baseId}-question-num`} fontWeight="bold">{question.num}</AdvText>
 
 			<VStack alignItems="start">
-				<MD id={`q${question.num}-question`}>{question.question}</MD>
+				<MD id={`${baseId}-question`}>{question.question}</MD>
 
 				{mode === "test" &&
 					<Fieldset.Root>
@@ -268,7 +270,7 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 											/>
 											<RadioGroup.ItemText>
 												<Box as="span">
-													<MD id={`q${question.num}-choice${i}`}>{choice}</MD>
+													<MD id={`${baseId}-choice${i}`}>{choice}</MD>
 												</Box>
 											</RadioGroup.ItemText>
 										</RadioGroup.Item>
@@ -301,9 +303,9 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 							return (
 								<HStack key={letter}>
 									<Radiomark {...markProps} />
-									<Text ms="0.5" fontSize="sm" fontWeight="medium">
-										{choice}
-									</Text>
+									<Box ms="0.5" fontSize="sm" fontWeight="medium">
+										<MD id={`${baseId}-choice${i}`}>{choice}</MD>
+									</Box>
 								</HStack>
 							)
 						})}
@@ -321,6 +323,7 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 	const answer = useModuleStore((state) => state.answers[question.num]) ?? []
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 	const mode = useModuleStore((state) => state.mode)
+	const baseId = `q${question.num}`
 
 	function toLetter(index: number) {
 		return String.fromCharCode(65 + index);
@@ -331,7 +334,7 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 		<HStack ref={ref} alignItems="start">
 			<VStack alignItems="start">
 
-				<MD id={`q${question.num}-question`}>{question.question}</MD>
+				<MD id={`${baseId}-question`}>{question.question}</MD>
 
 				{mode === "test" &&
 					<Fieldset.Root mt="2">
@@ -348,7 +351,7 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 										<Checkbox.Control />
 										<Checkbox.Label>
 											<Box as="span" userSelect="text">
-												<MD id={`q${question.num}-choice${i}`}>{choice}</MD>
+												<MD id={`${baseId}-choice${i}`}>{choice}</MD>
 											</Box>
 										</Checkbox.Label>
 									</Checkbox.Root>
@@ -382,9 +385,9 @@ export const MultipleChoice = forwardRef<HTMLDivElement, { question: QuestionTyp
 							return (
 								<HStack key={letter}>
 									<Checkmark {...markProps} />
-									<Text ms="0.5" fontSize="sm" fontWeight="medium">
-										{choice}
-									</Text>
+									<Box ms="0.5" fontSize="sm" fontWeight="medium">
+										<MD id={`${baseId}-choice${i}`}>{choice}</MD>
+									</Box>
 								</HStack>
 							)
 						})}
@@ -406,11 +409,13 @@ export const Matching = forwardRef<HTMLDivElement, QuestionProps>(({ question, o
 	const correctAnswer = question.correct_answer[0];
 	const isCorrect = result?.[0] > 0
 
+	const baseId = `q${question.num}`
+
 	return (
 		<HStack ref={ref}>
 			<HStack alignItems="start">
-				<Text fontWeight="bold">{question.num}</Text>
-				<MD id={`q${question.num}-question`}>{question.question}</MD>
+				<AdvText id={`${baseId}-question-num`} fontWeight="bold">{question.num}</AdvText>
+				<MD id={`${baseId}-question`}>{question.question}</MD>
 			</HStack>
 
 			{mode === "test" && (

@@ -3,23 +3,26 @@ import { Image, VStack, Center } from "@chakra-ui/react"
 import { getModuleFile } from "./utils";
 import { useModuleStore } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";
+import { AdvText } from "./AdvText";
 
-export function Visual({ visual }: { visual: Visual }) {
+export function Visual({ visual, id }: { visual: Visual, id?: string }) {
 	switch (visual.type) {
 		case "image":
-			return <ImageVisual visual={visual} />
+			return <ImageVisual visual={visual} id={id} />
 		case "table":
 			return null
 	}
 }
 
-export function ImageVisual({ visual }: { visual: ImageVisual }) {
+export function ImageVisual({ visual, id }: { visual: ImageVisual, id?: string }) {
 	const module1 = useModuleStore((state) => state.module)
 	const { colorMode } = useColorMode()
 
 	return (
 		<VStack alignItems="start">
-			<Center mx="auto" fontSize="lg" textAlign="center" fontWeight="bold">{visual.title}</Center>
+			<Center mx="auto" fontSize="lg" textAlign="center" fontWeight="bold">
+				<AdvText id={id}>{visual.title}</AdvText>
+			</Center>
 			<Image
 				mt="1"
 				mx="auto"

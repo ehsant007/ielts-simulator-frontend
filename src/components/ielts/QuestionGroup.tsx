@@ -3,16 +3,20 @@
 import type { QuestionGroupBase, NoteCompletionGroup, QuestionGroup, VisualLabelingGroup, SentenceMatchingGroup, IdentifyInfoGroup, ParagraphMatchingGroup, ReadingContent } from "@/client";
 import { Content, MD } from "./Content";
 import { Question } from "./Question";
-import { Box, VStack, Text, HStack, Image, Table, Wrap } from "@chakra-ui/react";
+import { Box, VStack, HStack, Image, Table, Wrap } from "@chakra-ui/react";
 import { useModuleStore, useModuleStoreApi } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";
 import { useCallback, useEffect, useState } from "react";
 import { getModuleFile } from "./utils";
 import { useDraggable, DragDropProvider, useDroppable } from '@dnd-kit/react';
 import { QuestionGroupProvider } from "./QuestionGroupProvider";
+import { AdvText } from "./AdvText";
 
 export function QuestionGroup({ g }: { g: QuestionGroup }) {
-	let ui
+	const pi = useModuleStore((state) => state.part)
+	const baseId = `part${pi}-qg${g.question_range[0]}-${g.question_range[1]}`
+	let ui = null
+
 	switch (g.group_type) {
 		case "basic":
 			ui = <QuestionGroupBase g={g} />
@@ -39,12 +43,12 @@ export function QuestionGroup({ g }: { g: QuestionGroup }) {
 	return (
 		<QuestionGroupProvider group={g}>
 			<VStack alignItems="start">
-				<Text fontStyle="italic" fontWeight="bold">
+				<AdvText fontStyle="italic" fontWeight="bold" id={`${baseId}-qg-range`}>
 					Questions {g.question_range?.[0]}-{g.question_range?.[1]}
-				</Text>
+				</AdvText>
 				{g.prompt &&
 					<Box mb="4" fontStyle="italic">
-						<MD id={`qg${g.question_range[0]}-${g.question_range[1]}-prompt`}>{g.prompt}</MD>
+						<MD id={`${baseId}-prompt`}>{g.prompt}</MD>
 					</Box>
 				}
 
@@ -78,6 +82,7 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 	const store = useModuleStoreApi()
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
+	const baseId = `part${pi}-qg${g.question_range[0]}-${g.question_range[1]}`
 
 	const [selected, setSelected] = useState<Record<number, string | undefined>>({})
 	const select = useCallback((questionNum: number, option: string) => {
@@ -116,7 +121,7 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 			<Box
 				shadow="md"
 			>
-				<Text
+				<AdvText
 					ref={ref}
 					cursor="pointer"
 					px="3"
@@ -125,9 +130,10 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 					border="md"
 					borderColor={isSelected ? "transparent" : "fg.subtle"}
 					color={isSelected ? "fg.muted" : "fg"}
+					id={`${baseId}-${option.replace(" ", "")}`}
 				>
 					{option}
-				</Text>
+				</AdvText>
 
 			</Box>
 		)
@@ -251,9 +257,11 @@ export function VisualLabelingGroup({ children: g }: { children: VisualLabelingG
 
 
 export function SentenceMatching({ children: g }: { children: SentenceMatchingGroup }) {
-	
+	const pi = useModuleStore((state) => state.part)
 	const [selected, setSelected] = useState<Record<string, number>>({})
 	const getQuestion = useModuleStore((state) => state.getQuestion)
+
+	const baseId = `part${pi}-qg${g.question_range[0]}-${g.question_range[1]}`
 
 	return (
 		<VStack alignItems="start">
@@ -269,7 +277,13 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 				shadow="lg"
 				borderRadius="md"
 			>
-				<Text fontWeight="bold" mx="auto">{g.sentences_title}</Text>
+				<AdvText
+					fontWeight="bold"
+					mx="auto"
+					id={`${baseId}-sentences_title`}
+				>
+					{g.sentences_title}
+				</AdvText>
 				{
 					Object.keys(g.sentences).map(key =>
 						<HStack
@@ -278,8 +292,8 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 							mx="0"
 							px="6"
 						>
-							<Text fontWeight="bold" fontFamily="mono" fontSize="lg">{key}</Text>
-							<Text>{g.sentences[key]}</Text>
+							<AdvText id={`${baseId}-sentence-key${key}`} fontWeight="bold" fontFamily="mono" fontSize="lg">{key}</AdvText>
+							<AdvText id={`${baseId}-sentence${key}`}>{g.sentences[key]}</AdvText>
 						</HStack>)
 				}
 			</VStack>
@@ -312,33 +326,41 @@ export function SentenceMatching({ children: g }: { children: SentenceMatchingGr
 
 export function IdentifyInfoGroup({ children: group }: { children: IdentifyInfoGroup }) {
 	const getQuestion = useModuleStore((state) => state.getQuestion)
+	const pi = useModuleStore((state) => state.part)
+	const baseId = `part${pi}-qg${group.question_range[0]}-${group.question_range[1]}`
 
-	return <VStack alignItems="start">
+	return (
+		<VStack alignItems="start">
 
-		<VStack alignItems="start" mb="10">
-			<Text>{group.options_prompt}</Text>
-			<Table.Root ms="6">
-				<Table.Body>
-					{
-						group.options.map((option, i) => (
-							<Table.Row key={option} bg="none">
-								<Table.Cell fontWeight="bold">{option}</Table.Cell>
-								<Table.Cell>{group.option_descriptions[i]}</Table.Cell>
-							</Table.Row>
-						))
-					}
-				</Table.Body>
-			</Table.Root>
+			<VStack alignItems="start" mb="10">
+				<AdvText id={`${baseId}-prompt`}>{group.options_prompt}</AdvText>
+				<Table.Root ms="6">
+					<Table.Body>
+						{
+							group.options.map((option, i) => (
+								<Table.Row key={option} bg="none">
+									<Table.Cell fontWeight="bold">
+										<AdvText id={`${baseId}-option-${i}`}>{option}</AdvText>
+									</Table.Cell>
+									<Table.Cell>
+										<AdvText id={`${baseId}-option-${i}-description`}>{group.option_descriptions[i]}</AdvText>
+									</Table.Cell>
+								</Table.Row>
+							))
+						}
+					</Table.Body>
+				</Table.Root>
+			</VStack>
+
+			<VStack alignItems="stretch">
+				{
+					group.questions.map((question) => (
+						<Question key={question.num} question={getQuestion(question.num)} options={group.options} />
+					))
+				}
+			</VStack>
 		</VStack>
-
-		<VStack alignItems="stretch">
-			{
-				group.questions.map((question) => (
-					<Question key={question.num} question={getQuestion(question.num)} options={group.options} />
-				))
-			}
-		</VStack>
-	</VStack>
+	)
 }
 
 
@@ -352,14 +374,16 @@ export function ParagraphMatchingGroup({ children: group }: { children: Paragrap
 	const labels: string[] = []
 	content.parts[part].passage.sections.forEach((section) => labels.push(section.label ?? ""))
 
-	return <VStack alignItems="start">
+	return (
+		<VStack alignItems="start">
 
-		<VStack alignItems="stretch">
-			{
-				group.questions.map((question) => (
-					<Question key={question.num} question={getQuestion(question.num)} options={labels} />
-				))
-			}
+			<VStack alignItems="stretch">
+				{
+					group.questions.map((question) => (
+						<Question key={question.num} question={getQuestion(question.num)} options={labels} />
+					))
+				}
+			</VStack>
 		</VStack>
-	</VStack>
+	)
 }
