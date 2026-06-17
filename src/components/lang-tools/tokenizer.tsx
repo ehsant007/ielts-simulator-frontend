@@ -6,7 +6,20 @@ function wrapText(
 	text: string,
 	nextTokenIndex: () => number,
 	setWordQuery: (value: string) => void,
-) {
+): React.ReactNode {
+
+	const re = /\{\{q\d+\}\}/
+	const match = re.exec(text)
+
+	if (match) {
+		console.log(match)
+		return [
+			wrapText(text.slice(0, match.index), nextTokenIndex, setWordQuery),
+			match[0],
+			wrapText(text.slice(match.index + match[0].length), nextTokenIndex, setWordQuery)
+		]
+	}
+
 	const parts = text.match(/\s+|[\p{L}\p{N}]+|[^\p{L}\p{N}\s]/gu)
 	if (!parts)
 		return text

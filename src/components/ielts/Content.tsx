@@ -7,6 +7,7 @@ import rehypeRaw from "rehype-raw"
 import { useModuleStore } from "./ModuleProvider"
 import { Question } from "./Question"
 import { AdvText } from "./AdvText"
+import React from "react"
 
 export function MD({ children, id }: { children: string | string[] | null | undefined, id: string }) {
 	const getQuestion = useModuleStore((state) => state.getQuestion)
@@ -45,19 +46,17 @@ export function MD({ children, id }: { children: string | string[] | null | unde
 			return <List.Root ps="5">{children}</List.Root>
 		},
 		li({ children }) {
-			return <List.Item>{children}</List.Item>
+			return <AdvText as={List.Item} id={getId()}>{children}</AdvText>
 		},
 		code({ children }) {
 
-			if (typeof children !== "string") {
-				return children
-			}
+			const text = React.Children.toArray(children).join("")
 
-			const question_num = children.match(/^\{\{q(\d+)\}\}/)?.[1]
-			if (!question_num)
-				return children
+			const match = text.match(/^\{\{q(\d+)\}\}/)
+			if (!match)
+				return <code>{children}</code>
 
-			return <Question question={getQuestion(Number.parseInt(question_num))} />
+			return <Question question={getQuestion(Number.parseInt(match[1]))} />
 		},
 		strong({ children }) {
 			return <Text as="span" fontWeight="bold" color="question.strong">{children}</Text>
