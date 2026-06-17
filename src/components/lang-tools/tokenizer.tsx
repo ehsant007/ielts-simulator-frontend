@@ -12,7 +12,6 @@ function wrapText(
 	const match = re.exec(text)
 
 	if (match) {
-		console.log(match)
 		return [
 			wrapText(text.slice(0, match.index), nextTokenIndex, setWordQuery),
 			match[0],
