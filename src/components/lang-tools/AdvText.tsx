@@ -1,6 +1,5 @@
 "use client"
 
-import React from "react"
 import { Text as ChakraText, TextProps } from "@chakra-ui/react"
 import { HighlightSlice } from "./types"
 import { Highlighter } from "./Highlighter"

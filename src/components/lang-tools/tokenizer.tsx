@@ -7,7 +7,11 @@ function wrapText(
 	nextTokenIndex: () => number,
 	setWordQuery: (value: string) => void,
 ) {
-	return text.match(/\s+|[\p{L}\p{N}]+|[^\p{L}\p{N}\s]/gu)?.map((part) => {
+	const parts = text.match(/\s+|[\p{L}\p{N}]+|[^\p{L}\p{N}\s]/gu)
+	if (!parts)
+		return text
+
+	return parts.map((part) => {
 		const isWord = !/^\s+$/.test(part)
 		const tokenIndex = nextTokenIndex()
 
