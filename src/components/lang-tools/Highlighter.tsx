@@ -56,7 +56,7 @@ type HighlighterProps = {
 
 export function Highlighter({ children, id }: HighlighterProps) {
 	const highlightingEnabled = useLangToolStore((state) => state.highlightingEnabled)
-	const highlights = useLangToolStore((s) => s.highlights)[id] ?? []
+	const highlights = useLangToolStore((s) => s.highlights[id])?? []
 	const setHighlights = useLangToolStore((s) => s.setHighlights)
 
 	const rootRef = React.useRef<HTMLSpanElement>(null)
