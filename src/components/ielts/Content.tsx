@@ -59,10 +59,25 @@ export function MD({ children, id }: { children: string | string[] | null | unde
 			return <Question question={getQuestion(Number.parseInt(match[1]))} />
 		},
 		strong({ children }) {
-			return <Text as="span" fontWeight="bold" color="question.strong">{children}</Text>
+			return (
+				<AdvText
+					as="span"
+					fontWeight="bold"
+					color="question.strong"
+					id={getId()}
+				>
+					{children}
+				</AdvText>
+			)
 		},
 		center({ children }) {
-			return <Center as="span">{children}</Center>
+			return (
+				<Center as="span">
+					<AdvText as="span" textAlign="center" id={getId()}>
+						{children}
+					</AdvText>
+				</Center>
+			)
 		},
 	}} >
 		{data}
