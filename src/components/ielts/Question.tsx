@@ -258,14 +258,19 @@ export const SingleChoice = forwardRef<HTMLDivElement, { question: QuestionType 
 										<RadioGroup.Item
 											key={choice}
 											value={toLetter(i)}
-											onPointerUp={() => {
-												const item_value = toLetter(i)
-												setAnswer(question.num, answer == item_value ? [] : [item_value])
-											}}
 										>
 											<RadioGroup.ItemHiddenInput />
-											<RadioGroup.ItemIndicator />
-											<RadioGroup.ItemText>{choice}</RadioGroup.ItemText>
+											<RadioGroup.ItemIndicator
+												onPointerUp={() => {
+													const item_value = toLetter(i)
+													setAnswer(question.num, answer === item_value ? [] : [item_value])
+												}}
+											/>
+											<RadioGroup.ItemText>
+												<Box as="span">
+													<MD id={`q${question.num}-choice${i}`}>{choice}</MD>
+												</Box>
+											</RadioGroup.ItemText>
 										</RadioGroup.Item>
 									))
 								}
