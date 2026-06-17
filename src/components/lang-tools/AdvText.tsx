@@ -4,7 +4,7 @@ import { Text as ChakraText, TextProps } from "@chakra-ui/react"
 import { HighlightSlice } from "./types"
 import { Highlighter } from "./Highlighter"
 import { tokenizer } from "./tokenizer"
-import { createContext, useContext } from "react"
+import { createContext, forwardRef, useContext } from "react"
 
 
 const AdvTextContext = createContext<boolean>(false);
@@ -13,19 +13,19 @@ type AdvTextProps = {
 	onWordPointed: (value: string) => void
 } & TextProps & HighlightSlice
 
-export function AdvText({ children, id, onWordPointed, highlights, setHighlights, ...props }: AdvTextProps) {
+export const AdvText = forwardRef<HTMLDivElement, AdvTextProps>(({ children, id, onWordPointed, highlights, setHighlights, ...props }, ref) => {
 	const insideAdvText = useContext(AdvTextContext)
 
 	let tokenIndex = 0
 	const nextTokenIndex = () => tokenIndex++
 
 	if (insideAdvText) {
-		return <ChakraText {...props}>{children}</ChakraText>
+		return <ChakraText ref={ref} {...props}>{children}</ChakraText>
 	}
 
 	return (
 		<AdvTextContext.Provider value={true}>
-			<ChakraText {...props}>
+			<ChakraText ref={ref} {...props}>
 				{id ? (
 					<Highlighter
 						id={id}
@@ -40,4 +40,6 @@ export function AdvText({ children, id, onWordPointed, highlights, setHighlights
 			</ChakraText>
 		</AdvTextContext.Provider>
 	)
-}
+})
+
+AdvText.displayName = "AdvText"
