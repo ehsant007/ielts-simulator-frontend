@@ -2,20 +2,21 @@ import type { Passage } from "@/client";
 import { Box, Center, HStack, VStack, Text } from "@chakra-ui/react";
 import { MD } from "./Content";
 import { useModuleStore } from "./ModuleProvider";
+import { AdvText } from "./AdvText";
 
 export function Passage({ title, subtitle, sections }: Passage) {
 	const pi = useModuleStore((state) => state.part)
 
 	return (
 		<>
-			<Box mx="auto" maxW="3xl">
-				<Center fontSize="xl" fontWeight="bold" textAlign="center">
+			<AdvText as={Box} mx="auto" maxW="3xl" id={`part${pi}_passage_title`}>
+				<Text fontSize="xl" fontWeight="bold" textAlign="center">
 					{title}
-				</Center>
-				<Center px="6" textAlign="center" fontStyle="italic">
+				</Text>
+				<Text px="6" textAlign="center" fontStyle="italic">
 					{subtitle}
-				</Center>
-			</Box>
+				</Text>
+			</AdvText>
 
 			<Box>
 				{sections.map((section, i) => (
