@@ -49,6 +49,95 @@ function selectionToHighlight(root: HTMLElement): Highlight | null {
 	return { from, to }
 }
 
+function getSelectedTokens(): HTMLElement[] {
+	const selection = window.getSelection()
+	if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+		return []
+	}
+
+	const range = selection.getRangeAt(0)
+	const root = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+		? range.commonAncestorContainer
+		: range.commonAncestorContainer.parentElement
+
+	if (!(root instanceof HTMLElement))
+		return []
+
+	const result: HTMLElement[] = []
+
+	if (root.hasAttribute("data-token-index") && range.intersectsNode(root)) {
+		result.push(root)
+		return result
+	}
+
+	const walker = document.createTreeWalker(
+		root,
+		NodeFilter.SHOW_ELEMENT,
+		{
+			acceptNode(node) {
+				const el = node as HTMLElement
+
+				if (!el.hasAttribute("data-token-index")) {
+					return NodeFilter.FILTER_SKIP
+				}
+
+				return range.intersectsNode(el)
+					? NodeFilter.FILTER_ACCEPT
+					: NodeFilter.FILTER_SKIP
+			},
+		},
+	)
+
+	let node = walker.nextNode()
+	while (node) {
+		result.push(node as HTMLElement)
+		node = walker.nextNode()
+	}
+
+	return result
+}
+
+
+function getSelectedTokensGroupByAdvText() {
+	return getSelectedTokens().reduce<Record<string, HTMLElement[]>>((result, token) => {
+		const advTextId = token.closest("[data-advtext-id]")?.getAttribute("data-advtext-id")
+		if (!advTextId)
+			return result;
+
+		(result[advTextId] ??= []).push(token)
+		return result
+	}, {})
+}
+
+
+export function highlightSelectedText({ setHighlights }: Pick<LangToolsSlice, "setHighlights">) {
+	const tokens = getSelectedTokensGroupByAdvText()
+
+	Object.keys(tokens).forEach((key) => {
+		const group = tokens[key]
+		const from = group[0].dataset.tokenIndex
+		const to = group[group.length - 1].dataset.tokenIndex
+
+		if (from == null || to == null)
+			return
+
+		const range: Highlight = {
+			from: Number(from),
+			to: Number(to),
+		}
+
+		setHighlights(key, (prev) => normalizeHighlights([...prev, range]))
+	})
+
+	// Clear selection
+	const selection = window.getSelection()
+
+	if (selection && !selection.isCollapsed) {
+		selection.removeAllRanges()
+	}
+}
+
+
 type HighlighterProps = {
 	children: React.ReactNode
 	id: string
@@ -56,13 +145,13 @@ type HighlighterProps = {
 
 export function Highlighter({ children, id }: HighlighterProps) {
 	const highlightingEnabled = useLangToolStore((state) => state.highlightingEnabled)
-	const highlights = useLangToolStore((s) => s.highlights[id])?? []
+	const highlights = useLangToolStore((s) => s.highlights[id]) ?? []
 	const setHighlights = useLangToolStore((s) => s.setHighlights)
 
 	const rootRef = React.useRef<HTMLSpanElement>(null)
 
 	useEffect(() => {
-		if(!highlightingEnabled)
+		if (!highlightingEnabled)
 			return
 
 		const onPointerUp = () => {
@@ -179,7 +268,7 @@ export function applyHighlights(root: React.ReactNode, highlights: Highlight[]):
 
 	// 3. Handle Single React Elements
 	if (React.isValidElement(root)) {
-		const element = root as React.ReactElement<{children?: React.ReactNode}>;
+		const element = root as React.ReactElement<{ children?: React.ReactNode }>;
 		const { props } = element;
 
 		// If this is a token but we reached it via the "Single Element" path,

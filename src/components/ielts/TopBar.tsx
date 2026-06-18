@@ -6,6 +6,7 @@ import { useModuleStore, useModuleStoreApi } from "./ModuleProvider";
 import { createIeltsAttempt } from "@/client";
 import { useAuth } from "@/auth";
 import { AudioVolumeControl, Audio } from "./Audio";
+import { HighlightButton } from "./AdvText";
 
 
 export function TopBar() {
@@ -47,12 +48,13 @@ export function TopBar() {
 						</Stack>
 					</HStack>
 
-					<Text>
-						{query}
-					</Text>
 					<Button onClick={() => setHighlighting(prev => !prev)}>
 						{highlighting ? 1 : 0}
 					</Button>
+					<HighlightButton>Highlight</HighlightButton>
+					<Text>
+						{query}
+					</Text>
 					
 				</HStack>
 

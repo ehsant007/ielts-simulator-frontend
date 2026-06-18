@@ -53,7 +53,7 @@ const AdvTextInner = forwardRef<HTMLDivElement, TextProps>(({
 	const nextTokenIndex = () => tokenIndex++
 
 	return (
-		<ChakraText ref={ref} {...props}>
+		<ChakraText data-advtext-id={id} ref={ref} {...props}>
 			{id? (
 				<Highlighter id={id}>
 					{tokenizer(children, nextTokenIndex, setWordQuery)}
