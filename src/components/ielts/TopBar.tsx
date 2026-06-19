@@ -6,7 +6,8 @@ import { useModuleStore, useModuleStoreApi } from "./ModuleProvider";
 import { createIeltsAttempt } from "@/client";
 import { useAuth } from "@/auth";
 import { AudioVolumeControl, Audio } from "./Audio";
-import { HighlightButton } from "./AdvText";
+
+import { HighlightButton, useLangToolsStore } from "../lang-tools";
 
 
 export function TopBar() {
@@ -15,9 +16,9 @@ export function TopBar() {
 	const { user } = useAuth();
 	const store = useModuleStoreApi()
 
-	const query = useModuleStore(state => state.wordQuery)
-	const highlighting = useModuleStore(state => state.highlightingEnabled)
-	const setHighlighting = useModuleStore(state => state.setHighlightingEnabled)
+	const query = useLangToolsStore(state => state.wordQuery)
+	const highlighting = useLangToolsStore(state => state.highlightingEnabled)
+	const setHighlighting = useLangToolsStore(state => state.setHighlightingEnabled)
 
 	const submit = async () => {
 		const state = store.getState()

@@ -2,7 +2,7 @@ import type { Passage } from "@/client";
 import { Box, Center, HStack, VStack, Text } from "@chakra-ui/react";
 import { MD } from "./Content";
 import { useModuleStore } from "./ModuleProvider";
-import { AdvText } from "./AdvText";
+import { AdvText } from "../lang-tools"
 
 export function Passage({ title, subtitle, sections }: Passage) {
 	const pi = useModuleStore((state) => state.part)

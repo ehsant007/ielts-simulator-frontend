@@ -6,7 +6,7 @@ import { MD } from "./Content"
 import { useModuleStore } from "./ModuleProvider"
 import { useDraggable, useDroppable } from '@dnd-kit/react';
 import { useQuestionGroup } from "./QuestionGroupProvider"
-import { AdvText } from "./AdvText"
+import { AdvText } from "../lang-tools"
 
 type QuestionProps = {
 	question: QuestionType

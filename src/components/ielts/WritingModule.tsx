@@ -4,7 +4,7 @@ import { VStack, Text, Box, Textarea } from "@chakra-ui/react";
 import { MD } from "./Content";
 import { Layout } from "./Layout";
 import { Visual } from "./Visual";
-import { AdvText } from "./AdvText";
+import { AdvText } from "../lang-tools"
 
 
 export function WritingModule() {

@@ -6,7 +6,7 @@ import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import { useModuleStore } from "./ModuleProvider"
 import { Question } from "./Question"
-import { AdvText } from "./AdvText"
+import { AdvText } from "../lang-tools"
 import React from "react"
 
 export function MD({ children, id }: { children: string | string[] | null | undefined, id: string }) {

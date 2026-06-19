@@ -3,7 +3,7 @@ import { Image, VStack, Center } from "@chakra-ui/react"
 import { getModuleFile } from "./utils";
 import { useModuleStore } from "./ModuleProvider";
 import { useColorMode } from "../ui/color-mode";
-import { AdvText } from "./AdvText";
+import { AdvText } from "../lang-tools"
 
 export function Visual({ visual, id }: { visual: Visual, id?: string }) {
 	switch (visual.type) {

@@ -10,7 +10,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getModuleFile } from "./utils";
 import { useDraggable, DragDropProvider, useDroppable } from '@dnd-kit/react';
 import { QuestionGroupProvider } from "./QuestionGroupProvider";
-import { AdvText } from "./AdvText";
+import { AdvText } from "../lang-tools"
 
 export function QuestionGroup({ g }: { g: QuestionGroup }) {
 	const pi = useModuleStore((state) => state.part)

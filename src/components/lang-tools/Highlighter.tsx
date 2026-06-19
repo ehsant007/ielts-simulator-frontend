@@ -1,52 +1,71 @@
 "use client"
 
-import React, { useEffect } from "react"
-import { Box } from "@chakra-ui/react"
-import { Highlight, LangToolsSlice } from "./store"
-import { useLangToolStore } from "./hooks"
+import React, { forwardRef } from "react"
+import { Box, Button, ButtonProps } from "@chakra-ui/react"
+import { Highlight, LangToolsStore } from "./store"
+import { useLangToolsStore } from "./LangToolsProvider"
 
 
-function normalizeHighlights(ranges: Highlight[]) {
+function addHighlight(ranges: Highlight[], range: Highlight) {
 	if (ranges.length === 0)
-		return []
+		return [range]
 
-	const sorted = [...ranges].sort((a, b) => a.from - b.from)
-	const merged: Highlight[] = [sorted[0]]
+	const result: Highlight[] = []
 
-	for (let i = 1; i < sorted.length; i++) {
-		const prev = merged[merged.length - 1]
-		const current = sorted[i]
+	let from = range.from
+	let to = range.to
+	let range_added = false
 
-		if (current.from <= prev.to) {
-			prev.to = Math.max(prev.to, current.to)
-		} else {
-			merged.push({ ...current })
+	for (let i = 0; i < ranges.length; i++) {
+
+		if (range_added) {
+			result.push(ranges[i])
+			continue
 		}
+
+		if (from > ranges[i].to) {
+			result.push(ranges[i])
+			continue
+		}
+
+		if (from >= ranges[i].from) {
+			from = ranges[i].to + 1
+			result.push(ranges[i])
+
+			if (from > to)
+				range_added = true
+
+			continue
+		}
+
+		// "from" doesn't intersect with ranges[i]
+
+		if (to < ranges[i].from) {
+			result.push({ groupId: range.groupId, from, to })
+			result.push(ranges[i])
+			range_added = true
+			continue
+		}
+
+		if (to <= ranges[i].to) {
+			result.push({ groupId: range.groupId, from, to: ranges[i].from - 1 })
+			result.push(ranges[i])
+			range_added = true
+			continue
+		}
+
+		result.push({ groupId: range.groupId, from, to: ranges[i].from - 1 })
+		result.push(ranges[i])
+		from = ranges[i].to + 1
+		if (from > to)
+			range_added = true
 	}
 
-	return merged
-}
-
-function selectionToHighlight(root: HTMLElement): Highlight | null {
-	const selection = window.getSelection()
-
-	if (!selection || selection.rangeCount === 0 || selection.isCollapsed)
-		return null
-
-	const nativeRange = selection.getRangeAt(0)
-	// if (!root.contains(nativeRange.commonAncestorContainer))
-	// 	return null
-
-	const tokens = Array.from(root.querySelectorAll<HTMLElement>("[data-token-index]"))
-	const selected = tokens.filter((node) => nativeRange.intersectsNode(node))
-
-	if (selected.length === 0)
-		return null
-
-	const from = Number(selected[0].dataset.tokenIndex)
-	const to = Number(selected[selected.length - 1].dataset.tokenIndex)
-
-	return { from, to }
+	if (!range_added && from <= to) {
+		result.push({ groupId: range.groupId, from, to })
+	}
+	console.log(result)
+	return result
 }
 
 function getSelectedTokens(): HTMLElement[] {
@@ -110,11 +129,13 @@ function getSelectedTokensGroupByAdvText() {
 }
 
 
-export function highlightSelectedText({ setHighlights }: Pick<LangToolsSlice, "setHighlights">) {
+let nextGroupId = 0
+export function highlightSelectedText({ setHighlights }: Pick<LangToolsStore, "setHighlights">) {
 	const tokens = getSelectedTokensGroupByAdvText()
+	const groupId = nextGroupId++
 
-	Object.keys(tokens).forEach((key) => {
-		const group = tokens[key]
+	Object.keys(tokens).forEach((advTextId) => {
+		const group = tokens[advTextId]
 		const from = group[0].dataset.tokenIndex
 		const to = group[group.length - 1].dataset.tokenIndex
 
@@ -122,11 +143,12 @@ export function highlightSelectedText({ setHighlights }: Pick<LangToolsSlice, "s
 			return
 
 		const range: Highlight = {
+			groupId,
 			from: Number(from),
 			to: Number(to),
 		}
 
-		setHighlights(key, (prev) => normalizeHighlights([...prev, range]))
+		setHighlights(advTextId, (prev) => addHighlight(prev, range))
 	})
 
 	// Clear selection
@@ -144,35 +166,10 @@ type HighlighterProps = {
 }
 
 export function Highlighter({ children, id }: HighlighterProps) {
-	const highlightingEnabled = useLangToolStore((state) => state.highlightingEnabled)
-	const highlights = useLangToolStore((s) => s.highlights[id]) ?? []
-	const setHighlights = useLangToolStore((s) => s.setHighlights)
-
-	const rootRef = React.useRef<HTMLSpanElement>(null)
-
-	useEffect(() => {
-		if (!highlightingEnabled)
-			return
-
-		const onPointerUp = () => {
-			const root = rootRef.current
-			if (!root)
-				return
-
-			const range = selectionToHighlight(root)
-			if (!range)
-				return
-
-			setHighlights(id, prev => normalizeHighlights([...prev, range]))
-		}
-
-		document.addEventListener("pointerup", onPointerUp)
-		return () => document.removeEventListener("pointerup", onPointerUp)
-	}, [id, highlightingEnabled])
-
-
+	const highlights = useLangToolsStore((s) => s.highlights[id]) ?? []
+	
 	return (
-		<Box as="span" ref={rootRef}>
+		<Box as="span">
 			{applyHighlights(children, highlights)}
 		</Box>
 	)
@@ -283,3 +280,22 @@ export function applyHighlights(root: React.ReactNode, highlights: Highlight[]):
 
 	return root;
 }
+
+
+export const HighlightButton = forwardRef<HTMLButtonElement, ButtonProps>(({ children, onClick, ...props }, ref) => {
+	const setHighlights = useLangToolsStore((s) => s.setHighlights)
+
+	return (
+		<Button
+			onClick={(e) => {
+				highlightSelectedText({ setHighlights })
+				onClick?.(e)
+			}}
+			ref={ref}
+			{...props}
+		>
+			{children}
+		</Button>
+	)
+})
+HighlightButton.displayName = "HighlightButton"

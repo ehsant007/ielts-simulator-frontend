@@ -10,6 +10,7 @@ import { StartPage } from "./StartPage";
 import { WritingModule } from "./WritingModule";
 import { SpeakingModule } from "./SpeakingModule";
 import { ModuleMode } from "./store";
+import { LangToolsProvider } from "../lang-tools";
 
 
 type ModuleProps = {
@@ -46,12 +47,16 @@ export function Module({ module, lastAttempt }: ModuleProps) {
 		)
 	}
 
-	return <ModuleContextProvider
-		key={module.id}
-		module={module}
-		mode={mode}
-		lastAttempt={mode === "review" ? lastAttempt : undefined}
-	>
-		{module_ui}
-	</ModuleContextProvider>
+	return (
+		<LangToolsProvider>
+			<ModuleContextProvider
+				key={module.id}
+				module={module}
+				mode={mode}
+				lastAttempt={mode === "review" ? lastAttempt : undefined}
+			>
+				{module_ui}
+			</ModuleContextProvider>
+		</LangToolsProvider>
+	)
 }

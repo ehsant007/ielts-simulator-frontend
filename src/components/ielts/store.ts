@@ -1,6 +1,5 @@
 import { AttemptRead, ModuleRead, Question } from "@/client";
 import { createStore } from "zustand/vanilla"
-import { LangToolsSlice, createLangToolsSlice } from "../lang-tools/store";
 
 export type QuestionMeta = { index: number, focused: boolean, focusCount: number }
 export type ModuleMode = "test" | "review"
@@ -42,7 +41,7 @@ export type ModuleStore = {
 	audioMute: boolean
 	setAudioMute: (value: boolean) => void
 
-} & LangToolsSlice
+}
 
 export function createModuleStore(
 	module: ModuleRead,
@@ -118,7 +117,5 @@ export function createModuleStore(
 
 		audioMute: false,
 		setAudioMute: (value) => set(() => ({ audioMute: value })),
-
-		...createLangToolsSlice(set),
 	}))
 }
