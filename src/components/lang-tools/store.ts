@@ -10,7 +10,7 @@ export type LangToolsStore = {
 	wordQuery: string
 	setWordQuery: (value: string) => void
 
-	highlights: Record<string, Array<Highlight>>,
+	highlights: Record<string, Highlight[]>,
 	setHighlights: (
 		id: string,
 		highlights: Updater<Highlight[]>

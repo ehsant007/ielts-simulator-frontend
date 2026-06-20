@@ -64,8 +64,18 @@ function addHighlight(ranges: Highlight[], range: Highlight) {
 	if (!range_added && from <= to) {
 		result.push({ groupId: range.groupId, from, to })
 	}
-	console.log(result)
+
 	return result
+}
+
+export function removeHighlight({ highlights, setHighlights }: LangToolsStore, groupId: number) {
+	for (const [id, hlArray] of Object.entries(highlights)) {
+		const next = hlArray.filter((hl) => hl.groupId !== groupId)
+
+		if (next.length !== hlArray.length) {
+			setHighlights(id, next)
+		}
+	}
 }
 
 function getSelectedTokens(): HTMLElement[] {
@@ -251,9 +261,9 @@ export function applyHighlights(root: React.ReactNode, highlights: Highlight[]):
 		}
 
 		const children = applyHighlights(root.props.children, highlights)
-		if(children === root.props.children)
+		if (children === root.props.children)
 			return root
-		return React.cloneElement(root, {children});
+		return React.cloneElement(root, { children });
 	}
 
 	return root;
