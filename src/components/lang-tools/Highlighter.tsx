@@ -167,7 +167,7 @@ type HighlighterProps = {
 
 export function Highlighter({ children, id }: HighlighterProps) {
 	const highlights = useLangToolsStore((s) => s.highlights[id]) ?? []
-	
+
 	return (
 		<Box as="span">
 			{applyHighlights(children, highlights)}
@@ -184,7 +184,7 @@ type TokenProps = {
  * Optimized lookup using Binary Search.
  * Leverages the fact that highlights are sorted and merged (non-overlapping).
  */
-function isIndexHighlighted(index: number, highlights: Highlight[]): boolean {
+function findHighlight(index: number, highlights: Highlight[]): Highlight | null {
 	let low = 0;
 	let high = highlights.length - 1;
 
@@ -193,7 +193,7 @@ function isIndexHighlighted(index: number, highlights: Highlight[]): boolean {
 		const range = highlights[mid];
 
 		if (index >= range.from && index <= range.to) {
-			return true; // Found the range containing this token
+			return range; // Found the range containing this token
 		} else if (index < range.from) {
 			high = mid - 1; // Look in the left half
 		} else {
@@ -201,23 +201,24 @@ function isIndexHighlighted(index: number, highlights: Highlight[]): boolean {
 		}
 	}
 
-	return false;
+	return null;
 }
 
 /**
  * Helper to check if a React node is a token and should be highlighted.
  */
-function isHighlightedToken(node: React.ReactNode, highlights: Highlight[]): boolean {
-	if (!React.isValidElement<TokenProps>(node)) return false;
+function getHighlight(node: React.ReactNode, highlights: Highlight[]): Highlight | null {
+	if (!React.isValidElement<TokenProps>(node))
+		return null;
 	const index = node.props["data-token-index"];
 	if (typeof index !== "number")
-		return false;
+		return null;
 
-	return isIndexHighlighted(index, highlights);
+	return findHighlight(index, highlights);
 }
 
 export function applyHighlights(root: React.ReactNode, highlights: Highlight[]): React.ReactNode {
-	// 1. Check for primitives and nulls
+
 	if (
 		root == null ||
 		typeof root === "boolean" ||
@@ -227,55 +228,32 @@ export function applyHighlights(root: React.ReactNode, highlights: Highlight[]):
 		return root;
 	}
 
-	// 2. Handle Arrays of children with Grouping Logic
 	if (Array.isArray(root)) {
-		const result: React.ReactNode[] = [];
-		let i = 0;
-
-		while (i < root.length) {
-			const child = root[i];
-
-			if (isHighlightedToken(child, highlights)) {
-				// --- GROUPING START ---
-				const group: React.ReactNode[] = [];
-
-				// Collect all contiguous siblings that are also highlighted tokens
-				while (i < root.length && isHighlightedToken(root[i], highlights)) {
-					// We recurse into the token itself just in case it has children 
-					// that need highlighting deep inside, though typically tokens are leaves.
-					group.push(applyHighlights(root[i], highlights));
-					i++;
-				}
-
-				// Wrap the entire contiguous group in a single Box
-				result.push(
-					<Box as="span" bg="highlight" key={`hl-group-${i}`}>
-						{group}
-					</Box>
-				);
-				// --- GROUPING END ---
-			} else {
-				// Not a highlighted token, just process it recursively and move on
-				result.push(applyHighlights(child, highlights));
-				i++;
-			}
-		}
-		return result;
+		return root.map((child) => {
+			return applyHighlights(child, highlights)
+		})
 	}
 
-	// 3. Handle Single React Elements
-	if (React.isValidElement(root)) {
-		const element = root as React.ReactElement<{ children?: React.ReactNode }>;
-		const { props } = element;
+	if (React.isValidElement<{ children?: React.ReactNode }>(root)) {
 
-		// If this is a token but we reached it via the "Single Element" path,
-		// it means it's either already grouped or isolated. 
-		// We only need to handle the recursive step for its children here.
-		if (props.children != null) {
-			return React.cloneElement(element, {
-				children: applyHighlights(props.children, highlights),
-			});
+		const highlight = getHighlight(root, highlights)
+		if (highlight) {
+			return (
+				<Box
+					as="span"
+					bg="highlight"
+					key={`hl-${root.key}`}
+					data-group-id={highlight.groupId}
+				>
+					{root}
+				</Box>
+			)
 		}
+
+		const children = applyHighlights(root.props.children, highlights)
+		if(children === root.props.children)
+			return root
+		return React.cloneElement(root, {children});
 	}
 
 	return root;

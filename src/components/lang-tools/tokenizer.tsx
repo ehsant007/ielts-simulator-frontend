@@ -29,7 +29,7 @@ function wrapText(
 
 		return (
 			<span
-				key={tokenIndex}
+				key={`token-${tokenIndex}`}
 				data-token-index={tokenIndex}
 				{...(isWord ?
 					{
