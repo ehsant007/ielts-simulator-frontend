@@ -183,23 +183,14 @@ export function Highlighter({ children, id }: HighlighterProps) {
 	const highlights = useLangToolsStore((s) => s.highlights[id])
 	//const setHighlights = useLangToolsStore((state) => state.setHighlights)
 
-	return applyHighlights(children, highlights, (token, highlight) => (
-		// React.cloneElement(
-		// 	token,
-		// 	{
-		// 		className: "highlight",
-		// 		"data-hl-group-id": highlight.groupId,
-		// 	} as React.HTMLAttributes<HTMLElement>,
-		// 	token.props.children,
-		// )
-
+	return applyHighlights(children, highlights, (tokens, highlight) => (
 		<span
 			className="highlight"
-			key={`hl-${token.key}`}
+			key={`hl-${tokens[0].key}`}
 			data-group-id={highlight.groupId}
 		//onClick={() => removeHighlight(highlights, setHighlights, highlight.groupId)}
 		>
-			{token}
+			{tokens}
 		</span>
 	))
 }
@@ -249,7 +240,7 @@ function getHighlight(node: React.ReactNode, highlights: Highlight[]): Highlight
 export function applyHighlights(
 	root: React.ReactNode,
 	highlights: Highlight[],
-	wrapper: (token: React.ReactElement<TokenProps>, highlight: Highlight) => React.ReactNode,
+	wrapper: (tokens: React.ReactElement<TokenProps>[], highlight: Highlight) => React.ReactNode,
 ): React.ReactNode {
 	if (!highlights || highlights.length === 0)
 		return root
@@ -264,16 +255,38 @@ export function applyHighlights(
 	}
 
 	if (Array.isArray(root)) {
-		return root.map((child) => {
-			return applyHighlights(child, highlights, wrapper)
-		})
+		const result: React.ReactNode[] = []
+
+		for (let i = 0; i < root.length; i++) {
+			const highlight = getHighlight(root[i], highlights)
+			if (!highlight) {
+				result.push(applyHighlights(root[i], highlights, wrapper))
+				continue
+			}
+
+			const group = [root[i]]
+
+			i++
+			while (i < root.length) {
+				if (getHighlight(root[i], highlights) !== highlight) {
+					i--
+					break
+				}
+				group.push(root[i])
+				i++
+			}
+
+			result.push(wrapper(group, highlight))
+		}
+
+		return result
 	}
 
 	if (React.isValidElement<{ children?: React.ReactNode }>(root)) {
 
 		const highlight = getHighlight(root, highlights)
 		if (highlight)
-			return wrapper(root, highlight)
+			return wrapper([root], highlight)
 
 		const children = applyHighlights(root.props.children, highlights, wrapper)
 		if (children === root.props.children)
