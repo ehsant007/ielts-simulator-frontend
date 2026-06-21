@@ -3,7 +3,7 @@
 import React, { forwardRef } from "react"
 import { Button, ButtonProps } from "@chakra-ui/react"
 import { Highlight, LangToolsStore } from "./store"
-import { useLangToolsStore } from "./LangToolsProvider"
+import { useLangToolsStore, useLangToolsStoreApi } from "./LangToolsProvider"
 
 
 function addHighlight(ranges: Highlight[], range: Highlight) {
@@ -181,14 +181,14 @@ type HighlighterProps = {
 
 export function Highlighter({ children, id }: HighlighterProps) {
 	const highlights = useLangToolsStore((s) => s.highlights[id])
-	//const setHighlights = useLangToolsStore((state) => state.setHighlights)
+	//const store = useLangToolsStoreApi()
 
 	return applyHighlights(children, highlights, (tokens, highlight) => (
 		<span
 			className="highlight"
 			key={`hl-${tokens[0].key}`}
 			data-group-id={highlight.groupId}
-		//onClick={() => removeHighlight(highlights, setHighlights, highlight.groupId)}
+		//onClick={() => removeHighlight(store.getState().highlights, store.getState().setHighlights, highlight.groupId)}
 		>
 			{tokens}
 		</span>
