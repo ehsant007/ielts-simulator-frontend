@@ -144,7 +144,7 @@ function getSelectedTokensGroupByAdvText() {
 
 
 let nextGroupId = 0
-export function highlightSelectedText({ setHighlights }: Pick<LangToolsStore, "setHighlights">) {
+export function highlightSelectedText(setHighlights: LangToolsStore["setHighlights"]) {
 	const tokens = getSelectedTokensGroupByAdvText()
 	const groupId = nextGroupId++
 
@@ -304,7 +304,7 @@ export const HighlightButton = forwardRef<HTMLButtonElement, ButtonProps>(({ chi
 	return (
 		<Button
 			onClick={(e) => {
-				highlightSelectedText({ setHighlights })
+				highlightSelectedText(setHighlights)
 				onClick?.(e)
 			}}
 			ref={ref}
