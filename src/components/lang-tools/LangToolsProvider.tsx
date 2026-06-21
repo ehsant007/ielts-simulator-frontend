@@ -21,7 +21,7 @@ export function LangToolsProvider({ children }: LangToolsProviderProps) {
 			return
 
 		const onPointerUp = () => {
-			highlightSelectedText({ setHighlights })
+			highlightSelectedText(setHighlights)
 		}
 
 		document.addEventListener("pointerup", onPointerUp)
