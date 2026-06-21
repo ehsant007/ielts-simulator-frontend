@@ -113,7 +113,10 @@ const config = defineConfig({
 		},
 		button: {
 			colorPalette: "purple",
-		}
+		},
+		".highlight":{
+			bg: "highlight"
+		},
 	},
 })
 

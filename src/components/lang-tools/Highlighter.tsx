@@ -68,7 +68,11 @@ function addHighlight(ranges: Highlight[], range: Highlight) {
 	return result
 }
 
-export function removeHighlight({ highlights, setHighlights }: LangToolsStore, groupId: number) {
+export function removeHighlight(
+	highlights: LangToolsStore["highlights"],
+	setHighlights: LangToolsStore["setHighlights"],
+	groupId: number,
+) {
 	for (const [id, hlArray] of Object.entries(highlights)) {
 		const next = hlArray.filter((hl) => hl.groupId !== groupId)
 
@@ -176,13 +180,28 @@ type HighlighterProps = {
 }
 
 export function Highlighter({ children, id }: HighlighterProps) {
-	const highlights = useLangToolsStore((s) => s.highlights[id]) ?? []
+	const highlights = useLangToolsStore((s) => s.highlights[id])
+	//const setHighlights = useLangToolsStore((state) => state.setHighlights)
 
-	return (
-		<Box as="span">
-			{applyHighlights(children, highlights)}
-		</Box>
-	)
+	return applyHighlights(children, highlights, (token, highlight) => (
+		// React.cloneElement(
+		// 	token,
+		// 	{
+		// 		className: "highlight",
+		// 		"data-hl-group-id": highlight.groupId,
+		// 	} as React.HTMLAttributes<HTMLElement>,
+		// 	token.props.children,
+		// )
+
+		<span
+			className="highlight"
+			key={`hl-${token.key}`}
+			data-group-id={highlight.groupId}
+		//onClick={() => removeHighlight(highlights, setHighlights, highlight.groupId)}
+		>
+			{token}
+		</span>
+	))
 }
 
 type TokenProps = {
@@ -227,7 +246,13 @@ function getHighlight(node: React.ReactNode, highlights: Highlight[]): Highlight
 	return findHighlight(index, highlights);
 }
 
-export function applyHighlights(root: React.ReactNode, highlights: Highlight[]): React.ReactNode {
+export function applyHighlights(
+	root: React.ReactNode,
+	highlights: Highlight[],
+	wrapper: (token: React.ReactElement<TokenProps>, highlight: Highlight) => React.ReactNode,
+): React.ReactNode {
+	if (!highlights || highlights.length === 0)
+		return root
 
 	if (
 		root == null ||
@@ -240,27 +265,17 @@ export function applyHighlights(root: React.ReactNode, highlights: Highlight[]):
 
 	if (Array.isArray(root)) {
 		return root.map((child) => {
-			return applyHighlights(child, highlights)
+			return applyHighlights(child, highlights, wrapper)
 		})
 	}
 
 	if (React.isValidElement<{ children?: React.ReactNode }>(root)) {
 
 		const highlight = getHighlight(root, highlights)
-		if (highlight) {
-			return (
-				<Box
-					as="span"
-					bg="highlight"
-					key={`hl-${root.key}`}
-					data-group-id={highlight.groupId}
-				>
-					{root}
-				</Box>
-			)
-		}
+		if (highlight)
+			return wrapper(root, highlight)
 
-		const children = applyHighlights(root.props.children, highlights)
+		const children = applyHighlights(root.props.children, highlights, wrapper)
 		if (children === root.props.children)
 			return root
 		return React.cloneElement(root, { children });
