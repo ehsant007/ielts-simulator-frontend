@@ -1,7 +1,7 @@
 "use client"
 
 import React, { forwardRef } from "react"
-import { Box, Button, ButtonProps } from "@chakra-ui/react"
+import { Button, ButtonProps } from "@chakra-ui/react"
 import { Highlight, LangToolsStore } from "./store"
 import { useLangToolsStore } from "./LangToolsProvider"
 
@@ -13,7 +13,7 @@ function addHighlight(ranges: Highlight[], range: Highlight) {
 	const result: Highlight[] = []
 
 	let from = range.from
-	let to = range.to
+	const to = range.to
 	let range_added = false
 
 	for (let i = 0; i < ranges.length; i++) {

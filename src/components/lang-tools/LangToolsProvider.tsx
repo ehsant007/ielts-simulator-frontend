@@ -26,7 +26,7 @@ export function LangToolsProvider({ children }: LangToolsProviderProps) {
 
 		document.addEventListener("pointerup", onPointerUp)
 		return () => document.removeEventListener("pointerup", onPointerUp)
-	}, [highlightingEnabled])
+	}, [highlightingEnabled, setHighlights])
 
 	return (
 		<LangToolsContext.Provider value={store} >

@@ -1,6 +1,6 @@
 import { useModuleStore } from "./ModuleProvider";
 import type { WritingContent } from "@/client";
-import { VStack, Text, Box, Textarea } from "@chakra-ui/react";
+import { VStack, Box, Textarea } from "@chakra-ui/react";
 import { MD } from "./Content";
 import { Layout } from "./Layout";
 import { Visual } from "./Visual";
