@@ -11,6 +11,7 @@ import { WritingModule } from "./WritingModule";
 import { SpeakingModule } from "./SpeakingModule";
 import { ModuleMode } from "./store";
 import { LangToolsProvider } from "../lang-tools";
+import { ContextMenu } from "./ContextMenu";
 
 
 type ModuleProps = {
@@ -55,7 +56,9 @@ export function Module({ module, lastAttempt }: ModuleProps) {
 				mode={mode}
 				lastAttempt={mode === "review" ? lastAttempt : undefined}
 			>
-				{module_ui}
+				<ContextMenu>
+					{module_ui}
+				</ContextMenu>
 			</ModuleContextProvider>
 		</LangToolsProvider>
 	)

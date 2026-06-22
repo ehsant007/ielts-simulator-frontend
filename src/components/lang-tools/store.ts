@@ -197,7 +197,6 @@ function getSelectedTokensGroupByAdvText() {
 let nextGroupId = 0
 function _highlightSelectedText(setHighlights: LangToolsStore["setHighlights"]) {
 	const tokens = getSelectedTokensGroupByAdvText()
-	const groupId = nextGroupId++
 
 	Object.keys(tokens).forEach((advTextId) => {
 		const group = tokens[advTextId]
@@ -208,7 +207,7 @@ function _highlightSelectedText(setHighlights: LangToolsStore["setHighlights"]) 
 			return
 
 		const range: Highlight = {
-			groupId,
+			groupId: nextGroupId++,
 			from: Number(from),
 			to: Number(to),
 		}
