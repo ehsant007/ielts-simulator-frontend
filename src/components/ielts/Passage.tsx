@@ -23,13 +23,13 @@ export function Passage({ title, subtitle, sections }: Passage) {
 					<VStack key={i} alignItems="start" mt="6">
 						<HStack alignItems="start">
 							{section.label &&
-								<Text
+								<AdvText
 									fontWeight="bold"
 									me="2"
 									id={`part${pi}_passage_section${section.label}`}
 								>
 									{section.label}
-								</Text>
+								</AdvText>
 							}
 							<MD id={`part${pi}_passage_section${i}`}>{section.text}</MD>
 						</HStack>
