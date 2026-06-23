@@ -7,18 +7,12 @@ import { createIeltsAttempt } from "@/client";
 import { useAuth } from "@/auth";
 import { AudioVolumeControl, Audio } from "./Audio";
 
-import { HighlightButton, useLangToolsStore } from "../lang-tools";
-
 
 export function TopBar() {
 	const module1 = useModuleStore((state) => state.module)
 	const mode = useModuleStore((state) => state.mode)
 	const { user } = useAuth();
 	const store = useModuleStoreApi()
-
-	const query = useLangToolsStore(state => state.wordQuery)
-	const highlighting = useLangToolsStore(state => state.highlightingEnabled)
-	const setHighlighting = useLangToolsStore(state => state.setHighlightingEnabled)
 
 	const submit = async () => {
 		const state = store.getState()
@@ -48,14 +42,6 @@ export function TopBar() {
 							</Text>
 						</Stack>
 					</HStack>
-
-					<Button onClick={() => setHighlighting(prev => !prev)}>
-						{highlighting ? 1 : 0}
-					</Button>
-					<HighlightButton>Highlight</HighlightButton>
-					<Text>
-						{query}
-					</Text>
 					
 				</HStack>
 

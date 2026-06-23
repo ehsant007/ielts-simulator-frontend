@@ -151,6 +151,7 @@ export const Completion = forwardRef<HTMLInputElement, { question: QuestionType 
 			value={answer}
 			onChange={(e) => setAnswer(question.num, [e.currentTarget.value])}
 			id={`q${question.num}`}
+			data-question-num={question.num}
 			textAlign="center"
 			placeholder={question.num.toString()}
 			w={`${Math.max(answer.length, 17)}ch`}

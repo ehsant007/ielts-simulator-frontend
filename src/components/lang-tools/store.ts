@@ -41,7 +41,7 @@ export function createLangToolsStore() {
 				}
 				)),
 
-			highlightingEnabled: true,
+			highlightingEnabled: false,
 			setHighlightingEnabled: (value) =>
 				set((state) => ({
 					highlightingEnabled: typeof value === "function" ? value(state.highlightingEnabled) : value
