@@ -6,8 +6,6 @@ import { LuClipboardPaste, LuCopy, LuDelete, LuHighlighter } from "react-icons/l
 import { useLangToolsStore, getHighlightGroupId, getSelectedText } from "../lang-tools";
 import { useModuleStore } from "./ModuleProvider";
 
-type Point = { x: number; y: number }
-
 type ContextMenuState = {
 	x: number,
 	y: number,

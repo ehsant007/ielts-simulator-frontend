@@ -21,7 +21,7 @@ export function LangToolsProvider({ children }: LangToolsProviderProps) {
 
 		document.addEventListener("pointerup", highlightSelectedText)
 		return () => document.removeEventListener("pointerup", highlightSelectedText)
-	}, [highlightingEnabled])
+	}, [highlightingEnabled, highlightSelectedText])
 
 	return (
 		<LangToolsContext.Provider value={store} >
