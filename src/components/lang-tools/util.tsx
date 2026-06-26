@@ -27,3 +27,14 @@ export function getHighlightGroupId(target: EventTarget): number | null {
 	return null
 }
 
+
+export function getTokenWord(target: EventTarget): string | null {
+	if (!(target instanceof HTMLElement))
+		return null
+
+	if (!target.hasAttribute("data-word"))
+		return null
+
+	return target.dataset.word ?? null
+}
+

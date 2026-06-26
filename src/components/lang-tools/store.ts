@@ -6,7 +6,7 @@ type Updater<T> = T | ((prev: T) => T)
 
 export type LangToolsStore = {
 
-	wordQuery: string
+	wordQuery: string | null
 	setWordQuery: (value: string) => void
 
 	highlights: Record<string, Highlight[]>,
@@ -25,7 +25,7 @@ export type LangToolsStore = {
 export function createLangToolsStore() {
 	return createStore<LangToolsStore>((set, get) => (
 		{
-			wordQuery: "",
+			wordQuery: null,
 			setWordQuery: (value) => set(() => ({ wordQuery: value })),
 
 			highlights: {},

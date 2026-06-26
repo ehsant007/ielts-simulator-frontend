@@ -1446,6 +1446,32 @@ export type RoleRead = {
 };
 
 /**
+ * Sense
+ */
+export type Sense = {
+    /**
+     * Definition
+     */
+    definition: string;
+    /**
+     * Examples
+     */
+    examples: Array<string>;
+    /**
+     * Pos
+     */
+    pos: string;
+    /**
+     * Synonyms
+     */
+    synonyms: Array<string>;
+    /**
+     * Antonyms
+     */
+    antonyms: Array<string>;
+};
+
+/**
  * SentenceCompletionGroup
  */
 export type SentenceCompletionGroup = {
@@ -1944,6 +1970,28 @@ export type VisualLabelingGroup = {
 };
 
 /**
+ * WordNetData
+ */
+export type WordNetData = {
+    /**
+     * Word
+     */
+    word: string;
+    /**
+     * All Synonyms
+     */
+    all_synonyms: Array<string>;
+    /**
+     * All Antonyms
+     */
+    all_antonyms: Array<string>;
+    /**
+     * Senses
+     */
+    senses: Array<Sense>;
+};
+
+/**
  * WritingContent
  */
 export type WritingContent = {
@@ -1974,6 +2022,36 @@ export type WritingTask = {
      */
     sample_answer: Array<string>;
 };
+
+export type ReadWordnetData = {
+    body?: never;
+    path: {
+        /**
+         * Word
+         */
+        word: string;
+    };
+    query?: never;
+    url: '/api/v1/lang-tools/wordnet/{word}';
+};
+
+export type ReadWordnetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadWordnetError = ReadWordnetErrors[keyof ReadWordnetErrors];
+
+export type ReadWordnetResponses = {
+    /**
+     * Successful Response
+     */
+    200: WordNetData;
+};
+
+export type ReadWordnetResponse = ReadWordnetResponses[keyof ReadWordnetResponses];
 
 export type ReadIeltsExamsData = {
     body?: never;

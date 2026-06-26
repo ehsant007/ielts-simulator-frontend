@@ -45,7 +45,7 @@ const AdvTextInner = forwardRef<HTMLDivElement, TextProps>(({
 				{...(isWord ?
 					{
 						"data-word": token,
-						onPointerEnter: () => setWordQuery(token),
+						//onPointerEnter: () => setWordQuery(token),
 					}
 					: {}
 				)

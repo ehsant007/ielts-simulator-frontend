@@ -10,7 +10,7 @@
     "genapi": "openapi-ts"
   },
   "dependencies": {
-    "@chakra-ui/react": "^3.35.0",
+    "@chakra-ui/react": "^3.36.0",
     "@dnd-kit/helpers": "^0.4.0",
     "@dnd-kit/react": "^0.4.0",
     "@emotion/react": "^11.14.0",
