@@ -9,6 +9,8 @@ export type LangToolsStore = {
 	wordQuery: string | null
 	setWordQuery: (value: string) => void
 
+	translateHistory: string[]
+
 	highlights: Record<string, Highlight[]>,
 	setHighlights: (
 		id: string,
@@ -20,13 +22,17 @@ export type LangToolsStore = {
 
 	highlightingEnabled: boolean,
 	setHighlightingEnabled: (value: Updater<boolean>) => void
+
+	copiedText: string | null
+	setCopiedText: (value: string) => void
 }
 
 export function createLangToolsStore() {
 	return createStore<LangToolsStore>((set, get) => (
 		{
+			translateHistory: [],
 			wordQuery: null,
-			setWordQuery: (value) => set(() => ({ wordQuery: value })),
+			setWordQuery: (value) => set((state) => ({ wordQuery: value, translateHistory: [...state.translateHistory, value] })),
 
 			highlights: {},
 			setHighlights: (id, highlights) =>
@@ -49,6 +55,9 @@ export function createLangToolsStore() {
 
 			highlightSelectedText: () => _highlightSelectedText(get().setHighlights),
 			removeHighlight: (groupId) => _removeHighlight(get().highlights, get().setHighlights, groupId),
+
+			copiedText: null,
+			setCopiedText: (value) => set(() => ({ copiedText: value }))
 		}
 	))
 }

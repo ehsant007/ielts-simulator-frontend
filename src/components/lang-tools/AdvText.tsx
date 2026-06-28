@@ -4,7 +4,6 @@ import { Text as ChakraText, TextProps } from "@chakra-ui/react"
 import { Highlighter } from "./Highlighter"
 import { tokenize } from "./tokenizer"
 import { createContext, forwardRef, useContext } from "react"
-import { useLangToolsStore } from "./LangToolsProvider"
 
 const AdvTextContext = createContext<boolean>(false);
 
@@ -35,7 +34,6 @@ const AdvTextInner = forwardRef<HTMLDivElement, TextProps>(({
 	id,
 	...props
 }, ref) => {
-	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
 
 	const content = tokenize(children, (token, index, isWord) => {
 		return (
@@ -45,7 +43,6 @@ const AdvTextInner = forwardRef<HTMLDivElement, TextProps>(({
 				{...(isWord ?
 					{
 						"data-word": token,
-						//onPointerEnter: () => setWordQuery(token),
 					}
 					: {}
 				)

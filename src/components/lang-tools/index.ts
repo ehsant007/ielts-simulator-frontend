@@ -2,3 +2,4 @@ export { LangToolsProvider, useLangToolsStore, useLangToolsStoreApi } from "./La
 export { AdvText } from "./AdvText";
 export { HighlightButton } from "./Highlighter"
 export { getHighlightGroupId, getSelectedText, getTokenWord } from "./util"
+export { ContextMenu, type ContextMenuState, type ContextMenuProps } from "./ContextMenu"
