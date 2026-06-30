@@ -2,8 +2,13 @@
 	"typescript.tsdk": "node_modules\\typescript\\lib",
 	"cSpell.words": [
 		"advtext",
+		"dtype",
 		"ielts",
+		"Kokoro",
+		"onnx",
+		"pretrained",
 		"Radiomark",
+		"webgpu",
 		"Wordnet"
 	]
 }

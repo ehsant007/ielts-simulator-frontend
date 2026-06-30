@@ -1,15 +1,19 @@
 "use client"
 
-import { VStack, Box, List } from "@chakra-ui/react";
+import { VStack, Box, List, HStack } from "@chakra-ui/react";
 import { WordNetData } from "@/client";
 import { ContextMenu } from "../ContextMenu";
 import { AdvText } from "../AdvText";
+import { TTSButton } from "../TTS";
 
 export function WordNetResult({ data }: { data: WordNetData }) {
 	return (
 		<ContextMenu>
 			<VStack alignItems="start">
-				<AdvText fontWeight="bold">{data.word}</AdvText>
+				<HStack>
+					<AdvText fontWeight="bold">{data.word}</AdvText>
+					<TTSButton text={data.word} />
+				</HStack>
 				{data.senses.map((sense, i) => (
 					<Box key={`example-${i}`}>
 						<AdvText>{sense.pos}</AdvText>

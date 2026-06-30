@@ -16,6 +16,18 @@ const nextConfig: NextConfig = {
 	//     return config;
 	//   },
 
+	serverExternalPackages: ["onnxruntime-node", "sharp"],
+	webpack: (config, { isServer }) => {
+		config.resolve.alias = {
+			...config.resolve.alias,
+			"sharp$": false,
+			"onnxruntime-node$": false,
+		};
+		config.experiments = { ...config.experiments, asyncWebAssembly: true, layers: true };
+		if (!isServer) config.output.globalObject = "self";
+		return config;
+	},
+
 };
 
 const withNextIntl = createNextIntlPlugin();
