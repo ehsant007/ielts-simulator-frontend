@@ -1,11 +1,9 @@
 // app/components/TTSButton.tsx
 "use client";
-import { Button, IconButton, Spinner } from "@chakra-ui/react";
+import { AbsoluteCenter, Button, IconButton, ProgressCircle, Spinner, Text } from "@chakra-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { HiOutlineSpeakerWave } from "react-icons/hi2";
 import { useLangToolsStore } from "./LangToolsProvider";
-import { isGenerator } from "motion/react";
-
 
 export async function speak(speech: ArrayBuffer, rate: number = 1.0) {
 	const blob = new Blob([speech], { type: "audio/wav" });
@@ -16,18 +14,32 @@ export async function speak(speech: ArrayBuffer, rate: number = 1.0) {
 	audio.play()
 }
 
+export type ProgressInfo = {
+	name: string
+	file: string
+	status: string
+	loaded: number
+	total: number
+	progress: number
+}
+
 export function TTSButton({ text }: { text: string }) {
 	const workerRef = useRef<Worker | null>(null);
 	const cache = useLangToolsStore((state) => state.ttsCache[text])
 	const addToTtsCache = useLangToolsStore((state) => state.addToTtsCache)
 	const countRef = useRef(0)
-	const [loading, setLoading] = useState(false)
-	const [generating, setGenerating] = useState(false)
+	const [progress, setProgress] = useState<ProgressInfo | null>(null)
+	const [waiting, setWaiting] = useState(false)
+
+
+	const generate = () => {
+		setWaiting(true)
+		workerRef.current?.postMessage({ type: "generate", text })
+	}
 
 	const handleClick = useCallback(async () => {
 		if (!cache) {
-			setGenerating(true)
-			workerRef.current?.postMessage({ type: "generate", text })
+			generate()
 			return
 		}
 
@@ -47,21 +59,22 @@ export function TTSButton({ text }: { text: string }) {
 			{ type: "module" }
 		);
 
-		setLoading(true)
 		worker.postMessage({ type: "load" });
 
 		worker.onmessage = (e) => {
-			if (e.data.type === "ready") {
-				console.log("TTS ready!");
-				setLoading(false)
-			}
-			if (e.data.type === "result") {
-				addToTtsCache(text, e.data.wav)
-				setGenerating(false)
-				speak(e.data.wav)
-			}
-			if (e.data.type === "progress") {
-				console.log(e.data.info)
+			switch (e.data.type) {
+				case "result":
+					addToTtsCache(text, e.data.wav)
+					setWaiting(false)
+					speak(e.data.wav)
+					break
+				case "progress":
+					setProgress(e.data.info)
+					break
+				case "ready":
+					if (waiting)
+						generate()
+					break
 			}
 		};
 
@@ -70,13 +83,27 @@ export function TTSButton({ text }: { text: string }) {
 	}, []);
 
 
+	const renderIcon = () => {
+		if (waiting && progress) {
+			return (
+				<ProgressCircle.Root size="xs" value={progress.status === "done" ? null : progress?.progress}>
+					<ProgressCircle.Circle>
+						<ProgressCircle.Track />
+						<ProgressCircle.Range />
+					</ProgressCircle.Circle>
+					<AbsoluteCenter>
+						<ProgressCircle.ValueText />
+					</AbsoluteCenter>
+				</ProgressCircle.Root>
+			)
+		}
+
+		return <HiOutlineSpeakerWave />
+	}
+
 	return (
 		<IconButton onClick={handleClick} minW="unset" h="auto" p="1" variant="ghost">
-			{generating ?
-				<Spinner size="sm" color={loading ? "red" : "primary"} />
-				:
-				<HiOutlineSpeakerWave />
-			}
+			{renderIcon()}
 		</IconButton>
 	)
 }
