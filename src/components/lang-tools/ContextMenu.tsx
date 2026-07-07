@@ -5,6 +5,8 @@ import { Box, Menu, Portal } from "@chakra-ui/react"
 import { LuClipboardPaste, LuCopy, LuDelete, LuHighlighter } from "react-icons/lu";
 import { useLangToolsStore, getHighlightGroupId, getSelectedText, getTokenWord } from "../lang-tools";
 import { BsTranslate } from "react-icons/bs";
+import { useKokoroStore, speak } from "./kokoro-tts";
+import { HiOutlineSpeakerWave } from "react-icons/hi2";
 
 export type ContextMenuState = {
 	x: number,
@@ -24,6 +26,7 @@ export function ContextMenu({ children, paste }: ContextMenuProps) {
 	const highlightSelectedText = useLangToolsStore((state) => state.highlightSelectedText)
 	const removeHighlight = useLangToolsStore((state) => state.removeHighlight)
 	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
+	const generate = useKokoroStore((state) => state.generate)
 
 	const [open, setOpen] = useState(false)
 
@@ -70,6 +73,13 @@ export function ContextMenu({ children, paste }: ContextMenuProps) {
 			setWordQuery(context.word)
 	}
 
+	async function _speak(){
+		if(!context.selectedText)
+			return
+		const audio = await generate(context.selectedText)
+		speak(audio)
+	}
+
 	return (
 		<Box onContextMenu={handleContextMenu}>
 			{children}
@@ -84,6 +94,14 @@ export function ContextMenu({ children, paste }: ContextMenuProps) {
 							>
 								<BsTranslate />
 								<Box flex="1">Translate</Box>
+							</Menu.Item>
+							<Menu.Item
+								value="speak"
+								disabled={!context.word}
+								onSelect={_speak}
+							>
+								<HiOutlineSpeakerWave />
+								<Box flex="1">Speak</Box>
 							</Menu.Item>
 							<Menu.Separator />
 							<Menu.Item

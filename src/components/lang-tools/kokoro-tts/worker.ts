@@ -25,6 +25,6 @@ onmessage = async (event) => {
 		// Use `tts.list_voices()` to list all available voices
 		const audio = await tts.generate(text, { voice: voice ?? "af_heart" });
 		const wav = audio.toWav();
-		postMessage({ type: "result", wav }, [wav]);
+		postMessage({ type: "result", text, wav }, [wav]);
 	}
 }

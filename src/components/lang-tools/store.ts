@@ -11,9 +11,6 @@ export type LangToolsStore = {
 
 	translateHistory: string[]
 
-	ttsCache: Record<string, ArrayBuffer>
-	addToTtsCache: (text: string, speech: ArrayBuffer) => void
-
 	highlights: Record<string, Highlight[]>,
 	setHighlights: (
 		id: string,
@@ -36,9 +33,6 @@ export function createLangToolsStore() {
 			translateHistory: [],
 			wordQuery: null,
 			setWordQuery: (value) => set((state) => ({ wordQuery: value, translateHistory: [...state.translateHistory, value] })),
-
-			ttsCache: {},
-			addToTtsCache: (text, speech) => set((state) => ({ ttsCache: { ...state.ttsCache, [text]: speech } })),
 
 			highlights: {},
 			setHighlights: (id, highlights) =>
@@ -63,7 +57,7 @@ export function createLangToolsStore() {
 			removeHighlight: (groupId) => _removeHighlight(get().highlights, get().setHighlights, groupId),
 
 			copiedText: null,
-			setCopiedText: (value) => set(() => ({ copiedText: value }))
+			setCopiedText: (value) => set(() => ({ copiedText: value })),
 		}
 	))
 }

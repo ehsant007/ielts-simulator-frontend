@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { StoreApi, useStore } from "zustand";
 import { createLangToolsStore, LangToolsStore } from "./store"
+import { KokoroProvider } from "./kokoro-tts/KokoroProvider";
 
 const LangToolsContext = createContext<StoreApi<LangToolsStore> | undefined>(undefined)
 
@@ -25,7 +26,9 @@ export function LangToolsProvider({ children }: LangToolsProviderProps) {
 
 	return (
 		<LangToolsContext.Provider value={store} >
-			{children}
+			<KokoroProvider>
+				{children}
+			</KokoroProvider>
 		</LangToolsContext.Provider>
 	)
 }
