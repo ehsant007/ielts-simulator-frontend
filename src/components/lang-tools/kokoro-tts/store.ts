@@ -1,4 +1,5 @@
 import { createStore } from "zustand/vanilla"
+import { KokoroOutput } from "./types"
 
 export type KokoroLoadingProgressInfo = {
 	name: string
@@ -13,32 +14,13 @@ export type KokoroStore = {
 	worker: Worker | null
 	setWorker: (worker: Worker) => void
 
-	cache: Record<string, ArrayBuffer>
-	addToCache: (text: string, speech: ArrayBuffer) => void
+	cache: Record<string, KokoroOutput[]>
+	addToCache: (text: string, audio: KokoroOutput) => void
 	loadingProgress: KokoroLoadingProgressInfo | null
 	setLoadingProgress: (value: KokoroLoadingProgressInfo) => void
-	generate: (text: string) => Promise<ArrayBuffer>
+	generate: (text: string, onResult?: (audio: KokoroOutput[]) => void, stream?: boolean) => Promise<KokoroOutput[]>
 	inferencing: boolean
 	setInferencing: (value: boolean) => void
-}
-
-function generate(worker: Worker, text: string): Promise<ArrayBuffer> {
-	return new Promise((resolve, reject) => {
-		worker.postMessage({ type: "generate", text });
-
-		const onMessage = (event: MessageEvent) => {
-			worker.removeEventListener("message", onMessage)
-			resolve(event.data);
-		};
-
-		const onError = (error: ErrorEvent) => {
-			worker.removeEventListener("error", onError)
-			reject(error);
-		};
-
-		worker.addEventListener("message", onMessage)
-		worker.addEventListener("error", onError)
-	});
 }
 
 
@@ -48,28 +30,39 @@ export function createKokoroStore() {
 		setWorker: (worker) => set({ worker }),
 
 		cache: {},
-		addToCache: (text, speech) => set((state) => ({ cache: { ...state.cache, [text]: speech } })),
+		addToCache: (text, audio) => set((state) => ({ cache: { ...state.cache, [text]: [...(state.cache[text] ?? []), audio] } })),
+
 		loadingProgress: null,
 		setLoadingProgress: (value) => set({ loadingProgress: value }),
 		inferencing: false,
 		setInferencing: (value) => set({ inferencing: value }),
 
-		generate: (text) => {
+		generate: (text, onResult, stream) => {
 			const result = get().cache[text]
 			get().setInferencing(true)
 			return new Promise((resolve, reject) => {
 				if (result) {
+					onResult?.(result)
 					resolve(result)
 					return
 				}
 
 				const onMessage = (e: MessageEvent) => {
-					if (e.data.type !== "result")
+					const msgType: string = e.data.type
+
+					if (!stream || msgType === "stream-done")
+						get().worker?.removeEventListener("message", onMessage)
+
+					if (msgType !== "result")
 						return
-					get().worker?.removeEventListener("message", onMessage)
-					get().addToCache(e.data.text, e.data.wav)
+
+					const audio: KokoroOutput = e.data.audio
+
+					get().addToCache(e.data.text, audio)
 					get().setInferencing(false)
-					resolve(e.data.wav)
+					const result = [audio]
+					onResult?.(result)
+					resolve(result)
 				}
 
 				const onError = (error: ErrorEvent) => {
@@ -80,7 +73,10 @@ export function createKokoroStore() {
 				get().worker?.addEventListener("message", onMessage)
 				get().worker?.addEventListener("error", onError)
 
-				get().worker?.postMessage({ type: "generate", text })
+				if (stream)
+					get().worker?.postMessage({ type: "stream", text })
+				else
+					get().worker?.postMessage({ type: "generate", text })
 			})
 		},
 

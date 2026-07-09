@@ -4,7 +4,7 @@ import { VStack, Box, List, HStack } from "@chakra-ui/react";
 import { WordNetData } from "@/client";
 import { ContextMenu } from "../ContextMenu";
 import { AdvText } from "../AdvText";
-import { TTSButton } from "../TTS";
+import { TTSButton } from "../tts";
 
 export function WordNetResult({ data }: { data: WordNetData }) {
 	return (

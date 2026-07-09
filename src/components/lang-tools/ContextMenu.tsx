@@ -7,6 +7,7 @@ import { useLangToolsStore, getHighlightGroupId, getSelectedText, getTokenWord }
 import { BsTranslate } from "react-icons/bs";
 import { useKokoroStore, speak } from "./kokoro-tts";
 import { HiOutlineSpeakerWave } from "react-icons/hi2";
+import { KokoroOutput } from "./kokoro-tts/types";
 
 export type ContextMenuState = {
 	x: number,
@@ -76,8 +77,11 @@ export function ContextMenu({ children, paste }: ContextMenuProps) {
 	async function _speak(){
 		if(!context.selectedText)
 			return
-		const audio = await generate(context.selectedText)
-		speak(audio)
+		// let playback = Promise.resolve()
+		// function enqueueAudio(audio: KokoroOutput[]){
+		// 	playback = playback.then(()=>speak(audio))
+		// }
+		generate(context.selectedText, (audio)=>speak(audio), false)
 	}
 
 	return (

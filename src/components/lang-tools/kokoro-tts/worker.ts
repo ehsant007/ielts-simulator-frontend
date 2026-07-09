@@ -1,12 +1,19 @@
 /// <reference lib="webworker" />
 
-import { KokoroTTS } from "kokoro-js";
+import { KokoroTTS, TextSplitterStream } from "kokoro-js";
+import { KokoroOutput, RawAudio } from "./types";
 const model_id = "onnx-community/Kokoro-82M-v1.0-ONNX";
 
 let tts: KokoroTTS | null = null;
 
 onmessage = async (event) => {
 	const { type, text, voice } = event.data;
+
+
+	function postResult(result: RawAudio) {
+		const audio: KokoroOutput = { audio: result.audio, sampleRate: result.sampling_rate }
+		postMessage({ type: "result", text, audio }, [result.audio.buffer])
+	}
 
 	if (type === "load") {
 		tts = await KokoroTTS.from_pretrained(model_id, {
@@ -15,16 +22,50 @@ onmessage = async (event) => {
 			progress_callback: (info) => postMessage({ type: "progress", info })
 		});
 
-		if(tts)
-			postMessage({ type: "ready" });
-		else
+		if (!tts)
 			console.log(`Failed to load model ${model_id}`)
+
+		postMessage({ type: "ready" });
+		return
 	}
 
-	if (type === "generate" && tts) {
-		// Use `tts.list_voices()` to list all available voices
-		const audio = await tts.generate(text, { voice: voice ?? "af_heart" });
-		const wav = audio.toWav();
-		postMessage({ type: "result", text, wav }, [wav]);
+	if (!tts)
+		return
+
+	if (type === "generate") {
+		const audio = await tts.generate(text, { voice: voice ?? "af_heart" })
+		postResult(audio)
+		return
+	}
+
+	if (type === "stream0") {
+		const splitter = new TextSplitterStream()
+		const stream = tts.stream(splitter);
+		(async () => {
+			for await (const { text, phonemes, audio } of stream) {
+				console.log({ text, phonemes })
+				postResult(audio)
+			}
+		})();
+
+		splitter.push(text)
+		return
+	}
+
+
+	if (type === "stream") {
+		const splitter = new TextSplitterStream()
+		const stream = tts.stream(splitter);
+		(async () => {
+			for await (const { text, phonemes, audio } of stream) {
+				console.log({ text, phonemes })
+				postResult(audio)
+			}
+
+			postMessage({ type: "stream-done" })
+		})();
+
+		splitter.push(text)
+		return
 	}
 }
