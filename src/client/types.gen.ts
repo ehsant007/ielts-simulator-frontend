@@ -1751,6 +1751,40 @@ export type Token = {
 };
 
 /**
+ * TranslateRequest
+ */
+export type TranslateRequest = {
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Context
+     */
+    context: string;
+    /**
+     * Source Language
+     */
+    source_language: string;
+    /**
+     * Target Language
+     */
+    target_language: string;
+};
+
+/**
+ * TranslateResponse
+ */
+export type TranslateResponse = {
+    /**
+     * Translation
+     *
+     * Full translation in target language
+     */
+    translation: string;
+};
+
+/**
  * UpdatePassword
  */
 export type UpdatePassword = {
@@ -2023,6 +2057,31 @@ export type WritingTask = {
     sample_answer: Array<string>;
 };
 
+export type TranslateData = {
+    body: TranslateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/langtools/ai/translate';
+};
+
+export type TranslateErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type TranslateError = TranslateErrors[keyof TranslateErrors];
+
+export type TranslateResponses = {
+    /**
+     * Successful Response
+     */
+    200: TranslateResponse;
+};
+
+export type TranslateResponse2 = TranslateResponses[keyof TranslateResponses];
+
 export type ReadWordnetData = {
     body?: never;
     path: {
@@ -2032,7 +2091,7 @@ export type ReadWordnetData = {
         word: string;
     };
     query?: never;
-    url: '/api/v1/lang-tools/wordnet/{word}';
+    url: '/api/v1/langtools/wordnet/{word}';
 };
 
 export type ReadWordnetErrors = {

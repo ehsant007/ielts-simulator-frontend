@@ -17,7 +17,7 @@ export function TTSButton({ text }: { text: string }) {
 		const audio = await generate(text)
 		setWaiting(false)
 
-		const rate = countRef.current++ % 2 === 0 ? 1.0 : 0.6
+		const rate = countRef.current++ % 2 === 0 ? 1.0 : 0.8
 		speak(audio, rate)
 	}, [text, generate])
 
