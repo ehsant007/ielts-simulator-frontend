@@ -2,7 +2,7 @@
 
 import { VStack, Box, List, HStack } from "@chakra-ui/react";
 import { WordNetData } from "@/client";
-import { ContextMenu } from "../ContextMenu";
+import { ContextMenu } from "../menu/ContextMenu";
 import { AdvText } from "../AdvText";
 import { TTSButton } from "../tts";
 

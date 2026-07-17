@@ -1,11 +1,11 @@
 
-export function getSelectedText() {
+export function getSelection1() {
 	const selection = window.getSelection()
 	if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
 		return null
 	}
 
-	return selection.toString()
+	return selection
 }
 
 

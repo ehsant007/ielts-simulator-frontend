@@ -3,43 +3,45 @@
 import React, { useState } from "react"
 import { Box, Menu, Portal } from "@chakra-ui/react"
 import { LuClipboardPaste, LuCopy, LuDelete, LuHighlighter } from "react-icons/lu";
-import { useLangToolsStore, getHighlightGroupId, getSelectedText, getTokenWord } from "../lang-tools";
 import { BsTranslate } from "react-icons/bs";
-import { useKokoroStore, speak } from "./kokoro-tts";
 import { HiOutlineSpeakerWave } from "react-icons/hi2";
-import { KokoroOutput } from "./kokoro-tts/types";
+import { useMenu } from "./hooks";
+import { getHighlightGroupId, getTokenWord } from "../util";
+
 
 export type ContextMenuState = {
 	x: number,
 	y: number,
 	target: EventTarget | null
 	highlightGroupId: number | null
-	selectedText: string | null | undefined
 	word: string | null
 }
+
 
 export type ContextMenuProps = {
 	children: React.ReactNode
 	paste?: ((context: ContextMenuState) => void) | undefined
 }
 
+
 export function ContextMenu({ children, paste }: ContextMenuProps) {
-	const highlightSelectedText = useLangToolsStore((state) => state.highlightSelectedText)
-	const removeHighlight = useLangToolsStore((state) => state.removeHighlight)
-	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
-	const generate = useKokoroStore((state) => state.generate)
-
-	const [open, setOpen] = useState(false)
-
-	const copiedText = useLangToolsStore((state) => state.copiedText)
-	const setCopiedText = useLangToolsStore((state) => state.setCopiedText)
+	const {
+		open,
+		setOpen,
+		selectedText,
+		highlight,
+		removeHighlight,
+		copiedText,
+		copy,
+		translate,
+		speak,
+	} = useMenu()
 
 	const [context, setContext] = useState<ContextMenuState>({
 		x: 0,
 		y: 0,
 		target: null,
 		highlightGroupId: null,
-		selectedText: null,
 		word: null,
 	})
 
@@ -54,34 +56,11 @@ export function ContextMenu({ children, paste }: ContextMenuProps) {
 			x: e.clientX,
 			y: e.clientY,
 			target: e.target,
-			selectedText: getSelectedText()?.trim(),
 			highlightGroupId: getHighlightGroupId(e.target),
 			word: getTokenWord(e.target),
 		})
 
 		setOpen(true)
-	}
-
-	async function copy() {
-		if (context.selectedText) {
-			setCopiedText(context.selectedText)
-			await navigator.clipboard.writeText(context.selectedText);
-		}
-	}
-
-	function translate() {
-		if (context.word)
-			setWordQuery(context.word)
-	}
-
-	async function _speak(){
-		if(!context.selectedText)
-			return
-		// let playback = Promise.resolve()
-		// function enqueueAudio(audio: KokoroOutput[]){
-		// 	playback = playback.then(()=>speak(audio))
-		// }
-		generate(context.selectedText, (audio)=>speak(audio), false)
 	}
 
 	return (
@@ -94,7 +73,7 @@ export function ContextMenu({ children, paste }: ContextMenuProps) {
 							<Menu.Item
 								value="translate"
 								disabled={!context.word}
-								onSelect={translate}
+								onSelect={() => translate(context.word)}
 							>
 								<BsTranslate />
 								<Box flex="1">Translate</Box>
@@ -102,7 +81,7 @@ export function ContextMenu({ children, paste }: ContextMenuProps) {
 							<Menu.Item
 								value="speak"
 								disabled={!context.word}
-								onSelect={_speak}
+								onSelect={speak}
 							>
 								<HiOutlineSpeakerWave />
 								<Box flex="1">Speak</Box>
@@ -110,8 +89,8 @@ export function ContextMenu({ children, paste }: ContextMenuProps) {
 							<Menu.Separator />
 							<Menu.Item
 								value="highlight"
-								disabled={!context.selectedText}
-								onSelect={highlightSelectedText}
+								disabled={!selectedText}
+								onSelect={highlight}
 							>
 								<LuHighlighter />
 								<Box flex="1">Highlight</Box>
@@ -128,7 +107,7 @@ export function ContextMenu({ children, paste }: ContextMenuProps) {
 							<Menu.Separator />
 							<Menu.Item
 								value="copy"
-								disabled={!context.selectedText}
+								disabled={!selectedText}
 								onSelect={copy}
 							>
 								<LuCopy />
@@ -149,7 +128,6 @@ export function ContextMenu({ children, paste }: ContextMenuProps) {
 					</Menu.Root>
 				</Box>
 			</Portal>
-
 		</Box>
 	)
 }

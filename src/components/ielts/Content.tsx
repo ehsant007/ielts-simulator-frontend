@@ -1,7 +1,7 @@
 "use client"
 
 import { Content as ContentType, Table as TableType, Text as TextType } from "@/client"
-import { Box, Center, List, Table, VStack, Text } from "@chakra-ui/react"
+import { Box, Center, List, Table, VStack } from "@chakra-ui/react"
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import { useModuleStore } from "./ModuleProvider"

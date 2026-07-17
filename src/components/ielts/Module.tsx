@@ -12,7 +12,8 @@ import { SpeakingModule } from "./SpeakingModule";
 import { ModuleMode } from "./store";
 import { LangToolsProvider } from "../lang-tools";
 import { ContextMenu } from "./ContextMenu";
-import { WordNet } from "../lang-tools/translate/WordNet";
+import { WordNet } from "../lang-tools";
+import { PopoverMenu } from "../lang-tools";
 
 
 type ModuleProps = {
@@ -60,6 +61,7 @@ export function Module({ module, lastAttempt }: ModuleProps) {
 				<ContextMenu>
 					{module_ui}
 					<WordNet/>
+					<PopoverMenu/>
 				</ContextMenu>
 			</ModuleContextProvider>
 		</LangToolsProvider>
