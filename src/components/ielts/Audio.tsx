@@ -2,7 +2,7 @@
 
 import { useModuleStore } from "./ModuleProvider";
 import { Box, Button, Center, HStack, Popover, Portal, Progress, Slider, StackProps, Text, VStack } from "@chakra-ui/react";
-import { useEffect, useRef, useMemo, useState } from "react";
+import { useEffect, useRef, useMemo, useState, useEffectEvent } from "react";
 import { getModuleFile } from "./utils";
 
 import { MdGraphicEq } from "react-icons/md";
@@ -202,7 +202,7 @@ export function AudioReview(props: StackProps) {
 	const audioVolume = useModuleStore((state) => state.audioVolume)
 	const audioMute = useModuleStore((state) => state.audioMute)
 
-	const waveformRef = useRef<HTMLDivElement>(null)
+	const waveSurferContainerRef = useRef<HTMLDivElement>(null)
 	const playerRef = useRef<WaveSurfer | null>(null)
 
 	const [time, setTime] = useState(0)
@@ -224,14 +224,15 @@ export function AudioReview(props: StackProps) {
 			player.pause()
 	}, [audioVolume, audioMute, audioPlay, playbackRate])
 
-	useEffect(() => {
-		if (!waveformRef.current) return
+	const createWaveSurfer = useEffectEvent((part_index: number, moduleId: string) => {
+		if (!waveSurferContainerRef.current)
+			return null
 
 		setIsLoading(true)
 
 		const ws = WaveSurfer.create({
-			container: waveformRef.current,
-			url: getModuleFile(module1.id, `part${pi + 1}.mp3`),
+			container: waveSurferContainerRef.current,
+			url: getModuleFile(moduleId, `part${part_index + 1}.mp3`),
 			height: "auto",
 			waveColor: "#6400a7",
 			progressColor: "#c9006e",
@@ -253,10 +254,20 @@ export function AudioReview(props: StackProps) {
 			setTime(Math.floor(value))
 		})
 
-		playerRef.current = ws
+		return ws
+	})
 
-		return () => ws.destroy()
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+	useEffect(() => {
+		const ws = createWaveSurfer(pi, module1.id)
+		if (!ws)
+			return
+
+		playerRef.current = ws
+		
+		return () => {
+			ws.destroy()
+			playerRef.current = null
+		}
 	}, [pi, module1.id])
 
 	return (
@@ -286,7 +297,7 @@ export function AudioReview(props: StackProps) {
 					</Center>
 				)}
 				<Box
-					ref={waveformRef}
+					ref={waveSurferContainerRef}
 					cursor="pointer"
 					width="full"
 					h="full"
