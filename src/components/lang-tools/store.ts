@@ -7,11 +7,11 @@ type Updater<T> = T | ((prev: T) => T)
 export type LangToolsStore = {
 
 	wordQuery: string | null
-	setWordQuery: (value: string) => void
+	setWordQuery: (value: string | null) => void
 
-	translateHistory: string[]
+	translateHistory: Map<string, number>
 
-	highlights: Record<string, Highlight[]>,
+	highlights: Record<string, Highlight[]>
 	setHighlights: (
 		id: string,
 		highlights: Updater<Highlight[]>
@@ -30,9 +30,15 @@ export type LangToolsStore = {
 export function createLangToolsStore() {
 	return createStore<LangToolsStore>((set, get) => (
 		{
-			translateHistory: [],
+			translateHistory: new Map(),
 			wordQuery: null,
-			setWordQuery: (value) => set((state) => ({ wordQuery: value, translateHistory: [...state.translateHistory, value] })),
+			setWordQuery: (value) =>
+				set((state) => ({
+					wordQuery: value,
+					translateHistory: value
+						? new Map(state.translateHistory).set(value, Date.now())
+						: state.translateHistory,
+				})),
 
 			highlights: {},
 			setHighlights: (id, highlights) =>

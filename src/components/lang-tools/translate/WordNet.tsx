@@ -1,46 +1,37 @@
 "use client"
 
-import { useEffect, useState } from "react";
 import { useLangToolsStore } from "../LangToolsProvider";
-import { readWordnet, WordNetData } from "@/client";
+import { readWordnet } from "@/client";
 import { Text, Portal, FloatingPanel, IconButton, AbsoluteCenter, HStack, Spinner, Menu } from "@chakra-ui/react";
 import { WordNetResult } from "./WordNetResult";
 import { LuGripHorizontal, LuMaximize2, LuMinus, LuSquare, LuX } from "react-icons/lu";
 import { AdvText } from "../AdvText";
 import { MdHistory } from "react-icons/md";
+import { useQuery } from "@tanstack/react-query";
 
 export function WordNet() {
 	const word = useLangToolsStore((state) => state.wordQuery)
 	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
 	const history = useLangToolsStore((state) => state.translateHistory)
-	const [result, setResult] = useState<WordNetData | null>(null)
-	const [open, setOpen] = useState(false)
-	const [loading, setLoading] = useState(false)
 
-	useEffect(() => {
-		if (!word)
-			return
+	const sortedHistory = [...history.entries()].sort((a, b) => b[1] - a[1])
 
-		setResult(null)
-		setOpen(true)
-		setLoading(true)
+	const { data: result, isLoading } = useQuery({
+		enabled: Boolean(word),
+		queryFn: () => readWordnet({
+			path: { word: word! },
+		}).then((res) => res.data)
+		,
+		queryKey: ["wordnet", word],
+	})
 
-		readWordnet({
-			path: {
-				word
-			}
-		})
-			.then((res) => setResult(res.data))
-			.catch(() => null)
-			.finally(() => setLoading(false))
-	}, [word])
-
+	const isOpen = Boolean(word)
+	const close = () => setWordQuery(null)
 
 	return (
 		<FloatingPanel.Root
-			open={open}
-			onOpenChange={(details) => setOpen(details.open)}
-
+			open={isOpen}
+			onOpenChange={(details) => !details.open && close()}
 			minSize={{ width: 320, height: 200 }}
 		>
 			<Portal>
@@ -54,7 +45,7 @@ export function WordNet() {
 								</FloatingPanel.Title>
 							</FloatingPanel.DragTrigger>
 
-							<Menu.Root onSelect={(e)=>setWordQuery(e.value)}>
+							<Menu.Root onSelect={(e) => setWordQuery(e.value)}>
 								<Menu.Trigger asChild>
 									<IconButton variant="ghost" minW="unset" h="auto" w="auto" p="1">
 										<MdHistory />
@@ -64,7 +55,7 @@ export function WordNet() {
 								<Portal>
 									<Menu.Positioner>
 										<Menu.Content zIndex="max">
-											{history.slice().reverse().map((query, i) =>
+											{sortedHistory.map(([query], i) =>
 												<Menu.Item key={i} value={query}>
 													{query}
 												</Menu.Item>
@@ -98,7 +89,7 @@ export function WordNet() {
 							</FloatingPanel.Control>
 						</FloatingPanel.Header>
 						<FloatingPanel.Body p="6">
-							{!loading ?
+							{!isLoading ?
 								result ?
 									< WordNetResult data={result} />
 									:
