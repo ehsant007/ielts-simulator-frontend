@@ -3,7 +3,7 @@
 import React, { forwardRef } from "react"
 import { Button, ButtonProps } from "@chakra-ui/react"
 import { Highlight } from "./store"
-import { useLangToolsStore } from "./LangToolsProvider"
+import { useHighlightStore } from "./HighlightProvider"
 
 
 type HighlighterProps = {
@@ -12,7 +12,7 @@ type HighlighterProps = {
 }
 
 export function Highlighter({ children, id }: HighlighterProps) {
-	const highlights = useLangToolsStore((s) => s.highlights[id])
+	const highlights = useHighlightStore((s) => s.highlights[id])
 
 	return applyHighlights(children, highlights, (tokens, highlight) => (
 		<span
@@ -129,7 +129,7 @@ export function applyHighlights(
 
 
 export const HighlightButton = forwardRef<HTMLButtonElement, ButtonProps>(({ children, onClick, ...props }, ref) => {
-	const highlightSelectedText = useLangToolsStore((s) => s.highlightSelectedText)
+	const highlightSelectedText = useHighlightStore((s) => s.highlightSelectedText)
 
 	return (
 		<Button

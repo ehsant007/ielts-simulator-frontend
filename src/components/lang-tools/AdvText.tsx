@@ -1,7 +1,7 @@
 "use client"
 
 import { Text as ChakraText, TextProps } from "@chakra-ui/react"
-import { Highlighter } from "./Highlighter"
+import { Highlighter } from "./highlighter"
 import { tokenize } from "./tokenizer"
 import { createContext, forwardRef, useContext } from "react"
 

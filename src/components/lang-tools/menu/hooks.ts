@@ -2,10 +2,11 @@ import { useState } from "react"
 import { useLangToolsStore } from "..";
 import { useKokoroStore, speak as speakAudio } from "../kokoro-tts";
 import { useTextSelection } from "../hooks";
+import { useHighlightStore } from "../highlighter/HighlightProvider";
 
 export function useMenu() {
-	const highlight = useLangToolsStore((state) => state.highlightSelectedText)
-	const removeHighlight = useLangToolsStore((state) => state.removeHighlight)
+	const highlight = useHighlightStore((state) => state.highlightSelectedText)
+	const removeHighlight = useHighlightStore((state) => state.removeHighlight)
 	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
 	const generate = useKokoroStore((state) => state.generate)
 
