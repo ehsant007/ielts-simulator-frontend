@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 import { useLangToolsStore } from "..";
 import { useKokoroStore, speak as speakAudio } from "../kokoro-tts";
-import { getSelection1 } from "../util";
-
+import { useTextSelection } from "../hooks";
 
 export function useMenu() {
 	const highlight = useLangToolsStore((state) => state.highlightSelectedText)
@@ -11,12 +10,12 @@ export function useMenu() {
 	const generate = useKokoroStore((state) => state.generate)
 
 	const [open, setOpen] = useState(false)
-	const selectionRangeRef = useRef<Range | null>(null)
-	const [selectedText, setSelectedText] = useState<string | null>(null)
-	const [selectionRect, setSelectionRect] = useState<DOMRect | null>(null)
+
+	const { text: selectedText, rect: selectionRect } = useTextSelection()
 
 	const copiedText = useLangToolsStore((state) => state.copiedText)
 	const setCopiedText = useLangToolsStore((state) => state.setCopiedText)
+
 
 	async function copy() {
 		if (!selectedText)
@@ -36,56 +35,6 @@ export function useMenu() {
 			return
 		generate(selectedText, (audio) => speakAudio(audio), false)
 	}
-
-
-	useEffect(() => {
-
-		const reset = () => {
-			selectionRangeRef.current = null
-			setSelectionRect(null)
-			setSelectedText(null)
-		}
-
-		const set = (range: Range, text: string) => {
-			selectionRangeRef.current = range
-			setSelectionRect(range.getBoundingClientRect())
-			setSelectedText(text)
-		}
-
-		const onScroll = () => {
-			if (!selectionRangeRef.current)
-				return
-			setSelectionRect(selectionRangeRef.current.getBoundingClientRect())
-		}
-
-		const onPointerUp = () => {
-			const selection = getSelection1()
-
-			if (!selection) {
-				reset()
-				return;
-			}
-			
-			const text = selection.toString().trim()
-			if (!text) {
-				reset()
-				return
-			}
-
-			set(selection.getRangeAt(0), text)
-		}
-
-
-		document.addEventListener("pointerup", onPointerUp)
-		//document.addEventListener("pointerdown", reset)
-		document.addEventListener("scroll", onScroll, true)
-
-		return () => {
-			document.removeEventListener("pointerup", onPointerUp)
-			//document.removeEventListener("pointerdown", reset)
-			document.removeEventListener("scroll", onScroll, true)
-		}
-	}, [])
 
 
 	return {

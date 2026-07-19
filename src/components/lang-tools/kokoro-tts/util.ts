@@ -1,15 +1,5 @@
 import { KokoroOutput } from "./types";
 
-export async function speak0(speech: ArrayBuffer, rate: number = 1.0) {
-	const blob = new Blob([speech], { type: "audio/wav" });
-	const url = URL.createObjectURL(blob);
-	const audio = new Audio(url)
-	audio.playbackRate = rate
-	audio.preservesPitch = true
-	return audio.play()
-}
-
-
 export async function speak(speech: KokoroOutput[], playbackRate = 1.0) {
 
 	const sampleRate = speech[0].sampleRate
