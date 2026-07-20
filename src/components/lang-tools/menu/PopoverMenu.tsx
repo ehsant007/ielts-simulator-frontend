@@ -43,7 +43,7 @@ export function PopoverMenu() {
 					left={rect.left + rect.width / 2}
 					top={rect.top - 8}
 					transform={"translate(-50%, -100%)"}
-					zIndex="popover"
+					zIndex="max"
 				>
 					<ActionBar.Content borderRadius="full" p="1" bg="bg.info" gap="1">
 						<MenuItem>
