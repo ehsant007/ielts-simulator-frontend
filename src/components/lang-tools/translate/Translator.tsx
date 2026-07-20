@@ -3,12 +3,9 @@
 import { useLangToolsStore } from "../LangToolsProvider";
 import { Text, Portal, FloatingPanel, IconButton, AbsoluteCenter, HStack, Spinner, Menu, Group } from "@chakra-ui/react";
 import { WordNet } from "./Wordnet";
-import { LuGripHorizontal, LuMaximize2, LuMinus, LuSquare, LuX } from "react-icons/lu";
+import { LuMaximize2, LuMinus, LuSquare, LuX } from "react-icons/lu";
 import { MdHistory, MdOutlineArrowBack, MdOutlineArrowForward } from "react-icons/md";
 import { Suspense } from "react";
-import { BsBack, BsForward } from "react-icons/bs";
-import { FaBackward } from "react-icons/fa6";
-import { ImBackward } from "react-icons/im";
 
 export function Translator() {
 	const word = useLangToolsStore((state) => state.wordQuery)
