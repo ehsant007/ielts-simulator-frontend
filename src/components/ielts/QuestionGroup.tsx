@@ -77,12 +77,63 @@ export function NoteCompletion({ g }: { g: NoteCompletionGroup }) {
 }
 
 
+// Draggable Option
+function Option({ children: option, baseId, isSelected }: { children: string, baseId: string, isSelected: boolean }) {
+	const { ref } = useDraggable({ id: option, type: "option" });
+
+	return (
+		<Box
+			shadow="md"
+		>
+			<AdvText
+				ref={ref}
+				cursor="pointer"
+				px="3"
+				py="2"
+				bg={isSelected ? "transparent" : "bg"}
+				border="md"
+				borderColor={isSelected ? "transparent" : "fg.subtle"}
+				color={isSelected ? "fg.muted" : "fg"}
+				id={`${baseId}-${option.replace(" ", "")}`}
+			>
+				{option}
+			</AdvText>
+
+		</Box>
+	)
+}
+
+// Options Area
+function OptionsArea({ g, selectedOptions }: { g: NoteCompletionGroup, selectedOptions: Record<number, string | undefined> }) {
+	const pi = useModuleStore((state) => state.part)
+	const baseId = `part${pi}-qg${g.question_range[0]}-${g.question_range[1]}`
+
+	const { ref } = useDroppable({ id: g.question_range.join("-"), type: "options-area", accept: ["question"] });
+	return (
+		<Wrap
+			p="6"
+			mb="10"
+			justifyContent="center"
+			border="md"
+			borderColor="fg.subtle"
+			ref={ref}
+		>
+			{
+				g.options?.map((option) => (
+
+					<Option key={option} baseId={baseId} isSelected={Object.values(selectedOptions).includes(option)}>{option}</Option>
+				)
+				)
+			}
+		</Wrap>
+	)
+}
+
 export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 	const pi = useModuleStore((state) => state.part)
 	const store = useModuleStoreApi()
 	const setAnswer = useModuleStore((state) => state.setAnswer)
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
-	const baseId = `part${pi}-qg${g.question_range[0]}-${g.question_range[1]}`
 
 	const [selected, setSelected] = useState<Record<number, string | undefined>>({})
 	const select = useCallback((questionNum: number, option: string) => {
@@ -110,57 +161,6 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 		})
 	}, [g.questions, select, store])
 
-
-	// Draggable Option
-	function Option({ children: option }: { children: string }) {
-		const { ref } = useDraggable({ id: option, type: "option" });
-
-		const isSelected = Object.values(selected).includes(option)
-
-		return (
-			<Box
-				shadow="md"
-			>
-				<AdvText
-					ref={ref}
-					cursor="pointer"
-					px="3"
-					py="2"
-					bg={isSelected ? "transparent" : "bg"}
-					border="md"
-					borderColor={isSelected ? "transparent" : "fg.subtle"}
-					color={isSelected ? "fg.muted" : "fg"}
-					id={`${baseId}-${option.replace(" ", "")}`}
-				>
-					{option}
-				</AdvText>
-
-			</Box>
-		)
-	}
-
-	// Options Area
-	function OptionsArea() {
-		const { ref } = useDroppable({ id: g.question_range.join("-"), type: "options-area", accept: ["question"] });
-		return (
-			<Wrap
-				p="6"
-				mb="10"
-				justifyContent="center"
-				border="md"
-				borderColor="fg.subtle"
-				ref={ref}
-			>
-				{
-					g.options?.map((option) => (
-
-						<Option key={option}>{option}</Option>
-					)
-					)
-				}
-			</Wrap>
-		)
-	}
 
 	return (
 		<DragDropProvider
@@ -205,7 +205,7 @@ export function NoteCompletionWithOptions({ g }: { g: NoteCompletionGroup }) {
 		>
 
 			<Box p="3">
-				<OptionsArea />
+				<OptionsArea g={g} selectedOptions={selected} />
 				<Content
 					id={`part${pi}-nc-qg${g.question_range[0]}-${g.question_range[1]}`}
 					content={g.content}

@@ -1,7 +1,7 @@
 "use client"
 import { NoteCompletionGroup, Question as QuestionType, SentenceCompletionGroup } from "@/client"
 import { Checkbox, CheckboxGroup, Fieldset, HStack, Input, NativeSelect, RadioGroup, Separator, VStack, Text, Box, Radiomark, Checkmark } from "@chakra-ui/react"
-import { ChangeEventHandler, forwardRef, useEffect, useRef } from "react"
+import { ChangeEventHandler, forwardRef, RefObject, useEffect, useRef } from "react"
 import { MD } from "./Content"
 import { useModuleStore } from "./ModuleProvider"
 import { useDraggable, useDroppable } from '@dnd-kit/react';
@@ -19,14 +19,14 @@ export function Question({ question, options, onChange }: QuestionProps) {
 	const focusQuestion = useModuleStore((state) => state.focusQuestion)
 	const focused = useModuleStore((state) => { return state.questionsMeta[question.num].focused })
 	const focusCount = useModuleStore((state) => state.questionsMeta[question.num].focusCount)
-	const ref = useRef<any>(null)
+	const ref = useRef<unknown>(null)
 	const { group } = useQuestionGroup()
 
 	useEffect(() => {
 		if (!focused)
 			return
 
-		const el = ref.current
+		const el = ref.current as HTMLElement
 		if (!el)
 			return
 
@@ -47,8 +47,8 @@ export function Question({ question, options, onChange }: QuestionProps) {
 	switch (question.question_type) {
 		case "completion":
 			ui = (group as NoteCompletionGroup | SentenceCompletionGroup).options
-				? <CompletionWithOption ref={ref} question={question} />
-				: <Completion ref={ref} question={question} />
+				? <CompletionWithOption ref={ref as RefObject<HTMLDivElement>} question={question} />
+				: <Completion ref={ref as RefObject<HTMLInputElement>} question={question} />
 			return ui
 		case "single_choice":
 			ui = <SingleChoice question={question} />
@@ -208,7 +208,7 @@ export const CompletionWithOption = forwardRef<HTMLDivElement, { question: Quest
 
 				onFocus={() => focusQuestion(question.num)}
 				bg="bg.muted"
-				ref={(node: any) => {
+				ref={(node: HTMLDivElement | null) => {
 
 					if (typeof ref === "function")
 						ref(node)
