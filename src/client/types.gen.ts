@@ -326,6 +326,36 @@ export type CurrencyRead = {
 export type CurrencyType = 'fiat' | 'crypto';
 
 /**
+ * EnglishVerbForms
+ */
+export type EnglishVerbForms = {
+    /**
+     * Base Form
+     */
+    base_form: string;
+    /**
+     * Third Person Singular
+     */
+    third_person_singular: Array<string>;
+    /**
+     * Simple Past
+     */
+    simple_past: Array<string>;
+    /**
+     * Past Participle
+     */
+    past_participle: Array<string>;
+    /**
+     * Present Participle
+     */
+    present_participle: Array<string>;
+    /**
+     * Regularity
+     */
+    regularity: 'regular' | 'irregular' | 'both';
+};
+
+/**
  * ExamCreate
  */
 export type ExamCreate = {
@@ -420,6 +450,24 @@ export type ExamUpdate = {
      * Speaking Id
      */
     speaking_id?: string | null;
+};
+
+/**
+ * Example
+ */
+export type Example = {
+    /**
+     * Sentence
+     *
+     * Example sentence in source language
+     */
+    sentence: string;
+    /**
+     * Translation
+     *
+     * Translation of example into target language
+     */
+    translation: string;
 };
 
 /**
@@ -736,6 +784,80 @@ export type KycRequirementGroupCreate = {
  * KycReviewAction
  */
 export type KycReviewAction = 'approve' | 'reject' | 'request_more_info' | 'expire';
+
+/**
+ * LexicalAnalysis
+ */
+export type LexicalAnalysis = {
+    /**
+     * The complete analysis of the primary expression.
+     */
+    entry: LexicalEntry;
+    /**
+     * Context Related Expressions
+     *
+     * Larger established expressions supported by CONTEXT. Empty when CONTEXT contains no relevant larger expression.
+     */
+    context_related_expressions?: Array<LexicalEntry>;
+    /**
+     * Input Correction Note
+     *
+     * Explanation of any correction made to TEXT, such as spelling, grammar, or unnatural wording. Null if no correction was needed.
+     */
+    input_correction_note?: string | null;
+};
+
+/**
+ * LexicalEntry
+ */
+export type LexicalEntry = {
+    /**
+     * Expression
+     *
+     * The exact source-language expression being analyzed.
+     */
+    expression: string;
+    /**
+     * Expression Type
+     *
+     * The lexical category of the analyzed expression.
+     */
+    expression_type: 'word' | 'compound' | 'phrasal_verb' | 'idiom' | 'collocation' | 'fixed_expression' | 'common_phrase' | 'abbreviation' | 'corrected_expression' | 'other';
+    /**
+     * Canonical Form
+     *
+     * The normalized dictionary form of the expression in the source language.
+     */
+    canonical_form: string;
+    /**
+     * Cefr Level
+     *
+     * An overall CEFR estimate for recognizing and using the expression.
+     */
+    cefr_level?: 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2' | null;
+    /**
+     * Translation Summary
+     *
+     * The most useful overall target-language equivalents, ordered by relevance.
+     */
+    translation_summary: Array<string>;
+    /**
+     * Senses
+     *
+     * Distinct established senses, with the contextually relevant sense first.
+     */
+    senses: Array<AppSchemasLangtoolsAdvTranslatorSense>;
+    /**
+     * Common Usage Examples
+     *
+     * Two to four varied examples showing common forms, situations, registers, or grammatical patterns.
+     */
+    common_usage_examples: Array<Example>;
+    /**
+     * Verb conjugation information when applicable.
+     */
+    verb_forms?: EnglishVerbForms | null;
+};
 
 /**
  * ListeningContent
@@ -1446,32 +1568,6 @@ export type RoleRead = {
 };
 
 /**
- * Sense
- */
-export type Sense = {
-    /**
-     * Definition
-     */
-    definition: string;
-    /**
-     * Examples
-     */
-    examples: Array<string>;
-    /**
-     * Pos
-     */
-    pos: string;
-    /**
-     * Synonyms
-     */
-    synonyms: Array<string>;
-    /**
-     * Antonyms
-     */
-    antonyms: Array<string>;
-};
-
-/**
  * SentenceCompletionGroup
  */
 export type SentenceCompletionGroup = {
@@ -1751,40 +1847,6 @@ export type Token = {
 };
 
 /**
- * TranslateRequest
- */
-export type TranslateRequest = {
-    /**
-     * Text
-     */
-    text: string;
-    /**
-     * Context
-     */
-    context: string;
-    /**
-     * Source Language
-     */
-    source_language: string;
-    /**
-     * Target Language
-     */
-    target_language: string;
-};
-
-/**
- * TranslateResponse
- */
-export type TranslateResponse = {
-    /**
-     * Translation
-     *
-     * Full translation in target language
-     */
-    translation: string;
-};
-
-/**
  * UpdatePassword
  */
 export type UpdatePassword = {
@@ -2008,21 +2070,13 @@ export type VisualLabelingGroup = {
  */
 export type WordNetData = {
     /**
-     * Word
+     * Lemma
      */
-    word: string;
-    /**
-     * All Synonyms
-     */
-    all_synonyms: Array<string>;
-    /**
-     * All Antonyms
-     */
-    all_antonyms: Array<string>;
+    lemma: string;
     /**
      * Senses
      */
-    senses: Array<Sense>;
+    senses: Array<AppSchemasLangtoolsWordnetSense>;
 };
 
 /**
@@ -2057,8 +2111,195 @@ export type WritingTask = {
     sample_answer: Array<string>;
 };
 
+/**
+ * Sense
+ */
+export type AppSchemasLangtoolsAdvTranslatorSense = {
+    /**
+     * Part Of Speech
+     */
+    part_of_speech: 'noun' | 'verb' | 'auxiliary_verb' | 'phrasal_verb' | 'adjective' | 'adverb' | 'pronoun' | 'determiner' | 'article' | 'preposition' | 'conjunction' | 'interjection' | 'numeral' | 'particle' | 'idiom' | 'collocation' | 'phrase' | 'other';
+    /**
+     * Definition
+     *
+     * A clear, concise explanation of this sense written in the info language.
+     */
+    definition: string;
+    /**
+     * Translations
+     *
+     * Natural target-language equivalents specific to this sense, ordered from most generally useful to more context-dependent.
+     */
+    translations: Array<string>;
+    /**
+     * Examples
+     *
+     * One or two natural examples.
+     */
+    examples: Array<Example>;
+    /**
+     * Synonyms
+     *
+     * Sense-matched synonyms in the source language.
+     */
+    synonyms?: Array<string>;
+    /**
+     * Antonyms
+     *
+     * Sense-matched antonyms in the source language.
+     */
+    antonyms?: Array<string>;
+    /**
+     * Grammar Patterns
+     *
+     * Common source-language grammatical patterns for this sense, such as 'verb + object + infinitive'. Empty when not useful.
+     */
+    grammar_patterns?: Array<string>;
+    /**
+     * Separability
+     *
+     * Whether a phrasal verb is separable.
+     */
+    separability?: 'separable' | 'inseparable' | 'both' | null;
+    /**
+     * Transitivity
+     *
+     * The usual transitivity of the verb in the analyzed expression.
+     */
+    transitivity?: 'transitive' | 'intransitive' | 'ambitransitive' | null;
+    /**
+     * Context Relevant
+     *
+     * Whether CONTEXT supports or uses this sense. False when context is empty or the sense is included only for lexical completeness.
+     */
+    context_relevant: boolean;
+    /**
+     * Usage Notes
+     *
+     * Concise notes in the info language about register, connotation, formality, dialect, restrictions, common errors, or distinctions. Empty when no note is needed.
+     */
+    usage_notes?: Array<string>;
+};
+
+/**
+ * TranslateRequest
+ */
+export type AppSchemasLangtoolsAdvTranslatorTranslateRequest = {
+    /**
+     * Text
+     *
+     * the content to translate or analyze.
+     */
+    text: string;
+    /**
+     * Context
+     *
+     * trusted linguistic context that may clarify meaning, complete a fragment, or reveal a larger expression. It may be empty.
+     */
+    context: string;
+    /**
+     * Source Language
+     *
+     * the language of TEXT
+     */
+    source_language: string;
+    /**
+     * Target Language
+     *
+     * the language into which translations are written.
+     */
+    target_language: string;
+    /**
+     * Info Language
+     *
+     * the language of definitions, explanations, usage notes, situation labels, correction explanations, and all other explanatory information.
+     */
+    info_language: string;
+};
+
+/**
+ * TranslateResponse
+ */
+export type AppSchemasLangtoolsAdvTranslatorTranslateResponse = {
+    /**
+     * Source Language
+     */
+    source_language: string;
+    /**
+     * Target Language
+     */
+    target_language: string;
+    lexical_analysis: LexicalAnalysis | null;
+    /**
+     * Passage Translation
+     *
+     * The complete, natural translation of TEXT into the target language, with structure and formatting preserved where appropriate.
+     */
+    passage_translation?: string | null;
+};
+
+/**
+ * TranslateRequest
+ */
+export type AppSchemasLangtoolsTranslatorTranslateRequest = {
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Context
+     */
+    context: string;
+    /**
+     * Source Language
+     */
+    source_language: string;
+    /**
+     * Target Language
+     */
+    target_language: string;
+};
+
+/**
+ * TranslateResponse
+ */
+export type AppSchemasLangtoolsTranslatorTranslateResponse = {
+    /**
+     * Translation
+     *
+     * Full translation in target language
+     */
+    translation: string;
+};
+
+/**
+ * Sense
+ */
+export type AppSchemasLangtoolsWordnetSense = {
+    /**
+     * Pos
+     */
+    pos: string;
+    /**
+     * Definition
+     */
+    definition: string;
+    /**
+     * Examples
+     */
+    examples: Array<string>;
+    /**
+     * Synonyms
+     */
+    synonyms: Array<string>;
+    /**
+     * Antonyms
+     */
+    antonyms: Array<string>;
+};
+
 export type TranslateData = {
-    body: TranslateRequest;
+    body: AppSchemasLangtoolsTranslatorTranslateRequest;
     path?: never;
     query?: never;
     url: '/api/v1/langtools/ai/translate';
@@ -2077,10 +2318,35 @@ export type TranslateResponses = {
     /**
      * Successful Response
      */
-    200: TranslateResponse;
+    200: AppSchemasLangtoolsTranslatorTranslateResponse;
 };
 
-export type TranslateResponse2 = TranslateResponses[keyof TranslateResponses];
+export type TranslateResponse = TranslateResponses[keyof TranslateResponses];
+
+export type AdvTranslateData = {
+    body: AppSchemasLangtoolsAdvTranslatorTranslateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/langtools/ai/adv-translate';
+};
+
+export type AdvTranslateErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type AdvTranslateError = AdvTranslateErrors[keyof AdvTranslateErrors];
+
+export type AdvTranslateResponses = {
+    /**
+     * Successful Response
+     */
+    200: AppSchemasLangtoolsAdvTranslatorTranslateResponse;
+};
+
+export type AdvTranslateResponse = AdvTranslateResponses[keyof AdvTranslateResponses];
 
 export type ReadWordnetData = {
     body?: never;

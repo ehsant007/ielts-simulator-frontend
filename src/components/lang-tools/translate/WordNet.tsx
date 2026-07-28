@@ -30,8 +30,8 @@ export function WordNet({ word }: { word: string }) {
 
 		<VStack alignItems="start">
 			<HStack>
-				<AdvText fontWeight="bold">{data.word}</AdvText>
-				<TTSButton text={data.word} />
+				<AdvText fontWeight="bold">{data.lemma}</AdvText>
+				<TTSButton text={data.lemma} />
 			</HStack>
 			{data.senses.map((sense, i) => (
 				<Box key={`example-${i}`}>
