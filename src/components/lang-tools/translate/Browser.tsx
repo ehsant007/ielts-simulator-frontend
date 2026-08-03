@@ -1,7 +1,7 @@
 "use client"
 
 import { useLangToolsStore } from "../LangToolsProvider";
-import { Text, Portal, FloatingPanel, IconButton, AbsoluteCenter, HStack, Spinner, Menu, Group, Tabs, Box } from "@chakra-ui/react";
+import { Text, Portal, FloatingPanel, IconButton, HStack, Spinner, Menu, Group, Tabs, Box } from "@chakra-ui/react";
 import { WordNet } from "./Wordnet";
 import { LuMaximize2, LuMinus, LuSquare, LuX } from "react-icons/lu";
 import { MdHistory, MdOutlineArrowBack, MdOutlineArrowForward } from "react-icons/md";

@@ -1,6 +1,6 @@
 "use client"
 
-import { VStack, Box, List, HStack, AbsoluteCenter } from "@chakra-ui/react";
+import { VStack, Box, List, HStack } from "@chakra-ui/react";
 import { readWordnet } from "@/client";
 import { AdvText } from "../AdvText";
 import { TTSButton } from "../tts";

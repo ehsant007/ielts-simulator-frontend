@@ -326,6 +326,115 @@ export type CurrencyRead = {
 export type CurrencyType = 'fiat' | 'crypto';
 
 /**
+ * DictionaryEntry
+ */
+export type DictionaryEntry = {
+    /**
+     * Headword
+     */
+    headword: string;
+    /**
+     * Pos
+     */
+    pos: string | null;
+    /**
+     * Ipa Us
+     */
+    ipa_us: string | null;
+    /**
+     * Ipa Gb
+     */
+    ipa_gb: string | null;
+    /**
+     * Cefr Level
+     */
+    cefr_level: 'a1' | 'a2' | 'b1' | 'b2' | 'c' | 'c2' | null;
+    /**
+     * Senses
+     */
+    senses: Array<DictionarySense>;
+};
+
+/**
+ * DictionaryExample
+ */
+export type DictionaryExample = {
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Audio Us
+     */
+    audio_us: string | null;
+    /**
+     * Audio Gb
+     */
+    audio_gb: string | null;
+    /**
+     * Sort Order
+     */
+    sort_order: number;
+    /**
+     * Extra
+     */
+    extra: boolean;
+};
+
+/**
+ * DictionarySense
+ */
+export type DictionarySense = {
+    sense_group: DictionarySenseGroup | null;
+    /**
+     * Sense Num
+     */
+    sense_num: number | null;
+    /**
+     * Cefr Level
+     */
+    cefr_level: 'a1' | 'a2' | 'b1' | 'b2' | 'c' | 'c2' | null;
+    /**
+     * Grammar
+     */
+    grammar: string | null;
+    /**
+     * Labels
+     */
+    labels: string | null;
+    /**
+     * Variants
+     */
+    variants: string | null;
+    /**
+     * Definition
+     */
+    definition: string;
+    /**
+     * Sort Order
+     */
+    sort_order: number;
+    /**
+     * Examples
+     */
+    examples: Array<DictionaryExample>;
+};
+
+/**
+ * DictionarySenseGroup
+ */
+export type DictionarySenseGroup = {
+    /**
+     * Topic
+     */
+    topic: string;
+    /**
+     * Sort Order
+     */
+    sort_order: number;
+};
+
+/**
  * EnglishVerbForms
  */
 export type EnglishVerbForms = {
@@ -2076,7 +2185,7 @@ export type WordNetData = {
     /**
      * Senses
      */
-    senses: Array<AppSchemasLangtoolsWordnetSense>;
+    senses: Array<AppWordnetSchemasSense>;
 };
 
 /**
@@ -2275,7 +2384,7 @@ export type AppSchemasLangtoolsTranslatorTranslateResponse = {
 /**
  * Sense
  */
-export type AppSchemasLangtoolsWordnetSense = {
+export type AppWordnetSchemasSense = {
     /**
      * Pos
      */
@@ -2297,6 +2406,36 @@ export type AppSchemasLangtoolsWordnetSense = {
      */
     antonyms: Array<string>;
 };
+
+export type LookupData = {
+    body?: never;
+    path: {
+        /**
+         * Headword
+         */
+        headword: string;
+    };
+    query?: never;
+    url: '/api/v1/dictionary/lookup/{headword}';
+};
+
+export type LookupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type LookupError = LookupErrors[keyof LookupErrors];
+
+export type LookupResponses = {
+    /**
+     * Successful Response
+     */
+    200: DictionaryEntry;
+};
+
+export type LookupResponse = LookupResponses[keyof LookupResponses];
 
 export type TranslateData = {
     body: AppSchemasLangtoolsTranslatorTranslateRequest;
