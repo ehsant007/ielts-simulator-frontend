@@ -12,13 +12,25 @@ export function Translator() {
 	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
 	const history = useLangToolsStore((state) => state.translateHistory)
 
-	const sortedHistory = [...history.entries()].sort((a, b) => b[1] - a[1])
-
 	const isOpen = Boolean(word)
 	const close = () => setWordQuery(null)
 
+	const currentIndex = word ? history.indexOf(word) : -1;
+
+	const previous =
+		currentIndex >= 0 && currentIndex + 1 < history.length
+			? history[currentIndex + 1]
+			: undefined;
+
+	const next =
+		currentIndex > 0
+			? history[currentIndex - 1]
+			: undefined;
+
+			
 	if (!word)
 		return null
+
 
 	return (
 		<FloatingPanel.Root
@@ -34,14 +46,14 @@ export function Translator() {
 								{/* <LuGripHorizontal /> */}
 								<FloatingPanel.Title>
 									<Group gap="1">
-										<IconButton variant="ghost" minW="unset" h="auto" w="auto" p="1">
+										<IconButton variant="ghost" minW="unset" h="auto" w="auto" p="1" disabled={!previous} onClick={() => setWordQuery(previous ?? null, false)}>
 											<MdOutlineArrowBack />
 										</IconButton>
-										<IconButton variant="ghost" minW="unset" h="auto" w="auto" p="1">
+										<IconButton variant="ghost" minW="unset" h="auto" w="auto" p="1" disabled={!next} onClick={() => setWordQuery(next ?? null, false)}>
 											<MdOutlineArrowForward />
 										</IconButton>
 									</Group>
-									
+
 								</FloatingPanel.Title>
 
 							</FloatingPanel.DragTrigger>
@@ -59,7 +71,7 @@ export function Translator() {
 								<Portal>
 									<Menu.Positioner>
 										<Menu.Content zIndex="max">
-											{sortedHistory.map(([query], i) =>
+											{history.map((query, i) =>
 												<Menu.Item key={i} value={query}>
 													{query}
 												</Menu.Item>

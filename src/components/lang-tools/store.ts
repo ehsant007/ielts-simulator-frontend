@@ -3,9 +3,9 @@ import { createStore } from "zustand/vanilla"
 export type LangToolsStore = {
 
 	wordQuery: string | null
-	setWordQuery: (value: string | null) => void
+	setWordQuery: (value: string | null, updateHistory?: boolean) => void
 
-	translateHistory: Map<string, number>
+	translateHistory: string[]
 
 	copiedText: string | null
 	setCopiedText: (value: string) => void
@@ -14,14 +14,12 @@ export type LangToolsStore = {
 export function createLangToolsStore() {
 	return createStore<LangToolsStore>((set) => (
 		{
-			translateHistory: new Map(),
+			translateHistory: [],
 			wordQuery: null,
-			setWordQuery: (value) =>
+			setWordQuery: (value, updateHistory=true) =>
 				set((state) => ({
 					wordQuery: value,
-					translateHistory: value
-						? new Map(state.translateHistory).set(value, Date.now())
-						: state.translateHistory,
+					translateHistory: updateHistory && value ? [value, ...state.translateHistory.filter((v) => v != value)] : state.translateHistory,
 				})),
 
 			copiedText: null,

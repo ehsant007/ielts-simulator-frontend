@@ -9,7 +9,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 
 export function WordNet({ word }: { word: string }) {
 
-	const { data, error } = useSuspenseQuery({
+	const { data } = useSuspenseQuery({
 		queryFn: () => readWordnet({
 			path: { word: word! },
 		}).then((res) => res.data)
@@ -17,47 +17,45 @@ export function WordNet({ word }: { word: string }) {
 		queryKey: ["wordnet", word],
 	})
 
-	if (error)
-		return (
-			<AbsoluteCenter>
-				<VStack>
-					<AdvText>No definition was found for this query!</AdvText>
-				</VStack>
-			</AbsoluteCenter>
-		)
 
 	return (
-
 		<VStack alignItems="start">
-			<HStack>
+			<HStack mb="3">
 				<AdvText fontWeight="bold">{data.lemma}</AdvText>
 				<TTSButton text={data.lemma} />
 			</HStack>
-			{data.senses.map((sense, i) => (
-				<Box key={`example-${i}`}>
-					<AdvText>{sense.pos}</AdvText>
-					<AdvText>{sense.definition}</AdvText>
-					{sense.examples.length > 0 &&
-						<Box>
-							<AdvText fontWeight="bold">Examples</AdvText>
-							<List.Root ms="6">
-								{sense.examples.map((example, j) => (
-									<List.Item key={`example-${j}`}>
-										<AdvText>{example}</AdvText>
-									</List.Item>
-								))
-								}
-							</List.Root>
-						</Box>
-					}
-					{sense.synonyms.length > 0 &&
-						<Box>
-							<AdvText fontWeight="bold">Synonyms</AdvText>
-							<AdvText ms="6">{sense.synonyms.join(", ")}</AdvText>
-						</Box>
-					}
-				</Box>
-			))}
-		</VStack>
+
+			{data.senses.length === 0 &&
+				<AdvText color="fg.warning" fontStyle="italic">No definition was found for this query!</AdvText>
+			}
+
+			{
+				data.senses.map((sense, i) => (
+					<Box key={`example-${i}`}>
+						<AdvText>{sense.pos}</AdvText>
+						<AdvText>{sense.definition}</AdvText>
+						{sense.examples.length > 0 &&
+							<Box>
+								<AdvText fontWeight="bold">Examples</AdvText>
+								<List.Root ms="6">
+									{sense.examples.map((example, j) => (
+										<List.Item key={`example-${j}`}>
+											<AdvText>{example}</AdvText>
+										</List.Item>
+									))
+									}
+								</List.Root>
+							</Box>
+						}
+						{sense.synonyms.length > 0 &&
+							<Box>
+								<AdvText fontWeight="bold">Synonyms</AdvText>
+								<AdvText ms="6">{sense.synonyms.join(", ")}</AdvText>
+							</Box>
+						}
+					</Box>
+				))
+			}
+		</VStack >
 	)
 }
