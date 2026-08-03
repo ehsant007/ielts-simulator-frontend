@@ -1,13 +1,13 @@
 "use client"
 
 import { useLangToolsStore } from "../LangToolsProvider";
-import { Text, Portal, FloatingPanel, IconButton, AbsoluteCenter, HStack, Spinner, Menu, Group } from "@chakra-ui/react";
+import { Text, Portal, FloatingPanel, IconButton, AbsoluteCenter, HStack, Spinner, Menu, Group, Tabs, Box } from "@chakra-ui/react";
 import { WordNet } from "./Wordnet";
 import { LuMaximize2, LuMinus, LuSquare, LuX } from "react-icons/lu";
 import { MdHistory, MdOutlineArrowBack, MdOutlineArrowForward } from "react-icons/md";
 import { Suspense } from "react";
 
-export function Translator() {
+export function Browser() {
 	const word = useLangToolsStore((state) => state.wordQuery)
 	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
 	const history = useLangToolsStore((state) => state.translateHistory)
@@ -27,7 +27,7 @@ export function Translator() {
 			? history[currentIndex - 1]
 			: undefined;
 
-			
+
 	if (!word)
 		return null
 
@@ -104,22 +104,9 @@ export function Translator() {
 								</FloatingPanel.CloseTrigger>
 							</FloatingPanel.Control>
 						</FloatingPanel.Header>
-						<FloatingPanel.Body p="6">
+						<FloatingPanel.Body p="0">
 
-							<Suspense
-								fallback={
-									<AbsoluteCenter bg="bg/80" backdropFilter="blur(2px)" rounded="md" p="4">
-										<HStack gap="3">
-											<Spinner size="sm" colorPalette="blue" />
-											<Text fontSize="sm" color="fg.muted">
-												Loading...
-											</Text>
-										</HStack>
-									</AbsoluteCenter>
-								}
-							>
-								<WordNet word={word} />
-							</Suspense>
+							<BrowserTabs word={word} />
 
 						</FloatingPanel.Body>
 						<FloatingPanel.ResizeTriggers />
@@ -129,3 +116,68 @@ export function Translator() {
 		</FloatingPanel.Root>
 	)
 }
+
+
+
+function TabContent({ children, value }: { children: React.ReactNode, value: string }) {
+	return (
+		<Tabs.Content
+			p="6"
+			value={value}
+			position="absolute"
+			inset="0"
+			_open={{
+				animationName: "fade-in, scale-in",
+				animationDuration: "300ms",
+			}}
+			_closed={{
+				animationName: "fade-out, scale-out",
+				animationDuration: "120ms",
+			}}
+		>
+			<Suspense
+				fallback={
+					<HStack gap="3" bg="bg/80" backdropFilter="blur(2px)" rounded="md" p="4" width="min" mx="auto">
+						<Spinner size="sm" colorPalette="blue" />
+						<Text fontSize="sm" color="fg.muted">
+							Loading...
+						</Text>
+					</HStack>
+				}
+			>
+				{children}
+			</Suspense>
+		</Tabs.Content>
+	)
+}
+
+function BrowserTabs({ word }: { word: string }) {
+	return (
+		<Tabs.Root defaultValue="dictionary" width="full" size="sm">
+			<Tabs.List>
+
+				<Tabs.Trigger value="dictionary">
+					Dictionary
+				</Tabs.Trigger>
+
+				<Tabs.Trigger value="wordnet">
+					Wordnet
+				</Tabs.Trigger>
+
+			</Tabs.List>
+
+			<Box pos="relative" width="full">
+
+				<TabContent value="wordnet">
+					<WordNet word={word} />
+				</TabContent>
+
+				<TabContent value="dictionary">
+					<Text>Not implemented yet</Text>
+				</TabContent>
+
+			</Box>
+		</Tabs.Root>
+	)
+}
+

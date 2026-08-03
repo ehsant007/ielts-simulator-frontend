@@ -12,7 +12,7 @@ import { SpeakingModule } from "./SpeakingModule";
 import { ModuleMode } from "./store";
 import { LangToolsProvider } from "../lang-tools";
 import { ContextMenu } from "./ContextMenu";
-import { Translator } from "../lang-tools";
+import { Browser } from "../lang-tools";
 import { PopoverMenu } from "../lang-tools";
 
 
@@ -60,7 +60,7 @@ export function Module({ module, lastAttempt }: ModuleProps) {
 			>
 				<ContextMenu>
 					{module_ui}
-					<Translator/>
+					<Browser/>
 					<PopoverMenu/>
 				</ContextMenu>
 			</ModuleContextProvider>
