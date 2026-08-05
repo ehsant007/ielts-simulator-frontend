@@ -22,9 +22,9 @@ export function Dictionary({ headword }: { headword: string }) {
 
 	return (
 		<VStack alignItems="start">
-			{entries.map((entry, entry_index) => (
+			{entries.map((entry) => (
 				<Collapse
-					key={entry_index}
+					key={entry.id}
 					title={
 						<Text>
 							<Text as="span" fontWeight="bold" fontSize="lg">{entry.headword} </Text>
@@ -34,49 +34,62 @@ export function Dictionary({ headword }: { headword: string }) {
 				>
 					<VStack alignItems="start">
 
+						{entry.ipa_us !== entry.ipa_gb &&
+							<>
+								<HStack>
+									<Text>{entry.ipa_us}</Text>
+									<TTSButton text={entry.headword} colorPalette="blue"/>
+								</HStack>
 
-						<HStack>
-							<Text>{entry.ipa_us}</Text>
-							<TTSButton text={entry.headword} />
-						</HStack>
+								<HStack>
+									<Text>{entry.ipa_gb}</Text>
+									<TTSButton text={entry.headword} colorPalette="red"/>
+								</HStack>
+							</>
+						}
 
-						<HStack>
-							<Text>{entry.ipa_gb}</Text>
-							<TTSButton text={entry.headword} />
-						</HStack>
+						{entry.ipa_us === entry.ipa_gb &&
+							<HStack>
+								<Text>{entry.ipa_us}</Text>
+								<TTSButton text={entry.headword} colorPalette="blue"/>
+								<TTSButton text={entry.headword} colorPalette="red"/>
+							</HStack>
+						}
 
-						<VStack alignItems="start">
+						<List.Root as="ol">
 							{entry.senses.map((sense, sense_index) => (
-								<HStack key={sense_index} alignItems="start">
-									<Text fontWeight="medium">{sense_index + 1}</Text>
-									{sense.cefr_level &&
-										<Box
-											px="1.5"
-											//bg="blue.subtle"
-											borderRadius="full"
-											fontSize="small"
-											fontFamily="mono"
-											fontWeight="semibold"
-											color="fg.info"
-											border="sm"
-											borderColor="blue.border"
-										>
-											{sense.cefr_level.toUpperCase()}
-										</Box>
-									}
+								<List.Item key={sense_index} my="2">
+
 									<VStack alignItems="start">
-										<Text fontWeight="medium">{sense.definition}</Text>
-										<List.Root ms="4">
+										<HStack alignItems="start">
+											{sense.cefr_level &&
+												<Box
+													px="1.5"
+													//bg="blue.subtle"
+													borderRadius="full"
+													fontSize="small"
+													fontFamily="mono"
+													fontWeight="semibold"
+													color="fg.info"
+													border="sm"
+													borderColor="blue.border"
+												>
+													{sense.cefr_level.toUpperCase()}
+												</Box>
+											}
+											<Text fontWeight="medium">{sense.definition}</Text>
+										</HStack>
+										<List.Root ms="4" listStyleType="disc">
 											{sense.examples.sort((a, b) => a.sort_order - b.sort_order).map((example, example_index) => (
-												<List.Item key={example_index} fontStyle="italic">
+												<List.Item key={example_index} fontStyle="italic" as={AdvText}>
 													{example.text}
 												</List.Item>
 											))}
 										</List.Root>
 									</VStack>
-								</HStack>
+								</List.Item>
 							))}
-						</VStack>
+						</List.Root>
 
 					</VStack>
 				</Collapse>
@@ -90,16 +103,16 @@ export function Dictionary({ headword }: { headword: string }) {
 
 function Collapse({ children, title }: { children: React.ReactNode, title: React.ReactNode }) {
 	return (
-		<Collapsible.Root defaultOpen w="full" bg="bg.muted">
+		<Collapsible.Root defaultOpen w="full" bg="bg.muted" p="3">
 			<Collapsible.Trigger
-				paddingY="3"
-				display="flex"
-				gap="2"
 				alignItems="center"
-				w="full"
 				bg="bg.emphasized"
-				px="2"
 				cursor="pointer"
+				display="flex"
+				w="full"
+				gap="2"
+				py="3"
+				px="2"
 			>
 				<Collapsible.Indicator
 					transition="transform 0.2s"

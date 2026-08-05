@@ -1,12 +1,11 @@
 "use client";
 
-import { AbsoluteCenter, IconButton, ProgressCircle } from "@chakra-ui/react"
+import { AbsoluteCenter, IconButton, ProgressCircle, IconButtonProps } from "@chakra-ui/react"
 import { useCallback, useRef, useState } from "react"
 import { HiOutlineSpeakerWave } from "react-icons/hi2"
 import { useKokoroStore, speak } from "./kokoro-tts"
 
-
-export function TTSButton({ text }: { text: string }) {
+export function TTSButton({ text, ...props }: { text: string } & IconButtonProps) {
 	const generate = useKokoroStore((state) => state.generate)
 	const progress = useKokoroStore((state) => state.loadingProgress)
 	const [waiting, setWaiting] = useState(false)
@@ -41,7 +40,7 @@ export function TTSButton({ text }: { text: string }) {
 	}
 
 	return (
-		<IconButton onClick={handleClick} minW="unset" h="auto" p="1" variant="ghost">
+		<IconButton onClick={handleClick} minW="unset" h="auto" p="1" variant="ghost" {...props}>
 			{renderIcon()}
 		</IconButton>
 	)

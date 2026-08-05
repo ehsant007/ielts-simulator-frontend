@@ -123,7 +123,7 @@ export function Browser() {
 function TabContent({ children, value }: { children: React.ReactNode, value: string }) {
 	return (
 		<Tabs.Content
-			p="6"
+			p="0"
 			value={value}
 			position="absolute"
 			inset="0"

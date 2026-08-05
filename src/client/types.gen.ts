@@ -245,6 +245,10 @@ export type Content = ({
  */
 export type DictionaryEntry = {
     /**
+     * Id
+     */
+    id: number;
+    /**
      * Headword
      */
     headword: string;
@@ -263,7 +267,7 @@ export type DictionaryEntry = {
     /**
      * Cefr Level
      */
-    cefr_level: 'a1' | 'a2' | 'b1' | 'b2' | 'c' | 'c2' | null;
+    cefr_level: 'a1' | 'a2' | 'b1' | 'b2' | 'c1' | 'c2' | null;
     /**
      * Senses
      */
@@ -274,6 +278,10 @@ export type DictionaryEntry = {
  * DictionaryExample
  */
 export type DictionaryExample = {
+    /**
+     * Id
+     */
+    id: number;
     /**
      * Text
      */
@@ -310,6 +318,10 @@ export type DictionaryResponse = {
  * DictionarySense
  */
 export type DictionarySense = {
+    /**
+     * Id
+     */
+    id: number;
     sense_group: DictionarySenseGroup | null;
     /**
      * Sense Num
@@ -318,7 +330,7 @@ export type DictionarySense = {
     /**
      * Cefr Level
      */
-    cefr_level: 'a1' | 'a2' | 'b1' | 'b2' | 'c' | 'c2' | null;
+    cefr_level: 'a1' | 'a2' | 'b1' | 'b2' | 'c1' | 'c2' | null;
     /**
      * Grammar
      */
@@ -349,6 +361,10 @@ export type DictionarySense = {
  * DictionarySenseGroup
  */
 export type DictionarySenseGroup = {
+    /**
+     * Id
+     */
+    id: number;
     /**
      * Topic
      */
