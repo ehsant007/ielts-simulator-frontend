@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AddFilesToIeltsModuleData, AddFilesToIeltsModuleErrors, AddFilesToIeltsModuleResponses, AdvTranslateData, AdvTranslateErrors, AdvTranslateResponses, CreateIeltsAttemptData, CreateIeltsAttemptErrors, CreateIeltsAttemptResponses, CreateIeltsExamData, CreateIeltsExamErrors, CreateIeltsExamResponses, CreateIeltsModuleData, CreateIeltsModuleErrors, CreateIeltsModuleResponses, CreateInvoiceData, CreateInvoiceErrors, CreateInvoiceResponses, CreateKycDocumentData, CreateKycDocumentErrors, CreateKycDocumentResponses, CreateKycDocumentTypeData, CreateKycDocumentTypeErrors, CreateKycDocumentTypeResponses, CreateOfferData, CreateOfferErrors, CreateOfferResponses, CreatePaymentData, CreatePaymentErrors, CreatePaymentResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, CreateTicketData, CreateTicketErrors, CreateTicketMessageData, CreateTicketMessageErrors, CreateTicketMessageResponses, CreateTicketResponses, CreateUserData, CreateUserErrors, CreateUserResponses, DeleteFileData, DeleteFileErrors, DeleteFileResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DeleteUserData, DeleteUserErrors, DeleteUserMeData, DeleteUserMeResponses, DeleteUserResponses, HealthCheckData, HealthCheckResponses, LockOfferData, LockOfferErrors, LockOfferResponses, LoginAccessTokenData, LoginAccessTokenErrors, LoginAccessTokenResponses, LookupData, LookupErrors, LookupResponses, ReadCurrenciesData, ReadCurrenciesResponses, ReadCurrencyBySymbolData, ReadCurrencyBySymbolErrors, ReadCurrencyBySymbolResponses, ReadFileByFilenameData, ReadFileByFilenameErrors, ReadFileByFilenameResponses, ReadFileByIdData, ReadFileByIdErrors, ReadFileByIdResponses, ReadFileSetData, ReadFileSetErrors, ReadFileSetResponses, ReadIeltsExamByIdData, ReadIeltsExamByIdErrors, ReadIeltsExamByIdResponses, ReadIeltsExamsData, ReadIeltsExamsResponses, ReadIeltsModuleByIdData, ReadIeltsModuleByIdErrors, ReadIeltsModuleByIdResponses, ReadIeltsModulesData, ReadIeltsModulesResponses, ReadInvoiceByIdData, ReadInvoiceByIdErrors, ReadInvoiceByIdResponses, ReadInvoicesData, ReadInvoicesErrors, ReadInvoicesResponses, ReadKycDocumentsData, ReadKycDocumentsErrors, ReadKycDocumentsResponses, ReadKycDocumentTypesData, ReadKycDocumentTypesResponses, ReadLastAttemptData, ReadLastAttemptErrors, ReadLastAttemptResponses, ReadMyIeltsAttemptsData, ReadMyIeltsAttemptsResponses, ReadMyKycDocumentsData, ReadMyKycDocumentsResponses, ReadOffersData, ReadOffersErrors, ReadOffersResponses, ReadPaymentsData, ReadPaymentsErrors, ReadPaymentsResponses, ReadPermissionsData, ReadPermissionsResponses, ReadReceiptByIdData, ReadReceiptByIdErrors, ReadReceiptByIdResponses, ReadRolesData, ReadRolesResponses, ReadSettingsData, ReadSettingsResponses, ReadTicketByIdData, ReadTicketByIdErrors, ReadTicketByIdResponses, ReadTicketMessagesData, ReadTicketMessagesErrors, ReadTicketMessagesResponses, ReadTicketsData, ReadTicketsErrors, ReadTicketsResponses, ReadUserByIdData, ReadUserByIdErrors, ReadUserByIdResponses, ReadUserMeData, ReadUserMeResponses, ReadUserOffersData, ReadUserOffersErrors, ReadUserOffersResponses, ReadUserRolesData, ReadUserRolesErrors, ReadUserRolesResponses, ReadUsersData, ReadUsersErrors, ReadUsersResponses, ReadWordnetData, ReadWordnetErrors, ReadWordnetResponses, RecoverPasswordData, RecoverPasswordErrors, RecoverPasswordHtmlContentData, RecoverPasswordHtmlContentErrors, RecoverPasswordHtmlContentResponses, RecoverPasswordResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, ReviewKycDocumentData, ReviewKycDocumentErrors, ReviewKycDocumentResponses, SearchOffersData, SearchOffersErrors, SearchOffersResponses, SetRoleKycRequirementsData, SetRoleKycRequirementsErrors, SetRoleKycRequirementsResponses, TestEmailData, TestEmailErrors, TestEmailResponses, TestTokenData, TestTokenResponses, TranslateData, TranslateErrors, TranslateResponses, UpdateIeltsExamData, UpdateIeltsExamErrors, UpdateIeltsExamResponses, UpdateIeltsModuleData, UpdateIeltsModuleErrors, UpdateIeltsModuleResponses, UpdatePasswordMeData, UpdatePasswordMeErrors, UpdatePasswordMeResponses, UpdatePaymentStatusData, UpdatePaymentStatusErrors, UpdatePaymentStatusResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateSettingsData, UpdateSettingsErrors, UpdateSettingsResponses, UpdateTicketData, UpdateTicketErrors, UpdateTicketResponses, UpdateUserData, UpdateUserErrors, UpdateUserMeData, UpdateUserMeErrors, UpdateUserMeResponses, UpdateUserResponses } from './types.gen';
+import type { AddFilesToIeltsModuleData, AddFilesToIeltsModuleErrors, AddFilesToIeltsModuleResponses, AdvTranslateData, AdvTranslateErrors, AdvTranslateResponses, CreateIeltsAttemptData, CreateIeltsAttemptErrors, CreateIeltsAttemptResponses, CreateIeltsExamData, CreateIeltsExamErrors, CreateIeltsExamResponses, CreateIeltsModuleData, CreateIeltsModuleErrors, CreateIeltsModuleResponses, CreateKycDocumentData, CreateKycDocumentErrors, CreateKycDocumentResponses, CreateKycDocumentTypeData, CreateKycDocumentTypeErrors, CreateKycDocumentTypeResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, CreateTicketData, CreateTicketErrors, CreateTicketMessageData, CreateTicketMessageErrors, CreateTicketMessageResponses, CreateTicketResponses, CreateUserData, CreateUserErrors, CreateUserResponses, DeleteFileData, DeleteFileErrors, DeleteFileResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DeleteUserData, DeleteUserErrors, DeleteUserMeData, DeleteUserMeResponses, DeleteUserResponses, HealthCheckData, HealthCheckResponses, LoginAccessTokenData, LoginAccessTokenErrors, LoginAccessTokenResponses, LookupData, LookupErrors, LookupResponses, ReadFileByFilenameData, ReadFileByFilenameErrors, ReadFileByFilenameResponses, ReadFileByIdData, ReadFileByIdErrors, ReadFileByIdResponses, ReadFileSetData, ReadFileSetErrors, ReadFileSetResponses, ReadIeltsExamByIdData, ReadIeltsExamByIdErrors, ReadIeltsExamByIdResponses, ReadIeltsExamsData, ReadIeltsExamsResponses, ReadIeltsModuleByIdData, ReadIeltsModuleByIdErrors, ReadIeltsModuleByIdResponses, ReadIeltsModulesData, ReadIeltsModulesResponses, ReadKycDocumentsData, ReadKycDocumentsErrors, ReadKycDocumentsResponses, ReadKycDocumentTypesData, ReadKycDocumentTypesResponses, ReadLastAttemptData, ReadLastAttemptErrors, ReadLastAttemptResponses, ReadMyIeltsAttemptsData, ReadMyIeltsAttemptsResponses, ReadMyKycDocumentsData, ReadMyKycDocumentsResponses, ReadPermissionsData, ReadPermissionsResponses, ReadRolesData, ReadRolesResponses, ReadSettingsData, ReadSettingsResponses, ReadTicketByIdData, ReadTicketByIdErrors, ReadTicketByIdResponses, ReadTicketMessagesData, ReadTicketMessagesErrors, ReadTicketMessagesResponses, ReadTicketsData, ReadTicketsErrors, ReadTicketsResponses, ReadUserByIdData, ReadUserByIdErrors, ReadUserByIdResponses, ReadUserMeData, ReadUserMeResponses, ReadUserRolesData, ReadUserRolesErrors, ReadUserRolesResponses, ReadUsersData, ReadUsersErrors, ReadUsersResponses, ReadWordnetData, ReadWordnetErrors, ReadWordnetResponses, RecoverPasswordData, RecoverPasswordErrors, RecoverPasswordHtmlContentData, RecoverPasswordHtmlContentErrors, RecoverPasswordHtmlContentResponses, RecoverPasswordResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, ReviewKycDocumentData, ReviewKycDocumentErrors, ReviewKycDocumentResponses, SetRoleKycRequirementsData, SetRoleKycRequirementsErrors, SetRoleKycRequirementsResponses, TestEmailData, TestEmailErrors, TestEmailResponses, TestTokenData, TestTokenResponses, TranslateData, TranslateErrors, TranslateResponses, UpdateIeltsExamData, UpdateIeltsExamErrors, UpdateIeltsExamResponses, UpdateIeltsModuleData, UpdateIeltsModuleErrors, UpdateIeltsModuleResponses, UpdatePasswordMeData, UpdatePasswordMeErrors, UpdatePasswordMeResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateSettingsData, UpdateSettingsErrors, UpdateSettingsResponses, UpdateTicketData, UpdateTicketErrors, UpdateTicketResponses, UpdateUserData, UpdateUserErrors, UpdateUserMeData, UpdateUserMeErrors, UpdateUserMeResponses, UpdateUserResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -33,7 +33,7 @@ export const lookup = <ThrowOnError extends boolean = true>(options: Options<Loo
  */
 export const translate = <ThrowOnError extends boolean = true>(options: Options<TranslateData, ThrowOnError>) => {
     return (options.client ?? client).post<TranslateResponses, TranslateErrors, ThrowOnError>({
-        url: '/api/v1/langtools/ai/translate',
+        url: '/api/v1/translator/translate',
         ...options,
         headers: {
             'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ export const translate = <ThrowOnError extends boolean = true>(options: Options<
  */
 export const advTranslate = <ThrowOnError extends boolean = true>(options: Options<AdvTranslateData, ThrowOnError>) => {
     return (options.client ?? client).post<AdvTranslateResponses, AdvTranslateErrors, ThrowOnError>({
-        url: '/api/v1/langtools/ai/adv-translate',
+        url: '/api/v1/translator/adv-translate',
         ...options,
         headers: {
             'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ export const advTranslate = <ThrowOnError extends boolean = true>(options: Optio
  */
 export const readWordnet = <ThrowOnError extends boolean = true>(options: Options<ReadWordnetData, ThrowOnError>) => {
     return (options.client ?? client).get<ReadWordnetResponses, ReadWordnetErrors, ThrowOnError>({
-        url: '/api/v1/langtools/wordnet/{word}',
+        url: '/api/v1/wordnet/{word}',
         ...options
     });
 };
@@ -713,102 +713,6 @@ export const healthCheck = <ThrowOnError extends boolean = true>(options?: Optio
 };
 
 /**
- * Read Offers
- */
-export const readOffers = <ThrowOnError extends boolean = true>(options?: Options<ReadOffersData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ReadOffersResponses, ReadOffersErrors, ThrowOnError>({
-        url: '/api/v1/offers/',
-        ...options
-    });
-};
-
-/**
- * Create Offer
- */
-export const createOffer = <ThrowOnError extends boolean = true>(options: Options<CreateOfferData, ThrowOnError>) => {
-    return (options.client ?? client).post<CreateOfferResponses, CreateOfferErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/offers/',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Search Offers
- */
-export const searchOffers = <ThrowOnError extends boolean = true>(options: Options<SearchOffersData, ThrowOnError>) => {
-    return (options.client ?? client).get<SearchOffersResponses, SearchOffersErrors, ThrowOnError>({
-        url: '/api/v1/offers/search',
-        ...options
-    });
-};
-
-/**
- * Read User Offers
- */
-export const readUserOffers = <ThrowOnError extends boolean = true>(options?: Options<ReadUserOffersData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ReadUserOffersResponses, ReadUserOffersErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/offers/user',
-        ...options
-    });
-};
-
-/**
- * Lock Offer
- */
-export const lockOffer = <ThrowOnError extends boolean = true>(options: Options<LockOfferData, ThrowOnError>) => {
-    return (options.client ?? client).post<LockOfferResponses, LockOfferErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/offers/{offer_id}/lock',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Read Currencies
- */
-export const readCurrencies = <ThrowOnError extends boolean = true>(options?: Options<ReadCurrenciesData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ReadCurrenciesResponses, unknown, ThrowOnError>({
-        url: '/api/v1/currencies/',
-        ...options
-    });
-};
-
-/**
- * Read Currency By Symbol
- */
-export const readCurrencyBySymbol = <ThrowOnError extends boolean = true>(options: Options<ReadCurrencyBySymbolData, ThrowOnError>) => {
-    return (options.client ?? client).get<ReadCurrencyBySymbolResponses, ReadCurrencyBySymbolErrors, ThrowOnError>({
-        url: '/api/v1/currencies/{symbol}',
-        ...options
-    });
-};
-
-/**
  * Read Tickets
  */
 export const readTickets = <ThrowOnError extends boolean = true>(options?: Options<ReadTicketsData, ThrowOnError>) => {
@@ -913,132 +817,6 @@ export const createTicketMessage = <ThrowOnError extends boolean = true>(options
         ...options,
         headers: {
             'Content-Type': null,
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Read Payments
- */
-export const readPayments = <ThrowOnError extends boolean = true>(options?: Options<ReadPaymentsData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ReadPaymentsResponses, ReadPaymentsErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/payments/',
-        ...options
-    });
-};
-
-/**
- * Create Payment
- */
-export const createPayment = <ThrowOnError extends boolean = true>(options: Options<CreatePaymentData, ThrowOnError>) => {
-    return (options.client ?? client).post<CreatePaymentResponses, CreatePaymentErrors, ThrowOnError>({
-        ...formDataBodySerializer,
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/payments/',
-        ...options,
-        headers: {
-            'Content-Type': null,
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Read Invoices
- */
-export const readInvoices = <ThrowOnError extends boolean = true>(options?: Options<ReadInvoicesData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ReadInvoicesResponses, ReadInvoicesErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/payments/invoices',
-        ...options
-    });
-};
-
-/**
- * Create Invoice
- */
-export const createInvoice = <ThrowOnError extends boolean = true>(options: Options<CreateInvoiceData, ThrowOnError>) => {
-    return (options.client ?? client).post<CreateInvoiceResponses, CreateInvoiceErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/payments/invoices',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Read Invoice By Id
- */
-export const readInvoiceById = <ThrowOnError extends boolean = true>(options: Options<ReadInvoiceByIdData, ThrowOnError>) => {
-    return (options.client ?? client).get<ReadInvoiceByIdResponses, ReadInvoiceByIdErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/payments/invoices/{invoice_id}',
-        ...options
-    });
-};
-
-/**
- * Read Receipt By Id
- */
-export const readReceiptById = <ThrowOnError extends boolean = true>(options: Options<ReadReceiptByIdData, ThrowOnError>) => {
-    return (options.client ?? client).get<ReadReceiptByIdResponses, ReadReceiptByIdErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/payments/receipts/{payment_id}',
-        ...options
-    });
-};
-
-/**
- * Update Payment Status
- */
-export const updatePaymentStatus = <ThrowOnError extends boolean = true>(options: Options<UpdatePaymentStatusData, ThrowOnError>) => {
-    return (options.client ?? client).patch<UpdatePaymentStatusResponses, UpdatePaymentStatusErrors, ThrowOnError>({
-        ...urlSearchParamsBodySerializer,
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/payments/{payment_id}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
             ...options.headers
         }
     });

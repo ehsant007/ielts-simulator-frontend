@@ -135,16 +135,6 @@ export type AttemptRead = {
 };
 
 /**
- * BlockchainRead
- */
-export type BlockchainRead = {
-    /**
-     * Name
-     */
-    name: string;
-};
-
-/**
  * Body_add_files_to_ielts_module
  */
 export type BodyAddFilesToIeltsModule = {
@@ -166,25 +156,6 @@ export type BodyCreateKycDocument = {
      * Files
      */
     files: Array<Blob | File>;
-};
-
-/**
- * Body_create_payment
- */
-export type BodyCreatePayment = {
-    /**
-     * Invoice Id
-     */
-    invoice_id: string;
-    payment_method?: PaymentMethodEnum;
-    /**
-     * Receipt File
-     */
-    receipt_file?: Blob | File | null;
-    /**
-     * Receipt Test
-     */
-    receipt_test?: string | null;
 };
 
 /**
@@ -261,13 +232,6 @@ export type BodyLoginAccessToken = {
 };
 
 /**
- * Body_update_payment_status
- */
-export type BodyUpdatePaymentStatus = {
-    status: PaymentStatus;
-};
-
-/**
  * Content
  */
 export type Content = ({
@@ -275,55 +239,6 @@ export type Content = ({
 } & Table) | ({
     type: 'text';
 } & Text);
-
-/**
- * CurrencyRead
- */
-export type CurrencyRead = {
-    /**
-     * Id
-     */
-    id: number;
-    type: CurrencyType;
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Symbol
-     */
-    symbol: string;
-    /**
-     * Sign
-     */
-    sign: string | null;
-    /**
-     * Decimals
-     */
-    decimals: number;
-    /**
-     * Logo
-     */
-    logo: string | null;
-    /**
-     * Is Active
-     */
-    is_active: boolean;
-    /**
-     * Token Std
-     */
-    token_std: string | null;
-    blockchain: BlockchainRead | null;
-    /**
-     * Contract Address
-     */
-    contract_address: string | null;
-};
-
-/**
- * CurrencyType
- */
-export type CurrencyType = 'fiat' | 'crypto';
 
 /**
  * DictionaryEntry
@@ -379,6 +294,16 @@ export type DictionaryExample = {
      * Extra
      */
     extra: boolean;
+};
+
+/**
+ * DictionaryResponse
+ */
+export type DictionaryResponse = {
+    /**
+     * Entries
+     */
+    entries: Array<DictionaryEntry>;
 };
 
 /**
@@ -715,75 +640,6 @@ export type Image = {
 };
 
 /**
- * InvoiceCreate
- */
-export type InvoiceCreate = {
-    /**
-     * Amount
-     */
-    amount: number | string;
-    /**
-     * Currency
-     */
-    currency: string;
-    type: InvoiceType;
-};
-
-/**
- * InvoiceRead
- */
-export type InvoiceRead = {
-    /**
-     * Id
-     */
-    id: string;
-    /**
-     * Amount
-     */
-    amount: number | string;
-    /**
-     * Currency
-     */
-    currency: string;
-    type: InvoiceType;
-    /**
-     * Created At
-     */
-    created_at: string;
-    status: InvoiceStatus;
-    /**
-     * Expires At
-     */
-    expires_at: string | null;
-};
-
-/**
- * InvoiceStatus
- *
- * Enum for the status of an invoice.
- */
-export type InvoiceStatus = 'paid' | 'unpaid' | 'expired' | 'cancelled';
-
-/**
- * InvoiceType
- */
-export type InvoiceType = 'wallet_top_up' | 'offer_create_commission' | 'offer_lock_commission';
-
-/**
- * InvoicesRead
- */
-export type InvoicesRead = {
-    /**
-     * Data
-     */
-    data: Array<InvoiceRead>;
-    /**
-     * Count
-     */
-    count: number;
-};
-
-/**
  * KycDocumentRead
  */
 export type KycDocumentRead = {
@@ -955,7 +811,7 @@ export type LexicalEntry = {
      *
      * Distinct established senses, with the contextually relevant sense first.
      */
-    senses: Array<AppSchemasLangtoolsAdvTranslatorSense>;
+    senses: Array<AppTranslatorSchemasAdvTranslatorSense>;
     /**
      * Common Usage Examples
      *
@@ -1001,17 +857,6 @@ export type ListeningPart = {
      * Audio Script
      */
     audio_script: Array<Utterance>;
-};
-
-/**
- * Maker
- */
-export type Maker = {
-    profile: ProfilePublic;
-    /**
-     * Username
-     */
-    username: string;
 };
 
 /**
@@ -1207,103 +1052,6 @@ export type NoteCompletionGroup = {
 };
 
 /**
- * OfferCreate
- */
-export type OfferCreate = {
-    /**
-     * Sell Asset Id
-     */
-    sell_asset_id: number;
-    /**
-     * Buy Asset Id
-     */
-    buy_asset_id: number;
-    /**
-     * Quote
-     */
-    quote: number | string;
-    /**
-     * Total Amount
-     */
-    total_amount: number | string;
-    /**
-     * Min Lock Amount
-     */
-    min_lock_amount?: number | string | null;
-    /**
-     * Max Lock Amount
-     */
-    max_lock_amount?: number | string | null;
-    /**
-     * Expires At
-     */
-    expires_at: string | null;
-};
-
-/**
- * OfferLockCreate
- */
-export type OfferLockCreate = {
-    /**
-     * Locked Amount
-     */
-    locked_amount: number | string;
-};
-
-/**
- * OfferLockRead
- */
-export type OfferLockRead = {
-    /**
-     * Id
-     */
-    id: string;
-};
-
-/**
- * OfferPublic
- */
-export type OfferPublic = {
-    /**
-     * Id
-     */
-    id: string;
-    maker: Maker;
-    sell: CurrencyRead;
-    buy: CurrencyRead;
-    /**
-     * Price
-     */
-    price: number | string;
-    /**
-     * Total Amount
-     */
-    total_amount: number | string;
-    /**
-     * Min Lock Amount
-     */
-    min_lock_amount: number | string;
-    /**
-     * Available Amount
-     */
-    available_amount: number | string;
-};
-
-/**
- * OffersPublic
- */
-export type OffersPublic = {
-    /**
-     * Data
-     */
-    data: Array<OfferPublic>;
-    /**
-     * Count
-     */
-    count: number;
-};
-
-/**
  * Page[KycDocumentRead]
  */
 export type PageKycDocumentRead = {
@@ -1396,60 +1144,6 @@ export type PassageSection = {
      * Text
      */
     text: Array<string>;
-};
-
-/**
- * PaymentMethodEnum
- */
-export type PaymentMethodEnum = 'crypto' | 'paypal' | 'wallet' | 'bank_transfer';
-
-/**
- * PaymentRead
- */
-export type PaymentRead = {
-    /**
-     * Id
-     */
-    id: string;
-    /**
-     * Invoice Id
-     */
-    invoice_id: string;
-    /**
-     * Amount
-     */
-    amount: number | string;
-    /**
-     * Currency Id
-     */
-    currency_id: number;
-    status: PaymentStatus;
-    receipt_file_set: FileSetRead | null;
-    /**
-     * Created At
-     */
-    created_at: string;
-};
-
-/**
- * PaymentStatus
- *
- * Enum for the status of a payment.
- */
-export type PaymentStatus = 'pending' | 'success' | 'failed';
-
-/**
- * PaymentsRead
- */
-export type PaymentsRead = {
-    /**
-     * Data
-     */
-    data: Array<PaymentRead>;
-    /**
-     * Count
-     */
-    count: number;
 };
 
 /**
@@ -2223,7 +1917,7 @@ export type WritingTask = {
 /**
  * Sense
  */
-export type AppSchemasLangtoolsAdvTranslatorSense = {
+export type AppTranslatorSchemasAdvTranslatorSense = {
     /**
      * Part Of Speech
      */
@@ -2293,7 +1987,7 @@ export type AppSchemasLangtoolsAdvTranslatorSense = {
 /**
  * TranslateRequest
  */
-export type AppSchemasLangtoolsAdvTranslatorTranslateRequest = {
+export type AppTranslatorSchemasAdvTranslatorTranslateRequest = {
     /**
      * Text
      *
@@ -2329,7 +2023,7 @@ export type AppSchemasLangtoolsAdvTranslatorTranslateRequest = {
 /**
  * TranslateResponse
  */
-export type AppSchemasLangtoolsAdvTranslatorTranslateResponse = {
+export type AppTranslatorSchemasAdvTranslatorTranslateResponse = {
     /**
      * Source Language
      */
@@ -2350,7 +2044,7 @@ export type AppSchemasLangtoolsAdvTranslatorTranslateResponse = {
 /**
  * TranslateRequest
  */
-export type AppSchemasLangtoolsTranslatorTranslateRequest = {
+export type AppTranslatorSchemasTranslatorTranslateRequest = {
     /**
      * Text
      */
@@ -2372,7 +2066,7 @@ export type AppSchemasLangtoolsTranslatorTranslateRequest = {
 /**
  * TranslateResponse
  */
-export type AppSchemasLangtoolsTranslatorTranslateResponse = {
+export type AppTranslatorSchemasTranslatorTranslateResponse = {
     /**
      * Translation
      *
@@ -2432,16 +2126,16 @@ export type LookupResponses = {
     /**
      * Successful Response
      */
-    200: DictionaryEntry;
+    200: DictionaryResponse;
 };
 
 export type LookupResponse = LookupResponses[keyof LookupResponses];
 
 export type TranslateData = {
-    body: AppSchemasLangtoolsTranslatorTranslateRequest;
+    body: AppTranslatorSchemasTranslatorTranslateRequest;
     path?: never;
     query?: never;
-    url: '/api/v1/langtools/ai/translate';
+    url: '/api/v1/translator/translate';
 };
 
 export type TranslateErrors = {
@@ -2457,16 +2151,16 @@ export type TranslateResponses = {
     /**
      * Successful Response
      */
-    200: AppSchemasLangtoolsTranslatorTranslateResponse;
+    200: AppTranslatorSchemasTranslatorTranslateResponse;
 };
 
 export type TranslateResponse = TranslateResponses[keyof TranslateResponses];
 
 export type AdvTranslateData = {
-    body: AppSchemasLangtoolsAdvTranslatorTranslateRequest;
+    body: AppTranslatorSchemasAdvTranslatorTranslateRequest;
     path?: never;
     query?: never;
-    url: '/api/v1/langtools/ai/adv-translate';
+    url: '/api/v1/translator/adv-translate';
 };
 
 export type AdvTranslateErrors = {
@@ -2482,7 +2176,7 @@ export type AdvTranslateResponses = {
     /**
      * Successful Response
      */
-    200: AppSchemasLangtoolsAdvTranslatorTranslateResponse;
+    200: AppTranslatorSchemasAdvTranslatorTranslateResponse;
 };
 
 export type AdvTranslateResponse = AdvTranslateResponses[keyof AdvTranslateResponses];
@@ -2496,7 +2190,7 @@ export type ReadWordnetData = {
         word: string;
     };
     query?: never;
-    url: '/api/v1/langtools/wordnet/{word}';
+    url: '/api/v1/wordnet/{word}';
 };
 
 export type ReadWordnetErrors = {
@@ -3487,229 +3181,6 @@ export type HealthCheckResponses = {
 
 export type HealthCheckResponse = HealthCheckResponses[keyof HealthCheckResponses];
 
-export type ReadOffersData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/v1/offers/';
-};
-
-export type ReadOffersErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadOffersError = ReadOffersErrors[keyof ReadOffersErrors];
-
-export type ReadOffersResponses = {
-    /**
-     * Successful Response
-     */
-    200: OffersPublic;
-};
-
-export type ReadOffersResponse = ReadOffersResponses[keyof ReadOffersResponses];
-
-export type CreateOfferData = {
-    body: OfferCreate;
-    path?: never;
-    query?: never;
-    url: '/api/v1/offers/';
-};
-
-export type CreateOfferErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateOfferError = CreateOfferErrors[keyof CreateOfferErrors];
-
-export type CreateOfferResponses = {
-    /**
-     * Successful Response
-     */
-    200: OfferPublic;
-};
-
-export type CreateOfferResponse = CreateOfferResponses[keyof CreateOfferResponses];
-
-export type SearchOffersData = {
-    body?: never;
-    path?: never;
-    query: {
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-        /**
-         * Type
-         */
-        type: 'buy' | 'sell';
-        /**
-         * Target
-         */
-        target: string;
-        /**
-         * Amount
-         */
-        amount: number | string;
-        /**
-         * Base
-         */
-        base: string;
-    };
-    url: '/api/v1/offers/search';
-};
-
-export type SearchOffersErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type SearchOffersError = SearchOffersErrors[keyof SearchOffersErrors];
-
-export type SearchOffersResponses = {
-    /**
-     * Successful Response
-     */
-    200: OffersPublic;
-};
-
-export type SearchOffersResponse = SearchOffersResponses[keyof SearchOffersResponses];
-
-export type ReadUserOffersData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/v1/offers/user';
-};
-
-export type ReadUserOffersErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadUserOffersError = ReadUserOffersErrors[keyof ReadUserOffersErrors];
-
-export type ReadUserOffersResponses = {
-    /**
-     * Successful Response
-     */
-    200: OffersPublic;
-};
-
-export type ReadUserOffersResponse = ReadUserOffersResponses[keyof ReadUserOffersResponses];
-
-export type LockOfferData = {
-    body: OfferLockCreate;
-    path: {
-        /**
-         * Offer Id
-         */
-        offer_id: string;
-    };
-    query?: never;
-    url: '/api/v1/offers/{offer_id}/lock';
-};
-
-export type LockOfferErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type LockOfferError = LockOfferErrors[keyof LockOfferErrors];
-
-export type LockOfferResponses = {
-    /**
-     * Successful Response
-     */
-    200: OfferLockRead;
-};
-
-export type LockOfferResponse = LockOfferResponses[keyof LockOfferResponses];
-
-export type ReadCurrenciesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/currencies/';
-};
-
-export type ReadCurrenciesResponses = {
-    /**
-     * Response Read Currencies
-     *
-     * Successful Response
-     */
-    200: Array<CurrencyRead>;
-};
-
-export type ReadCurrenciesResponse = ReadCurrenciesResponses[keyof ReadCurrenciesResponses];
-
-export type ReadCurrencyBySymbolData = {
-    body?: never;
-    path: {
-        /**
-         * Symbol
-         */
-        symbol: string;
-    };
-    query?: never;
-    url: '/api/v1/currencies/{symbol}';
-};
-
-export type ReadCurrencyBySymbolErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadCurrencyBySymbolError = ReadCurrencyBySymbolErrors[keyof ReadCurrencyBySymbolErrors];
-
-export type ReadCurrencyBySymbolResponses = {
-    /**
-     * Response Read Currency By Symbol
-     *
-     * Successful Response
-     */
-    200: Array<CurrencyRead>;
-};
-
-export type ReadCurrencyBySymbolResponse = ReadCurrencyBySymbolResponses[keyof ReadCurrencyBySymbolResponses];
-
 export type ReadTicketsData = {
     body?: never;
     path?: never;
@@ -3897,212 +3368,6 @@ export type CreateTicketMessageResponses = {
 };
 
 export type CreateTicketMessageResponse = CreateTicketMessageResponses[keyof CreateTicketMessageResponses];
-
-export type ReadPaymentsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/v1/payments/';
-};
-
-export type ReadPaymentsErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadPaymentsError = ReadPaymentsErrors[keyof ReadPaymentsErrors];
-
-export type ReadPaymentsResponses = {
-    /**
-     * Successful Response
-     */
-    200: PaymentsRead;
-};
-
-export type ReadPaymentsResponse = ReadPaymentsResponses[keyof ReadPaymentsResponses];
-
-export type CreatePaymentData = {
-    body: BodyCreatePayment;
-    path?: never;
-    query?: never;
-    url: '/api/v1/payments/';
-};
-
-export type CreatePaymentErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreatePaymentError = CreatePaymentErrors[keyof CreatePaymentErrors];
-
-export type CreatePaymentResponses = {
-    /**
-     * Successful Response
-     */
-    200: PaymentRead;
-};
-
-export type CreatePaymentResponse = CreatePaymentResponses[keyof CreatePaymentResponses];
-
-export type ReadInvoicesData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/v1/payments/invoices';
-};
-
-export type ReadInvoicesErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadInvoicesError = ReadInvoicesErrors[keyof ReadInvoicesErrors];
-
-export type ReadInvoicesResponses = {
-    /**
-     * Successful Response
-     */
-    200: InvoicesRead;
-};
-
-export type ReadInvoicesResponse = ReadInvoicesResponses[keyof ReadInvoicesResponses];
-
-export type CreateInvoiceData = {
-    body: InvoiceCreate;
-    path?: never;
-    query?: never;
-    url: '/api/v1/payments/invoices';
-};
-
-export type CreateInvoiceErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateInvoiceError = CreateInvoiceErrors[keyof CreateInvoiceErrors];
-
-export type CreateInvoiceResponses = {
-    /**
-     * Successful Response
-     */
-    200: InvoiceCreate;
-};
-
-export type CreateInvoiceResponse = CreateInvoiceResponses[keyof CreateInvoiceResponses];
-
-export type ReadInvoiceByIdData = {
-    body?: never;
-    path: {
-        /**
-         * Invoice Id
-         */
-        invoice_id: string;
-    };
-    query?: never;
-    url: '/api/v1/payments/invoices/{invoice_id}';
-};
-
-export type ReadInvoiceByIdErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadInvoiceByIdError = ReadInvoiceByIdErrors[keyof ReadInvoiceByIdErrors];
-
-export type ReadInvoiceByIdResponses = {
-    /**
-     * Successful Response
-     */
-    200: InvoiceRead;
-};
-
-export type ReadInvoiceByIdResponse = ReadInvoiceByIdResponses[keyof ReadInvoiceByIdResponses];
-
-export type ReadReceiptByIdData = {
-    body?: never;
-    path: {
-        /**
-         * Payment Id
-         */
-        payment_id: string;
-    };
-    query?: never;
-    url: '/api/v1/payments/receipts/{payment_id}';
-};
-
-export type ReadReceiptByIdErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadReceiptByIdError = ReadReceiptByIdErrors[keyof ReadReceiptByIdErrors];
-
-export type ReadReceiptByIdResponses = {
-    /**
-     * Successful Response
-     */
-    200: unknown;
-};
-
-export type UpdatePaymentStatusData = {
-    body: BodyUpdatePaymentStatus;
-    path: {
-        /**
-         * Payment Id
-         */
-        payment_id: string;
-    };
-    query?: never;
-    url: '/api/v1/payments/{payment_id}';
-};
-
-export type UpdatePaymentStatusErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdatePaymentStatusError = UpdatePaymentStatusErrors[keyof UpdatePaymentStatusErrors];
-
-export type UpdatePaymentStatusResponses = {
-    /**
-     * Successful Response
-     */
-    200: PaymentRead;
-};
-
-export type UpdatePaymentStatusResponse = UpdatePaymentStatusResponses[keyof UpdatePaymentStatusResponses];
 
 export type ReadKycDocumentTypesData = {
     body?: never;

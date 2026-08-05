@@ -1,11 +1,12 @@
 "use client"
 
 import { useLangToolsStore } from "../LangToolsProvider";
-import { Text, Portal, FloatingPanel, IconButton, HStack, Spinner, Menu, Group, Tabs, Box } from "@chakra-ui/react";
+import { Text, Portal, FloatingPanel, IconButton, HStack, Spinner, Menu, Group, Tabs, Box, Input } from "@chakra-ui/react";
 import { WordNet } from "./Wordnet";
 import { LuMaximize2, LuMinus, LuSquare, LuX } from "react-icons/lu";
 import { MdHistory, MdOutlineArrowBack, MdOutlineArrowForward } from "react-icons/md";
 import { Suspense } from "react";
+import { Dictionary } from "./Dictionary";
 
 export function Browser() {
 	const word = useLangToolsStore((state) => state.wordQuery)
@@ -54,12 +55,12 @@ export function Browser() {
 										</IconButton>
 									</Group>
 
+
 								</FloatingPanel.Title>
 
 							</FloatingPanel.DragTrigger>
 
-
-
+							<Input value={word} w="30ch" onChange={(e) => setWordQuery(e.currentTarget.value)} mx="auto" />
 
 							<Menu.Root onSelect={(e) => setWordQuery(e.value)}>
 								<Menu.Trigger asChild>
@@ -173,7 +174,7 @@ function BrowserTabs({ word }: { word: string }) {
 				</TabContent>
 
 				<TabContent value="dictionary">
-					<Text>Not implemented yet</Text>
+					<Dictionary headword={word} />
 				</TabContent>
 
 			</Box>
