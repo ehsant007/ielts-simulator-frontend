@@ -1,7 +1,7 @@
 "use client"
 
 import { useLangToolsStore } from "../LangToolsProvider";
-import { Text, Portal, FloatingPanel, IconButton, HStack, Spinner, Menu, Group, Tabs, Box, Input } from "@chakra-ui/react";
+import { Text, Portal, FloatingPanel, IconButton, HStack, Spinner, Menu, Group, Tabs, Box, Input, ScrollArea } from "@chakra-ui/react";
 import { WordNet } from "./Wordnet";
 import { LuMaximize2, LuMinus, LuSquare, LuX } from "react-icons/lu";
 import { MdHistory, MdOutlineArrowBack, MdOutlineArrowForward } from "react-icons/md";
@@ -43,7 +43,14 @@ export function Browser() {
 		>
 			<Portal>
 				<FloatingPanel.Positioner>
-					<FloatingPanel.Content border="sm" borderColor="fg.subtle" shadow="md">
+					<FloatingPanel.Content
+						display="flex"
+						flexDir="column"
+						overflow="hidden"
+						border="sm"
+						borderColor="fg.subtle"
+						shadow="md"
+					>
 						<FloatingPanel.Header>
 							<Group gap="1">
 								<IconButton variant="ghost" minW="unset" h="auto" w="auto" p="1" disabled={!previous} onClick={() => setWordQuery(previous ?? null, false)}>
@@ -60,7 +67,7 @@ export function Browser() {
 							<FloatingPanel.DragTrigger h="full">
 								{/* <LuGripHorizontal /> */}
 								<FloatingPanel.Title>
-									
+
 								</FloatingPanel.Title>
 
 							</FloatingPanel.DragTrigger>
@@ -90,7 +97,7 @@ export function Browser() {
 
 						</FloatingPanel.Header>
 
-						<FloatingPanel.Body p="0">
+						<FloatingPanel.Body display="flex" flexDir="column" minH="0" flex="1" p="0">
 
 							<BrowserTabs word={word} />
 
@@ -122,25 +129,44 @@ function TabContent({ children, value }: { children: React.ReactNode, value: str
 				animationDuration: "120ms",
 			}}
 		>
-			<Suspense
-				fallback={
-					<HStack gap="3" bg="bg/80" backdropFilter="blur(2px)" rounded="md" p="4" width="min" mx="auto">
-						<Spinner size="sm" colorPalette="blue" />
-						<Text fontSize="sm" color="fg.muted">
-							Loading...
-						</Text>
-					</HStack>
-				}
-			>
-				{children}
-			</Suspense>
+			<ScrollArea.Root>
+				<ScrollArea.Viewport>
+					<ScrollArea.Content spaceY="4" textStyle="sm">
+						<Suspense
+							fallback={
+								<HStack gap="3" bg="bg/80" backdropFilter="blur(2px)" rounded="md" p="4" width="min" mx="auto">
+									<Spinner size="sm" colorPalette="blue" />
+									<Text fontSize="sm" color="fg.muted">
+										Loading...
+									</Text>
+								</HStack>
+							}
+						>
+							{children}
+							<Box h="10%"></Box>
+						</Suspense>
+					</ScrollArea.Content>
+				</ScrollArea.Viewport>
+				<ScrollArea.Scrollbar>
+					<ScrollArea.Thumb />
+				</ScrollArea.Scrollbar>
+				<ScrollArea.Corner />
+			</ScrollArea.Root>
 		</Tabs.Content>
 	)
 }
 
 function BrowserTabs({ word }: { word: string }) {
 	return (
-		<Tabs.Root defaultValue="dictionary" width="full" size="sm">
+		<Tabs.Root
+			display="flex"
+			flexDir="column"
+			flex="1"
+			minH="0"
+			w="full"
+			defaultValue="dictionary"
+			size="sm"
+		>
 			<Tabs.List>
 
 				<Tabs.Trigger value="dictionary">
@@ -153,7 +179,7 @@ function BrowserTabs({ word }: { word: string }) {
 
 			</Tabs.List>
 
-			<Box pos="relative" width="full">
+			<Box flex="1" minH="0" pos="relative">
 
 				<TabContent value="wordnet">
 					<WordNet word={word} />
