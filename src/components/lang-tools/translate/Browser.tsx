@@ -28,6 +28,7 @@ export function Browser() {
 			? history[currentIndex - 1]
 			: undefined;
 
+	const minSize = { width: 520, height: 400 };
 
 	if (!word)
 		return null
@@ -37,30 +38,31 @@ export function Browser() {
 		<FloatingPanel.Root
 			open={isOpen}
 			onOpenChange={(details) => !details.open && close()}
-			minSize={{ width: 320, height: 200 }}
+			defaultSize={minSize}
+			minSize={minSize}
 		>
 			<Portal>
 				<FloatingPanel.Positioner>
 					<FloatingPanel.Content border="sm" borderColor="fg.subtle" shadow="md">
 						<FloatingPanel.Header>
+							<Group gap="1">
+								<IconButton variant="ghost" minW="unset" h="auto" w="auto" p="1" disabled={!previous} onClick={() => setWordQuery(previous ?? null, false)}>
+									<MdOutlineArrowBack />
+								</IconButton>
+								<IconButton variant="ghost" minW="unset" h="auto" w="auto" p="1" disabled={!next} onClick={() => setWordQuery(next ?? null, false)}>
+									<MdOutlineArrowForward />
+								</IconButton>
+							</Group>
+							<Input value={word} w="30ch" onChange={(e) => setWordQuery(e.currentTarget.value)} mx="auto" />
 							<FloatingPanel.DragTrigger>
 								{/* <LuGripHorizontal /> */}
 								<FloatingPanel.Title>
-									<Group gap="1">
-										<IconButton variant="ghost" minW="unset" h="auto" w="auto" p="1" disabled={!previous} onClick={() => setWordQuery(previous ?? null, false)}>
-											<MdOutlineArrowBack />
-										</IconButton>
-										<IconButton variant="ghost" minW="unset" h="auto" w="auto" p="1" disabled={!next} onClick={() => setWordQuery(next ?? null, false)}>
-											<MdOutlineArrowForward />
-										</IconButton>
-									</Group>
 
-
+									...
 								</FloatingPanel.Title>
 
 							</FloatingPanel.DragTrigger>
 
-							<Input value={word} w="30ch" onChange={(e) => setWordQuery(e.currentTarget.value)} mx="auto" />
 
 							<Menu.Root onSelect={(e) => setWordQuery(e.value)}>
 								<Menu.Trigger asChild>
