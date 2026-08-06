@@ -126,6 +126,8 @@ function Pronunciation({ entry }: { entry: DictionaryEntry }) {
 }
 
 function Sense({ sense }: { sense: DictionarySense }) {
+	const baseId = `dic-sense-${sense.id}`;
+
 	return (
 		<Box>
 			<Text>
@@ -147,13 +149,13 @@ function Sense({ sense }: { sense: DictionarySense }) {
 					</Text>
 				}
 				{sense.grammar &&
-					<Text as="span" color="fg.muted">{sense.grammar} </Text>
+					<AdvText as="span" color="fg.muted" id={`${baseId}-grammar`}>{sense.grammar} </AdvText>
 				}
-				<Text as="span" fontWeight="medium">{sense.definition}</Text>
+				<AdvText as="span" fontWeight="medium" id={`${baseId}-def`}>{sense.definition}</AdvText>
 			</Text>
 			<List.Root ms="4" listStyleType="disc">
 				{sense.examples.sort((a, b) => a.sort_order - b.sort_order).map((example, example_index) => (
-					<List.Item key={example_index} fontStyle="italic" as={AdvText}>
+					<List.Item key={example_index} fontStyle="italic" as={AdvText} id={`${baseId}-example${example_index}`}>
 						{example.text}
 					</List.Item>
 				))}

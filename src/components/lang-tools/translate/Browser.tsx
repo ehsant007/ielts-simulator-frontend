@@ -53,36 +53,17 @@ export function Browser() {
 									<MdOutlineArrowForward />
 								</IconButton>
 							</Group>
+
+							<HistoryMenu />
 							<Input value={word} w="30ch" onChange={(e) => setWordQuery(e.currentTarget.value)} mx="auto" />
-							<FloatingPanel.DragTrigger>
+
+							<FloatingPanel.DragTrigger h="full">
 								{/* <LuGripHorizontal /> */}
 								<FloatingPanel.Title>
-
-									...
+									
 								</FloatingPanel.Title>
 
 							</FloatingPanel.DragTrigger>
-
-
-							<Menu.Root onSelect={(e) => setWordQuery(e.value)}>
-								<Menu.Trigger asChild>
-									<IconButton variant="ghost" minW="unset" h="auto" w="auto" p="1">
-										<MdHistory />
-									</IconButton>
-								</Menu.Trigger>
-
-								<Portal>
-									<Menu.Positioner>
-										<Menu.Content zIndex="max">
-											{history.map((query, i) =>
-												<Menu.Item key={i} value={query}>
-													{query}
-												</Menu.Item>
-											)}
-										</Menu.Content>
-									</Menu.Positioner>
-								</Portal>
-							</Menu.Root>
 
 							<FloatingPanel.Control>
 								<FloatingPanel.StageTrigger stage="minimized" asChild>
@@ -106,12 +87,15 @@ export function Browser() {
 									</IconButton>
 								</FloatingPanel.CloseTrigger>
 							</FloatingPanel.Control>
+
 						</FloatingPanel.Header>
+
 						<FloatingPanel.Body p="0">
 
 							<BrowserTabs word={word} />
 
 						</FloatingPanel.Body>
+
 						<FloatingPanel.ResizeTriggers />
 					</FloatingPanel.Content>
 				</FloatingPanel.Positioner>
@@ -184,3 +168,31 @@ function BrowserTabs({ word }: { word: string }) {
 	)
 }
 
+
+
+function HistoryMenu() {
+	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
+	const history = useLangToolsStore((state) => state.translateHistory)
+
+	return (
+		<Menu.Root onSelect={(e) => setWordQuery(e.value)}>
+			<Menu.Trigger asChild>
+				<IconButton variant="ghost" minW="unset" h="auto" w="auto" p="1">
+					<MdHistory />
+				</IconButton>
+			</Menu.Trigger>
+
+			<Portal>
+				<Menu.Positioner>
+					<Menu.Content zIndex="max">
+						{history.map((query, i) =>
+							<Menu.Item key={i} value={query}>
+								{query}
+							</Menu.Item>
+						)}
+					</Menu.Content>
+				</Menu.Positioner>
+			</Portal>
+		</Menu.Root>
+	)
+}
