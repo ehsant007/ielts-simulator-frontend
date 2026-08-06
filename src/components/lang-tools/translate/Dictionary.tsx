@@ -1,12 +1,10 @@
 "use client"
 
-import { VStack, Box, List, HStack, Button, Text, Collapsible, Separator } from "@chakra-ui/react";
-import { DictionaryEntry, DictionarySense, lookup, readWordnet } from "@/client";
+import { VStack, Box, List, HStack, Text, Collapsible, Separator } from "@chakra-ui/react";
+import { DictionaryEntry, DictionarySense, lookup } from "@/client";
 import { AdvText } from "../AdvText";
 import { TTSButton } from "../tts";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { GiUsaFlag } from "react-icons/gi";
 import { LuChevronRight } from "react-icons/lu";
 
 
