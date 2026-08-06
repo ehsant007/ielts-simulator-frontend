@@ -3,6 +3,7 @@ import { BsTranslate } from "react-icons/bs";
 import { HiOutlineSpeakerWave } from "react-icons/hi2";
 import { LuCopy, LuHighlighter } from "react-icons/lu";
 import { useMenu } from "./hooks"
+import { useEffect, useRef } from "react";
 
 
 function MenuItem({ children, ...props }: IconButtonProps) {
@@ -23,6 +24,8 @@ function MenuItem({ children, ...props }: IconButtonProps) {
 
 export function PopoverMenu() {
 	const {
+		open,
+		setOpen,
 		selectedText,
 		selectionRect: rect,
 		highlight,
@@ -31,12 +34,34 @@ export function PopoverMenu() {
 		speak,
 	} = useMenu()
 
+	const ref = useRef<HTMLDivElement | null>(null)
+
+	useEffect(() => {
+		const onPointerUp = () => {
+			setOpen(selectedText != null)
+		}
+
+		const onPointerDown = (e: Event) => {
+			if (ref.current?.contains(e.target as Node))
+				return
+			setOpen(false)
+		}
+
+		document.addEventListener("pointerup", onPointerUp)
+		document.addEventListener("pointerdown", onPointerDown)
+		return () => {
+			document.removeEventListener("pointerup", onPointerUp)
+			document.removeEventListener("pointerdown", onPointerDown)
+		}
+	}, [selectedText, setOpen])
+
+
 	if (!rect)
 		return null
 
 	return (
 
-		<ActionBar.Root open={!!selectedText}>
+		<ActionBar.Root open={open}>
 			<Portal>
 				<Box
 					position="fixed"
@@ -44,13 +69,14 @@ export function PopoverMenu() {
 					top={rect.top - 8}
 					transform={"translate(-50%, -100%)"}
 					zIndex="max"
+					ref={ref}
 				>
 					<ActionBar.Content borderRadius="full" p="1" bg="bg.info" gap="1">
-						<MenuItem>
-							<HiOutlineSpeakerWave onClick={speak} />
+						<MenuItem onClick={speak}>
+							<HiOutlineSpeakerWave />
 						</MenuItem>
-						<MenuItem>
-							<LuHighlighter onClick={highlight} />
+						<MenuItem onClick={highlight}>
+							<LuHighlighter />
 						</MenuItem>
 						<MenuItem onClick={() => translate(selectedText)}>
 							<BsTranslate />
