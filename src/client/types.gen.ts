@@ -827,7 +827,7 @@ export type LexicalEntry = {
      *
      * Distinct established senses, with the contextually relevant sense first.
      */
-    senses: Array<AppTranslatorSchemasAdvTranslatorSense>;
+    senses: Array<Sense>;
     /**
      * Common Usage Examples
      *
@@ -1387,6 +1387,76 @@ export type RoleRead = {
 };
 
 /**
+ * Sense
+ */
+export type Sense = {
+    /**
+     * Part Of Speech
+     */
+    part_of_speech: 'noun' | 'verb' | 'auxiliary_verb' | 'phrasal_verb' | 'adjective' | 'adverb' | 'pronoun' | 'determiner' | 'article' | 'preposition' | 'conjunction' | 'interjection' | 'numeral' | 'particle' | 'idiom' | 'collocation' | 'phrase' | 'other';
+    /**
+     * Definition
+     *
+     * A clear, concise explanation of this sense written in the info language.
+     */
+    definition: string;
+    /**
+     * Translations
+     *
+     * Natural target-language equivalents specific to this sense, ordered from most generally useful to more context-dependent.
+     */
+    translations: Array<string>;
+    /**
+     * Examples
+     *
+     * One or two natural examples.
+     */
+    examples: Array<Example>;
+    /**
+     * Synonyms
+     *
+     * Sense-matched synonyms in the source language.
+     */
+    synonyms?: Array<string>;
+    /**
+     * Antonyms
+     *
+     * Sense-matched antonyms in the source language.
+     */
+    antonyms?: Array<string>;
+    /**
+     * Grammar Patterns
+     *
+     * Common source-language grammatical patterns for this sense, such as 'verb + object + infinitive'. Empty when not useful.
+     */
+    grammar_patterns?: Array<string>;
+    /**
+     * Separability
+     *
+     * Whether a phrasal verb is separable.
+     */
+    separability?: 'separable' | 'inseparable' | 'both' | null;
+    /**
+     * Transitivity
+     *
+     * The usual transitivity of the verb in the analyzed expression.
+     */
+    transitivity?: 'transitive' | 'intransitive' | 'ambitransitive' | null;
+    /**
+     * Context Relevant
+     *
+     * Whether CONTEXT supports or uses this sense. False when context is empty or the sense is included only for lexical completeness.
+     */
+    context_relevant: boolean;
+    /**
+     * Usage Notes
+     *
+     * Concise notes in the info language about register, connotation, formality, dialect, restrictions, common errors, or distinctions. Empty when no note is needed.
+     */
+    usage_notes?: Array<string>;
+};
+
+/**
  * SentenceCompletionGroup
  */
 export type SentenceCompletionGroup = {
@@ -1885,9 +1955,9 @@ export type VisualLabelingGroup = {
 };
 
 /**
- * WordNetData
+ * WordnetData
  */
-export type WordNetData = {
+export type WordnetData = {
     /**
      * Lemma
      */
@@ -1895,7 +1965,33 @@ export type WordNetData = {
     /**
      * Senses
      */
-    senses: Array<AppWordnetSchemasSense>;
+    senses: Array<WordnetSense>;
+};
+
+/**
+ * WordnetSense
+ */
+export type WordnetSense = {
+    /**
+     * Pos
+     */
+    pos: string;
+    /**
+     * Definition
+     */
+    definition: string;
+    /**
+     * Examples
+     */
+    examples: Array<string>;
+    /**
+     * Synonyms
+     */
+    synonyms: Array<string>;
+    /**
+     * Antonyms
+     */
+    antonyms: Array<string>;
 };
 
 /**
@@ -1928,76 +2024,6 @@ export type WritingTask = {
      * Sample Answer
      */
     sample_answer: Array<string>;
-};
-
-/**
- * Sense
- */
-export type AppTranslatorSchemasAdvTranslatorSense = {
-    /**
-     * Part Of Speech
-     */
-    part_of_speech: 'noun' | 'verb' | 'auxiliary_verb' | 'phrasal_verb' | 'adjective' | 'adverb' | 'pronoun' | 'determiner' | 'article' | 'preposition' | 'conjunction' | 'interjection' | 'numeral' | 'particle' | 'idiom' | 'collocation' | 'phrase' | 'other';
-    /**
-     * Definition
-     *
-     * A clear, concise explanation of this sense written in the info language.
-     */
-    definition: string;
-    /**
-     * Translations
-     *
-     * Natural target-language equivalents specific to this sense, ordered from most generally useful to more context-dependent.
-     */
-    translations: Array<string>;
-    /**
-     * Examples
-     *
-     * One or two natural examples.
-     */
-    examples: Array<Example>;
-    /**
-     * Synonyms
-     *
-     * Sense-matched synonyms in the source language.
-     */
-    synonyms?: Array<string>;
-    /**
-     * Antonyms
-     *
-     * Sense-matched antonyms in the source language.
-     */
-    antonyms?: Array<string>;
-    /**
-     * Grammar Patterns
-     *
-     * Common source-language grammatical patterns for this sense, such as 'verb + object + infinitive'. Empty when not useful.
-     */
-    grammar_patterns?: Array<string>;
-    /**
-     * Separability
-     *
-     * Whether a phrasal verb is separable.
-     */
-    separability?: 'separable' | 'inseparable' | 'both' | null;
-    /**
-     * Transitivity
-     *
-     * The usual transitivity of the verb in the analyzed expression.
-     */
-    transitivity?: 'transitive' | 'intransitive' | 'ambitransitive' | null;
-    /**
-     * Context Relevant
-     *
-     * Whether CONTEXT supports or uses this sense. False when context is empty or the sense is included only for lexical completeness.
-     */
-    context_relevant: boolean;
-    /**
-     * Usage Notes
-     *
-     * Concise notes in the info language about register, connotation, formality, dialect, restrictions, common errors, or distinctions. Empty when no note is needed.
-     */
-    usage_notes?: Array<string>;
 };
 
 /**
@@ -2089,32 +2115,6 @@ export type AppTranslatorSchemasTranslatorTranslateResponse = {
      * Full translation in target language
      */
     translation: string;
-};
-
-/**
- * Sense
- */
-export type AppWordnetSchemasSense = {
-    /**
-     * Pos
-     */
-    pos: string;
-    /**
-     * Definition
-     */
-    definition: string;
-    /**
-     * Examples
-     */
-    examples: Array<string>;
-    /**
-     * Synonyms
-     */
-    synonyms: Array<string>;
-    /**
-     * Antonyms
-     */
-    antonyms: Array<string>;
 };
 
 export type LookupData = {
@@ -2222,7 +2222,7 @@ export type ReadWordnetResponses = {
     /**
      * Successful Response
      */
-    200: WordNetData;
+    200: WordnetData;
 };
 
 export type ReadWordnetResponse = ReadWordnetResponses[keyof ReadWordnetResponses];

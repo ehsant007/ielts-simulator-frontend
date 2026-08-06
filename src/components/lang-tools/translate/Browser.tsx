@@ -182,7 +182,7 @@ function BrowserTabs({ word }: { word: string }) {
 			<Box flex="1" minH="0" pos="relative">
 
 				<TabContent value="wordnet">
-					<WordNet word={word} />
+					<WordNet headword={word} />
 				</TabContent>
 
 				<TabContent value="dictionary">

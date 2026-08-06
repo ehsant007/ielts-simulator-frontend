@@ -1,61 +1,132 @@
 "use client"
 
-import { VStack, Box, List, HStack } from "@chakra-ui/react";
-import { readWordnet } from "@/client";
+import { VStack, Box, List, HStack, Collapsible, Text } from "@chakra-ui/react";
+import { readWordnet, WordnetSense, WordnetData } from "@/client";
 import { AdvText } from "../AdvText";
 import { TTSButton } from "../tts";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { LuChevronRight } from "react-icons/lu";
 
 
-export function WordNet({ word }: { word: string }) {
+function groupBy<T, K>(
+	array: T[],
+	key: (item: T) => K
+): Map<K, T[]> {
+	return array.reduce((result, item) => {
+		const groupName = key(item);
+		const group = result.get(groupName) ?? [];
+
+		group.push(item);
+		result.set(groupName, group);
+
+		return result;
+	}, new Map<K, T[]>());
+}
+
+
+export function WordNet({ headword }: { headword: string }) {
 
 	const { data } = useSuspenseQuery({
 		queryFn: () => readWordnet({
-			path: { word: word! },
+			path: { word: headword! },
 		}).then((res) => res.data)
 		,
-		queryKey: ["wordnet", word],
+		queryKey: ["wordnet", headword],
 	})
+
+	const baseId = `wordnet-${headword}`
+
+	const grouped_senses = groupBy(data.senses, (sense) => sense.pos)
 
 
 	return (
 		<VStack alignItems="start">
-			<HStack mb="3">
-				<AdvText fontWeight="bold">{data.lemma}</AdvText>
-				<TTSButton text={data.lemma} />
-			</HStack>
 
-			{data.senses.length === 0 &&
-				<AdvText color="fg.warning" fontStyle="italic">No definition was found for this query!</AdvText>
-			}
 
-			{
-				data.senses.map((sense, i) => (
-					<Box key={`example-${i}`}>
-						<AdvText>{sense.pos}</AdvText>
-						<AdvText>{sense.definition}</AdvText>
-						{sense.examples.length > 0 &&
-							<Box>
-								<AdvText fontWeight="bold">Examples</AdvText>
-								<List.Root ms="6">
-									{sense.examples.map((example, j) => (
-										<List.Item key={`example-${j}`}>
-											<AdvText>{example}</AdvText>
-										</List.Item>
-									))
-									}
-								</List.Root>
-							</Box>
-						}
-						{sense.synonyms.length > 0 &&
-							<Box>
-								<AdvText fontWeight="bold">Synonyms</AdvText>
-								<AdvText ms="6">{sense.synonyms.join(", ")}</AdvText>
-							</Box>
-						}
-					</Box>
-				))
-			}
-		</VStack >
+			{Array.from(grouped_senses.entries()).map(([pos, senses], sense_index) => (
+				<Collapse
+					key={sense_index}
+					title={
+						<Text>
+							<Text as="span" fontWeight="bold" fontSize="lg">{headword} </Text>
+							<Text as="span" color="fg.subtle" fontWeight="semibold" fontStyle="italic">{pos}</Text>
+						</Text>
+					}
+				>
+					<VStack alignItems="start">
+						<Pronunciation entry={data} />
+
+						<List.Root as="ol">
+
+							{senses.map((sense, sense_index) => (
+								<List.Item key={sense_index} my="2" ms="4">
+									<Sense sense={sense} baseId={baseId} />
+								</List.Item>
+							))}
+
+						</List.Root>
+
+					</VStack>
+				</Collapse>
+			))}
+		</VStack>
+	)
+}
+
+
+function Pronunciation({ entry }: { entry: WordnetData }) {
+	return (
+		<HStack>
+			<AdvText>{entry.lemma}</AdvText>
+			<TTSButton text={entry.lemma} colorPalette="blue" />
+			<TTSButton text={entry.lemma} colorPalette="red" />
+		</HStack>
+
+	)
+}
+
+
+function Sense({ sense, baseId }: { sense: WordnetSense, baseId: string }) {
+	return (
+		<Box>
+			<AdvText as="span" fontWeight="medium" id={`${baseId}-def`}>{sense.definition}</AdvText>
+
+			<List.Root ms="4" listStyleType="disc">
+				{sense.examples.map((example, example_index) => (
+					<List.Item key={example_index} fontStyle="italic" as={AdvText} id={`${baseId}-example${example_index}`}>
+						{example}
+					</List.Item>
+				))}
+			</List.Root>
+		</Box>
+	)
+}
+
+
+function Collapse({ children, title }: { children: React.ReactNode, title: React.ReactNode }) {
+	return (
+		<Collapsible.Root defaultOpen w="full" bg="bg.muted" p="3">
+			<Collapsible.Trigger
+				alignItems="center"
+				bg="bg.emphasized"
+				cursor="pointer"
+				display="flex"
+				w="full"
+				gap="2"
+				py="3"
+				px="2"
+			>
+				<Collapsible.Indicator
+					transition="transform 0.2s"
+					_open={{ transform: "rotate(90deg)" }}
+				>
+					<LuChevronRight />
+				</Collapsible.Indicator>
+				{title}
+			</Collapsible.Trigger>
+			<Collapsible.Content px="5" py="2">
+				{children}
+			</Collapsible.Content>
+		</Collapsible.Root>
 	)
 }
