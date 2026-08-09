@@ -272,6 +272,10 @@ export type DictionaryEntry = {
      * Senses
      */
     senses: Array<DictionarySense>;
+    /**
+     * Verb Forms
+     */
+    verb_forms: Array<DictionaryVerbForm>;
 };
 
 /**
@@ -369,6 +373,44 @@ export type DictionarySenseGroup = {
      * Topic
      */
     topic: string;
+    /**
+     * Sort Order
+     */
+    sort_order: number;
+};
+
+/**
+ * DictionaryVerbForm
+ */
+export type DictionaryVerbForm = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Entry Id
+     */
+    entry_id: number;
+    /**
+     * Form Label
+     */
+    form_label: string | null;
+    /**
+     * Form Text
+     */
+    form_text: string;
+    /**
+     * Tag
+     */
+    tag: string | null;
+    /**
+     * Audio Us
+     */
+    audio_us: string | null;
+    /**
+     * Audio Gb
+     */
+    audio_gb: string | null;
     /**
      * Sort Order
      */
@@ -904,9 +946,9 @@ export type ModuleContent = ({
 export type ModuleCreate = {
     type: IeltsModuleType;
     /**
-     * Tag
+     * Code
      */
-    tag?: string | null;
+    code: string;
     /**
      * Duration Minutes
      */
@@ -928,9 +970,9 @@ export type ModuleInfo = {
     id: string;
     type: IeltsModuleType;
     /**
-     * Tag
+     * Code
      */
-    tag: string | null;
+    code: string;
     /**
      * Duration Minutes
      */
@@ -947,9 +989,9 @@ export type ModuleRead = {
     id: string;
     type: IeltsModuleType;
     /**
-     * Tag
+     * Code
      */
-    tag: string | null;
+    code: string;
     /**
      * Duration Minutes
      */
@@ -968,9 +1010,9 @@ export type ModuleRead = {
 export type ModuleUpdate = {
     type?: IeltsModuleType | null;
     /**
-     * Tag
+     * Code
      */
-    tag?: string | null;
+    code: string;
     /**
      * Duration Minutes
      */

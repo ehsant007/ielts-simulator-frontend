@@ -68,8 +68,8 @@ const config = defineConfig({
 					contrast: { value: "{colors.white}" },
 					fg: { value: { base: "{colors.primary.600}", _dark: "{colors.primary.300}" } },
 					muted: { value: "{colors.primary.100}" },
-					subtle: { value: "{colors.primary.900}" },
-					emphasized: { value: "{colors.primary.300}" },
+					subtle: { value: {base: "{colors.primary.300}", _dark: "{colors.primary.900}"} },
+					emphasized: { value: { base: "{colors.primary.300}", _dark: "{colors.primary.700}" } },
 					focusRing: { value: "{colors.primary.500}" },
 					border: { value: "colors.primary.400" }
 				},
@@ -94,7 +94,7 @@ const config = defineConfig({
 					strong: { value: "{colors.primary}" },
 				},
 
-				highlight:{
+				highlight: {
 					value: { base: "{colors.yellow.solid}", _dark: "{colors.yellow.800}" },
 				},
 			}
@@ -114,7 +114,7 @@ const config = defineConfig({
 		button: {
 			colorPalette: "purple",
 		},
-		".highlight":{
+		".highlight": {
 			bg: "highlight"
 		},
 	},
