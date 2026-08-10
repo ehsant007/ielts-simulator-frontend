@@ -1,7 +1,7 @@
 "use client"
 
 import { VStack, Box, List, HStack, Text, Collapsible, Separator, CollapsibleRootProps } from "@chakra-ui/react";
-import { DictionaryEntry, DictionarySense, lookup } from "@/client";
+import { DictionaryEntry, DictionaryExample, DictionarySense, DictionaryVerbForm, lookup } from "@/client";
 import { AdvText } from "../AdvText";
 import { TTSButton } from "../tts";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -68,46 +68,9 @@ export function Dictionary({ headword }: { headword: string }) {
 
 						<Pronunciation entry={entry} />
 
-						{entry.verb_forms.length > 0 &&
-							<EntryContentCollapse
-								mt="2"
-								mb="6"
-								title={
-									<Text fontWeight="medium">Verb Forms</Text>
-								}
-							>
-								{entry.verb_forms.map((form) =>
-									<AdvText id={`entry${entry.id}-verb-form${form.id}`} key={form.id} mb="1">
-										{form.tag}
-										<Text as="span" fontWeight="medium" color="primary.fg" ms="1">
-											{form.form_text}
-										</Text>
-									</AdvText>
-								)}
-							</EntryContentCollapse>
-						}
+						<VerbForms values={entry.verb_forms}/>
 
-						<List.Root as="ol">
-
-							{Array.from(sortSenses(entry.senses).entries()).map(([groupName, senses], group_index) => (
-								<Box key={groupName ?? group_index} mb="4">
-									{senses[0].sense_group &&
-										<VStack alignItems="start" gap="0.5" mb="3">
-											<AdvText fontWeight="medium">{groupName}</AdvText>
-											<Separator width="full" />
-										</VStack>
-
-									}
-
-									{senses.map((sense) => (
-										<List.Item key={sense.id} my="2" ms="4">
-											<Sense sense={sense} />
-										</List.Item>
-									))}
-								</Box>
-							))}
-
-						</List.Root>
+						<Senses senses={entry.senses} />
 
 					</VStack>
 				</EntryCollapse>
@@ -145,42 +108,84 @@ function Pronunciation({ entry }: { entry: DictionaryEntry }) {
 	)
 }
 
+
+function Examples({ examples }: { examples: DictionaryExample[] }) {
+	return (
+		<List.Root mt="2" ms="4" listStyleType="disc">
+			{examples.sort((a, b) => a.sort_order - b.sort_order).map((example, example_index) => (
+				<List.Item mt="1" key={example_index} fontStyle="italic" as={AdvText} id={`$example${example.id}`}>
+					{example.text}
+				</List.Item>
+			))}
+		</List.Root>
+	)
+}
+
+function CEFRLevel({ value }: { value?: string | null }) {
+
+	if (value == null)
+		return null
+
+	return (
+		<Text
+			px="1.5"
+			as="span"
+			borderRadius="full"
+			fontSize="small"
+			fontFamily="mono"
+			fontWeight="semibold"
+			color="fg.info"
+			border="sm"
+			borderColor="blue.border"
+			me="1ch"
+		>
+			{value.toUpperCase()}
+		</Text>
+	)
+}
+
+
 function Sense({ sense }: { sense: DictionarySense }) {
 	const baseId = `dic-sense-${sense.id}`;
 
 	return (
 		<Box>
 			<Text>
-				{sense.cefr_level &&
-					<Text
-						px="1.5"
-						as="span"
-						//bg="blue.subtle"
-						borderRadius="full"
-						fontSize="small"
-						fontFamily="mono"
-						fontWeight="semibold"
-						color="fg.info"
-						border="sm"
-						borderColor="blue.border"
-						me="1ch"
-					>
-						{sense.cefr_level.toUpperCase()}
-					</Text>
-				}
+				<CEFRLevel value={sense.cefr_level} />
 				{sense.grammar &&
 					<AdvText as="span" color="fg.muted" id={`${baseId}-grammar`}>{sense.grammar} </AdvText>
 				}
 				<AdvText as="span" fontWeight="medium" id={`${baseId}-def`}>{sense.definition}</AdvText>
 			</Text>
-			<List.Root mt="2" ms="4" listStyleType="disc">
-				{sense.examples.sort((a, b) => a.sort_order - b.sort_order).map((example, example_index) => (
-					<List.Item mt="1" key={example_index} fontStyle="italic" as={AdvText} id={`${baseId}-example${example_index}`}>
-						{example.text}
-					</List.Item>
-				))}
-			</List.Root>
+			<Examples examples={sense.examples} />
 		</Box>
+	)
+}
+
+
+function Senses({ senses }: { senses: DictionarySense[] }) {
+	return (
+		<List.Root as="ol">
+
+			{Array.from(sortSenses(senses).entries()).map(([groupName, senses], group_index) => (
+				<Box key={groupName ?? group_index} mb="4">
+					{senses[0].sense_group &&
+						<VStack alignItems="start" gap="0.5" mb="3">
+							<AdvText fontWeight="medium">{groupName}</AdvText>
+							<Separator width="full" />
+						</VStack>
+
+					}
+
+					{senses.map((sense) => (
+						<List.Item key={sense.id} my="2" ms="4">
+							<Sense sense={sense} />
+						</List.Item>
+					))}
+				</Box>
+			))}
+
+		</List.Root>
 	)
 }
 
@@ -250,6 +255,34 @@ function EntryContentCollapse({ children, title, ...props }: { children: React.R
 				</Box>
 			</Collapsible.Content>
 		</Collapsible.Root>
+	)
+}
+
+
+function VerbForms({ values }: { values?: DictionaryVerbForm[] | null }) {
+	if (values == null)
+		return null
+
+	if (values.length == 0)
+		return null
+
+	return (
+		<EntryContentCollapse
+			mt="2"
+			mb="6"
+			title={
+				<Text fontWeight="medium">Verb Forms</Text>
+			}
+		>
+			{values.map((form) =>
+				<AdvText id={`verb-form${form.id}`} key={form.id} mb="1">
+					{form.tag}
+					<Text as="span" fontWeight="medium" color="primary.fg" ms="1">
+						{form.form_text}
+					</Text>
+				</AdvText>
+			)}
+		</EntryContentCollapse>
 	)
 }
 
