@@ -50,7 +50,7 @@ export function createModuleStore(
 	lastAttempt: AttemptRead | undefined,
 ) {
 	return createStore<ModuleStore>((set, get) => ({
-		key: crypto.randomUUID(),
+		key: Date.now().toString(),
 		module,
 		questionsMeta,
 		getQuestion: (num: number) => get().module.questions[get().questionsMeta[num].index],
