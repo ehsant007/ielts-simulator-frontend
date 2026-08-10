@@ -68,6 +68,25 @@ export function Dictionary({ headword }: { headword: string }) {
 
 						<Pronunciation entry={entry} />
 
+						{entry.verb_forms.length > 0 &&
+							<EntryContentCollapse
+								mt="2"
+								mb="6"
+								title={
+									<Text fontWeight="medium">Verb Forms</Text>
+								}
+							>
+								{entry.verb_forms.map((form) =>
+									<AdvText id={`entry${entry.id}-verb-form${form.id}`} key={form.id} mb="1">
+										{form.tag}
+										<Text as="span" fontWeight="medium" color="primary.fg" ms="1">
+											{form.form_text}
+										</Text>
+									</AdvText>
+								)}
+							</EntryContentCollapse>
+						}
+
 						<List.Root as="ol">
 
 							{Array.from(sortSenses(entry.senses).entries()).map(([groupName, senses], group_index) => (
@@ -78,25 +97,6 @@ export function Dictionary({ headword }: { headword: string }) {
 											<Separator width="full" />
 										</VStack>
 
-									}
-
-									{entry.verb_forms.length > 0 &&
-										<EntryContentCollapse
-											mt="2"
-											mb="6"
-											title={
-												<Text fontWeight="medium">Verb Forms</Text>
-											}
-										>
-											{entry.verb_forms.map((form) =>
-												<AdvText key={form.id} mb="1">
-													{form.tag}
-													<Text as="span" fontWeight="medium" color="primary.fg" ms="1">
-														{form.form_text}
-													</Text>
-												</AdvText>
-											)}
-										</EntryContentCollapse>
 									}
 
 									{senses.map((sense) => (
@@ -124,12 +124,12 @@ function Pronunciation({ entry }: { entry: DictionaryEntry }) {
 				<>
 					<HStack>
 						<Text>{entry.ipa_us}</Text>
-						<TTSButton text={entry.headword} colorPalette="blue" />
+						<TTSButton text={entry.headword} colorPalette="blue" ipa="US" />
 					</HStack>
 
 					<HStack>
 						<Text>{entry.ipa_gb}</Text>
-						<TTSButton text={entry.headword} colorPalette="red" />
+						<TTSButton text={entry.headword} colorPalette="red" ipa="UK" />
 					</HStack>
 				</>
 			}
@@ -137,8 +137,8 @@ function Pronunciation({ entry }: { entry: DictionaryEntry }) {
 			{entry.ipa_us === entry.ipa_gb &&
 				<HStack>
 					<Text>{entry.ipa_us}</Text>
-					<TTSButton text={entry.headword} colorPalette="blue" />
-					<TTSButton text={entry.headword} colorPalette="red" />
+					<TTSButton text={entry.headword} colorPalette="blue" ipa="US" />
+					<TTSButton text={entry.headword} colorPalette="red" ipa="UK" />
 				</HStack>
 			}
 		</>
