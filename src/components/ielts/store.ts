@@ -40,7 +40,6 @@ export type ModuleStore = {
 	setAudioVolume: (value: number) => void
 	audioMute: boolean
 	setAudioMute: (value: boolean) => void
-
 }
 
 export function createModuleStore(
