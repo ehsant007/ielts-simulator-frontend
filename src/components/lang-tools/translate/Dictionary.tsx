@@ -1,6 +1,6 @@
 "use client"
 
-import { VStack, Box, List, HStack, Text, Collapsible, Separator, CollapsibleRootProps, Tabs } from "@chakra-ui/react";
+import { VStack, Box, List, HStack, Text, Collapsible, Separator, Tabs } from "@chakra-ui/react";
 import { DictionaryCollocation, DictionaryEntry, DictionaryExample, DictionarySense, DictionaryVerbForm, lookup } from "@/client";
 import { Text as AdvText } from "@chakra-ui/react";
 import { TTSButton } from "../tts";
@@ -68,13 +68,9 @@ export function Dictionary({ headword }: { headword: string }) {
 
 						<Pronunciation entry={entry} />
 
-						{/* <VerbForms values={entry.verb_forms} /> */}
-
 						<Extras entry={entry} />
 
 						<Senses senses={entry.senses} />
-
-						{/* <Collocations values={entry.collocations} /> */}
 
 					</VStack>
 				</EntryCollapse>
@@ -224,42 +220,42 @@ function EntryCollapse({ children, title }: { children: React.ReactNode, title: 
 }
 
 
-function EntryContentCollapse({ children, title, ...props }: { children: React.ReactNode, title: React.ReactNode } & Omit<CollapsibleRootProps, "title">) {
-	const [open, setOpen] = useState(false)
+// function EntryContentCollapse({ children, title, ...props }: { children: React.ReactNode, title: React.ReactNode } & Omit<CollapsibleRootProps, "title">) {
+// 	const [open, setOpen] = useState(false)
 
-	return (
-		<Collapsible.Root
-			open={open}
-			onOpenChange={(e) => setOpen(e.open)}
-			w="full"
-			bg="primary.subtle/30"
-			borderStart="lg"
-			borderColor="primary.solid/50"
-			{...props}
-		>
-			<Collapsible.Trigger
-				alignItems="center"
-				bg="primary.emphasized/40"
-				cursor="pointer"
-				display="flex"
-				w="full"
-				gap="2"
-				py="3"
-				px="2"
-			>
-				<Collapsible.Indicator color="purple.border/80">
-					{open ? <LuMinus strokeWidth="4" /> : <LuPlus strokeWidth="4" />}
-				</Collapsible.Indicator>
-				{title}
-			</Collapsible.Trigger>
-			<Collapsible.Content>
-				<Box px="5" py="4">
-					{children}
-				</Box>
-			</Collapsible.Content>
-		</Collapsible.Root>
-	)
-}
+// 	return (
+// 		<Collapsible.Root
+// 			open={open}
+// 			onOpenChange={(e) => setOpen(e.open)}
+// 			w="full"
+// 			bg="primary.subtle/30"
+// 			borderStart="lg"
+// 			borderColor="primary.solid/50"
+// 			{...props}
+// 		>
+// 			<Collapsible.Trigger
+// 				alignItems="center"
+// 				bg="primary.emphasized/40"
+// 				cursor="pointer"
+// 				display="flex"
+// 				w="full"
+// 				gap="2"
+// 				py="3"
+// 				px="2"
+// 			>
+// 				<Collapsible.Indicator color="purple.border/80">
+// 					{open ? <LuMinus strokeWidth="4" /> : <LuPlus strokeWidth="4" />}
+// 				</Collapsible.Indicator>
+// 				{title}
+// 			</Collapsible.Trigger>
+// 			<Collapsible.Content>
+// 				<Box px="5" py="4">
+// 					{children}
+// 				</Box>
+// 			</Collapsible.Content>
+// 		</Collapsible.Root>
+// 	)
+// }
 
 
 function VerbFormsInner({ values }: { values: DictionaryVerbForm[] }) {
@@ -359,6 +355,9 @@ function TabContent({ children, value }: { children: React.ReactNode, value: str
 
 function Extras({ entry }: { entry: DictionaryEntry }) {
 
+	const [open, setOpen] = useState(false)
+	const [tab, setTab] = useState<string | null>(null)
+
 	const extras: { title: string, node: React.ReactNode }[] = []
 
 	if (entry.verb_forms.length > 0)
@@ -373,56 +372,62 @@ function Extras({ entry }: { entry: DictionaryEntry }) {
 			node: <CollocationsInner values={entry.collocations} />,
 		})
 
-
 	if (extras.length == 0)
 		return null
 
 	return (
-		<EntryContentCollapse
-			mt="2"
-			mb="6"
-			title={
-				<Text fontWeight="medium">
-					{extras.map(({ title }, index) => (
-						<Text as="span" key={title}>
-							{title}
-							{index < extras.length - 1 &&
-								<Text as="span" color="primary.border" mx="2">|</Text>
-							}
-						</Text>
-					))}
-				</Text>
-			}
+		<Tabs.Root
+			w="full"
+			value={tab}
+			onValueChange={(e) => setTab(e.value)}
+			defaultValue={extras[0].title}
+			size="sm"
+			bg="primary.subtle/30"
+			borderStart="lg"
+			borderColor="primary.solid/50"
 		>
-			{extras.length == 1
-				? extras[0].node
-				: <Tabs.Root
-					w="full"
-					defaultValue={extras[0].title}
-					size="sm"
-				>
-					<Tabs.List>
+			<HStack
+				w="full"
+				cursor="pointer"
+				bg="primary.emphasized/40"
+				onClick={(e) => {
+					const target_tab = (e.target as HTMLElement).dataset.tab
+					if (target_tab == null)
+						setOpen(prev => !prev)
+					else
+						setOpen(open ? target_tab !== tab : true)
+				}}
+			>
+				<Box color="purple.border/80" ms="2">
+					{open ? <LuMinus strokeWidth="4" /> : <LuPlus strokeWidth="4" />}
+				</Box>
+				<Tabs.List w="full">
 
-						{extras.map(({ title }) => (
-							<Tabs.Trigger key={title} value={title}>
-								{title}
-							</Tabs.Trigger>
-						))}
+					{extras.map(({ title }) => (
+						<Tabs.Trigger data-tab={title} key={title} value={title}>
+							{title}
+						</Tabs.Trigger>
+					))}
 
-					</Tabs.List>
+				</Tabs.List>
+			</HStack>
 
+			<Collapsible.Root
+				open={open}
+				onOpenChange={(e) => setOpen(e.open)}
+			>
+				<Collapsible.Content>
 					<Box p="3">
-
 						{extras.map(({ title, node }) => (
 							<TabContent key={title} value={title}>
 								{node}
 							</TabContent>
 						))}
-
 					</Box>
-				</Tabs.Root>
-			}
+				</Collapsible.Content>
+			</Collapsible.Root>
 
-		</EntryContentCollapse>
+		</Tabs.Root>
 	)
 }
+
