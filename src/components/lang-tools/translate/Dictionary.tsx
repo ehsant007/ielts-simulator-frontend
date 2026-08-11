@@ -356,8 +356,6 @@ function TabContent({ children, value }: { children: React.ReactNode, value: str
 function Extras({ entry }: { entry: DictionaryEntry }) {
 
 	const [open, setOpen] = useState(false)
-	const [tab, setTab] = useState<string | null>(null)
-
 	const extras: { title: string, node: React.ReactNode }[] = []
 
 	if (entry.verb_forms.length > 0)
@@ -372,6 +370,8 @@ function Extras({ entry }: { entry: DictionaryEntry }) {
 			node: <CollocationsInner values={entry.collocations} />,
 		})
 
+	const [tab, setTab] = useState<string>(extras[0]?.title)
+
 	if (extras.length == 0)
 		return null
 
@@ -380,11 +380,11 @@ function Extras({ entry }: { entry: DictionaryEntry }) {
 			w="full"
 			value={tab}
 			onValueChange={(e) => setTab(e.value)}
-			defaultValue={extras[0].title}
 			size="sm"
 			bg="primary.subtle/30"
 			borderStart="lg"
 			borderColor="primary.solid/50"
+			variant={extras.length == 1 ? "plain" : "line"}
 		>
 			<HStack
 				w="full"
