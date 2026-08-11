@@ -2,7 +2,7 @@
 
 import { VStack, Box, List, HStack, Text, Collapsible, Separator, CollapsibleRootProps, Tabs } from "@chakra-ui/react";
 import { DictionaryCollocation, DictionaryEntry, DictionaryExample, DictionarySense, DictionaryVerbForm, lookup } from "@/client";
-import { AdvText } from "../AdvText";
+import { Text as AdvText } from "@chakra-ui/react";
 import { TTSButton } from "../tts";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { LuChevronRight, LuMinus, LuPlus } from "react-icons/lu";
@@ -68,11 +68,13 @@ export function Dictionary({ headword }: { headword: string }) {
 
 						<Pronunciation entry={entry} />
 
-						<VerbForms values={entry.verb_forms} />
+						{/* <VerbForms values={entry.verb_forms} /> */}
+
+						<Extras entry={entry} />
 
 						<Senses senses={entry.senses} />
 
-						<Collocations values={entry.collocations} />
+						{/* <Collocations values={entry.collocations} /> */}
 
 					</VStack>
 				</EntryCollapse>
@@ -260,21 +262,9 @@ function EntryContentCollapse({ children, title, ...props }: { children: React.R
 }
 
 
-function VerbForms({ values }: { values?: DictionaryVerbForm[] | null }) {
-	if (values == null)
-		return null
-
-	if (values.length == 0)
-		return null
-
+function VerbFormsInner({ values }: { values: DictionaryVerbForm[] }) {
 	return (
-		<EntryContentCollapse
-			mt="2"
-			mb="6"
-			title={
-				<Text fontWeight="medium">Verb Forms</Text>
-			}
-		>
+		<>
 			{values.map((form) =>
 				<AdvText id={`verb-form${form.id}`} key={form.id} mb="1">
 					{form.tag}
@@ -283,26 +273,34 @@ function VerbForms({ values }: { values?: DictionaryVerbForm[] | null }) {
 					</Text>
 				</AdvText>
 			)}
-		</EntryContentCollapse>
+		</>
 	)
 }
 
 
-function Collocations({ values }: { values?: DictionaryCollocation[] | null }) {
-	if (values == null)
-		return null
+// function VerbForms({ values }: { values?: DictionaryVerbForm[] | null }) {
+// 	if (values == null)
+// 		return null
 
-	if (values.length == 0)
-		return null
+// 	if (values.length == 0)
+// 		return null
 
+// 	return (
+// 		<EntryContentCollapse
+// 			mt="2"
+// 			mb="6"
+// 			title={
+// 				<Text fontWeight="medium">Verb Forms</Text>
+// 			}
+// 		>
+// 			<VerbFormsInner values={values} />
+// 		</EntryContentCollapse>
+// 	)
+// }
+
+function CollocationsInner({ values }: { values: DictionaryCollocation[] }) {
 	return (
-		<EntryContentCollapse
-			mt="2"
-			mb="6"
-			title={
-				<Text fontWeight="medium">Collocations</Text>
-			}
-		>
+		<>
 			{values.map((value) =>
 				<Box key={value.id} mb="4">
 					<Text fontWeight="medium">
@@ -313,7 +311,118 @@ function Collocations({ values }: { values?: DictionaryCollocation[] | null }) {
 					</Text>
 				</Box>
 			)}
-		</EntryContentCollapse>
+		</>
 	)
 }
 
+
+// function Collocations({ values }: { values?: DictionaryCollocation[] | null }) {
+// 	if (values == null)
+// 		return null
+
+// 	if (values.length == 0)
+// 		return null
+
+// 	return (
+// 		<EntryContentCollapse
+// 			mt="2"
+// 			mb="6"
+// 			title={
+// 				<Text fontWeight="medium">Collocations</Text>
+// 			}
+// 		>
+// 			<CollocationsInner values={values} />
+// 		</EntryContentCollapse>
+// 	)
+// }
+
+function TabContent({ children, value }: { children: React.ReactNode, value: string }) {
+	return (
+		<Tabs.Content
+			p="0"
+			value={value}
+			_open={{
+				animationName: "fade-in, scale-in",
+				animationDuration: "300ms",
+			}}
+			_closed={{
+				animationName: "fade-out, scale-out",
+				animationDuration: "120ms",
+			}}
+		>
+
+			{children}
+
+		</Tabs.Content>
+	)
+}
+
+function Extras({ entry }: { entry: DictionaryEntry }) {
+
+	const extras: { title: string, node: React.ReactNode }[] = []
+
+	if (entry.verb_forms.length > 0)
+		extras.push({
+			title: "Verb Forms",
+			node: <VerbFormsInner values={entry.verb_forms} />,
+		})
+
+	if (entry.collocations.length > 0)
+		extras.push({
+			title: "Collocations",
+			node: <CollocationsInner values={entry.collocations} />,
+		})
+
+
+	if (extras.length == 0)
+		return null
+
+	return (
+		<EntryContentCollapse
+			mt="2"
+			mb="6"
+			title={
+				<Text fontWeight="medium">
+					{extras.map(({ title }, index) => (
+						<Text as="span" key={title}>
+							{title}
+							{index < extras.length - 1 &&
+								<Text as="span" color="primary.border" mx="2">|</Text>
+							}
+						</Text>
+					))}
+				</Text>
+			}
+		>
+			{extras.length == 1
+				? extras[0].node
+				: <Tabs.Root
+					w="full"
+					defaultValue={extras[0].title}
+					size="sm"
+				>
+					<Tabs.List>
+
+						{extras.map(({ title }) => (
+							<Tabs.Trigger key={title} value={title}>
+								{title}
+							</Tabs.Trigger>
+						))}
+
+					</Tabs.List>
+
+					<Box p="3">
+
+						{extras.map(({ title, node }) => (
+							<TabContent key={title} value={title}>
+								{node}
+							</TabContent>
+						))}
+
+					</Box>
+				</Tabs.Root>
+			}
+
+		</EntryContentCollapse>
+	)
+}
