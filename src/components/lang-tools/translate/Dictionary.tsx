@@ -1,7 +1,7 @@
 "use client"
 
-import { VStack, Box, List, HStack, Text, Collapsible, Separator, CollapsibleRootProps } from "@chakra-ui/react";
-import { DictionaryEntry, DictionaryExample, DictionarySense, DictionaryVerbForm, lookup } from "@/client";
+import { VStack, Box, List, HStack, Text, Collapsible, Separator, CollapsibleRootProps, Tabs } from "@chakra-ui/react";
+import { DictionaryCollocation, DictionaryEntry, DictionaryExample, DictionarySense, DictionaryVerbForm, lookup } from "@/client";
 import { AdvText } from "../AdvText";
 import { TTSButton } from "../tts";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -68,9 +68,11 @@ export function Dictionary({ headword }: { headword: string }) {
 
 						<Pronunciation entry={entry} />
 
-						<VerbForms values={entry.verb_forms}/>
+						<VerbForms values={entry.verb_forms} />
 
 						<Senses senses={entry.senses} />
+
+						<Collocations values={entry.collocations} />
 
 					</VStack>
 				</EntryCollapse>
@@ -81,30 +83,29 @@ export function Dictionary({ headword }: { headword: string }) {
 
 
 function Pronunciation({ entry }: { entry: DictionaryEntry }) {
+
+	if (entry.ipa_us === entry.ipa_gb)
+		return (
+			<HStack>
+				<Text>{entry.ipa_us}</Text>
+				<TTSButton text={entry.headword} colorPalette="blue" ipa="US" />
+				<TTSButton text={entry.headword} colorPalette="red" ipa="UK" />
+			</HStack>
+		)
+
+
 	return (
-		<>
-			{entry.ipa_us !== entry.ipa_gb &&
-				<>
-					<HStack>
-						<Text>{entry.ipa_us}</Text>
-						<TTSButton text={entry.headword} colorPalette="blue" ipa="US" />
-					</HStack>
+		<VStack>
+			<HStack>
+				<Text>{entry.ipa_us}</Text>
+				<TTSButton text={entry.headword} colorPalette="blue" ipa="US" />
+			</HStack>
 
-					<HStack>
-						<Text>{entry.ipa_gb}</Text>
-						<TTSButton text={entry.headword} colorPalette="red" ipa="UK" />
-					</HStack>
-				</>
-			}
-
-			{entry.ipa_us === entry.ipa_gb &&
-				<HStack>
-					<Text>{entry.ipa_us}</Text>
-					<TTSButton text={entry.headword} colorPalette="blue" ipa="US" />
-					<TTSButton text={entry.headword} colorPalette="red" ipa="UK" />
-				</HStack>
-			}
-		</>
+			<HStack>
+				<Text>{entry.ipa_gb}</Text>
+				<TTSButton text={entry.headword} colorPalette="red" ipa="UK" />
+			</HStack>
+		</VStack>
 	)
 }
 
@@ -168,7 +169,7 @@ function Senses({ senses }: { senses: DictionarySense[] }) {
 		<List.Root as="ol">
 
 			{Array.from(sortSenses(senses).entries()).map(([groupName, senses], group_index) => (
-				<Box key={groupName ?? group_index} mb="4">
+				<Box key={groupName ?? group_index} mt="4">
 					{senses[0].sense_group &&
 						<VStack alignItems="start" gap="0.5" mb="3">
 							<AdvText fontWeight="medium">{groupName}</AdvText>
@@ -281,6 +282,36 @@ function VerbForms({ values }: { values?: DictionaryVerbForm[] | null }) {
 						{form.form_text}
 					</Text>
 				</AdvText>
+			)}
+		</EntryContentCollapse>
+	)
+}
+
+
+function Collocations({ values }: { values?: DictionaryCollocation[] | null }) {
+	if (values == null)
+		return null
+
+	if (values.length == 0)
+		return null
+
+	return (
+		<EntryContentCollapse
+			mt="2"
+			mb="6"
+			title={
+				<Text fontWeight="medium">Collocations</Text>
+			}
+		>
+			{values.map((value) =>
+				<Box key={value.id} mb="4">
+					<Text fontWeight="medium">
+						{value.category}
+					</Text>
+					<Text fontWeight="medium" color="primary.fg" ms="1">
+						{value.words}
+					</Text>
+				</Box>
 			)}
 		</EntryContentCollapse>
 	)

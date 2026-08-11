@@ -241,6 +241,32 @@ export type Content = ({
 } & Text);
 
 /**
+ * DictionaryCollocation
+ */
+export type DictionaryCollocation = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Entry Id
+     */
+    entry_id: number;
+    /**
+     * Category
+     */
+    category: string;
+    /**
+     * Words
+     */
+    words: string;
+    /**
+     * Sort Order
+     */
+    sort_order: number;
+};
+
+/**
  * DictionaryEntry
  */
 export type DictionaryEntry = {
@@ -276,6 +302,10 @@ export type DictionaryEntry = {
      * Verb Forms
      */
     verb_forms: Array<DictionaryVerbForm>;
+    /**
+     * Collocations
+     */
+    collocations: Array<DictionaryCollocation>;
 };
 
 /**
