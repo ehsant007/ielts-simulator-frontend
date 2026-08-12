@@ -70,7 +70,7 @@ export function Browser() {
 
 							<HistoryMenu />
 
-							<SearchInput onQuerySubmit={(query) => setWordQuery(query)} />
+							<SearchInput key={word} defaultValue={word} onQuerySubmit={(query) => setWordQuery(query)} />
 
 							<FloatingPanel.DragTrigger h="full">
 								{/* <LuGripHorizontal /> */}
@@ -233,7 +233,7 @@ function HistoryMenu() {
 
 
 
-function SearchInput({ onQuerySubmit }: { onQuerySubmit: (query: string) => void }) {
+function SearchInput({ onQuerySubmit, defaultValue }: { onQuerySubmit: (query: string) => void, defaultValue?: string | undefined }) {
 	const [query, setQuery] = useState<string | undefined>(undefined)
 	const [inputValue, setInputValue] = useState<string>("")
 	const [open, setOpen] = useState(false)
@@ -291,7 +291,7 @@ function SearchInput({ onQuerySubmit }: { onQuerySubmit: (query: string) => void
 					}
 				>
 					<Input
-						value={inputValue}
+						value={inputValue ? inputValue : defaultValue}
 						onChange={(e) => handleInputChange(e.currentTarget.value)}
 						onClick={(e) => handleInputChange(e.currentTarget.value)}
 						onKeyDown={(e) => { if (e.key === "Enter") submitInputValue() }}
