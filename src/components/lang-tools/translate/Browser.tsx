@@ -1,12 +1,15 @@
 "use client"
 
 import { useLangToolsStore } from "../LangToolsProvider";
-import { Text, Portal, FloatingPanel, IconButton, HStack, Spinner, Menu, Group, Tabs, Box, Input, ScrollArea } from "@chakra-ui/react";
+import { Text, Portal, FloatingPanel, IconButton, HStack, Spinner, Menu, Group, Tabs, Box, Input, ScrollArea, InputGroup, Popover, Button, VStack } from "@chakra-ui/react";
 import { WordNet } from "./Wordnet";
-import { LuMaximize2, LuMinus, LuSquare, LuX } from "react-icons/lu";
+import { LuMaximize2, LuMinus, LuSearch, LuSquare, LuX } from "react-icons/lu";
 import { MdHistory, MdOutlineArrowBack, MdOutlineArrowForward } from "react-icons/md";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { Dictionary } from "./Dictionary";
+import { useQuery } from "@tanstack/react-query";
+import { search } from "@/client";
+import { useDebounce } from "use-debounce"
 
 export function Browser() {
 	const word = useLangToolsStore((state) => state.wordQuery)
@@ -28,11 +31,11 @@ export function Browser() {
 			? history[currentIndex - 1]
 			: undefined;
 
-	const minSize = { width: 520, height: 400 };
+	const minSize = { width: 620, height: 400 };
+
 
 	if (!word)
 		return null
-
 
 	return (
 		<FloatingPanel.Root
@@ -62,7 +65,8 @@ export function Browser() {
 							</Group>
 
 							<HistoryMenu />
-							<Input value={word} w="30ch" onChange={(e) => setWordQuery(e.currentTarget.value)} mx="auto" />
+
+							<SearchInput onQuerySubmit={(query) => setWordQuery(query)} />
 
 							<FloatingPanel.DragTrigger h="full">
 								{/* <LuGripHorizontal /> */}
@@ -220,5 +224,120 @@ function HistoryMenu() {
 				</Menu.Positioner>
 			</Portal>
 		</Menu.Root>
+	)
+}
+
+
+
+function SearchInput({ onQuerySubmit }: { onQuerySubmit: (query: string) => void }) {
+	const [query, setQuery] = useState<string | undefined>(undefined)
+	const [inputValue, setInputValue] = useState<string>("")
+	const [open, setOpen] = useState(false)
+
+	const [debouncedQuery] = useDebounce(query, 300)
+
+	const { data: headwords, isLoading } = useQuery({
+		enabled: !!debouncedQuery,
+		queryFn: () => search({
+			path: { query: debouncedQuery! },
+		}).then((res) => res.data.headwords),
+		queryKey: ["dictionary-search", debouncedQuery],
+	})
+
+	const handleInputChange = (value: string) => {
+		setInputValue(value)
+		setQuery(value)
+		setOpen(!!value)
+	}
+
+	const handleSelect = (value: string) => {
+		setInputValue(value)
+		setOpen(false)
+		onQuerySubmit(value)
+	}
+
+	const submitInputValue = () => {
+		setOpen(false)
+		if (inputValue)
+			onQuerySubmit(inputValue)
+	}
+
+	return (
+		<Popover.Root
+			open={open}
+			onOpenChange={(e) => setOpen(e.open)}
+			// positioning={{ offset: { crossAxis: 0, mainAxis: 0 } }}
+			autoFocus={false}
+		>
+
+			<Popover.Anchor asChild>
+				<InputGroup
+					flex="1"
+					endElement={
+						<IconButton
+							position="relative"
+							onClick={submitInputValue}
+							minW="unset"
+							h="auto"
+							p="1"
+							variant="ghost"
+						>
+							<LuSearch />
+						</IconButton>
+					}
+				>
+					<Input
+						value={inputValue}
+						onChange={(e) => handleInputChange(e.currentTarget.value)}
+						onClick={(e) => handleInputChange(e.currentTarget.value)}
+						onKeyDown={(e) => { if (e.key === "Enter") submitInputValue() }}
+						placeholder="Search dictionary"
+						borderRadius="none"
+					/>
+				</InputGroup>
+			</Popover.Anchor>
+
+			<Portal>
+				<Popover.Positioner>
+					<Popover.Content zIndex="max" borderRadius="none" width="var(--reference-width)">
+						<Popover.Body>
+
+							{isLoading ?
+								<HStack gap="3" bg="bg/80" backdropFilter="blur(2px)" rounded="md" p="4" width="min" mx="auto">
+									<Spinner size="sm" colorPalette="blue" />
+									<Text fontSize="sm" color="fg.muted">
+										Loading...
+									</Text>
+								</HStack>
+
+								:
+
+								<VStack alignItems="start" gap="0">
+									{headwords?.length ?? 0 > 0 ?
+										<>
+											{headwords?.map((headword) => (
+												<Button
+													variant="ghost"
+													borderRadius="none"
+													key={headword}
+													onClick={() => handleSelect(headword)}
+													w="full"
+													justifyContent="start"
+													size="sm"
+												>
+													{headword}
+												</Button>
+											))}
+										</> :
+										<Text>No entries found!</Text>
+									}
+								</VStack>
+							}
+
+						</Popover.Body>
+					</Popover.Content>
+				</Popover.Positioner>
+			</Portal>
+		</Popover.Root>
 	)
 }

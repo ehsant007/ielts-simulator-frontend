@@ -339,13 +339,23 @@ export type DictionaryExample = {
 };
 
 /**
- * DictionaryResponse
+ * DictionaryLookupResponse
  */
-export type DictionaryResponse = {
+export type DictionaryLookupResponse = {
     /**
      * Entries
      */
     entries: Array<DictionaryEntry>;
+};
+
+/**
+ * DictionarySearchResponse
+ */
+export type DictionarySearchResponse = {
+    /**
+     * Headwords
+     */
+    headwords: Array<string>;
 };
 
 /**
@@ -2214,10 +2224,40 @@ export type LookupResponses = {
     /**
      * Successful Response
      */
-    200: DictionaryResponse;
+    200: DictionaryLookupResponse;
 };
 
 export type LookupResponse = LookupResponses[keyof LookupResponses];
+
+export type SearchData = {
+    body?: never;
+    path: {
+        /**
+         * Query
+         */
+        query: string;
+    };
+    query?: never;
+    url: '/api/v1/dictionary/search/{query}';
+};
+
+export type SearchErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SearchError = SearchErrors[keyof SearchErrors];
+
+export type SearchResponses = {
+    /**
+     * Successful Response
+     */
+    200: DictionarySearchResponse;
+};
+
+export type SearchResponse = SearchResponses[keyof SearchResponses];
 
 export type TranslateData = {
     body: AppTranslatorSchemasTranslatorTranslateRequest;
