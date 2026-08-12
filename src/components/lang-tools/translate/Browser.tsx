@@ -10,7 +10,6 @@ import { Dictionary } from "./Dictionary";
 import { useQuery } from "@tanstack/react-query";
 import { search } from "@/client";
 import { useDebounce } from "use-debounce"
-import { number } from "motion/react";
 
 export function Browser() {
 	const word = useLangToolsStore((state) => state.wordQuery)
