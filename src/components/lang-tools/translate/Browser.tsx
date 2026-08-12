@@ -10,11 +10,16 @@ import { Dictionary } from "./Dictionary";
 import { useQuery } from "@tanstack/react-query";
 import { search } from "@/client";
 import { useDebounce } from "use-debounce"
+import { number } from "motion/react";
 
 export function Browser() {
 	const word = useLangToolsStore((state) => state.wordQuery)
 	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
 	const history = useLangToolsStore((state) => state.translateHistory)
+
+	const minSize = { width: 620, height: 400 }
+	const [size, setSize] = useState(minSize)
+	const [position, setPosition] = useState<{ x: number, y: number } | undefined>(undefined)
 
 	const isOpen = Boolean(word)
 	const close = () => setWordQuery(null)
@@ -31,9 +36,6 @@ export function Browser() {
 			? history[currentIndex - 1]
 			: undefined;
 
-	const minSize = { width: 620, height: 400 };
-
-
 	if (!word)
 		return null
 
@@ -41,8 +43,11 @@ export function Browser() {
 		<FloatingPanel.Root
 			open={isOpen}
 			onOpenChange={(details) => !details.open && close()}
-			defaultSize={minSize}
+			defaultSize={size}
 			minSize={minSize}
+			onSizeChange={(e) => setSize(e.size)}
+			position={position}
+			onPositionChange={(e) => setPosition(e.position)}
 		>
 			<Portal>
 				<FloatingPanel.Positioner>
