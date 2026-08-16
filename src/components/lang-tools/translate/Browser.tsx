@@ -280,7 +280,8 @@ function SearchInput({ onQuerySubmit, defaultValue }: SearchInputProps) {
 
 			<Popover.Anchor asChild>
 				<InputGroup
-					flex="1"
+					width="40ch"
+					//flex="1"
 					endElement={
 						<IconButton
 							position="relative"
@@ -307,7 +308,7 @@ function SearchInput({ onQuerySubmit, defaultValue }: SearchInputProps) {
 
 			<Portal>
 				<Popover.Positioner>
-					<Popover.Content zIndex="max" borderRadius="none" width="var(--reference-width)">
+					<Popover.Content zIndex="max" borderRadius="none" minW="var(--reference-width)" width="fit-content">
 						<Popover.Body>
 
 							{isLoading ?
