@@ -1,12 +1,13 @@
 "use client"
 
-import { VStack, Box, List, HStack, Text, Collapsible, Separator, Tabs } from "@chakra-ui/react";
+import { VStack, Box, List, HStack, Text, Collapsible, Separator, Tabs, Highlight } from "@chakra-ui/react";
 import { DictionaryCollocation, DictionaryEntry, DictionaryExample, DictionarySense, DictionaryVerbForm, lookup } from "@/client";
 import { Text as AdvText } from "@chakra-ui/react";
 import { TTSButton } from "../tts";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { LuChevronRight, LuMinus, LuPlus } from "react-icons/lu";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { DictionaryEntryProvider, useDictionaryEntry } from "./DictionaryEntryProvider";
 
 
 function groupBy<T, K>(
@@ -67,15 +68,17 @@ export function Dictionary({ headword }: { headword: string }) {
 						</Text>
 					}
 				>
-					<VStack alignItems="start">
+					<DictionaryEntryProvider entry={entry}>
+						<VStack alignItems="start">
 
-						<Pronunciation entry={entry} />
+							<Pronunciation entry={entry} />
 
-						<Extras entry={entry} />
+							<Extras entry={entry} />
 
-						<Senses senses={entry.senses} />
+							<Senses senses={entry.senses} />
 
-					</VStack>
+						</VStack>
+					</DictionaryEntryProvider>
 				</EntryCollapse>
 			))}
 		</VStack>
@@ -112,11 +115,36 @@ function Pronunciation({ entry }: { entry: DictionaryEntry }) {
 
 
 function Examples({ examples }: { examples: DictionaryExample[] }) {
+
+	const entry = useDictionaryEntry()
+
+	const highlightQuery = useMemo(
+		() => [...entry.verb_forms.map(form => form.form_text), entry.headword].sort((a, b) => b.length - a.length),
+		[entry],
+	)
+
 	return (
 		<List.Root mt="2" ms="4" listStyleType="disc">
 			{examples.sort((a, b) => a.sort_order - b.sort_order).map((example, example_index) => (
-				<List.Item mt="1" key={example_index} fontStyle="italic" as={AdvText} id={`$example${example.id}`}>
-					{example.text}
+				<List.Item
+					mt="1"
+					key={example_index}
+					fontStyle="italic"
+					as={AdvText}
+					id={`$example${example.id}`}
+				>
+					<Highlight
+						query={highlightQuery}
+						styles={{
+							px: "0.5",
+							bg: "orange.subtle",
+							color: "orange.fg",
+							m: "0",
+							p: "0",
+						}}
+					>
+						{example.text}
+					</Highlight>
 				</List.Item>
 			))}
 		</List.Root>
