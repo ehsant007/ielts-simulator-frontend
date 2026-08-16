@@ -232,10 +232,14 @@ function HistoryMenu() {
 }
 
 
+type SearchInputProps = {
+	onQuerySubmit: (query: string) => void,
+	defaultValue?: string | undefined,
+}
 
-function SearchInput({ onQuerySubmit, defaultValue }: { onQuerySubmit: (query: string) => void, defaultValue?: string | undefined }) {
+function SearchInput({ onQuerySubmit, defaultValue }: SearchInputProps) {
 	const [query, setQuery] = useState<string | undefined>(undefined)
-	const [inputValue, setInputValue] = useState<string>("")
+	const [inputValue, setInputValue] = useState<string>(defaultValue ?? "")
 	const [open, setOpen] = useState(false)
 
 	const [debouncedQuery] = useDebounce(query, 300)
@@ -291,7 +295,7 @@ function SearchInput({ onQuerySubmit, defaultValue }: { onQuerySubmit: (query: s
 					}
 				>
 					<Input
-						value={inputValue ? inputValue : defaultValue}
+						value={inputValue}
 						onChange={(e) => handleInputChange(e.currentTarget.value)}
 						onClick={(e) => handleInputChange(e.currentTarget.value)}
 						onKeyDown={(e) => { if (e.key === "Enter") submitInputValue() }}
