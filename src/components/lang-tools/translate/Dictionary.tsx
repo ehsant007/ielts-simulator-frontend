@@ -45,12 +45,15 @@ export function Dictionary({ headword }: { headword: string }) {
 
 	const { data: entries } = useSuspenseQuery({
 		queryFn: () => lookup({
-			path: { headword: headword! },
+			query: { q: headword! },
 		}).then((res) => res.data.entries)
 		,
 		queryKey: ["dictionary", headword],
 	})
 
+
+	if (entries.length == 0)
+		return <Text m="6" color="fg.warning" fontWeight="medium">No definitions found for this query!</Text>
 
 	return (
 		<VStack alignItems="start">

@@ -247,7 +247,7 @@ function SearchInput({ onQuerySubmit, defaultValue }: SearchInputProps) {
 	const { data: headwords, isLoading } = useQuery({
 		enabled: !!debouncedQuery,
 		queryFn: () => search({
-			path: { query: debouncedQuery! },
+			query: { q: debouncedQuery! },
 		}).then((res) => res.data.headwords),
 		queryKey: ["dictionary-search", debouncedQuery],
 	})

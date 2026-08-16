@@ -2201,14 +2201,14 @@ export type AppTranslatorSchemasTranslatorTranslateResponse = {
 
 export type LookupData = {
     body?: never;
-    path: {
+    path?: never;
+    query: {
         /**
-         * Headword
+         * Q
          */
-        headword: string;
+        q: string;
     };
-    query?: never;
-    url: '/api/v1/dictionary/lookup/{headword}';
+    url: '/api/v1/dictionary/lookup';
 };
 
 export type LookupErrors = {
@@ -2231,14 +2231,14 @@ export type LookupResponse = LookupResponses[keyof LookupResponses];
 
 export type SearchData = {
     body?: never;
-    path: {
+    path?: never;
+    query: {
         /**
-         * Query
+         * Q
          */
-        query: string;
+        q: string;
     };
-    query?: never;
-    url: '/api/v1/dictionary/search/{query}';
+    url: '/api/v1/dictionary/search';
 };
 
 export type SearchErrors = {
@@ -2311,14 +2311,14 @@ export type AdvTranslateResponse = AdvTranslateResponses[keyof AdvTranslateRespo
 
 export type ReadWordnetData = {
     body?: never;
-    path: {
+    path?: never;
+    query: {
         /**
-         * Word
+         * Q
          */
-        word: string;
+        q: string;
     };
-    query?: never;
-    url: '/api/v1/wordnet/{word}';
+    url: '/api/v1/wordnet/';
 };
 
 export type ReadWordnetErrors = {

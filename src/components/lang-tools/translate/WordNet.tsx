@@ -28,7 +28,7 @@ export function WordNet({ headword }: { headword: string }) {
 
 	const { data } = useSuspenseQuery({
 		queryFn: () => readWordnet({
-			path: { word: headword! },
+			query: { q: headword! },
 		}).then((res) => res.data)
 		,
 		queryKey: ["wordnet", headword],
@@ -38,6 +38,8 @@ export function WordNet({ headword }: { headword: string }) {
 
 	const grouped_senses = groupBy(data.senses, (sense) => sense.pos)
 
+	if (data.senses.length == 0)
+		return <Text m="6" color="fg.warning" fontWeight="medium">No definitions found for this query!</Text>
 
 	return (
 		<VStack alignItems="start">

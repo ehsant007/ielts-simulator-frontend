@@ -23,7 +23,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  */
 export const lookup = <ThrowOnError extends boolean = true>(options: Options<LookupData, ThrowOnError>) => {
     return (options.client ?? client).get<LookupResponses, LookupErrors, ThrowOnError>({
-        url: '/api/v1/dictionary/lookup/{headword}',
+        url: '/api/v1/dictionary/lookup',
         ...options
     });
 };
@@ -33,7 +33,7 @@ export const lookup = <ThrowOnError extends boolean = true>(options: Options<Loo
  */
 export const search = <ThrowOnError extends boolean = true>(options: Options<SearchData, ThrowOnError>) => {
     return (options.client ?? client).get<SearchResponses, SearchErrors, ThrowOnError>({
-        url: '/api/v1/dictionary/search/{query}',
+        url: '/api/v1/dictionary/search',
         ...options
     });
 };
@@ -71,7 +71,7 @@ export const advTranslate = <ThrowOnError extends boolean = true>(options: Optio
  */
 export const readWordnet = <ThrowOnError extends boolean = true>(options: Options<ReadWordnetData, ThrowOnError>) => {
     return (options.client ?? client).get<ReadWordnetResponses, ReadWordnetErrors, ThrowOnError>({
-        url: '/api/v1/wordnet/{word}',
+        url: '/api/v1/wordnet/',
         ...options
     });
 };
