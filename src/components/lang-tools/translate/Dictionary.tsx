@@ -8,6 +8,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { LuChevronRight, LuMinus, LuPlus } from "react-icons/lu";
 import { useMemo, useState } from "react";
 import { DictionaryEntryProvider, useDictionaryEntry } from "./DictionaryEntryProvider";
+import { useLangToolsStore } from "../LangToolsProvider";
 
 
 function groupBy<T, K>(
@@ -115,12 +116,17 @@ function Pronunciation({ entry }: { entry: DictionaryEntry }) {
 
 
 function Examples({ examples }: { examples: DictionaryExample[] }) {
-
 	const entry = useDictionaryEntry()
+	const query = useLangToolsStore((state)=>state.wordQuery)
 
 	const highlightQuery = useMemo(
-		() => [...entry.verb_forms.map(form => form.form_text), entry.headword].sort((a, b) => b.length - a.length),
-		[entry],
+		() => {
+			const values = [...entry.verb_forms.map(form => form.form_text), entry.headword]
+			if(query)
+				values.push(query)
+			return [...new Set(values)].sort((a, b) => b.length - a.length)
+		},
+		[entry, query],
 	)
 
 	return (
@@ -204,7 +210,6 @@ function Senses({ senses }: { senses: DictionarySense[] }) {
 							<AdvText fontWeight="medium">{groupName}</AdvText>
 							<Separator width="full" />
 						</VStack>
-
 					}
 
 					{senses.map((sense) => (
