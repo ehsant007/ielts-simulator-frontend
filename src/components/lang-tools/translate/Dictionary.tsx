@@ -1,6 +1,6 @@
 "use client"
 
-import { VStack, Box, List, HStack, Text, Collapsible, Separator, Tabs, Highlight } from "@chakra-ui/react";
+import { VStack, Box, List, HStack, Text, Collapsible, Separator, Tabs, Highlight, StackProps, BoxProps } from "@chakra-ui/react";
 import { DictionaryCollocation, DictionaryEntry, DictionaryExample, DictionarySense, DictionaryVerbForm, lookup } from "@/client";
 import { Text as AdvText } from "@chakra-ui/react";
 import { TTSButton } from "../tts";
@@ -27,7 +27,7 @@ function groupBy<T, K>(
 }
 
 
-function sortSenses(senses: DictionarySense[]) {
+function groupSenses(senses: DictionarySense[]) {
 	const sorted = senses.toSorted((a, b) => {
 		const groupOrder =
 			(a.sense_group?.sort_order ?? 0) -
@@ -58,25 +58,27 @@ export function Dictionary({ headword }: { headword: string }) {
 		return <Text m="6" color="fg.warning" fontWeight="medium">No definitions found for this query!</Text>
 
 	return (
-		<VStack alignItems="start">
+		<VStack alignItems="start" gap="3">
 			{entries.map((entry) => (
 				<EntryCollapse
 					key={entry.id}
+					px="5"
+					py="5"
 					title={
 						<Text>
 							<Text as="span" fontWeight="bold" fontSize="lg">{entry.headword} </Text>
-							<Text as="span" color="fg.subtle" fontWeight="semibold" fontStyle="italic">{entry.pos}</Text>
+							<Text as="span" color="fg.subtle" fontWeight="semibold" fontStyle="italic" ms="1">{entry.pos}</Text>
 						</Text>
 					}
 				>
 					<DictionaryEntryProvider entry={entry}>
-						<VStack alignItems="start">
+						<VStack alignItems="start" gap="5">
 
 							<Pronunciation entry={entry} />
 
 							<Extras entry={entry} />
 
-							<Senses senses={entry.senses} />
+							<Senses senses={entry.senses} ms="3.5" />
 
 						</VStack>
 					</DictionaryEntryProvider>
@@ -117,12 +119,12 @@ function Pronunciation({ entry }: { entry: DictionaryEntry }) {
 
 function Examples({ examples }: { examples: DictionaryExample[] }) {
 	const entry = useDictionaryEntry()
-	const query = useLangToolsStore((state)=>state.wordQuery)
+	const query = useLangToolsStore((state) => state.wordQuery)
 
 	const highlightQuery = useMemo(
 		() => {
 			const values = [...entry.verb_forms.map(form => form.form_text), entry.headword]
-			if(query)
+			if (query)
 				values.push(query)
 			return [...new Set(values)].sort((a, b) => b.length - a.length)
 		},
@@ -130,7 +132,7 @@ function Examples({ examples }: { examples: DictionaryExample[] }) {
 	)
 
 	return (
-		<List.Root mt="2" ms="4" listStyleType="disc">
+		<List.Root mt="1" ms="4" listStyleType="disc">
 			{examples.sort((a, b) => a.sort_order - b.sort_order).map((example, example_index) => (
 				<List.Item
 					mt="1"
@@ -200,33 +202,35 @@ function Sense({ sense }: { sense: DictionarySense }) {
 }
 
 
-function Senses({ senses }: { senses: DictionarySense[] }) {
+function Senses({ senses, ...props }: { senses: DictionarySense[] } & StackProps) {
 	return (
-		<List.Root as="ol">
+		<VStack gap="5" w="full" alignItems="start" {...props}>
+			{
+				Array.from(groupSenses(senses).entries()).map(([groupName, senses], group_index) => (
+					<Box key={groupName ?? group_index} w="full">
+						{senses[0].sense_group &&
+							<>
+								<AdvText fontWeight="medium">{groupName}</AdvText>
+								<Separator mt="0.5" mb="2" width="full" />
+							</>
+						}
 
-			{Array.from(sortSenses(senses).entries()).map(([groupName, senses], group_index) => (
-				<Box key={groupName ?? group_index} mt="4">
-					{senses[0].sense_group &&
-						<VStack alignItems="start" gap="0.5" mb="3">
-							<AdvText fontWeight="medium">{groupName}</AdvText>
-							<Separator width="full" />
-						</VStack>
-					}
-
-					{senses.map((sense) => (
-						<List.Item key={sense.id} my="2" ms="4">
-							<Sense sense={sense} />
-						</List.Item>
-					))}
-				</Box>
-			))}
-
-		</List.Root>
+						<List.Root as="ol" gap="5" {...{ start: senses[0].sense_num }} >
+							{senses.map((sense) => (
+								<List.Item key={sense.id}>
+									<Sense sense={sense} />
+								</List.Item>
+							))}
+						</List.Root>
+					</Box>
+				))
+			}
+		</VStack>
 	)
 }
 
 
-function EntryCollapse({ children, title }: { children: React.ReactNode, title: React.ReactNode }) {
+function EntryCollapse({ children, title, ...props }: { children: React.ReactNode, title: React.ReactNode } & Omit<BoxProps, "title">) {
 	return (
 		<Collapsible.Root defaultOpen w="full" bg="bg.muted">
 			<Collapsible.Trigger
@@ -248,7 +252,7 @@ function EntryCollapse({ children, title }: { children: React.ReactNode, title: 
 				{title}
 			</Collapsible.Trigger>
 			<Collapsible.Content>
-				<Box px="5" py="3">
+				<Box {...props}>
 					{children}
 				</Box>
 			</Collapsible.Content>
