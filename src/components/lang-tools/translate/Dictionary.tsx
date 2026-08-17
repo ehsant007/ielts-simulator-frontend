@@ -126,7 +126,7 @@ function Examples({ examples }: { examples: DictionaryExample[] }) {
 			const values = [...entry.verb_forms.map(form => form.form_text), entry.headword]
 			if (query)
 				values.push(query)
-			return [...new Set(values)].sort((a, b) => b.length - a.length).map((value) => ` ${value} `)
+			return [...new Set(values)].sort((a, b) => b.length - a.length)
 		},
 		[entry, query],
 	)
