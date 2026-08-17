@@ -143,8 +143,9 @@ function Examples({ examples }: { examples: DictionaryExample[] }) {
 						query={highlightQuery}
 						styles={{
 							px: "0.5",
-							bg: "orange.subtle",
+							//bg: "orange.subtle",
 							color: "orange.fg",
+							fontWeight: "medium",
 							m: "0",
 							p: "0",
 						}}
