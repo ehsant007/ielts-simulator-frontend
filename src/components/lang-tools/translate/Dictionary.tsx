@@ -62,8 +62,7 @@ export function Dictionary({ headword }: { headword: string }) {
 			{entries.map((entry) => (
 				<EntryCollapse
 					key={entry.id}
-					px="5"
-					py="5"
+					p="5"
 					title={
 						<Text>
 							<Text as="span" fontWeight="bold" fontSize="lg">{entry.headword} </Text>
@@ -78,7 +77,7 @@ export function Dictionary({ headword }: { headword: string }) {
 
 							<Extras entry={entry} />
 
-							<Senses senses={entry.senses} ms="3.5" />
+							<Senses senses={entry.senses}/>
 
 						</VStack>
 					</DictionaryEntryProvider>
@@ -216,7 +215,7 @@ function Senses({ senses, ...props }: { senses: DictionarySense[] } & StackProps
 							</>
 						}
 
-						<List.Root as="ol" gap="5" {...{ start: senses[0].sense_num }} >
+						<List.Root ps="3.5" as="ol" gap="5" {...{ start: senses[0].sense_num }} >
 							{senses.map((sense) => (
 								<List.Item key={sense.id}>
 									<Sense sense={sense} />
