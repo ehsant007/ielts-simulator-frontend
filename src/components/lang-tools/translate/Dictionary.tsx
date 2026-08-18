@@ -77,7 +77,7 @@ export function Dictionary({ headword }: { headword: string }) {
 
 							<Extras entry={entry} />
 
-							<Senses senses={entry.senses}/>
+							<Senses senses={entry.senses} />
 
 						</VStack>
 					</DictionaryEntryProvider>
@@ -215,9 +215,14 @@ function Senses({ senses, ...props }: { senses: DictionarySense[] } & StackProps
 							</>
 						}
 
-						<List.Root ps="3.5" as="ol" gap="5" {...{ start: senses[0].sense_num }} >
+						<List.Root
+							as="ol"
+							gap="5"
+							ps="3.5"
+							{...{ start: senses[0].sense_num }}
+						>
 							{senses.map((sense) => (
-								<List.Item key={sense.id}>
+								<List.Item key={sense.id} _marker={{fontWeight: "medium"}}>
 									<Sense sense={sense} />
 								</List.Item>
 							))}
