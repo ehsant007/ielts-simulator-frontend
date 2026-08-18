@@ -4,7 +4,7 @@ import { useKokoroStore, speak as speakAudio } from "../kokoro-tts";
 import { useTextSelection } from "../hooks";
 import { useHighlightStore } from "../highlighter/HighlightProvider";
 
-export function useMenu() {
+export function useMenu({ onActionDone }: { onActionDone?: (action?: string) => void }) {
 	const highlight = useHighlightStore((state) => state.highlightSelectedText)
 	const removeHighlight = useHighlightStore((state) => state.removeHighlight)
 	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
@@ -23,18 +23,21 @@ export function useMenu() {
 			return
 		setCopiedText(selectedText)
 		await navigator.clipboard.writeText(selectedText)
+		onActionDone?.("copy")
 	}
 
 	function translate(text: string | null | undefined) {
 		if (!text)
 			return
+
 		setWordQuery(text)
+		onActionDone?.("translate")
 	}
 
 	async function speak() {
 		if (!selectedText)
 			return
-		generate(selectedText, (audio) => speakAudio(audio), false)
+		generate(selectedText, (audio) => speakAudio(audio), false).then(() => onActionDone?.("speak"))
 	}
 
 
