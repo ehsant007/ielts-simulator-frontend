@@ -222,7 +222,7 @@ function Senses({ senses, ...props }: { senses: DictionarySense[] } & StackProps
 							{...{ start: senses[0].sense_num }}
 						>
 							{senses.map((sense) => (
-								<List.Item key={sense.id} _marker={{fontWeight: "medium"}}>
+								<List.Item key={sense.id} _marker={{fontWeight: "medium", fontSize: "small"}}>
 									<Sense sense={sense} />
 								</List.Item>
 							))}
