@@ -5,71 +5,72 @@ export type ClientOptions = {
 };
 
 /**
- * AppSettingRead
+ * AIChatRead
  */
-export type AppSettingRead = {
+export type AiChatRead = {
     /**
-     * Key
+     * Id
      */
-    key: string;
+    id: string;
     /**
-     * Name
+     * User Id
      */
-    name: string | null;
+    user_id: string;
     /**
-     * Description
+     * App Id
      */
-    description: string | null;
+    app_id: string | null;
     /**
-     * Value
+     * Title
      */
-    value: {
-        [key: string]: unknown;
-    } | Array<unknown> | string | number | number | boolean | null;
+    title: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Last Active
+     */
+    last_active: string;
 };
 
 /**
- * AppSettings
- *
- * Central definition of application-level configuration.
- *
- * Each field in this model represents a single configurable setting and
- * maps to one record in the `AppSetting` database table.
- *
- * Defaults defined here are used as fallbacks and as initial values during
- * database synchronization.
- *
- * After adding, removing, or modifying fields in this model, run:
- *
- * python -m cli db sync
- *
- * to synchronize the definitions with the database.
- *
- * Notes:
- * - The setting name is derived from the field name by default.
- * - A custom name can be provided via `Field(title=...)`.
- * - Optional metadata such as descriptions should also be defined via `Field`.
+ * AIMessageCreate
  */
-export type AppSettings = {
+export type AiMessageCreate = {
     /**
-     * Fiat Commission
+     * Content
      */
-    fiat_commission?: number | string;
-    /**
-     * Crypto Commission
-     */
-    crypto_commission?: number | string;
-    /**
-     * Payment Currency
-     */
-    payment_currency_id?: number;
-    /**
-     * Pivot Currency
-     *
-     * Pivot currency ID used as the canonical reference for storing and deriving exchange rates. All rates are interpreted as `1 base_currency = rate * pivot_currency`.
-     */
-    pivot_currency_id?: number;
+    content: string;
 };
+
+/**
+ * AIMessageRead
+ */
+export type AiMessageRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Chat Id
+     */
+    chat_id: string;
+    role: AiMessageRole;
+    /**
+     * Content
+     */
+    content: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+};
+
+/**
+ * AIMessageRole
+ */
+export type AiMessageRole = 'user' | 'assistant' | 'system' | 'tool';
 
 /**
  * AttemptCreate
@@ -145,20 +146,6 @@ export type BodyAddFilesToIeltsModule = {
 };
 
 /**
- * Body_create_kyc_document
- */
-export type BodyCreateKycDocument = {
-    /**
-     * Doc Type Id
-     */
-    doc_type_id: number;
-    /**
-     * Files
-     */
-    files: Array<Blob | File>;
-};
-
-/**
  * Body_create_role
  */
 export type BodyCreateRole = {
@@ -167,38 +154,6 @@ export type BodyCreateRole = {
      * Permission Ids
      */
     permission_ids: Array<number>;
-};
-
-/**
- * Body_create_ticket
- */
-export type BodyCreateTicket = {
-    /**
-     * Subject
-     */
-    subject: string;
-    /**
-     * Message
-     */
-    message: string | null;
-    /**
-     * Files
-     */
-    files?: Array<Blob | File>;
-};
-
-/**
- * Body_create_ticket_message
- */
-export type BodyCreateTicketMessage = {
-    /**
-     * Message
-     */
-    message: string | null;
-    /**
-     * Files
-     */
-    files?: Array<Blob | File> | null;
 };
 
 /**
@@ -738,117 +693,6 @@ export type Image = {
 };
 
 /**
- * KycDocumentRead
- */
-export type KycDocumentRead = {
-    /**
-     * Id
-     */
-    id: string;
-    /**
-     * User Id
-     */
-    user_id: string;
-    type: KycDocumentTypeRead;
-    file_set: FileSetRead;
-    status: KycDocumentStatus;
-    /**
-     * Expires At
-     */
-    expires_at: string | null;
-};
-
-/**
- * KycDocumentReviewCreate
- */
-export type KycDocumentReviewCreate = {
-    action: KycReviewAction;
-    /**
-     * Rejection Reason
-     */
-    rejection_reason: string | null;
-};
-
-/**
- * KycDocumentStatus
- */
-export type KycDocumentStatus = 'pending_review' | 'approved' | 'rejected' | 'expired';
-
-/**
- * KycDocumentTypeCreate
- */
-export type KycDocumentTypeCreate = {
-    /**
-     * Code
-     */
-    code: string;
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Description
-     */
-    description: string;
-};
-
-/**
- * KycDocumentTypeRead
- */
-export type KycDocumentTypeRead = {
-    /**
-     * Id
-     */
-    id: number;
-    /**
-     * Code
-     */
-    code: string;
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Description
-     */
-    description: string;
-};
-
-/**
- * KycRequirementCreate
- *
- * Satisfying at least one requirement group is enough to assign the role.
- */
-export type KycRequirementCreate = {
-    /**
-     * Groups
-     */
-    groups: Array<KycRequirementGroupCreate>;
-};
-
-/**
- * KycRequirementGroupCreate
- *
- * A requirement group: at least `required_count` distinct document types are required.
- * If `required_count` is None, all document types in the group are required.
- */
-export type KycRequirementGroupCreate = {
-    /**
-     * Document Type Ids
-     */
-    document_type_ids: Array<number>;
-    /**
-     * Required Count
-     */
-    required_count?: number | null;
-};
-
-/**
- * KycReviewAction
- */
-export type KycReviewAction = 'approve' | 'reject' | 'request_more_info' | 'expire';
-
-/**
  * LexicalAnalysis
  */
 export type LexicalAnalysis = {
@@ -1147,32 +991,6 @@ export type NoteCompletionGroup = {
      */
     options?: Array<string> | null;
     content: Content;
-};
-
-/**
- * Page[KycDocumentRead]
- */
-export type PageKycDocumentRead = {
-    /**
-     * Items
-     */
-    items: Array<KycDocumentRead>;
-    /**
-     * Total
-     */
-    total: number;
-    /**
-     * Page
-     */
-    page: number;
-    /**
-     * Size
-     */
-    size: number;
-    /**
-     * Pages
-     */
-    pages: number;
 };
 
 /**
@@ -1619,6 +1437,73 @@ export type SentenceMatchingGroup = {
 };
 
 /**
+ * SettingRead
+ */
+export type SettingRead = {
+    /**
+     * Key
+     */
+    key: string;
+    /**
+     * Name
+     */
+    name: string | null;
+    /**
+     * Description
+     */
+    description: string | null;
+    /**
+     * Value
+     */
+    value: {
+        [key: string]: unknown;
+    } | Array<unknown> | string | number | number | boolean | null;
+};
+
+/**
+ * Settings
+ *
+ * Central definition of application-level configuration.
+ *
+ * Each field in this model represents a single configurable setting and
+ * maps to one record in the `AppSetting` database table.
+ *
+ * Defaults defined here are used as fallbacks and as initial values during
+ * database synchronization.
+ *
+ * After adding, removing, or modifying fields in this model, run:
+ *
+ * python -m cli db sync
+ *
+ * to synchronize the definitions with the database.
+ *
+ * Notes:
+ * - The setting name is derived from the field name by default.
+ * - A custom name can be provided via `Field(title=...)`.
+ * - Optional metadata such as descriptions should also be defined via `Field`.
+ */
+export type Settings = {
+    /**
+     * Fiat Commission
+     */
+    fiat_commission?: number | string;
+    /**
+     * Crypto Commission
+     */
+    crypto_commission?: number | string;
+    /**
+     * Payment Currency
+     */
+    payment_currency_id?: number;
+    /**
+     * Pivot Currency
+     *
+     * Pivot currency ID used as the canonical reference for storing and deriving exchange rates. All rates are interpreted as `1 base_currency = rate * pivot_currency`.
+     */
+    pivot_currency_id?: number;
+};
+
+/**
  * SpeakingContent
  */
 export type SpeakingContent = {
@@ -1708,99 +1593,6 @@ export type Text = {
      * Text
      */
     text: Array<string>;
-};
-
-/**
- * TicketMessageRead
- */
-export type TicketMessageRead = {
-    /**
-     * Id
-     */
-    id: string;
-    sender: TicketSender;
-    /**
-     * Message
-     */
-    message: string | null;
-    file_set: FileSetRead | null;
-    /**
-     * Created At
-     */
-    created_at: string;
-};
-
-/**
- * TicketMessagesRead
- */
-export type TicketMessagesRead = {
-    /**
-     * Data
-     */
-    data: Array<TicketMessageRead>;
-    /**
-     * Count
-     */
-    count: number;
-};
-
-/**
- * TicketRead
- */
-export type TicketRead = {
-    /**
-     * Id
-     */
-    id: string;
-    /**
-     * Subject
-     */
-    subject: string;
-    status: TicketStatus;
-    /**
-     * Created At
-     */
-    created_at: string;
-    /**
-     * Updated At
-     */
-    updated_at: string;
-};
-
-/**
- * TicketSender
- */
-export type TicketSender = {
-    /**
-     * Username
-     */
-    username: string;
-};
-
-/**
- * TicketStatus
- */
-export type TicketStatus = 'open' | 'closed';
-
-/**
- * TicketUpdate
- */
-export type TicketUpdate = {
-    status: TicketStatus;
-};
-
-/**
- * TicketsRead
- */
-export type TicketsRead = {
-    /**
-     * Data
-     */
-    data: Array<TicketRead>;
-    /**
-     * Count
-     */
-    count: number;
 };
 
 /**
@@ -2199,6 +1991,116 @@ export type AppTranslatorSchemasTranslatorTranslateResponse = {
     translation: string;
 };
 
+export type ReadChatsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ai/chats';
+};
+
+export type ReadChatsResponses = {
+    /**
+     * Response Read Chats
+     *
+     * Successful Response
+     */
+    200: Array<AiChatRead>;
+};
+
+export type ReadChatsResponse = ReadChatsResponses[keyof ReadChatsResponses];
+
+export type ReadChatMessagesData = {
+    body?: never;
+    path: {
+        /**
+         * Chat Id
+         */
+        chat_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ai/chat/{chat_id}';
+};
+
+export type ReadChatMessagesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadChatMessagesError = ReadChatMessagesErrors[keyof ReadChatMessagesErrors];
+
+export type ReadChatMessagesResponses = {
+    /**
+     * Response Read Chat Messages
+     *
+     * Successful Response
+     */
+    200: Array<AiMessageRead>;
+};
+
+export type ReadChatMessagesResponse = ReadChatMessagesResponses[keyof ReadChatMessagesResponses];
+
+export type CreateMessageData = {
+    body: AiMessageCreate;
+    path: {
+        /**
+         * Chat Id
+         */
+        chat_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ai/chat/{chat_id}/messages';
+};
+
+export type CreateMessageErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateMessageError = CreateMessageErrors[keyof CreateMessageErrors];
+
+export type CreateMessageResponses = {
+    /**
+     * Successful Response
+     */
+    200: AiMessageRead;
+};
+
+export type CreateMessageResponse = CreateMessageResponses[keyof CreateMessageResponses];
+
+export type CreateAiChatData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * App Id
+         */
+        app_id?: string | null;
+    };
+    url: '/api/v1/ai/chat';
+};
+
+export type CreateAiChatErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateAiChatError = CreateAiChatErrors[keyof CreateAiChatErrors];
+
+export type CreateAiChatResponses = {
+    /**
+     * Successful Response
+     */
+    200: AiChatRead;
+};
+
+export type CreateAiChatResponse = CreateAiChatResponses[keyof CreateAiChatResponses];
+
 export type LookupData = {
     body?: never;
     path?: never;
@@ -2318,7 +2220,7 @@ export type ReadWordnetData = {
          */
         q: string;
     };
-    url: '/api/v1/wordnet/';
+    url: '/api/v1/wordnet';
 };
 
 export type ReadWordnetErrors = {
@@ -2693,13 +2595,13 @@ export type ReadSettingsResponses = {
      *
      * Successful Response
      */
-    200: Array<AppSettingRead>;
+    200: Array<SettingRead>;
 };
 
 export type ReadSettingsResponse = ReadSettingsResponses[keyof ReadSettingsResponses];
 
 export type UpdateSettingsData = {
-    body: AppSettings;
+    body: Settings;
     path?: never;
     query?: never;
     url: '/api/v1/settings/';
@@ -2718,7 +2620,7 @@ export type UpdateSettingsResponses = {
     /**
      * Successful Response
      */
-    200: AppSettings;
+    200: Settings;
 };
 
 export type UpdateSettingsResponse = UpdateSettingsResponses[keyof UpdateSettingsResponses];
@@ -3308,396 +3210,6 @@ export type HealthCheckResponses = {
 };
 
 export type HealthCheckResponse = HealthCheckResponses[keyof HealthCheckResponses];
-
-export type ReadTicketsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/v1/tickets/';
-};
-
-export type ReadTicketsErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadTicketsError = ReadTicketsErrors[keyof ReadTicketsErrors];
-
-export type ReadTicketsResponses = {
-    /**
-     * Successful Response
-     */
-    200: TicketsRead;
-};
-
-export type ReadTicketsResponse = ReadTicketsResponses[keyof ReadTicketsResponses];
-
-export type CreateTicketData = {
-    body: BodyCreateTicket;
-    path?: never;
-    query?: never;
-    url: '/api/v1/tickets/';
-};
-
-export type CreateTicketErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateTicketError = CreateTicketErrors[keyof CreateTicketErrors];
-
-export type CreateTicketResponses = {
-    /**
-     * Successful Response
-     */
-    200: TicketRead;
-};
-
-export type CreateTicketResponse = CreateTicketResponses[keyof CreateTicketResponses];
-
-export type ReadTicketByIdData = {
-    body?: never;
-    path: {
-        /**
-         * Ticket Id
-         */
-        ticket_id: string;
-    };
-    query?: never;
-    url: '/api/v1/tickets/{ticket_id}';
-};
-
-export type ReadTicketByIdErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadTicketByIdError = ReadTicketByIdErrors[keyof ReadTicketByIdErrors];
-
-export type ReadTicketByIdResponses = {
-    /**
-     * Successful Response
-     */
-    200: TicketRead;
-};
-
-export type ReadTicketByIdResponse = ReadTicketByIdResponses[keyof ReadTicketByIdResponses];
-
-export type UpdateTicketData = {
-    body: TicketUpdate;
-    path: {
-        /**
-         * Ticket Id
-         */
-        ticket_id: string;
-    };
-    query?: never;
-    url: '/api/v1/tickets/{ticket_id}';
-};
-
-export type UpdateTicketErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateTicketError = UpdateTicketErrors[keyof UpdateTicketErrors];
-
-export type UpdateTicketResponses = {
-    /**
-     * Successful Response
-     */
-    200: TicketRead;
-};
-
-export type UpdateTicketResponse = UpdateTicketResponses[keyof UpdateTicketResponses];
-
-export type ReadTicketMessagesData = {
-    body?: never;
-    path: {
-        /**
-         * Ticket Id
-         */
-        ticket_id: string;
-    };
-    query?: {
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/v1/tickets/{ticket_id}/messages';
-};
-
-export type ReadTicketMessagesErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadTicketMessagesError = ReadTicketMessagesErrors[keyof ReadTicketMessagesErrors];
-
-export type ReadTicketMessagesResponses = {
-    /**
-     * Successful Response
-     */
-    200: TicketMessagesRead;
-};
-
-export type ReadTicketMessagesResponse = ReadTicketMessagesResponses[keyof ReadTicketMessagesResponses];
-
-export type CreateTicketMessageData = {
-    body: BodyCreateTicketMessage;
-    path: {
-        /**
-         * Ticket Id
-         */
-        ticket_id: string;
-    };
-    query?: never;
-    url: '/api/v1/tickets/{ticket_id}/messages';
-};
-
-export type CreateTicketMessageErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateTicketMessageError = CreateTicketMessageErrors[keyof CreateTicketMessageErrors];
-
-export type CreateTicketMessageResponses = {
-    /**
-     * Successful Response
-     */
-    200: TicketMessageRead;
-};
-
-export type CreateTicketMessageResponse = CreateTicketMessageResponses[keyof CreateTicketMessageResponses];
-
-export type ReadKycDocumentTypesData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/kyc/doc-types';
-};
-
-export type ReadKycDocumentTypesResponses = {
-    /**
-     * Response Read Kyc Document Types
-     *
-     * Successful Response
-     */
-    200: Array<KycDocumentTypeRead>;
-};
-
-export type ReadKycDocumentTypesResponse = ReadKycDocumentTypesResponses[keyof ReadKycDocumentTypesResponses];
-
-export type CreateKycDocumentTypeData = {
-    body: KycDocumentTypeCreate;
-    path?: never;
-    query?: never;
-    url: '/api/v1/kyc/doc-types';
-};
-
-export type CreateKycDocumentTypeErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateKycDocumentTypeError = CreateKycDocumentTypeErrors[keyof CreateKycDocumentTypeErrors];
-
-export type CreateKycDocumentTypeResponses = {
-    /**
-     * Successful Response
-     */
-    200: KycDocumentTypeRead;
-};
-
-export type CreateKycDocumentTypeResponse = CreateKycDocumentTypeResponses[keyof CreateKycDocumentTypeResponses];
-
-export type ReadKycDocumentsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Filters
-         *
-         * A JSON string representing filter conditions.
-         */
-        filters?: string | null;
-        /**
-         * Sort
-         *
-         * e.g. name:asc or user__email:desc
-         */
-        sort?: string | null;
-        /**
-         * Search
-         *
-         * A string for global search across string fields.
-         */
-        search?: string | null;
-        /**
-         * Page
-         *
-         * Page number
-         */
-        page?: number;
-        /**
-         * Size
-         *
-         * Page size
-         */
-        size?: number;
-    };
-    url: '/api/v1/kyc/documents';
-};
-
-export type ReadKycDocumentsErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReadKycDocumentsError = ReadKycDocumentsErrors[keyof ReadKycDocumentsErrors];
-
-export type ReadKycDocumentsResponses = {
-    /**
-     * Successful Response
-     */
-    200: PageKycDocumentRead;
-};
-
-export type ReadKycDocumentsResponse = ReadKycDocumentsResponses[keyof ReadKycDocumentsResponses];
-
-export type CreateKycDocumentData = {
-    body: BodyCreateKycDocument;
-    path?: never;
-    query?: never;
-    url: '/api/v1/kyc/documents';
-};
-
-export type CreateKycDocumentErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateKycDocumentError = CreateKycDocumentErrors[keyof CreateKycDocumentErrors];
-
-export type CreateKycDocumentResponses = {
-    /**
-     * Successful Response
-     */
-    200: KycDocumentRead;
-};
-
-export type CreateKycDocumentResponse = CreateKycDocumentResponses[keyof CreateKycDocumentResponses];
-
-export type ReadMyKycDocumentsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/api/v1/kyc/me/documents';
-};
-
-export type ReadMyKycDocumentsResponses = {
-    /**
-     * Response Read My Kyc Documents
-     *
-     * Successful Response
-     */
-    200: Array<KycDocumentRead>;
-};
-
-export type ReadMyKycDocumentsResponse = ReadMyKycDocumentsResponses[keyof ReadMyKycDocumentsResponses];
-
-export type ReviewKycDocumentData = {
-    body: KycDocumentReviewCreate;
-    path: {
-        /**
-         * Doc Id
-         */
-        doc_id: string;
-    };
-    query?: never;
-    url: '/api/v1/kyc/documents/{doc_id}/review';
-};
-
-export type ReviewKycDocumentErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type ReviewKycDocumentError = ReviewKycDocumentErrors[keyof ReviewKycDocumentErrors];
-
-export type ReviewKycDocumentResponses = {
-    /**
-     * Successful Response
-     */
-    200: KycDocumentRead;
-};
-
-export type ReviewKycDocumentResponse = ReviewKycDocumentResponses[keyof ReviewKycDocumentResponses];
-
-export type SetRoleKycRequirementsData = {
-    body: KycRequirementCreate;
-    path: {
-        /**
-         * Role Id
-         */
-        role_id: number;
-    };
-    query?: never;
-    url: '/api/v1/kyc/role-requirements/{role_id}';
-};
-
-export type SetRoleKycRequirementsErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type SetRoleKycRequirementsError = SetRoleKycRequirementsErrors[keyof SetRoleKycRequirementsErrors];
-
-export type SetRoleKycRequirementsResponses = {
-    /**
-     * Successful Response
-     */
-    200: Message;
-};
-
-export type SetRoleKycRequirementsResponse = SetRoleKycRequirementsResponses[keyof SetRoleKycRequirementsResponses];
 
 export type DeleteFileData = {
     body?: never;

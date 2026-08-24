@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AddFilesToIeltsModuleData, AddFilesToIeltsModuleErrors, AddFilesToIeltsModuleResponses, AdvTranslateData, AdvTranslateErrors, AdvTranslateResponses, CreateIeltsAttemptData, CreateIeltsAttemptErrors, CreateIeltsAttemptResponses, CreateIeltsExamData, CreateIeltsExamErrors, CreateIeltsExamResponses, CreateIeltsModuleData, CreateIeltsModuleErrors, CreateIeltsModuleResponses, CreateKycDocumentData, CreateKycDocumentErrors, CreateKycDocumentResponses, CreateKycDocumentTypeData, CreateKycDocumentTypeErrors, CreateKycDocumentTypeResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, CreateTicketData, CreateTicketErrors, CreateTicketMessageData, CreateTicketMessageErrors, CreateTicketMessageResponses, CreateTicketResponses, CreateUserData, CreateUserErrors, CreateUserResponses, DeleteFileData, DeleteFileErrors, DeleteFileResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DeleteUserData, DeleteUserErrors, DeleteUserMeData, DeleteUserMeResponses, DeleteUserResponses, HealthCheckData, HealthCheckResponses, LoginAccessTokenData, LoginAccessTokenErrors, LoginAccessTokenResponses, LookupData, LookupErrors, LookupResponses, ReadFileByFilenameData, ReadFileByFilenameErrors, ReadFileByFilenameResponses, ReadFileByIdData, ReadFileByIdErrors, ReadFileByIdResponses, ReadFileSetData, ReadFileSetErrors, ReadFileSetResponses, ReadIeltsExamByIdData, ReadIeltsExamByIdErrors, ReadIeltsExamByIdResponses, ReadIeltsExamsData, ReadIeltsExamsResponses, ReadIeltsModuleByIdData, ReadIeltsModuleByIdErrors, ReadIeltsModuleByIdResponses, ReadIeltsModulesData, ReadIeltsModulesResponses, ReadKycDocumentsData, ReadKycDocumentsErrors, ReadKycDocumentsResponses, ReadKycDocumentTypesData, ReadKycDocumentTypesResponses, ReadLastAttemptData, ReadLastAttemptErrors, ReadLastAttemptResponses, ReadMyIeltsAttemptsData, ReadMyIeltsAttemptsResponses, ReadMyKycDocumentsData, ReadMyKycDocumentsResponses, ReadPermissionsData, ReadPermissionsResponses, ReadRolesData, ReadRolesResponses, ReadSettingsData, ReadSettingsResponses, ReadTicketByIdData, ReadTicketByIdErrors, ReadTicketByIdResponses, ReadTicketMessagesData, ReadTicketMessagesErrors, ReadTicketMessagesResponses, ReadTicketsData, ReadTicketsErrors, ReadTicketsResponses, ReadUserByIdData, ReadUserByIdErrors, ReadUserByIdResponses, ReadUserMeData, ReadUserMeResponses, ReadUserRolesData, ReadUserRolesErrors, ReadUserRolesResponses, ReadUsersData, ReadUsersErrors, ReadUsersResponses, ReadWordnetData, ReadWordnetErrors, ReadWordnetResponses, RecoverPasswordData, RecoverPasswordErrors, RecoverPasswordHtmlContentData, RecoverPasswordHtmlContentErrors, RecoverPasswordHtmlContentResponses, RecoverPasswordResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, ReviewKycDocumentData, ReviewKycDocumentErrors, ReviewKycDocumentResponses, SearchData, SearchErrors, SearchResponses, SetRoleKycRequirementsData, SetRoleKycRequirementsErrors, SetRoleKycRequirementsResponses, TestEmailData, TestEmailErrors, TestEmailResponses, TestTokenData, TestTokenResponses, TranslateData, TranslateErrors, TranslateResponses, UpdateIeltsExamData, UpdateIeltsExamErrors, UpdateIeltsExamResponses, UpdateIeltsModuleData, UpdateIeltsModuleErrors, UpdateIeltsModuleResponses, UpdatePasswordMeData, UpdatePasswordMeErrors, UpdatePasswordMeResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateSettingsData, UpdateSettingsErrors, UpdateSettingsResponses, UpdateTicketData, UpdateTicketErrors, UpdateTicketResponses, UpdateUserData, UpdateUserErrors, UpdateUserMeData, UpdateUserMeErrors, UpdateUserMeResponses, UpdateUserResponses } from './types.gen';
+import type { AddFilesToIeltsModuleData, AddFilesToIeltsModuleErrors, AddFilesToIeltsModuleResponses, AdvTranslateData, AdvTranslateErrors, AdvTranslateResponses, CreateAiChatData, CreateAiChatErrors, CreateAiChatResponses, CreateIeltsAttemptData, CreateIeltsAttemptErrors, CreateIeltsAttemptResponses, CreateIeltsExamData, CreateIeltsExamErrors, CreateIeltsExamResponses, CreateIeltsModuleData, CreateIeltsModuleErrors, CreateIeltsModuleResponses, CreateMessageData, CreateMessageErrors, CreateMessageResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, CreateUserData, CreateUserErrors, CreateUserResponses, DeleteFileData, DeleteFileErrors, DeleteFileResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DeleteUserData, DeleteUserErrors, DeleteUserMeData, DeleteUserMeResponses, DeleteUserResponses, HealthCheckData, HealthCheckResponses, LoginAccessTokenData, LoginAccessTokenErrors, LoginAccessTokenResponses, LookupData, LookupErrors, LookupResponses, ReadChatMessagesData, ReadChatMessagesErrors, ReadChatMessagesResponses, ReadChatsData, ReadChatsResponses, ReadFileByFilenameData, ReadFileByFilenameErrors, ReadFileByFilenameResponses, ReadFileByIdData, ReadFileByIdErrors, ReadFileByIdResponses, ReadFileSetData, ReadFileSetErrors, ReadFileSetResponses, ReadIeltsExamByIdData, ReadIeltsExamByIdErrors, ReadIeltsExamByIdResponses, ReadIeltsExamsData, ReadIeltsExamsResponses, ReadIeltsModuleByIdData, ReadIeltsModuleByIdErrors, ReadIeltsModuleByIdResponses, ReadIeltsModulesData, ReadIeltsModulesResponses, ReadLastAttemptData, ReadLastAttemptErrors, ReadLastAttemptResponses, ReadMyIeltsAttemptsData, ReadMyIeltsAttemptsResponses, ReadPermissionsData, ReadPermissionsResponses, ReadRolesData, ReadRolesResponses, ReadSettingsData, ReadSettingsResponses, ReadUserByIdData, ReadUserByIdErrors, ReadUserByIdResponses, ReadUserMeData, ReadUserMeResponses, ReadUserRolesData, ReadUserRolesErrors, ReadUserRolesResponses, ReadUsersData, ReadUsersErrors, ReadUsersResponses, ReadWordnetData, ReadWordnetErrors, ReadWordnetResponses, RecoverPasswordData, RecoverPasswordErrors, RecoverPasswordHtmlContentData, RecoverPasswordHtmlContentErrors, RecoverPasswordHtmlContentResponses, RecoverPasswordResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SearchData, SearchErrors, SearchResponses, TestEmailData, TestEmailErrors, TestEmailResponses, TestTokenData, TestTokenResponses, TranslateData, TranslateErrors, TranslateResponses, UpdateIeltsExamData, UpdateIeltsExamErrors, UpdateIeltsExamResponses, UpdateIeltsModuleData, UpdateIeltsModuleErrors, UpdateIeltsModuleResponses, UpdatePasswordMeData, UpdatePasswordMeErrors, UpdatePasswordMeResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateSettingsData, UpdateSettingsErrors, UpdateSettingsResponses, UpdateUserData, UpdateUserErrors, UpdateUserMeData, UpdateUserMeErrors, UpdateUserMeResponses, UpdateUserResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -16,6 +16,68 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
      * used to access values that aren't defined as part of the SDK function.
      */
     meta?: Record<string, unknown>;
+};
+
+/**
+ * Read Chats
+ */
+export const readChats = <ThrowOnError extends boolean = true>(options?: Options<ReadChatsData, ThrowOnError>) => {
+    return (options?.client ?? client).get<ReadChatsResponses, unknown, ThrowOnError>({
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/ai/chats',
+        ...options
+    });
+};
+
+/**
+ * Read Chat Messages
+ */
+export const readChatMessages = <ThrowOnError extends boolean = true>(options: Options<ReadChatMessagesData, ThrowOnError>) => {
+    return (options.client ?? client).get<ReadChatMessagesResponses, ReadChatMessagesErrors, ThrowOnError>({
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/ai/chat/{chat_id}',
+        ...options
+    });
+};
+
+/**
+ * Create Message
+ */
+export const createMessage = <ThrowOnError extends boolean = true>(options: Options<CreateMessageData, ThrowOnError>) => {
+    return (options.client ?? client).post<CreateMessageResponses, CreateMessageErrors, ThrowOnError>({
+        url: '/api/v1/ai/chat/{chat_id}/messages',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Create Ai Chat
+ */
+export const createAiChat = <ThrowOnError extends boolean = true>(options?: Options<CreateAiChatData, ThrowOnError>) => {
+    return (options?.client ?? client).post<CreateAiChatResponses, CreateAiChatErrors, ThrowOnError>({
+        security: [
+            {
+                scheme: 'bearer',
+                type: 'http'
+            }
+        ],
+        url: '/api/v1/ai/chat',
+        ...options
+    });
 };
 
 /**
@@ -71,7 +133,7 @@ export const advTranslate = <ThrowOnError extends boolean = true>(options: Optio
  */
 export const readWordnet = <ThrowOnError extends boolean = true>(options: Options<ReadWordnetData, ThrowOnError>) => {
     return (options.client ?? client).get<ReadWordnetResponses, ReadWordnetErrors, ThrowOnError>({
-        url: '/api/v1/wordnet/',
+        url: '/api/v1/wordnet',
         ...options
     });
 };
@@ -719,245 +781,6 @@ export const healthCheck = <ThrowOnError extends boolean = true>(options?: Optio
     return (options?.client ?? client).get<HealthCheckResponses, unknown, ThrowOnError>({
         url: '/api/v1/utils/health-check/',
         ...options
-    });
-};
-
-/**
- * Read Tickets
- */
-export const readTickets = <ThrowOnError extends boolean = true>(options?: Options<ReadTicketsData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ReadTicketsResponses, ReadTicketsErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/tickets/',
-        ...options
-    });
-};
-
-/**
- * Create Ticket
- */
-export const createTicket = <ThrowOnError extends boolean = true>(options: Options<CreateTicketData, ThrowOnError>) => {
-    return (options.client ?? client).post<CreateTicketResponses, CreateTicketErrors, ThrowOnError>({
-        ...formDataBodySerializer,
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/tickets/',
-        ...options,
-        headers: {
-            'Content-Type': null,
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Read Ticket By Id
- */
-export const readTicketById = <ThrowOnError extends boolean = true>(options: Options<ReadTicketByIdData, ThrowOnError>) => {
-    return (options.client ?? client).get<ReadTicketByIdResponses, ReadTicketByIdErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/tickets/{ticket_id}',
-        ...options
-    });
-};
-
-/**
- * Update Ticket
- */
-export const updateTicket = <ThrowOnError extends boolean = true>(options: Options<UpdateTicketData, ThrowOnError>) => {
-    return (options.client ?? client).patch<UpdateTicketResponses, UpdateTicketErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/tickets/{ticket_id}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Read Ticket Messages
- */
-export const readTicketMessages = <ThrowOnError extends boolean = true>(options: Options<ReadTicketMessagesData, ThrowOnError>) => {
-    return (options.client ?? client).get<ReadTicketMessagesResponses, ReadTicketMessagesErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/tickets/{ticket_id}/messages',
-        ...options
-    });
-};
-
-/**
- * Create Ticket Message
- */
-export const createTicketMessage = <ThrowOnError extends boolean = true>(options: Options<CreateTicketMessageData, ThrowOnError>) => {
-    return (options.client ?? client).post<CreateTicketMessageResponses, CreateTicketMessageErrors, ThrowOnError>({
-        ...formDataBodySerializer,
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/tickets/{ticket_id}/messages',
-        ...options,
-        headers: {
-            'Content-Type': null,
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Read Kyc Document Types
- */
-export const readKycDocumentTypes = <ThrowOnError extends boolean = true>(options?: Options<ReadKycDocumentTypesData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ReadKycDocumentTypesResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/kyc/doc-types',
-        ...options
-    });
-};
-
-/**
- * Create Kyc Document Type
- */
-export const createKycDocumentType = <ThrowOnError extends boolean = true>(options: Options<CreateKycDocumentTypeData, ThrowOnError>) => {
-    return (options.client ?? client).post<CreateKycDocumentTypeResponses, CreateKycDocumentTypeErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/kyc/doc-types',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Read Kyc Documents
- */
-export const readKycDocuments = <ThrowOnError extends boolean = true>(options?: Options<ReadKycDocumentsData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ReadKycDocumentsResponses, ReadKycDocumentsErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/kyc/documents',
-        ...options
-    });
-};
-
-/**
- * Create Kyc Document
- */
-export const createKycDocument = <ThrowOnError extends boolean = true>(options: Options<CreateKycDocumentData, ThrowOnError>) => {
-    return (options.client ?? client).post<CreateKycDocumentResponses, CreateKycDocumentErrors, ThrowOnError>({
-        ...formDataBodySerializer,
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/kyc/documents',
-        ...options,
-        headers: {
-            'Content-Type': null,
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Read My Kyc Documents
- */
-export const readMyKycDocuments = <ThrowOnError extends boolean = true>(options?: Options<ReadMyKycDocumentsData, ThrowOnError>) => {
-    return (options?.client ?? client).get<ReadMyKycDocumentsResponses, unknown, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/kyc/me/documents',
-        ...options
-    });
-};
-
-/**
- * Review Kyc Document
- */
-export const reviewKycDocument = <ThrowOnError extends boolean = true>(options: Options<ReviewKycDocumentData, ThrowOnError>) => {
-    return (options.client ?? client).post<ReviewKycDocumentResponses, ReviewKycDocumentErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/kyc/documents/{doc_id}/review',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Set Role Kyc Requirements
- */
-export const setRoleKycRequirements = <ThrowOnError extends boolean = true>(options: Options<SetRoleKycRequirementsData, ThrowOnError>) => {
-    return (options.client ?? client).post<SetRoleKycRequirementsResponses, SetRoleKycRequirementsErrors, ThrowOnError>({
-        security: [
-            {
-                scheme: 'bearer',
-                type: 'http'
-            }
-        ],
-        url: '/api/v1/kyc/role-requirements/{role_id}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
     });
 };
 

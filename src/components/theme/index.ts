@@ -67,7 +67,7 @@ const config = defineConfig({
 					solid: { value: "{colors.primary}" },
 					contrast: { value: "{colors.white}" },
 					fg: { value: { base: "{colors.primary.600}", _dark: "{colors.primary.300}" } },
-					muted: { value: "{colors.primary.100}" },
+					muted: { value: {base: "{colors.primary.100}", _dark: "{colors.primary.800}"} },
 					subtle: { value: {base: "{colors.primary.300}", _dark: "{colors.primary.900}"} },
 					emphasized: { value: { base: "{colors.primary.300}", _dark: "{colors.primary.700}" } },
 					focusRing: { value: "{colors.primary.500}" },
