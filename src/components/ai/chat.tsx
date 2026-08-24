@@ -4,9 +4,9 @@ import { AiMessageRead, readChatMessages, readChats } from "@/client";
 import { VStack, Text, Button, HStack, Box, ScrollArea, ScrollAreaRootProps, Collapsible, CollapsibleRootProps, InputGroup, IconButton, Textarea } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { ChatProvider, useChat } from "./ChatProvider";
-import { LuChevronRight, LuMic } from "react-icons/lu";
+import { LuCheck, LuChevronRight, LuCopy, LuMic } from "react-icons/lu";
 
-import type { ButtonProps, StackProps } from "@chakra-ui/react"
+import type { ButtonProps, IconButtonProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5";
 import { BiUpArrowAlt } from "react-icons/bi";
 import { forwardRef, useLayoutEffect, useRef, useState } from "react";
@@ -143,7 +143,7 @@ export function ChatBox({ ...props }: StackProps) {
 	return (
 		<Scroller variant="always" pos="relative" ref={ref}>
 
-			<VStack {...props} gap="12" mx="auto">
+			<VStack {...props} gap="9" mx="auto">
 
 				<Text color="fg.muted" fontWeight="medium" fontSize="small">
 					<ChatTime dt={chat.created_at} />
@@ -161,26 +161,77 @@ export function ChatBox({ ...props }: StackProps) {
 	)
 }
 
+
 export function Message({ msg }: { msg: AiMessageRead }) {
 
 	if (msg.role === "user") {
-		return (
-			<Box
-				alignSelf="end"
-				w="70%"
-				borderRadius="xl"
-				p="3"
-				bg="primary.muted"
-			>
-				<Text>
-					{msg.content}
-				</Text>
-
-
-			</Box>
-		)
+		return <UserMessage msg={msg} />
 	}
 
+	return <AssistantMessage msg={msg} />
+}
+
+export function CopyButton({ text, ...props }: { text: string } & IconButtonProps) {
+	const [copied, setCopied] = useState(false)
+
+	const copy = async () => {
+		await navigator.clipboard.writeText(text)
+		setCopied(true)
+
+		setTimeout(() => setCopied(false), 1500)
+	}
+
+	return (
+		<IconButton
+			aria-label="Copy message"
+			size="xs"
+			variant="ghost"
+			transition="opacity 0.15s"
+			onClick={copy}
+			{...props}
+		>
+			{copied ? <LuCheck /> : <LuCopy />}
+		</IconButton>
+	)
+}
+
+export function UserMessage({ msg }: { msg: AiMessageRead }) {
+	return (
+		<Box
+			position="relative"
+			alignSelf="end"
+			w="70%"
+			pb="9"
+			_hover={{
+				"& .action-buttons": {
+					opacity: 1,
+				},
+			}}
+		>
+			<Box
+				borderRadius="xl"
+				bg="primary.muted"
+				p="3"
+			>
+				<Text>{msg.content}</Text>
+			</Box>
+
+			<HStack
+				className="action-buttons"
+				position="absolute"
+				bottom="0"
+				right="0"
+				opacity="0"
+				gap="0"
+			>
+				<CopyButton text={msg.content} />
+			</HStack>
+		</Box>
+	)
+}
+
+
+export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 	return (
 		<Box alignSelf="start">
 			<Text>
