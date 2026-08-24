@@ -1,10 +1,10 @@
 "use client"
 
 import { AiMessageRead, readChatMessages, readChats } from "@/client";
-import { VStack, Text, Input, Button, HStack, Box, ScrollArea, ScrollAreaRootProps, Collapsible, CollapsibleRootProps, InputGroup, IconButton, Textarea } from "@chakra-ui/react";
+import { VStack, Text, Button, HStack, Box, ScrollArea, ScrollAreaRootProps, Collapsible, CollapsibleRootProps, InputGroup, IconButton, Textarea } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { ChatProvider, useChat } from "./ChatProvider";
-import { LuChevronRight, LuMic, LuSend } from "react-icons/lu";
+import { LuChevronRight, LuMic } from "react-icons/lu";
 
 import type { ButtonProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5";
