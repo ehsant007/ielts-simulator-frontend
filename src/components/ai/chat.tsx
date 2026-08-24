@@ -1,16 +1,17 @@
 "use client"
 
-import { AiMessageRead, readChatMessages, readChats } from "@/client";
-import { VStack, Text, Button, HStack, Box, ScrollArea, ScrollAreaRootProps, Collapsible, CollapsibleRootProps, InputGroup, IconButton, Textarea } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
+import { AiMessageRead, createMessage, readChats } from "@/client"
+import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea } from "@chakra-ui/react"
+import { useQuery } from "@tanstack/react-query"
 import { ChatProvider, useChat } from "./ChatProvider";
-import { LuCheck, LuChevronRight, LuCopy, LuMic } from "react-icons/lu";
+import { LuMic, LuRefreshCw } from "react-icons/lu"
 
-import type { ButtonProps, IconButtonProps, StackProps } from "@chakra-ui/react"
-import { IoCreateOutline } from "react-icons/io5";
-import { BiUpArrowAlt } from "react-icons/bi";
-import { forwardRef, useLayoutEffect, useRef, useState } from "react";
-import { useFormatter } from "next-intl";
+import type { ButtonProps, StackProps } from "@chakra-ui/react"
+import { IoCreateOutline } from "react-icons/io5"
+import { BiUpArrowAlt } from "react-icons/bi"
+import { Fragment, useLayoutEffect, useRef, useState } from "react"
+import { MdEdit } from "react-icons/md"
+import { ChatTime, Collapse, isSameDay, Scroller, CopyButton } from "./utils";
 
 
 export function ChatPanel() {
@@ -82,44 +83,9 @@ export function ChatList({ ...props }: StackProps) {
 	)
 }
 
-export function ChatTime({ dt }: { dt: string }) {
-	const format = useFormatter()
-
-	const date = new Date(dt)
-	const now = new Date()
-
-	const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-	const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-
-	const diffDays = Math.round(
-		(today.getTime() - dateDay.getTime()) / 86_400_000,
-	)
-
-	const time = format.dateTime(date, {
-		hour: "numeric",
-		minute: "2-digit",
-	})
-
-	if (diffDays === 0) return `Today ${time}`
-	if (diffDays === 1) return `Yesterday ${time}`
-
-	return format.dateTime(date, {
-		month: "short",
-		day: "numeric",
-		hour: "numeric",
-		minute: "2-digit",
-	})
-}
-
 export function ChatBox({ ...props }: StackProps) {
 	const ref = useRef<HTMLDivElement>(null)
-	const { chat } = useChat()
-
-	const { data: messages, isLoading } = useQuery({
-		enabled: !!chat,
-		queryFn: () => readChatMessages({ path: { chat_id: chat!.id } }).then((res) => res.data),
-		queryKey: ["chat", chat?.id, "messages"],
-	})
+	const { chat, messages, isLoading, waitingMessage } = useChat()
 
 	useLayoutEffect(() => {
 		const el = ref.current
@@ -143,15 +109,32 @@ export function ChatBox({ ...props }: StackProps) {
 	return (
 		<Scroller variant="always" pos="relative" ref={ref}>
 
-			<VStack {...props} gap="9" mx="auto">
+			<VStack {...props} gap="3" mx="auto">
 
-				<Text color="fg.muted" fontWeight="medium" fontSize="small">
-					<ChatTime dt={chat.created_at} />
-				</Text>
+				{messages?.map((msg, index) => {
+					const previous = messages[index - 1]
+					const showDate = !previous || !isSameDay(previous.created_at, msg.created_at)
 
-				{messages?.map((msg) =>
-					<Message key={msg.id} msg={msg} />
-				)}
+					return (
+						<Fragment key={msg.id}>
+							{showDate && (
+								<Text
+									color="fg.muted"
+									fontWeight="medium"
+									fontSize="small"
+								>
+									<ChatTime dt={msg.created_at} />
+								</Text>
+							)}
+
+							<Message msg={msg} />
+						</Fragment>
+					)
+				})}
+
+				{waitingMessage &&
+					<Text alignSelf={"start"}>{waitingMessage}</Text>
+				}
 
 				<Box h="10rem" />
 				<ChatInput />
@@ -169,30 +152,6 @@ export function Message({ msg }: { msg: AiMessageRead }) {
 	}
 
 	return <AssistantMessage msg={msg} />
-}
-
-export function CopyButton({ text, ...props }: { text: string } & IconButtonProps) {
-	const [copied, setCopied] = useState(false)
-
-	const copy = async () => {
-		await navigator.clipboard.writeText(text)
-		setCopied(true)
-
-		setTimeout(() => setCopied(false), 1500)
-	}
-
-	return (
-		<IconButton
-			aria-label="Copy message"
-			size="xs"
-			variant="ghost"
-			transition="opacity 0.15s"
-			onClick={copy}
-			{...props}
-		>
-			{copied ? <LuCheck /> : <LuCopy />}
-		</IconButton>
-	)
 }
 
 export function UserMessage({ msg }: { msg: AiMessageRead }) {
@@ -225,6 +184,13 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 				gap="0"
 			>
 				<CopyButton text={msg.content} />
+				<IconButton
+					aria-label="Edit message"
+					size="xs"
+					variant="ghost"
+				>
+					<MdEdit />
+				</IconButton>
 			</HStack>
 		</Box>
 	)
@@ -237,6 +203,19 @@ export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 			<Text>
 				{msg.content}
 			</Text>
+
+			<HStack gap="0" mt="1">
+				<CopyButton text={msg.content} color="fg.muted" />
+				<IconButton
+					aria-label="Try again"
+					size="xs"
+					variant="ghost"
+					transition="opacity 0.15s"
+					color="fg.muted"
+				>
+					<LuRefreshCw />
+				</IconButton>
+			</HStack>
 		</Box>
 	)
 }
@@ -244,6 +223,49 @@ export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 
 export function ChatInput() {
 	const [value, setValue] = useState("")
+	const { chat, addMessage, messages, setWaitingMessage } = useChat()
+
+	const handleSend = async () => {
+		if (!chat)
+			return
+		if (!value)
+			return
+
+		addMessage({
+			id: messages[messages.length - 1].id + 1,
+			content: value,
+			created_at: new Date().toDateString(),
+			chat_id: chat.id,
+			role: "user"
+		})
+
+		setValue("")
+
+		const waitingMessages = [
+			"Thinking ...",
+			"Working on it please wait ...",
+		]
+
+		setWaitingMessage(waitingMessages[0])
+		let wmIndex = 0
+		const interval = setInterval(() => {
+			wmIndex = (wmIndex + 1) % waitingMessages.length
+			setWaitingMessage(waitingMessages[wmIndex])
+		}, 1000)
+
+		const response = await createMessage({
+			body: {
+				content: value,
+			},
+			path: {
+				chat_id: chat.id,
+			}
+		})
+
+		addMessage(response.data)
+		clearInterval(interval)
+		setWaitingMessage(null)
+	}
 
 	return (
 		<Box
@@ -277,6 +299,7 @@ export function ChatInput() {
 							h="auto"
 							p="1.5"
 							borderRadius="full"
+							onClick={handleSend}
 						>
 							<BiUpArrowAlt />
 						</IconButton>
@@ -301,49 +324,3 @@ export function ChatInput() {
 }
 
 
-const Scroller = forwardRef<HTMLDivElement, ScrollAreaRootProps>(({ children, ...props }, ref) => {
-	return (
-		<ScrollArea.Root {...props} pe="3" ref={ref}>
-			<ScrollArea.Viewport ref={ref}>
-				<ScrollArea.Content spaceY="4" textStyle="sm">
-
-					{children}
-
-				</ScrollArea.Content>
-			</ScrollArea.Viewport>
-			<ScrollArea.Scrollbar>
-				<ScrollArea.Thumb />
-			</ScrollArea.Scrollbar>
-			<ScrollArea.Corner />
-		</ScrollArea.Root>
-	)
-})
-Scroller.displayName = "Scroller"
-
-
-function Collapse({ children, title, ...props }: CollapsibleRootProps) {
-	return (
-		<Collapsible.Root defaultOpen {...props}>
-			<Collapsible.Trigger
-				display="flex"
-				cursor="pointer"
-				alignItems="center"
-				//w="full"
-				color="fg.muted"
-			>
-				{title}
-				<Collapsible.Indicator
-					transition="transform 0.2s"
-					_open={{ transform: "rotate(90deg)" }}
-				>
-					<LuChevronRight />
-				</Collapsible.Indicator>
-			</Collapsible.Trigger>
-			<Collapsible.Content>
-				<Box>
-					{children}
-				</Box>
-			</Collapsible.Content>
-		</Collapsible.Root>
-	)
-}
