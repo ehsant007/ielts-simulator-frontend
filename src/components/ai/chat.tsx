@@ -2,7 +2,7 @@
 
 import { AiMessageRead, createMessage, readChats } from "@/client"
 import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea } from "@chakra-ui/react"
-import { useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery } from "@tanstack/react-query"
 import { ChatProvider, useChat } from "./ChatProvider";
 import { LuMic, LuRefreshCw } from "react-icons/lu"
 
@@ -11,7 +11,7 @@ import { IoCreateOutline } from "react-icons/io5"
 import { BiUpArrowAlt } from "react-icons/bi"
 import { Fragment, useLayoutEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
-import { ChatTime, Collapse, isSameDay, Scroller, CopyButton } from "./utils";
+import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScroller, TextWriter } from "./utils";
 
 
 export function ChatPanel() {
@@ -47,12 +47,7 @@ export function ListButton({ children, ...props }: ButtonProps) {
 }
 
 export function ChatList({ ...props }: StackProps) {
-	const { setChat } = useChat()
-
-	const { data: chats } = useQuery({
-		queryFn: () => readChats().then((res) => res.data),
-		queryKey: ["chats"],
-	})
+	const { chat, chats, setChat } = useChat()
 
 	return (
 		<Scroller w="18rem" variant="always" borderEnd="sm" borderColor="border">
@@ -66,12 +61,13 @@ export function ChatList({ ...props }: StackProps) {
 
 				<Collapse title="Recent" w="full">
 					<VStack alignItems="start" gap="0">
-						{chats?.map((chat) =>
+						{chats?.map((c) =>
 							<ListButton
-								key={chat.id}
-								onClick={() => setChat(chat)}
+								key={c.id}
+								onClick={() => setChat(c)}
+								bg={c.id === chat?.id ? "primary.subtle" : "none"}
 							>
-								{chat.title}
+								{c.title}
 							</ListButton>
 						)}
 					</VStack>
@@ -84,20 +80,7 @@ export function ChatList({ ...props }: StackProps) {
 }
 
 export function ChatBox({ ...props }: StackProps) {
-	const ref = useRef<HTMLDivElement>(null)
 	const { chat, messages, isLoading, waitingMessage } = useChat()
-
-	useLayoutEffect(() => {
-		const el = ref.current
-
-		if (el) {
-			el.scrollTo({
-				top: el.scrollHeight,
-				behavior: "smooth",
-			})
-		}
-	}, [messages])
-
 
 	if (!chat) {
 		if (isLoading)
@@ -107,7 +90,7 @@ export function ChatBox({ ...props }: StackProps) {
 	}
 
 	return (
-		<Scroller variant="always" pos="relative" ref={ref}>
+		<StickToBottomScroller variant="always" pos="relative">
 
 			<VStack {...props} gap="3" mx="auto">
 
@@ -133,14 +116,16 @@ export function ChatBox({ ...props }: StackProps) {
 				})}
 
 				{waitingMessage &&
-					<Text alignSelf={"start"}>{waitingMessage}</Text>
+					<Text alignSelf={"start"} color="fg.info">
+						<TextWriter>{waitingMessage}</TextWriter>
+					</Text>
 				}
 
 				<Box h="10rem" />
 				<ChatInput />
 			</VStack>
 
-		</Scroller>
+		</StickToBottomScroller>
 	)
 }
 
@@ -223,48 +208,12 @@ export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 
 export function ChatInput() {
 	const [value, setValue] = useState("")
-	const { chat, addMessage, messages, setWaitingMessage } = useChat()
+	const { sendMessage } = useChat()
 
-	const handleSend = async () => {
-		if (!chat)
-			return
-		if (!value)
-			return
-
-		addMessage({
-			id: messages[messages.length - 1].id + 1,
-			content: value,
-			created_at: new Date().toDateString(),
-			chat_id: chat.id,
-			role: "user"
-		})
-
-		setValue("")
-
-		const waitingMessages = [
-			"Thinking ...",
-			"Working on it please wait ...",
-		]
-
-		setWaitingMessage(waitingMessages[0])
-		let wmIndex = 0
-		const interval = setInterval(() => {
-			wmIndex = (wmIndex + 1) % waitingMessages.length
-			setWaitingMessage(waitingMessages[wmIndex])
-		}, 1000)
-
-		const response = await createMessage({
-			body: {
-				content: value,
-			},
-			path: {
-				chat_id: chat.id,
-			}
-		})
-
-		addMessage(response.data)
-		clearInterval(interval)
-		setWaitingMessage(null)
+	const handleSend = () => {
+		const content = value.trim()
+		if (sendMessage(content))
+			setValue("")
 	}
 
 	return (

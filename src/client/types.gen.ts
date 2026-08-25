@@ -35,6 +35,14 @@ export type AiChatRead = {
 };
 
 /**
+ * AICreateMessageResponse
+ */
+export type AiCreateMessageResponse = {
+    request: AiMessageRead;
+    response: AiMessageRead;
+};
+
+/**
  * AIMessageCreate
  */
 export type AiMessageCreate = {
@@ -2066,7 +2074,7 @@ export type CreateMessageResponses = {
     /**
      * Successful Response
      */
-    200: AiMessageRead;
+    200: AiCreateMessageResponse;
 };
 
 export type CreateMessageResponse = CreateMessageResponses[keyof CreateMessageResponses];

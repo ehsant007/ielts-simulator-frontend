@@ -1,8 +1,9 @@
 import { Box, ScrollArea, ScrollAreaRootProps, Collapsible, CollapsibleRootProps, IconButton, IconButtonProps } from "@chakra-ui/react"
-import { LuCheck, LuChevronRight, LuCopy } from "react-icons/lu"
-import { forwardRef, useState } from "react"
+import { LuArrowDown, LuCheck, LuChevronRight, LuCopy } from "react-icons/lu"
+import { forwardRef, useEffect, useLayoutEffect, useState } from "react"
 import { useFormatter } from "next-intl"
-
+import { useStickToBottom } from "use-stick-to-bottom"
+import { useChat } from "./ChatProvider"
 
 export const Scroller = forwardRef<HTMLDivElement, ScrollAreaRootProps>(({ children, ...props }, ref) => {
 	return (
@@ -22,6 +23,63 @@ export const Scroller = forwardRef<HTMLDivElement, ScrollAreaRootProps>(({ child
 	)
 })
 Scroller.displayName = "Scroller"
+
+
+export const StickToBottomScroller = forwardRef<HTMLDivElement, ScrollAreaRootProps>(({ children, ...props }, ref) => {
+	const sticky = useStickToBottom()
+	const { messages } = useChat()
+
+	useLayoutEffect(() => {
+		const msg = messages[messages.length - 1]
+		if (msg && msg.role === "user")
+			sticky.scrollToBottom()
+	}, [messages, sticky])
+
+	return (
+		<ScrollArea.Root {...props} pe="3" ref={ref}>
+			{/* eslint-disable-next-line react-hooks/refs */}
+			<ScrollArea.Viewport ref={sticky.scrollRef}>
+				{/* eslint-disable-next-line react-hooks/refs */}
+				<ScrollArea.Content ref={sticky.contentRef} spaceY="4" textStyle="sm">
+
+					{children}
+
+				</ScrollArea.Content>
+			</ScrollArea.Viewport>
+			<ScrollArea.Scrollbar>
+				<ScrollArea.Thumb />
+			</ScrollArea.Scrollbar>
+			<ScrollArea.Corner />
+
+			{/* eslint-disable-next-line react-hooks/refs */}
+			{!sticky.isAtBottom && (
+				<Box
+					position="absolute"
+					bottom="6rem"
+					right="50%"
+					zIndex="10"
+				>
+					<IconButton
+						size="sm"
+						onClick={() => {
+							sticky.scrollToBottom()
+						}}
+
+						variant="solid"
+						borderRadius="full"
+						bg="primary.muted"
+						opacity="80%"
+						_hover={{ opacity: "100%" }}
+					>
+						<LuArrowDown />
+					</IconButton>
+				</Box>)
+			}
+
+		</ScrollArea.Root>
+	)
+})
+StickToBottomScroller.displayName = "StickToBottomScroller"
 
 
 export function Collapse({ children, title, ...props }: CollapsibleRootProps) {
@@ -113,5 +171,27 @@ export function CopyButton({ text, ...props }: { text: string } & IconButtonProp
 			{copied ? <LuCheck /> : <LuCopy />}
 		</IconButton>
 	)
+}
+
+
+export function TextWriter({ children: text, delay = 30 }: { children: string, delay?: number }) {
+	const [value, setValue] = useState("")
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setValue(prev => {
+				if (prev.length >= text.length) {
+					clearInterval(interval)
+					return prev
+				}
+
+				return text.slice(0, prev.length + 1)
+			})
+		}, delay)
+
+		return () => clearInterval(interval)
+	}, [text, delay])
+
+	return value
 }
 
