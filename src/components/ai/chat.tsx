@@ -1,9 +1,9 @@
 "use client"
 
 import { AiMessageRead } from "@/client"
-import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center } from "@chakra-ui/react"
+import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal } from "@chakra-ui/react"
 import { ChatProvider, useChat } from "./ChatProvider";
-import { LuMic, LuRefreshCw } from "react-icons/lu"
+import { LuDelete, LuEllipsis, LuMic, LuRefreshCw, LuTrash } from "react-icons/lu"
 
 import type { ButtonProps, InputGroupProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
@@ -72,13 +72,19 @@ export function ChatList({ ...props }: StackProps) {
 				>
 					<VStack alignItems="start" gap="0" mt="1">
 						{chats?.map((c) =>
-							<ListButton
+							<Box
 								key={c.id}
-								onClick={() => setChat(c)}
 								bg={c.id === chat?.id ? "primary.subtle" : "none"}
+								width="full"
+								borderRadius="xl"
 							>
-								{c.title}
-							</ListButton>
+								<ListButton
+									onClick={() => setChat(c)}
+								>
+									{c.title}
+									<ChatActionMenu />
+								</ListButton>
+							</Box>
 						)}
 					</VStack>
 				</Collapse>
@@ -86,6 +92,37 @@ export function ChatList({ ...props }: StackProps) {
 			</VStack>
 
 		</Scroller>
+	)
+}
+
+const ChatActionMenu = () => {
+	return (
+		<Menu.Root >
+			<Menu.Trigger asChild>
+				<IconButton variant="ghost" size="xs">
+					<LuEllipsis />
+				</IconButton>
+			</Menu.Trigger>
+			<Portal>
+				<Menu.Positioner>
+					<Menu.Content>
+						<Menu.ItemGroup>
+							<Menu.Item value="rename"><MdEdit />Rename</Menu.Item>
+						</Menu.ItemGroup>
+						<Menu.Separator />
+						<Menu.ItemGroup>
+							<Menu.Item
+								value="delete"
+								color="fg.error"
+								_hover={{ bg: "bg.error", color: "fg.error" }}
+							>
+								<LuTrash />Delete
+							</Menu.Item>
+						</Menu.ItemGroup>
+					</Menu.Content>
+				</Menu.Positioner>
+			</Portal>
+		</Menu.Root>
 	)
 }
 
