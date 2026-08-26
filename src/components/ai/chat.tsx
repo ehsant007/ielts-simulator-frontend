@@ -20,7 +20,7 @@ export function ChatPanel() {
 			<HStack
 				h="100%"
 			>
-				<ChatList p="3" />
+				<ChatList p="2" />
 				<ChatBox maxW="3xl" p="5" />
 			</HStack>
 		</ChatProvider>
@@ -62,7 +62,14 @@ export function ChatList({ ...props }: StackProps) {
 				</VStack>
 
 
-				<Collapse title="Recent" w="full">
+				<Collapse
+					title={
+						<Text fontWeight="medium" fontSize="sm">
+							Recent
+						</Text>
+					}
+					w="full"
+				>
 					<VStack alignItems="start" gap="0" mt="1">
 						{chats?.map((c) =>
 							<ListButton

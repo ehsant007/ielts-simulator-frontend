@@ -7,9 +7,15 @@ import { useChat } from "./ChatProvider"
 
 export const Scroller = forwardRef<HTMLDivElement, ScrollAreaRootProps>(({ children, ...props }, ref) => {
 	return (
-		<ScrollArea.Root {...props} pe="3" ref={ref}>
+		<ScrollArea.Root {...props} ref={ref}>
 			<ScrollArea.Viewport ref={ref}>
-				<ScrollArea.Content spaceY="4" textStyle="sm">
+				<ScrollArea.Content
+					css={{
+						"&[data-overflow-y]": {
+							pe: "3"
+						},
+					}}
+				>
 
 					{children}
 
@@ -36,11 +42,18 @@ export const StickToBottomScroller = forwardRef<HTMLDivElement, ScrollAreaRootPr
 	}, [messages, sticky])
 
 	return (
-		<ScrollArea.Root {...props} pe="3" ref={ref}>
+		<ScrollArea.Root {...props} ref={ref}>
 			{/* eslint-disable-next-line react-hooks/refs */}
 			<ScrollArea.Viewport ref={sticky.scrollRef}>
-				{/* eslint-disable-next-line react-hooks/refs */}
-				<ScrollArea.Content ref={sticky.contentRef} spaceY="4" textStyle="sm">
+				<ScrollArea.Content
+					/* eslint-disable-next-line react-hooks/refs */
+					ref={sticky.contentRef}
+					css={{
+						"&[data-overflow-y]": {
+							pe: "3"
+						},
+					}}
+				>
 
 					{children}
 
@@ -82,7 +95,7 @@ export const StickToBottomScroller = forwardRef<HTMLDivElement, ScrollAreaRootPr
 StickToBottomScroller.displayName = "StickToBottomScroller"
 
 
-export function Collapse({ children, title, ...props }: CollapsibleRootProps) {
+export function Collapse({ children, title, ...props }: { title: React.ReactNode } & Omit<CollapsibleRootProps, "title">) {
 	return (
 		<Collapsible.Root defaultOpen {...props}>
 			<Collapsible.Trigger
