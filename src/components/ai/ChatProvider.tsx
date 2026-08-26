@@ -1,7 +1,8 @@
 "use client"
 
-import { createMessage, readChatMessages, readChats, type AiChatRead, type AiMessageRead } from "@/client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createChat, createMessage, readMessages, readChats } from "@/client";
+import type { AiChatCreate, AiChatRead, AiMessageRead } from "@/client"
+import { useMutation, useQuery, useQueryClient, MutationState } from "@tanstack/react-query";
 import {
 	createContext,
 	useContext,
@@ -12,13 +13,17 @@ import {
 } from "react";
 
 type ChatContextType = {
-	chat: AiChatRead | undefined
-	setChat: Dispatch<SetStateAction<AiChatRead | undefined>>
+	chat: AiChatRead | null
+	setChat: Dispatch<SetStateAction<AiChatRead | null>>
+	createChat: (data: AiChatCreate) => boolean
 	chats: AiChatRead[]
 	messages: AiMessageRead[]
 	isLoading: boolean
 	sendMessage: (content: string) => boolean
-	waitingMessage: string | null | undefined
+	waitingMessage: string | null
+	createChatState: MutationState
+	drafts: Record<string, string>
+	setDrafts: Dispatch<SetStateAction<Record<string, string>>>
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
@@ -29,24 +34,31 @@ type ChatProviderProps = {
 
 const waitingMessages = [
 	"Thinking ...",
-	"Working on it please wait ...",
+	"Still working on it ...",
 ]
 
 
 export function ChatProvider({ children }: ChatProviderProps) {
-	const [chat, setChat] = useState<AiChatRead | undefined>(undefined)
-	const [waitingMessage, setWaitingMessage] = useState<string | null | undefined>()
+	const [chat, setChat] = useState<AiChatRead | null>(null)
+	const [waitingMessage, setWaitingMessage] = useState<string | null>(null)
+	const [drafts, setDrafts] = useState<Record<string, string>>({})
 
 	const { data: chats = [] } = useQuery({
 		queryFn: () => readChats().then((res) => res.data),
 		queryKey: ["chats"],
 	})
 
+	const setChats = (set: SetStateAction<AiChatRead[]>) => {
+		queryClient.setQueryData<AiChatRead[]>(
+			["chats"],
+			(prev = []) => typeof set === "function" ? set(prev) : set,
+		)
+	}
 
 	const { data: messages = [], isLoading } = useQuery({
 		enabled: !!chat,
 		queryFn: ({ signal }) =>
-			readChatMessages({
+			readMessages({
 				path: { chat_id: chat!.id },
 				signal,
 			}).then((res) => res.data),
@@ -55,35 +67,31 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
 	const queryClient = useQueryClient()
 
-	const setMessages = (set: SetStateAction<AiMessageRead[]>) => {
-		if (!chat) return
-
+	const setMessages = (chatId: string, set: SetStateAction<AiMessageRead[]>) => {
 		queryClient.setQueryData<AiMessageRead[]>(
-			["chat", chat.id, "messages"],
+			["chat", chatId, "messages"],
 			(prev = []) => typeof set === "function" ? set(prev) : set,
 		)
 	}
 
 	const createMessageMutation = useMutation({
-		mutationFn: (content: string) => {
-			if (!chat) throw new Error("No chat selected")
-
+		mutationFn: (data: { chat_id: string, message: string }) => {
 			return createMessage({
-				body: { content },
-				path: { chat_id: chat.id },
+				body: { content: data.message },
+				path: { chat_id: data.chat_id },
 			})
 		},
 
-		onMutate: (content) => {
+		onMutate: (data) => {
 			// Add user message optimistically
 			const optimisticMessage: AiMessageRead = {
 				id: (messages[messages.length - 1] ?? { id: 0 }).id + 1,
-				content,
+				content: data.message,
 				created_at: new Date().toISOString(),
-				chat_id: chat!.id,
+				chat_id: data.chat_id,
 				role: "user",
 			}
-			setMessages(prev => [...prev, optimisticMessage])
+			setMessages(optimisticMessage.chat_id, prev => [...prev, optimisticMessage])
 
 			setWaitingMessage(waitingMessages[0])
 
@@ -97,7 +105,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		},
 
 		onSuccess: ({ data: { request, response } }, _content, context) => {
-			setMessages((prev) => {
+			setMessages(request.chat_id, (prev) => {
 				const index = prev.findIndex(
 					(msg) => msg.id === context.optimisticMessage.id,
 				)
@@ -120,10 +128,27 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		},
 	})
 
-	const sendMessage = (content: string) => {
-		if (!chat || !content.trim() || createMessageMutation.isPending)
+	const createChatMutation = useMutation({
+		mutationFn: (data: AiChatCreate) => createChat({
+			body: data,
+		}),
+
+		onSuccess: ({ data: newChat }, { message }) => {
+			setChat(newChat)
+			setChats(prev => [newChat, ...prev])
+			createMessageMutation.mutate({ chat_id: newChat.id, message })
+		}
+	})
+
+	const sendMessage = (message: string) => {
+		if (!chat || !message.trim() || createMessageMutation.isPending)
 			return false
-		createMessageMutation.mutate(content)
+		createMessageMutation.mutate({ chat_id: chat.id, message })
+		return true
+	}
+
+	const createNewChat = (create_data: AiChatCreate) => {
+		createChatMutation.mutate(create_data)
 		return true
 	}
 
@@ -132,10 +157,14 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			chat,
 			chats,
 			setChat,
+			createChat: createNewChat,
+			createChatState: createChatMutation,
 			messages,
 			sendMessage,
 			isLoading,
 			waitingMessage,
+			drafts,
+			setDrafts,
 		}}
 	>
 		{children}

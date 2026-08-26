@@ -5,6 +5,20 @@ export type ClientOptions = {
 };
 
 /**
+ * AIChatCreate
+ */
+export type AiChatCreate = {
+    /**
+     * Message
+     */
+    message: string;
+    /**
+     * App Id
+     */
+    app_id?: string | null;
+};
+
+/**
  * AIChatRead
  */
 export type AiChatRead = {
@@ -2017,7 +2031,32 @@ export type ReadChatsResponses = {
 
 export type ReadChatsResponse = ReadChatsResponses[keyof ReadChatsResponses];
 
-export type ReadChatMessagesData = {
+export type CreateChatData = {
+    body: AiChatCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ai/chats';
+};
+
+export type CreateChatErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateChatError = CreateChatErrors[keyof CreateChatErrors];
+
+export type CreateChatResponses = {
+    /**
+     * Successful Response
+     */
+    200: AiChatRead;
+};
+
+export type CreateChatResponse = CreateChatResponses[keyof CreateChatResponses];
+
+export type ReadMessagesData = {
     body?: never;
     path: {
         /**
@@ -2026,28 +2065,28 @@ export type ReadChatMessagesData = {
         chat_id: string;
     };
     query?: never;
-    url: '/api/v1/ai/chat/{chat_id}';
+    url: '/api/v1/ai/chats/{chat_id}';
 };
 
-export type ReadChatMessagesErrors = {
+export type ReadMessagesErrors = {
     /**
      * Validation Error
      */
     422: HttpValidationError;
 };
 
-export type ReadChatMessagesError = ReadChatMessagesErrors[keyof ReadChatMessagesErrors];
+export type ReadMessagesError = ReadMessagesErrors[keyof ReadMessagesErrors];
 
-export type ReadChatMessagesResponses = {
+export type ReadMessagesResponses = {
     /**
-     * Response Read Chat Messages
+     * Response Read Messages
      *
      * Successful Response
      */
     200: Array<AiMessageRead>;
 };
 
-export type ReadChatMessagesResponse = ReadChatMessagesResponses[keyof ReadChatMessagesResponses];
+export type ReadMessagesResponse = ReadMessagesResponses[keyof ReadMessagesResponses];
 
 export type CreateMessageData = {
     body: AiMessageCreate;
@@ -2058,7 +2097,7 @@ export type CreateMessageData = {
         chat_id: string;
     };
     query?: never;
-    url: '/api/v1/ai/chat/{chat_id}/messages';
+    url: '/api/v1/ai/chats/{chat_id}/messages';
 };
 
 export type CreateMessageErrors = {
@@ -2078,36 +2117,6 @@ export type CreateMessageResponses = {
 };
 
 export type CreateMessageResponse = CreateMessageResponses[keyof CreateMessageResponses];
-
-export type CreateAiChatData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * App Id
-         */
-        app_id?: string | null;
-    };
-    url: '/api/v1/ai/chat';
-};
-
-export type CreateAiChatErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateAiChatError = CreateAiChatErrors[keyof CreateAiChatErrors];
-
-export type CreateAiChatResponses = {
-    /**
-     * Successful Response
-     */
-    200: AiChatRead;
-};
-
-export type CreateAiChatResponse = CreateAiChatResponses[keyof CreateAiChatResponses];
 
 export type LookupData = {
     body?: never;

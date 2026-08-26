@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AddFilesToIeltsModuleData, AddFilesToIeltsModuleErrors, AddFilesToIeltsModuleResponses, AdvTranslateData, AdvTranslateErrors, AdvTranslateResponses, CreateAiChatData, CreateAiChatErrors, CreateAiChatResponses, CreateIeltsAttemptData, CreateIeltsAttemptErrors, CreateIeltsAttemptResponses, CreateIeltsExamData, CreateIeltsExamErrors, CreateIeltsExamResponses, CreateIeltsModuleData, CreateIeltsModuleErrors, CreateIeltsModuleResponses, CreateMessageData, CreateMessageErrors, CreateMessageResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, CreateUserData, CreateUserErrors, CreateUserResponses, DeleteFileData, DeleteFileErrors, DeleteFileResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DeleteUserData, DeleteUserErrors, DeleteUserMeData, DeleteUserMeResponses, DeleteUserResponses, HealthCheckData, HealthCheckResponses, LoginAccessTokenData, LoginAccessTokenErrors, LoginAccessTokenResponses, LookupData, LookupErrors, LookupResponses, ReadChatMessagesData, ReadChatMessagesErrors, ReadChatMessagesResponses, ReadChatsData, ReadChatsResponses, ReadFileByFilenameData, ReadFileByFilenameErrors, ReadFileByFilenameResponses, ReadFileByIdData, ReadFileByIdErrors, ReadFileByIdResponses, ReadFileSetData, ReadFileSetErrors, ReadFileSetResponses, ReadIeltsExamByIdData, ReadIeltsExamByIdErrors, ReadIeltsExamByIdResponses, ReadIeltsExamsData, ReadIeltsExamsResponses, ReadIeltsModuleByIdData, ReadIeltsModuleByIdErrors, ReadIeltsModuleByIdResponses, ReadIeltsModulesData, ReadIeltsModulesResponses, ReadLastAttemptData, ReadLastAttemptErrors, ReadLastAttemptResponses, ReadMyIeltsAttemptsData, ReadMyIeltsAttemptsResponses, ReadPermissionsData, ReadPermissionsResponses, ReadRolesData, ReadRolesResponses, ReadSettingsData, ReadSettingsResponses, ReadUserByIdData, ReadUserByIdErrors, ReadUserByIdResponses, ReadUserMeData, ReadUserMeResponses, ReadUserRolesData, ReadUserRolesErrors, ReadUserRolesResponses, ReadUsersData, ReadUsersErrors, ReadUsersResponses, ReadWordnetData, ReadWordnetErrors, ReadWordnetResponses, RecoverPasswordData, RecoverPasswordErrors, RecoverPasswordHtmlContentData, RecoverPasswordHtmlContentErrors, RecoverPasswordHtmlContentResponses, RecoverPasswordResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SearchData, SearchErrors, SearchResponses, TestEmailData, TestEmailErrors, TestEmailResponses, TestTokenData, TestTokenResponses, TranslateData, TranslateErrors, TranslateResponses, UpdateIeltsExamData, UpdateIeltsExamErrors, UpdateIeltsExamResponses, UpdateIeltsModuleData, UpdateIeltsModuleErrors, UpdateIeltsModuleResponses, UpdatePasswordMeData, UpdatePasswordMeErrors, UpdatePasswordMeResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateSettingsData, UpdateSettingsErrors, UpdateSettingsResponses, UpdateUserData, UpdateUserErrors, UpdateUserMeData, UpdateUserMeErrors, UpdateUserMeResponses, UpdateUserResponses } from './types.gen';
+import type { AddFilesToIeltsModuleData, AddFilesToIeltsModuleErrors, AddFilesToIeltsModuleResponses, AdvTranslateData, AdvTranslateErrors, AdvTranslateResponses, CreateChatData, CreateChatErrors, CreateChatResponses, CreateIeltsAttemptData, CreateIeltsAttemptErrors, CreateIeltsAttemptResponses, CreateIeltsExamData, CreateIeltsExamErrors, CreateIeltsExamResponses, CreateIeltsModuleData, CreateIeltsModuleErrors, CreateIeltsModuleResponses, CreateMessageData, CreateMessageErrors, CreateMessageResponses, CreateRoleData, CreateRoleErrors, CreateRoleResponses, CreateUserData, CreateUserErrors, CreateUserResponses, DeleteFileData, DeleteFileErrors, DeleteFileResponses, DeleteRoleData, DeleteRoleErrors, DeleteRoleResponses, DeleteUserData, DeleteUserErrors, DeleteUserMeData, DeleteUserMeResponses, DeleteUserResponses, HealthCheckData, HealthCheckResponses, LoginAccessTokenData, LoginAccessTokenErrors, LoginAccessTokenResponses, LookupData, LookupErrors, LookupResponses, ReadChatsData, ReadChatsResponses, ReadFileByFilenameData, ReadFileByFilenameErrors, ReadFileByFilenameResponses, ReadFileByIdData, ReadFileByIdErrors, ReadFileByIdResponses, ReadFileSetData, ReadFileSetErrors, ReadFileSetResponses, ReadIeltsExamByIdData, ReadIeltsExamByIdErrors, ReadIeltsExamByIdResponses, ReadIeltsExamsData, ReadIeltsExamsResponses, ReadIeltsModuleByIdData, ReadIeltsModuleByIdErrors, ReadIeltsModuleByIdResponses, ReadIeltsModulesData, ReadIeltsModulesResponses, ReadLastAttemptData, ReadLastAttemptErrors, ReadLastAttemptResponses, ReadMessagesData, ReadMessagesErrors, ReadMessagesResponses, ReadMyIeltsAttemptsData, ReadMyIeltsAttemptsResponses, ReadPermissionsData, ReadPermissionsResponses, ReadRolesData, ReadRolesResponses, ReadSettingsData, ReadSettingsResponses, ReadUserByIdData, ReadUserByIdErrors, ReadUserByIdResponses, ReadUserMeData, ReadUserMeResponses, ReadUserRolesData, ReadUserRolesErrors, ReadUserRolesResponses, ReadUsersData, ReadUsersErrors, ReadUsersResponses, ReadWordnetData, ReadWordnetErrors, ReadWordnetResponses, RecoverPasswordData, RecoverPasswordErrors, RecoverPasswordHtmlContentData, RecoverPasswordHtmlContentErrors, RecoverPasswordHtmlContentResponses, RecoverPasswordResponses, RegisterUserData, RegisterUserErrors, RegisterUserResponses, ResetPasswordData, ResetPasswordErrors, ResetPasswordResponses, SearchData, SearchErrors, SearchResponses, TestEmailData, TestEmailErrors, TestEmailResponses, TestTokenData, TestTokenResponses, TranslateData, TranslateErrors, TranslateResponses, UpdateIeltsExamData, UpdateIeltsExamErrors, UpdateIeltsExamResponses, UpdateIeltsModuleData, UpdateIeltsModuleErrors, UpdateIeltsModuleResponses, UpdatePasswordMeData, UpdatePasswordMeErrors, UpdatePasswordMeResponses, UpdateRoleData, UpdateRoleErrors, UpdateRoleResponses, UpdateSettingsData, UpdateSettingsErrors, UpdateSettingsResponses, UpdateUserData, UpdateUserErrors, UpdateUserMeData, UpdateUserMeErrors, UpdateUserMeResponses, UpdateUserResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -35,27 +35,17 @@ export const readChats = <ThrowOnError extends boolean = true>(options?: Options
 };
 
 /**
- * Read Chat Messages
+ * Create Chat
  */
-export const readChatMessages = <ThrowOnError extends boolean = true>(options: Options<ReadChatMessagesData, ThrowOnError>) => {
-    return (options.client ?? client).get<ReadChatMessagesResponses, ReadChatMessagesErrors, ThrowOnError>({
+export const createChat = <ThrowOnError extends boolean = true>(options: Options<CreateChatData, ThrowOnError>) => {
+    return (options.client ?? client).post<CreateChatResponses, CreateChatErrors, ThrowOnError>({
         security: [
             {
                 scheme: 'bearer',
                 type: 'http'
             }
         ],
-        url: '/api/v1/ai/chat/{chat_id}',
-        ...options
-    });
-};
-
-/**
- * Create Message
- */
-export const createMessage = <ThrowOnError extends boolean = true>(options: Options<CreateMessageData, ThrowOnError>) => {
-    return (options.client ?? client).post<CreateMessageResponses, CreateMessageErrors, ThrowOnError>({
-        url: '/api/v1/ai/chat/{chat_id}/messages',
+        url: '/api/v1/ai/chats',
         ...options,
         headers: {
             'Content-Type': 'application/json',
@@ -65,18 +55,32 @@ export const createMessage = <ThrowOnError extends boolean = true>(options: Opti
 };
 
 /**
- * Create Ai Chat
+ * Read Messages
  */
-export const createAiChat = <ThrowOnError extends boolean = true>(options?: Options<CreateAiChatData, ThrowOnError>) => {
-    return (options?.client ?? client).post<CreateAiChatResponses, CreateAiChatErrors, ThrowOnError>({
+export const readMessages = <ThrowOnError extends boolean = true>(options: Options<ReadMessagesData, ThrowOnError>) => {
+    return (options.client ?? client).get<ReadMessagesResponses, ReadMessagesErrors, ThrowOnError>({
         security: [
             {
                 scheme: 'bearer',
                 type: 'http'
             }
         ],
-        url: '/api/v1/ai/chat',
+        url: '/api/v1/ai/chats/{chat_id}',
         ...options
+    });
+};
+
+/**
+ * Create Message
+ */
+export const createMessage = <ThrowOnError extends boolean = true>(options: Options<CreateMessageData, ThrowOnError>) => {
+    return (options.client ?? client).post<CreateMessageResponses, CreateMessageErrors, ThrowOnError>({
+        url: '/api/v1/ai/chats/{chat_id}/messages',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
     });
 };
 
