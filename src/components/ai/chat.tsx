@@ -8,7 +8,7 @@ import { LuMic, LuRefreshCw } from "react-icons/lu"
 import type { ButtonProps, InputGroupProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
 import { BiUpArrowAlt } from "react-icons/bi"
-import { Fragment, useState } from "react"
+import { Fragment } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScroller, TextWriter } from "./utils";
 
