@@ -14,12 +14,9 @@ import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScrol
 
 
 export function ChatPanel() {
-
 	return (
 		<ChatProvider>
-			<HStack
-				h="100%"
-			>
+			<HStack h="100%">
 				<ChatList p="2" />
 				<ChatBox maxW="3xl" p="5" />
 			</HStack>
