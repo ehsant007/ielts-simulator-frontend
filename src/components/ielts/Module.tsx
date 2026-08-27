@@ -11,9 +11,6 @@ import { WritingModule } from "./WritingModule";
 import { SpeakingModule } from "./SpeakingModule";
 import { ModuleMode } from "./store";
 import { LangToolsProvider } from "../lang-tools";
-import { Browser } from "../lang-tools";
-import { PopoverMenu } from "../lang-tools";
-
 
 type ModuleProps = {
 	module: ModuleRead,
@@ -57,11 +54,7 @@ export function Module({ module, lastAttempt }: ModuleProps) {
 				mode={mode}
 				lastAttempt={mode === "review" ? lastAttempt : undefined}
 			>
-
 				{module_ui}
-				<Browser />
-				<PopoverMenu />
-
 			</ModuleContextProvider>
 		</LangToolsProvider>
 	)

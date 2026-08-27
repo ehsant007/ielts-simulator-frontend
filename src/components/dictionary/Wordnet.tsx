@@ -2,8 +2,8 @@
 
 import { VStack, Box, List, HStack, Collapsible, Text } from "@chakra-ui/react";
 import { readWordnet, WordnetSense, WordnetData } from "@/client";
-import { AdvText } from "../AdvText";
-import { TTSButton } from "../tts";
+import { AdvText } from "../lang-tools/AdvText";
+import { TTSButton } from "../lang-tools/tts";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { LuChevronRight } from "react-icons/lu";
 

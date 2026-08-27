@@ -5,6 +5,9 @@ import ChakraProvider from "@/components/ui/chakra-provider"
 import { Locale, NextIntlClientProvider } from 'next-intl';
 import { AuthProvider } from "@/auth/AuthProvider"
 import { type User } from "@/auth";
+import { LangToolsProvider } from "@/components/lang-tools";
+import { PopoverMenu } from "@/components/lang-tools";
+import { Browser } from "@/components/dictionary"
 
 interface Props {
 	children: React.ReactNode;
@@ -14,7 +17,7 @@ interface Props {
 }
 
 export default function ProvidersStack({ children, user, locale, messages }: Props) {
-	
+
 	const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 	return (
@@ -23,7 +26,12 @@ export default function ProvidersStack({ children, user, locale, messages }: Pro
 				<AuthProvider user={user}>
 					<TanstackQueryProvider>
 
-						{children}
+						<LangToolsProvider>
+							{children}
+							
+							<Browser />
+							<PopoverMenu />
+						</LangToolsProvider>
 
 					</TanstackQueryProvider>
 				</AuthProvider>

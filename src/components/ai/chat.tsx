@@ -359,7 +359,7 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 
 	return (
 		<InputGroup
-			zIndex="max"
+			zIndex="10"
 			maxW="2xl"
 			endElement={
 				<HStack

@@ -1,6 +1,6 @@
 "use client"
 
-import { useLangToolsStore } from "../LangToolsProvider";
+import { useLangToolsStore } from "../lang-tools/LangToolsProvider";
 import { Text, Portal, FloatingPanel, IconButton, HStack, Spinner, Menu, Group, Tabs, Box, Input, ScrollArea, InputGroup, Popover, Button, VStack } from "@chakra-ui/react";
 import { WordNet } from "./Wordnet";
 import { LuMaximize2, LuMinus, LuSearch, LuSquare, LuX } from "react-icons/lu";

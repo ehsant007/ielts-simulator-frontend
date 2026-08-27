@@ -3,12 +3,12 @@
 import { VStack, Box, List, HStack, Text, Collapsible, Separator, Tabs, Highlight, StackProps, BoxProps } from "@chakra-ui/react";
 import { DictionaryCollocation, DictionaryEntry, DictionaryExample, DictionarySense, DictionaryVerbForm, lookup } from "@/client";
 import { Text as AdvText } from "@chakra-ui/react";
-import { TTSButton } from "../tts";
+import { TTSButton } from "../lang-tools/tts";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { LuChevronRight, LuMinus, LuPlus } from "react-icons/lu";
 import { useMemo, useState } from "react";
 import { DictionaryEntryProvider, useDictionaryEntry } from "./DictionaryEntryProvider";
-import { useLangToolsStore } from "../LangToolsProvider";
+import { useLangToolsStore } from "../lang-tools/LangToolsProvider";
 
 
 function groupBy<T, K>(
