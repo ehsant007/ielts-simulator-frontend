@@ -1,7 +1,7 @@
 "use client"
 
-import { createChat, createMessage, readMessages, readChats } from "@/client";
-import type { AiChatCreate, AiChatRead, AiMessageRead } from "@/client"
+import { createChat, createMessage, readMessages, readChats, deleteChat, updateChat } from "@/client";
+import type { AiChatCreate, AiChatRead, AiMessageRead, AiChatUpdate } from "@/client"
 import { useMutation, useQuery, useQueryClient, MutationState } from "@tanstack/react-query";
 import {
 	createContext,
@@ -24,6 +24,8 @@ type ChatContextType = {
 	createChatState: MutationState
 	drafts: Record<string, string>
 	setDrafts: Dispatch<SetStateAction<Record<string, string>>>
+	deleteChat: (chat_id: string) => void
+	updateChat: (input: { chat_id: string, data: AiChatUpdate }) => void
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined)
@@ -140,6 +142,33 @@ export function ChatProvider({ children }: ChatProviderProps) {
 		}
 	})
 
+
+	const deleteChatMutation = useMutation({
+		mutationFn: (chat_id: string) => deleteChat({
+			path: { chat_id }
+		}),
+
+		onSuccess: (_, chat_id) => {
+			setChats(prev => prev.filter((chat) => chat.id !== chat_id))
+		},
+	})
+
+	const updateChatMutation = useMutation({
+		mutationFn: ({ chat_id, data }: { chat_id: string, data: AiChatUpdate }) => updateChat({
+			body: data,
+			path: { chat_id },
+		}),
+
+		onSuccess: ({ data: updatedChat }, { chat_id }) => {
+			const i = chats.findIndex((chat) => chat.id === chat_id)
+			setChats(prev => {
+				const new_chats = prev.slice()
+				new_chats[i] = updatedChat
+				return new_chats
+			})
+		}
+	})
+
 	const sendMessage = (message: string) => {
 		if (!chat || !message.trim() || createMessageMutation.isPending)
 			return false
@@ -165,6 +194,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			waitingMessage,
 			drafts,
 			setDrafts,
+			deleteChat: deleteChatMutation.mutate,
+			updateChat: updateChatMutation.mutate,
 		}}
 	>
 		{children}

@@ -1,14 +1,14 @@
 "use client"
 
-import { AiMessageRead } from "@/client"
-import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal } from "@chakra-ui/react"
+import { AiChatRead, AiMessageRead } from "@/client"
+import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group } from "@chakra-ui/react"
 import { ChatProvider, useChat } from "./ChatProvider";
-import { LuDelete, LuEllipsis, LuMic, LuRefreshCw, LuTrash } from "react-icons/lu"
+import { LuEllipsis, LuMic, LuPin, LuPinOff, LuRefreshCw, LuTrash } from "react-icons/lu"
 
-import type { ButtonProps, InputGroupProps, StackProps } from "@chakra-ui/react"
+import type { InputGroupProps, MenuRootProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
 import { BiUpArrowAlt } from "react-icons/bi"
-import { Fragment } from "react"
+import { Fragment, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScroller, TextWriter } from "./utils";
 
@@ -28,39 +28,51 @@ export function ChatPanel() {
 }
 
 
-export function ListButton({ children, ...props }: ButtonProps) {
-	return (
-		<Button
-			variant="ghost"
-			w="full"
-			color="fg"
-			size="sm"
-			fontWeight="normal"
-			justifyContent="start"
-			borderRadius="xl"
-			{...props}
-		>
-			{children}
-		</Button>
-	)
-}
-
 export function ChatList({ ...props }: StackProps) {
-	const { chat, chats, setChat } = useChat()
+	const { chats, setChat } = useChat()
+
+	const pinned = chats?.filter((chat) => chat.pinned)
+	const recent = chats?.filter((chat) => !chat.pinned)
 
 	return (
 		<Scroller w="18rem" variant="always" borderEnd="sm" borderColor="border">
 
-			<VStack alignItems="start" {...props}>
+			<VStack alignItems="start" gap="5" {...props}>
 
 				<VStack w="full">
-					<ListButton
+
+					<Button
+						variant="ghost"
+						color="fg"
+						size="sm"
+						fontWeight="normal"
+						justifyContent="start"
+						borderRadius="xl"
+						w="full"
 						onClick={() => setChat(null)}
 					>
+
 						<IoCreateOutline />New chat
-					</ListButton>
+					</Button>
 				</VStack>
 
+
+				{pinned.length > 0 &&
+					<Collapse
+						title={
+							<Text fontWeight="medium" fontSize="sm">
+								Pinned
+							</Text>
+						}
+						w="full"
+					>
+						<VStack alignItems="start" gap="0" mt="1">
+							{pinned.map((c) =>
+								<ChatButton key={c.id} chat={c} />
+							)}
+						</VStack>
+					</Collapse>
+				}
 
 				<Collapse
 					title={
@@ -71,20 +83,8 @@ export function ChatList({ ...props }: StackProps) {
 					w="full"
 				>
 					<VStack alignItems="start" gap="0" mt="1">
-						{chats?.map((c) =>
-							<Box
-								key={c.id}
-								bg={c.id === chat?.id ? "primary.subtle" : "none"}
-								width="full"
-								borderRadius="xl"
-							>
-								<ListButton
-									onClick={() => setChat(c)}
-								>
-									{c.title}
-									<ChatActionMenu />
-								</ListButton>
-							</Box>
+						{recent.map((c) =>
+							<ChatButton key={c.id} chat={c} />
 						)}
 					</VStack>
 				</Collapse>
@@ -95,13 +95,79 @@ export function ChatList({ ...props }: StackProps) {
 	)
 }
 
-const ChatActionMenu = () => {
+export function ChatButton({ chat }: { chat: AiChatRead }) {
+	const { chat: selectedChat, setChat, updateChat } = useChat()
+	const [menuOpen, setMenuOpen] = useState(false)
+
 	return (
-		<Menu.Root >
-			<Menu.Trigger asChild>
-				<IconButton variant="ghost" size="xs">
-					<LuEllipsis />
+		<Group
+			key={chat.id}
+			_hover={{
+				"& .chat-action-menu": {
+					opacity: 1,
+				},
+				bg: "primary.subtle",
+			}}
+			bg={chat.id === selectedChat?.id ? "primary.subtle" : menuOpen ? "primary.subtle/60" : "none"}
+			w="full"
+			attached
+			borderRadius="xl"
+		>
+			<Button
+				variant="ghost"
+				color="fg"
+				size="xs"
+				fontWeight="normal"
+				justifyContent="start"
+				borderRadius="xl"
+				flex="1"
+				onClick={() => setChat(chat)}
+			>
+				{chat.title}
+			</Button>
+
+			<HStack
+				className="chat-action-menu"
+				opacity={menuOpen ? "1" : "0"}
+				gap="0"
+			>
+				<IconButton
+					variant="ghost"
+					size="xs"
+					borderRadius="xl"
+					onClick={() => updateChat({ chat_id: chat.id, data: { pinned: !chat.pinned } })}
+				>
+					{chat.pinned ? <LuPinOff /> : <LuPin />}
 				</IconButton>
+
+				<ChatActionMenu
+					chat={chat}
+					open={menuOpen}
+					onOpenChange={(e) => setMenuOpen(e.open)}
+				>
+					<IconButton
+						variant="ghost"
+						size="xs"
+						ms="auto"
+						borderRadius="xl"
+						focusRing="none"
+					>
+						<LuEllipsis />
+					</IconButton>
+				</ChatActionMenu >
+			</HStack>
+		</Group>
+	)
+}
+
+
+export function ChatActionMenu({ chat, children, ...props }: { chat: AiChatRead } & MenuRootProps) {
+	const { deleteChat } = useChat()
+
+	return (
+		<Menu.Root {...props}>
+			<Menu.Trigger asChild>
+				{children}
 			</Menu.Trigger>
 			<Portal>
 				<Menu.Positioner>
@@ -115,6 +181,7 @@ const ChatActionMenu = () => {
 								value="delete"
 								color="fg.error"
 								_hover={{ bg: "bg.error", color: "fg.error" }}
+								onClick={() => deleteChat(chat.id)}
 							>
 								<LuTrash />Delete
 							</Menu.Item>
