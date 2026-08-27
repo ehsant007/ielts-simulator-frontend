@@ -1,3 +1,5 @@
+"use client"
+
 import { Box, ScrollArea, ScrollAreaRootProps, Collapsible, CollapsibleRootProps, IconButton, IconButtonProps } from "@chakra-ui/react"
 import { LuArrowDown, LuCheck, LuChevronRight, LuCopy } from "react-icons/lu"
 import { forwardRef, useEffect, useLayoutEffect, useState } from "react"
