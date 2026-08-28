@@ -63,7 +63,7 @@ export type AiChatUpdate = {
     /**
      * Pinned
      */
-    pinned?: boolean | null;
+    pinned?: boolean;
 };
 
 /**

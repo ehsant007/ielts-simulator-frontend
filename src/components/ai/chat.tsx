@@ -2,7 +2,7 @@
 
 import { AiChatRead, AiMessageRead } from "@/client"
 import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group } from "@chakra-ui/react"
-import { ChatProvider, useChat } from "./ChatProvider";
+import { useChat } from "./ChatProvider";
 import { LuEllipsis, LuMic, LuPin, LuPinOff, LuRefreshCw, LuTrash } from "react-icons/lu"
 
 import type { InputGroupProps, MenuRootProps, StackProps } from "@chakra-ui/react"
@@ -11,22 +11,24 @@ import { BiUpArrowAlt } from "react-icons/bi"
 import { Fragment, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScroller, TextWriter } from "./utils";
+import { ChatStoreProvider, useChatStore } from "./ChatStoreProvider";
 
 
 export function ChatPanel() {
 	return (
-		<ChatProvider>
+		<ChatStoreProvider>
 			<HStack h="100%">
 				<ChatList p="2" />
 				<ChatBox maxW="3xl" p="5" />
 			</HStack>
-		</ChatProvider>
+		</ChatStoreProvider>
 	)
 }
 
 
 export function ChatList({ ...props }: StackProps) {
-	const { chats, setChat } = useChat()
+	const setChat = useChatStore((s) => s.setChat)
+	const { chats } = useChat()
 
 	const pinned = chats?.filter((chat) => chat.pinned)
 	const recent = chats?.filter((chat) => !chat.pinned)
@@ -93,7 +95,9 @@ export function ChatList({ ...props }: StackProps) {
 }
 
 export function ChatButton({ chat }: { chat: AiChatRead }) {
-	const { chat: selectedChat, setChat, updateChat } = useChat()
+	const selectedChat = useChatStore((s) => s.chat)
+	const setChat = useChatStore((s) => s.setChat)
+	const { updateChat } = useChat()
 	const [menuOpen, setMenuOpen] = useState(false)
 
 	return (
@@ -204,7 +208,8 @@ export function ChatHome() {
 }
 
 export function ChatBox({ ...props }: StackProps) {
-	const { chat, messages, isLoading, waitingMessage, sendMessage } = useChat()
+	const chat = useChatStore((s) => s.chat)
+	const { messages, isLoading, waitingMessage, sendMessage } = useChat()
 
 	if (!chat) {
 		if (isLoading)
@@ -342,12 +347,12 @@ export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 
 
 export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) => boolean } & Omit<InputGroupProps, "children" | "onSubmit">) {
-
-	const { drafts, setDrafts, chat } = useChat()
-
+	const chat = useChatStore((s)=>s.chat)
 	const chatId = chat ? chat.id : "starting-new-chat"
-	const value = drafts[chatId] ?? ""
-	const setValue = (value: string) => setDrafts(prev => ({ ...prev, [chatId]: value }))
+
+	const value = useChatStore((s) => s.drafts[chatId])
+	const setDraft = useChatStore((s) => s.setDraft)
+	const setValue = (value: string) => setDraft(chatId, value)
 
 	const handleSend = () => {
 		if (!value.trim())

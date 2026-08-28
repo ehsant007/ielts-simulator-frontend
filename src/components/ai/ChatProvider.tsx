@@ -7,14 +7,12 @@ import {
 	createContext,
 	useContext,
 	useState,
-	type Dispatch,
 	type ReactNode,
 	type SetStateAction,
 } from "react";
+import { useChatStore } from "./ChatStoreProvider";
 
 type ChatContextType = {
-	chat: AiChatRead | null
-	setChat: Dispatch<SetStateAction<AiChatRead | null>>
 	createChat: (data: AiChatCreate) => boolean
 	chats: AiChatRead[]
 	messages: AiMessageRead[]
@@ -22,8 +20,6 @@ type ChatContextType = {
 	sendMessage: (content: string) => boolean
 	waitingMessage: string | null
 	createChatState: MutationState
-	drafts: Record<string, string>
-	setDrafts: Dispatch<SetStateAction<Record<string, string>>>
 	deleteChat: (chat_id: string) => void
 	updateChat: (input: { chat_id: string, data: AiChatUpdate }) => void
 }
@@ -41,9 +37,9 @@ const waitingMessages = [
 
 
 export function ChatProvider({ children }: ChatProviderProps) {
-	const [chat, setChat] = useState<AiChatRead | null>(null)
+	const chat = useChatStore((s) => s.chat)
+	const setChat = useChatStore((s) => s.setChat)
 	const [waitingMessage, setWaitingMessage] = useState<string | null>(null)
-	const [drafts, setDrafts] = useState<Record<string, string>>({})
 
 	const { data: chats = [] } = useQuery({
 		queryFn: () => readChats().then((res) => res.data),
@@ -159,6 +155,15 @@ export function ChatProvider({ children }: ChatProviderProps) {
 			path: { chat_id },
 		}),
 
+		onMutate: ({ chat_id, data }) => {
+			const i = chats.findIndex((chat) => chat.id === chat_id)
+			setChats(prev => [
+				...prev.slice(0, i),
+				{...prev[i], ...data},
+				...prev.slice(i + 1)
+			])
+		},
+
 		onSuccess: ({ data: updatedChat }, { chat_id }) => {
 			const i = chats.findIndex((chat) => chat.id === chat_id)
 			setChats(prev => {
@@ -183,17 +188,13 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
 	return <ChatContext.Provider
 		value={{
-			chat,
 			chats,
-			setChat,
 			createChat: createNewChat,
 			createChatState: createChatMutation,
 			messages,
 			sendMessage,
 			isLoading,
 			waitingMessage,
-			drafts,
-			setDrafts,
 			deleteChat: deleteChatMutation.mutate,
 			updateChat: updateChatMutation.mutate,
 		}}
