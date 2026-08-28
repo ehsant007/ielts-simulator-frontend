@@ -4,8 +4,8 @@ import { createStore } from "zustand/vanilla";
 
 
 export type ChatStore = {
-	chat: AiChatRead | null
-	setChat: Dispatch<SetStateAction<AiChatRead | null>>
+	activeChat: AiChatRead | null
+	setActiveChat: Dispatch<SetStateAction<AiChatRead | null>>
 
 	drafts: Record<string, string>
 	setDraft: (chat_id: string, value: string) => void
@@ -14,11 +14,11 @@ export type ChatStore = {
 
 export function createChatStore() {
 	return createStore<ChatStore>((set) => ({
-		chat: null,
-		setChat: (value) => set(({ chat }) => ({ chat: typeof value === "function" ? value(chat) : value })),
+		activeChat: null,
+		setActiveChat: (value) => set((s) => ({ activeChat: typeof value === "function" ? value(s.activeChat) : value })),
 
-		drafts: {},
-		setDraft: (chat_id, value) => set(({ drafts }) => ({ drafts: { ...drafts, [chat_id]: value } }))
+		drafts: { "default": "" },
+		setDraft: (chat_id, value) => set((s) => ({ drafts: { ...s.drafts, [chat_id]: value } }))
 	}))
 }
 

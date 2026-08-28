@@ -91,7 +91,7 @@ export type AiMessageRead = {
     /**
      * Id
      */
-    id: number;
+    id: string;
     /**
      * Chat Id
      */

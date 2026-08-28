@@ -37,8 +37,8 @@ const waitingMessages = [
 
 
 export function ChatProvider({ children }: ChatProviderProps) {
-	const chat = useChatStore((s) => s.chat)
-	const setChat = useChatStore((s) => s.setChat)
+	const chat = useChatStore((s) => s.activeChat)
+	const setChat = useChatStore((s) => s.setActiveChat)
 	const [waitingMessage, setWaitingMessage] = useState<string | null>(null)
 
 	const { data: chats = [] } = useQuery({

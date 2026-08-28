@@ -27,7 +27,7 @@ export function ChatPanel() {
 
 
 export function ChatList({ ...props }: StackProps) {
-	const setChat = useChatStore((s) => s.setChat)
+	const setActiveChat = useChatStore((s) => s.setActiveChat)
 	const { chats } = useChat()
 
 	const pinned = chats?.filter((chat) => chat.pinned)
@@ -48,7 +48,7 @@ export function ChatList({ ...props }: StackProps) {
 						justifyContent="start"
 						borderRadius="xl"
 						w="full"
-						onClick={() => setChat(null)}
+						onClick={() => setActiveChat(null)}
 					>
 
 						<IoCreateOutline />New chat
@@ -95,8 +95,8 @@ export function ChatList({ ...props }: StackProps) {
 }
 
 export function ChatButton({ chat }: { chat: AiChatRead }) {
-	const selectedChat = useChatStore((s) => s.chat)
-	const setChat = useChatStore((s) => s.setChat)
+	const activeChat = useChatStore((s) => s.activeChat)
+	const setActiveChat = useChatStore((s) => s.setActiveChat)
 	const { updateChat } = useChat()
 	const [menuOpen, setMenuOpen] = useState(false)
 
@@ -109,7 +109,7 @@ export function ChatButton({ chat }: { chat: AiChatRead }) {
 				},
 				bg: "primary.subtle",
 			}}
-			bg={chat.id === selectedChat?.id ? "primary.subtle" : menuOpen ? "primary.subtle/60" : "none"}
+			bg={chat.id === activeChat?.id ? "primary.subtle" : menuOpen ? "primary.subtle/60" : "none"}
 			w="full"
 			attached
 			borderRadius="xl"
@@ -122,7 +122,7 @@ export function ChatButton({ chat }: { chat: AiChatRead }) {
 				justifyContent="start"
 				borderRadius="xl"
 				flex="1"
-				onClick={() => setChat(chat)}
+				onClick={() => setActiveChat(chat)}
 			>
 				{chat.title}
 			</Button>
@@ -208,7 +208,7 @@ export function ChatHome() {
 }
 
 export function ChatBox({ ...props }: StackProps) {
-	const chat = useChatStore((s) => s.chat)
+	const chat = useChatStore((s) => s.activeChat)
 	const { messages, isLoading, waitingMessage, sendMessage } = useChat()
 
 	if (!chat) {
@@ -347,8 +347,8 @@ export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 
 
 export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) => boolean } & Omit<InputGroupProps, "children" | "onSubmit">) {
-	const chat = useChatStore((s)=>s.chat)
-	const chatId = chat ? chat.id : "starting-new-chat"
+	const chat = useChatStore((s)=>s.activeChat)
+	const chatId = chat ? chat.id : "default"
 
 	const value = useChatStore((s) => s.drafts[chatId])
 	const setDraft = useChatStore((s) => s.setDraft)
