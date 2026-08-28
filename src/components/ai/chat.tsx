@@ -1,8 +1,8 @@
 "use client"
 
 import { AiChatRead, AiMessageRead } from "@/client"
-import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group } from "@chakra-ui/react"
-import { useChat } from "./ChatProvider";
+import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton } from "@chakra-ui/react"
+
 import { LuEllipsis, LuMic, LuPin, LuPinOff, LuRefreshCw, LuTrash } from "react-icons/lu"
 
 import type { InputGroupProps, MenuRootProps, StackProps } from "@chakra-ui/react"
@@ -10,11 +10,13 @@ import { IoCreateOutline } from "react-icons/io5"
 import { BiUpArrowAlt } from "react-icons/bi"
 import { Fragment, useState } from "react"
 import { MdEdit } from "react-icons/md"
-import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScroller, TextWriter } from "./utils";
-import { ChatStoreProvider, useChatStore } from "./ChatStoreProvider";
+import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScroller } from "./utils";
+import { ChatStoreProvider, useChatStore } from "./ChatProvider";
+import { useChats, useMessages } from "./hooks"
 
 
 export function ChatPanel() {
+
 	return (
 		<ChatStoreProvider>
 			<HStack h="100%">
@@ -28,7 +30,7 @@ export function ChatPanel() {
 
 export function ChatList({ ...props }: StackProps) {
 	const setActiveChat = useChatStore((s) => s.setActiveChat)
-	const { chats } = useChat()
+	const { query: { data: chats = [], isLoading } } = useChats()
 
 	const pinned = chats?.filter((chat) => chat.pinned)
 	const recent = chats?.filter((chat) => !chat.pinned)
@@ -86,6 +88,14 @@ export function ChatList({ ...props }: StackProps) {
 							<ChatButton key={c.id} chat={c} />
 						)}
 					</VStack>
+
+					{isLoading &&
+						<VStack flex="1">
+							{Array.from({ length: 10 }, (_, i) => (
+								<Skeleton w="full" key={i} height="8" borderRadius="xl" />
+							))}
+						</VStack>
+					}
 				</Collapse>
 
 			</VStack>
@@ -97,7 +107,7 @@ export function ChatList({ ...props }: StackProps) {
 export function ChatButton({ chat }: { chat: AiChatRead }) {
 	const activeChat = useChatStore((s) => s.activeChat)
 	const setActiveChat = useChatStore((s) => s.setActiveChat)
-	const { updateChat } = useChat()
+	const { updateMutation: { mutate: updateChat } } = useChats()
 	const [menuOpen, setMenuOpen] = useState(false)
 
 	return (
@@ -163,7 +173,7 @@ export function ChatButton({ chat }: { chat: AiChatRead }) {
 
 
 export function ChatActionMenu({ chat, children, ...props }: { chat: AiChatRead } & MenuRootProps) {
-	const { deleteChat } = useChat()
+	const { deleteMutation: { mutate: deleteChat } } = useChats()
 
 	return (
 		<Menu.Root {...props}>
@@ -194,8 +204,23 @@ export function ChatActionMenu({ chat, children, ...props }: { chat: AiChatRead 
 	)
 }
 
+
+export function ChatBox(props: StackProps) {
+	const chat = useChatStore((s) => s.activeChat)
+
+	if (!chat)
+		return <ChatHome />
+
+	return (
+		<StickToBottomScroller variant="always" pos="relative">
+			<Messages chat={chat} {...props} />
+		</StickToBottomScroller>
+	)
+}
+
+
 export function ChatHome() {
-	const { createChat } = useChat()
+	const { createMutation: { mutate: createChat } } = useChats()
 
 	return (
 		<Center w="full">
@@ -207,67 +232,76 @@ export function ChatHome() {
 	)
 }
 
-export function ChatBox({ ...props }: StackProps) {
-	const chat = useChatStore((s) => s.activeChat)
-	const { messages, isLoading, waitingMessage, sendMessage } = useChat()
 
-	if (!chat) {
-		if (isLoading)
-			return <Box>Loading ...</Box>
-		else
-			return <ChatHome />
+export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) {
+
+	const { query: { data: messages = [], isLoading }, createMutation } = useMessages(chat.id)
+
+	const sendMessage = (message: string) => {
+		if (!chat || !message.trim() || createMutation.isPending)
+			return false
+		createMutation.mutate({ chat_id: chat.id, message })
+		return true
 	}
 
+
+	if (isLoading)
+		return (
+			<HStack gap="3" bg="bg/80" backdropFilter="blur(2px)" rounded="md" p="4" width="min">
+				<Spinner size="sm" colorPalette="blue" />
+				<Text fontSize="sm" color="fg.muted">
+					Loading...
+				</Text>
+			</HStack>
+		)
+
 	return (
-		<StickToBottomScroller variant="always" pos="relative">
+		<VStack {...props} gap="3" mx="auto">
 
-			<VStack {...props} gap="3" mx="auto">
+			{messages.map((msg, index) => {
+				const previous = messages[index - 1]
+				const showDate = !previous || !isSameDay(previous.created_at, msg.created_at)
 
-				{messages?.map((msg, index) => {
-					const previous = messages[index - 1]
-					const showDate = !previous || !isSameDay(previous.created_at, msg.created_at)
+				return (
+					<Fragment key={msg.id}>
+						{showDate && (
+							<Text
+								color="fg.muted"
+								fontWeight="medium"
+								fontSize="small"
+							>
+								<ChatTime dt={msg.created_at} />
+							</Text>
+						)}
 
-					return (
-						<Fragment key={msg.id}>
-							{showDate && (
-								<Text
-									color="fg.muted"
-									fontWeight="medium"
-									fontSize="small"
-								>
-									<ChatTime dt={msg.created_at} />
-								</Text>
-							)}
+						<Message msg={msg} />
+					</Fragment>
+				)
+			})}
 
-							<Message msg={msg} />
-						</Fragment>
-					)
-				})}
-
-				{waitingMessage &&
-					<Text alignSelf={"start"} color="fg.info">
-						<TextWriter>{waitingMessage}</TextWriter>
-					</Text>
-				}
-
-				<Box h="10rem" />
-
-				<Box
-					position="absolute"
-					bottom="6"
-					width="full"
-					display="flex"
-					alignItems="flex-end"
-					justifyContent="center"
-				>
-					<ChatInput key={chat.id} onSubmit={sendMessage} />
+			{createMutation.isPending &&
+				<Box alignSelf={"start"}>
+					<Spinner size="sm" color="primary" />
 				</Box>
+			}
 
-			</VStack>
+			<Box h="10rem" />
 
-		</StickToBottomScroller>
+			<Box
+				position="absolute"
+				bottom="6"
+				width="full"
+				display="flex"
+				alignItems="flex-end"
+				justifyContent="center"
+			>
+				<ChatInput key={chat.id} onSubmit={sendMessage} />
+			</Box>
+
+		</VStack>
 	)
 }
+
 
 
 export function Message({ msg }: { msg: AiMessageRead }) {
@@ -346,8 +380,8 @@ export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 }
 
 
-export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) => boolean } & Omit<InputGroupProps, "children" | "onSubmit">) {
-	const chat = useChatStore((s)=>s.activeChat)
+export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) => void } & Omit<InputGroupProps, "children" | "onSubmit">) {
+	const chat = useChatStore((s) => s.activeChat)
 	const chatId = chat ? chat.id : "default"
 
 	const value = useChatStore((s) => s.drafts[chatId])
@@ -358,8 +392,8 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 		if (!value.trim())
 			return
 
-		if (onSubmit(value))
-			setValue("")
+		onSubmit(value)
+		setValue("")
 	}
 
 	return (

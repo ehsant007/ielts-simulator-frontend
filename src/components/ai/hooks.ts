@@ -1,11 +1,12 @@
 import { AiChatCreate, AiChatRead, AiChatUpdate, AiMessageRead, createChat, createMessage, deleteChat, readChats, readMessages, updateChat } from "@/client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useChatStore, useChatStoreApi } from "./ChatStoreProvider"
+import { useChatStore, useChatStoreApi } from "./ChatProvider"
 import { SetStateAction } from "react"
 import { v7 as uuid7 } from "uuid"
 
 
-const getMessagesQueyKey = (chat_id: string) => ["ai-chats", chat_id, "messages"] as const
+const chatsQueryKey = ["ai-chats"] as const
+const messagesQueryKey = (chat_id: string) => ["ai-chats", chat_id, "messages"] as const
 
 export function useMessageCreateMutation() {
 	const queryClient = useQueryClient()
@@ -13,12 +14,12 @@ export function useMessageCreateMutation() {
 
 	const setMessages = (chat_id: string, set: SetStateAction<AiMessageRead[]>) => {
 		queryClient.setQueryData<AiMessageRead[]>(
-			getMessagesQueyKey(chat_id),
+			messagesQueryKey(chat_id),
 			(prev = []) => typeof set === "function" ? set(prev) : set,
 		)
 	}
 
-	const create = useMutation({
+	const createMutation = useMutation({
 		mutationFn: (data: { chat_id: string, message: string }) => {
 			return createMessage({
 				body: { content: data.message },
@@ -28,21 +29,21 @@ export function useMessageCreateMutation() {
 
 		onMutate: (data) => {
 			// Add user message optimistically
-			const optimisticMessage: AiMessageRead = {
+			const optimisticMsg: AiMessageRead = {
 				id: uuid7(),
 				content: data.message,
 				created_at: new Date().toISOString(),
 				chat_id: data.chat_id,
 				role: "user",
 			}
-			setMessages(optimisticMessage.chat_id, prev => [...prev, optimisticMessage])
+			setMessages(optimisticMsg.chat_id, prev => [...prev, optimisticMsg])
 
-			return { optimisticMessage }
+			return { optimisticMsg }
 		},
 
 		onSuccess: ({ data: { request, response } }, _content, context) => {
 			setMessages(request.chat_id, (prev) => {
-				const index = prev.findIndex((msg) => msg.id === context.optimisticMessage.id)
+				const index = prev.findIndex((msg) => msg.id === context.optimisticMsg.id)
 
 				if (index === -1)
 					return [...prev, request, response]
@@ -60,17 +61,14 @@ export function useMessageCreateMutation() {
 			if (!context)
 				return
 
-			setMessages(context.optimisticMessage.chat_id, prev =>
-				prev.filter(msg => msg.id !== context.optimisticMessage.id)
-			)
-
-			const s = chatStore.getState()
-			s.setDraft(s.activeChat?.id ?? "default", context.optimisticMessage.content)
+			const { optimisticMsg } = context
+			setMessages(optimisticMsg.chat_id, prev => prev.filter(msg => msg.id !== optimisticMsg.id))
+			chatStore.getState().setDraft(optimisticMsg.chat_id, optimisticMsg.content)
 		},
 
 	})
 
-	return { create }
+	return { createMutation }
 }
 
 
@@ -78,23 +76,21 @@ export function useChats() {
 	const queryClient = useQueryClient()
 	const setActiveChat = useChatStore((s) => s.setActiveChat)
 
-	const { create: { mutate: createMessage } } = useMessageCreateMutation()
-
-	const chatsKey = ["ai-chats"] as const
+	const { createMutation: { mutate: createMessage } } = useMessageCreateMutation()
 
 	const setChats = (set: SetStateAction<AiChatRead[]>) => {
 		queryClient.setQueryData<AiChatRead[]>(
-			chatsKey,
+			chatsQueryKey,
 			(prev = []) => typeof set === "function" ? set(prev) : set,
 		)
 	}
 
-	const read = useQuery({
+	const query = useQuery({
 		queryFn: () => readChats().then((res) => res.data),
-		queryKey: chatsKey,
+		queryKey: chatsQueryKey,
 	})
 
-	const create = useMutation({
+	const createMutation = useMutation({
 		mutationFn: (data: AiChatCreate) => createChat({
 			body: data,
 		}),
@@ -106,7 +102,7 @@ export function useChats() {
 		}
 	})
 
-	const del = useMutation({
+	const deleteMutation = useMutation({
 		mutationFn: (chat_id: string) => deleteChat({
 			path: { chat_id }
 		}),
@@ -116,15 +112,15 @@ export function useChats() {
 		},
 	})
 
-	const update = useMutation({
+	const updateMutation = useMutation({
 		mutationFn: ({ chat_id, data }: { chat_id: string, data: AiChatUpdate }) => updateChat({
 			body: data,
 			path: { chat_id },
 		}),
 
 		onMutate: async ({ chat_id, data }) => {
-			await queryClient.cancelQueries({ queryKey: chatsKey })
-			const previous = queryClient.getQueryData<AiChatRead[]>(chatsKey) ?? []
+			await queryClient.cancelQueries({ queryKey: chatsQueryKey })
+			const previous = queryClient.getQueryData<AiChatRead[]>(chatsQueryKey) ?? []
 
 			// Add changes optimistically
 			setChats(prev => {
@@ -164,31 +160,30 @@ export function useChats() {
 
 
 	return {
-		create,
-		read,
-		update,
-		del,
+		query,
+		createMutation,
+		updateMutation,
+		deleteMutation,
 	}
 }
 
 
-export function useMessages() {
-	const activeChat = useChatStore((s) => s.activeChat)
+export function useMessages(chat_id: string | null) {
 
-	const { create } = useMessageCreateMutation()
+	const { createMutation } = useMessageCreateMutation()
 
-	const read = useQuery({
-		enabled: !!activeChat,
+	const query = useQuery({
+		enabled: !!chat_id,
 		queryFn: ({ signal }) =>
 			readMessages({
-				path: { chat_id: activeChat!.id },
+				path: { chat_id: chat_id! },
 				signal,
 			}).then((res) => res.data),
-		queryKey: getMessagesQueyKey(activeChat?.id ?? "no-active-chat"),
+		queryKey: messagesQueryKey(chat_id ?? "no-active-chat"),
 	})
 
 	return {
-		create,
-		read,
+		query,
+		createMutation,
 	}
 }

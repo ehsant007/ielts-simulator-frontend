@@ -2,10 +2,9 @@
 
 import { Box, ScrollArea, ScrollAreaRootProps, Collapsible, CollapsibleRootProps, IconButton, IconButtonProps } from "@chakra-ui/react"
 import { LuArrowDown, LuCheck, LuChevronRight, LuCopy } from "react-icons/lu"
-import { forwardRef, useEffect, useLayoutEffect, useState } from "react"
+import { forwardRef, useEffect, useState } from "react"
 import { useFormatter } from "next-intl"
 import { useStickToBottom } from "use-stick-to-bottom"
-import { useChat } from "./ChatProvider"
 
 export const Scroller = forwardRef<HTMLDivElement, ScrollAreaRootProps>(({ children, ...props }, ref) => {
 	return (
@@ -35,13 +34,13 @@ Scroller.displayName = "Scroller"
 
 export const StickToBottomScroller = forwardRef<HTMLDivElement, ScrollAreaRootProps>(({ children, ...props }, ref) => {
 	const sticky = useStickToBottom()
-	const { messages } = useChat()
+	// const { messages } = useChat()
 
-	useLayoutEffect(() => {
-		const msg = messages[messages.length - 1]
-		if (msg && msg.role === "user")
-			sticky.scrollToBottom()
-	}, [messages, sticky])
+	// useLayoutEffect(() => {
+	// 	const msg = messages[messages.length - 1]
+	// 	if (msg && msg.role === "user")
+	// 		sticky.scrollToBottom()
+	// }, [messages, sticky])
 
 	return (
 		<ScrollArea.Root {...props} ref={ref}>
