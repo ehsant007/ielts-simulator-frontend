@@ -1,18 +1,21 @@
 "use client"
 
 import { AiChatRead, AiMessageRead } from "@/client"
-import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton } from "@chakra-ui/react"
+import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton, Input } from "@chakra-ui/react"
 
 import { LuEllipsis, LuMic, LuPin, LuPinOff, LuRefreshCw, LuTrash } from "react-icons/lu"
 
 import type { InputGroupProps, MenuRootProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
-import { BiUpArrowAlt } from "react-icons/bi"
-import { Fragment, useState } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScroller } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
 import { useChats, useMessages } from "./hooks"
+import { FaArrowUp } from "react-icons/fa6"
+import { BiSolidUpArrow, BiUpArrow, BiUpArrowAlt } from "react-icons/bi"
+import { HiArrowUp } from "react-icons/hi"
+
 
 
 export function ChatPanel() {
@@ -127,7 +130,7 @@ export function ChatButton({ chat }: { chat: AiChatRead }) {
 			<Button
 				variant="ghost"
 				color="fg"
-				size="xs"
+				size="sm"
 				fontWeight="normal"
 				justifyContent="start"
 				borderRadius="xl"
@@ -144,7 +147,7 @@ export function ChatButton({ chat }: { chat: AiChatRead }) {
 			>
 				<IconButton
 					variant="ghost"
-					size="xs"
+					size="sm"
 					borderRadius="xl"
 					onClick={() => updateChat({ chat_id: chat.id, data: { pinned: !chat.pinned } })}
 				>
@@ -158,7 +161,7 @@ export function ChatButton({ chat }: { chat: AiChatRead }) {
 				>
 					<IconButton
 						variant="ghost"
-						size="xs"
+						size="sm"
 						ms="auto"
 						borderRadius="xl"
 						focusRing="none"
@@ -396,6 +399,20 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 		setValue("")
 	}
 
+	const textareaRef = useRef<HTMLTextAreaElement>(null)
+	const singleLineHeight = useRef(-1)
+
+	const [multiLines, setMultiLines] = useState(false)
+
+	useEffect(() => {
+		const el = textareaRef.current
+		if (!el)
+			return
+
+		if (singleLineHeight.current < 0)
+			singleLineHeight.current = el.getBoundingClientRect().height
+	}, [])
+
 	return (
 		<InputGroup
 			zIndex="10"
@@ -404,12 +421,14 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 				<HStack
 					mt="auto"
 					position="relative"
-					pb="2"
+					h={multiLines ? "wrap" : "full"}
+					pb={multiLines ? "2" : "unset"}
+					gap="3"
 				>
 					<IconButton
 						minW="unset"
 						h="auto"
-						p="1.5"
+						p="2"
 						variant="ghost"
 						borderRadius="full"
 					>
@@ -418,11 +437,11 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 					<IconButton
 						minW="unset"
 						h="auto"
-						p="1.5"
+						p="2"
 						borderRadius="full"
 						onClick={handleSend}
 					>
-						<BiUpArrowAlt />
+						<HiArrowUp />
 					</IconButton>
 				</HStack>
 			}
@@ -430,17 +449,34 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 			{...props}
 		>
 			<Textarea
+				ref={textareaRef}
 				placeholder="Ask anything"
 				borderRadius="4xl"
 				bg="bg.muted"
-				focusRingColor="border.emphasized"
-				autoresize
+				focusRing="none"
+				border="none"
+				shadow="sm"
+				rows={1}
 				alignContent="center"
 				ps="5"
-				py="1"
-				value={value}
-				onChange={(e) => setValue(e.currentTarget.value)}
+				pt="4"
+
+				pb={multiLines ? "12" : "4"}
+				pe={multiLines ? "5" : "6rem"}
+
+				size="lg"
+				autoresize
 				autoFocus
+
+				value={value}
+				onChange={(e) => {
+					if (!e.currentTarget.value)
+						setMultiLines(false)
+					else
+						setMultiLines(e.currentTarget.scrollHeight > singleLineHeight.current)
+					setValue(e.currentTarget.value)
+				}}
+
 				onKeyDown={(e) => {
 					if (e.shiftKey)
 						return
@@ -453,5 +489,3 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 		</InputGroup>
 	)
 }
-
-
