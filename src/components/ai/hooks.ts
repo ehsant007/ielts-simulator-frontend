@@ -1,6 +1,5 @@
 import { AiChatCreate, AiChatRead, AiChatUpdate, AiMessageRead, createChat, createMessage, deleteChat, readChats, readMessages, updateChat } from "@/client"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { useChatStore, useChatStoreApi } from "./ChatProvider"
 import { SetStateAction } from "react"
 import { v7 as uuid7 } from "uuid"
 
@@ -8,10 +7,17 @@ import { v7 as uuid7 } from "uuid"
 export const chatsQueryKey = ["ai-chats"] as const
 export const messagesQueryKey = (chat_id: string) => ["ai-chats", chat_id, "messages"] as const
 export const messageCreateKey = ["ai-message-create"] as const
+export const chatCreateKey = ["ai-chat-create"] as const
 
-export function useMessageCreateMutation() {
+
+type UseCollectionProps<T> = {
+	onCreateSuccess?: (data: T) => void,
+	onCreate?: () => void
+	onError?: (data: T) => void
+}
+
+export function useMessageCreateMutation({ onCreate, onCreateSuccess, onError }: UseCollectionProps<AiMessageRead> = {}) {
 	const queryClient = useQueryClient()
-	const chatStore = useChatStoreApi()
 
 	const setMessages = (chat_id: string, set: SetStateAction<AiMessageRead[]>) => {
 		queryClient.setQueryData<AiMessageRead[]>(
@@ -20,7 +26,7 @@ export function useMessageCreateMutation() {
 		)
 	}
 
-	const createMutation = useMutation({
+	const create = useMutation({
 		mutationKey: messageCreateKey,
 
 		mutationFn: (data: { chat_id: string, message: string }) => {
@@ -41,6 +47,8 @@ export function useMessageCreateMutation() {
 			}
 			setMessages(optimisticMsg.chat_id, prev => [...prev, optimisticMsg])
 
+			onCreate?.()
+
 			return { optimisticMsg }
 		},
 
@@ -58,6 +66,8 @@ export function useMessageCreateMutation() {
 					...prev.slice(index + 1),
 				]
 			})
+
+			onCreateSuccess?.(response)
 		},
 
 		onError: (_error, _data, context) => {
@@ -66,20 +76,17 @@ export function useMessageCreateMutation() {
 
 			const { optimisticMsg } = context
 			setMessages(optimisticMsg.chat_id, prev => prev.filter(msg => msg.id !== optimisticMsg.id))
-			chatStore.getState().setDraft(optimisticMsg.chat_id, optimisticMsg.content)
+			onError?.(context.optimisticMsg)
 		},
 
 	})
 
-	return { createMutation }
+	return { create }
 }
 
 
-export function useChats() {
+export function useChats({ onCreateSuccess }: UseCollectionProps<AiChatRead> = {}) {
 	const queryClient = useQueryClient()
-	const setActiveChat = useChatStore((s) => s.setActiveChat)
-
-	const { createMutation: { mutate: createMessage } } = useMessageCreateMutation()
 
 	const setChats = (set: SetStateAction<AiChatRead[]>) => {
 		queryClient.setQueryData<AiChatRead[]>(
@@ -93,19 +100,20 @@ export function useChats() {
 		queryKey: chatsQueryKey,
 	})
 
-	const createMutation = useMutation({
+	const create = useMutation({
+		mutationKey: chatCreateKey,
+
 		mutationFn: (data: AiChatCreate) => createChat({
 			body: data,
 		}),
 
-		onSuccess: ({ data: newChat }, { message }) => {
-			setActiveChat(newChat)
+		onSuccess: ({ data: newChat }) => {
 			setChats(prev => [newChat, ...prev])
-			createMessage({ chat_id: newChat.id, message })
+			onCreateSuccess?.(newChat)
 		}
 	})
 
-	const deleteMutation = useMutation({
+	const remove = useMutation({
 		mutationFn: (chat_id: string) => deleteChat({
 			path: { chat_id }
 		}),
@@ -115,7 +123,7 @@ export function useChats() {
 		},
 	})
 
-	const updateMutation = useMutation({
+	const update = useMutation({
 		mutationFn: ({ chat_id, data }: { chat_id: string, data: AiChatUpdate }) => updateChat({
 			body: data,
 			path: { chat_id },
@@ -164,16 +172,16 @@ export function useChats() {
 
 	return {
 		query,
-		createMutation,
-		updateMutation,
-		deleteMutation,
+		create,
+		update,
+		remove,
 	}
 }
 
 
 export function useMessages(chat_id: string | null | undefined) {
 
-	const { createMutation } = useMessageCreateMutation()
+	const { create } = useMessageCreateMutation()
 
 	const query = useQuery({
 		enabled: !!chat_id,
@@ -187,6 +195,6 @@ export function useMessages(chat_id: string | null | undefined) {
 
 	return {
 		query,
-		createMutation,
+		create,
 	}
 }

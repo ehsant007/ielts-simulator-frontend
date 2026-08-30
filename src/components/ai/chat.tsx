@@ -11,7 +11,7 @@ import { Fragment, useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScroller } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
-import { messageCreateKey, useChats, useMessages } from "./hooks"
+import { messageCreateKey, useChats, useMessageCreateMutation, useMessages } from "./hooks"
 import { HiArrowUp } from "react-icons/hi"
 import { BsCircleFill, BsStopFill } from "react-icons/bs"
 import { useIsMutating } from "@tanstack/react-query"
@@ -110,7 +110,7 @@ export function ChatList({ ...props }: StackProps) {
 export function ChatButton({ chat }: { chat: AiChatRead }) {
 	const activeChat = useChatStore((s) => s.activeChat)
 	const setActiveChat = useChatStore((s) => s.setActiveChat)
-	const { updateMutation: { mutate: updateChat } } = useChats()
+	const { update: { mutate: updateChat } } = useChats()
 	const [menuOpen, setMenuOpen] = useState(false)
 
 	return (
@@ -176,7 +176,7 @@ export function ChatButton({ chat }: { chat: AiChatRead }) {
 
 
 export function ChatActionMenu({ chat, children, ...props }: { chat: AiChatRead } & MenuRootProps) {
-	const { deleteMutation: { mutate: deleteChat } } = useChats()
+	const { remove: { mutate: deleteChat } } = useChats()
 
 	return (
 		<Menu.Root {...props}>
@@ -222,13 +222,11 @@ export function ChatBox(props: StackProps) {
 
 
 export function ChatHome() {
-	const { createMutation: { mutate: createChat } } = useChats()
-
 	return (
 		<Center w="full">
 			<VStack w="full" gap="7">
 				<Text fontSize="2xl">Good to see you, Ehsan.</Text>
-				<ChatInput onSubmit={(value) => createChat({ message: value, app_id: null })} />
+				<ChatInput2 />
 			</VStack>
 		</Center>
 	)
@@ -236,18 +234,9 @@ export function ChatHome() {
 
 
 export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) {
+	const { query: { data: messages = [], isLoading } } = useMessages(chat.id)
 
-	const { query: { data: messages = [], isLoading }, createMutation } = useMessages(chat.id)
-
-	const isPending = useIsMutating({mutationKey: messageCreateKey}) > 0
-
-	const sendMessage = (message: string) => {
-		if (!chat || !message.trim() || isPending)
-			return false
-		createMutation.mutate({ chat_id: chat.id, message })
-		return true
-	}
-
+	const isPending = useIsMutating({ mutationKey: messageCreateKey }) > 0
 
 	if (isLoading)
 		return (
@@ -308,7 +297,7 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 					alignItems="flex-end"
 					justifyContent="center"
 				>
-					<ChatInput key={chat.id} onSubmit={sendMessage} />
+					<ChatInput2 key={chat.id} />
 				</Box>
 
 			</VStack>
@@ -316,6 +305,59 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 	)
 }
 
+
+export function ChatInput2({ ...props }: ChatInputProps) {
+	const activeChat = useChatStore((s) => s.activeChat)
+	const setActiveChat = useChatStore((s) => s.setActiveChat)
+
+	const chatId = activeChat?.id ?? "default"
+
+	const userMsg = useChatStore(s => s.drafts[chatId])
+	const setDraft = useChatStore(s=>s.setDraft)
+	const setUserMsg = (value: string) => setDraft(chatId, value)
+
+	const { create: { mutate: createMessage } } = useMessageCreateMutation({
+		onCreate: () => {
+			setUserMsg("")
+		},
+
+		onError: (msg) => {
+			setUserMsg(msg.content)
+		},
+	})
+
+	const { create: chatCreateMutation } = useChats({
+		onCreateSuccess: (chat) => {
+			setActiveChat(chat)
+			createMessage({ message: userMsg, chat_id: chat.id })
+		}
+	})
+
+	const handleSend = () => {
+		if (!userMsg.trim() || chatCreateMutation.isPending)
+			return
+
+		if (activeChat == null)
+			chatCreateMutation.mutate({ message: userMsg, app_id: null })
+		else
+			createMessage({ message: userMsg, chat_id: activeChat.id })
+	}
+
+	return (
+		<ChatInput
+			value={userMsg}
+			onValueChange={(value) => setUserMsg(value)}
+			onSend={handleSend}
+			onStop={() => { }}
+			pending={chatCreateMutation.isPending}
+
+			zIndex="10"
+			maxW="3xl"
+			mx="3"
+			{...props}
+		/>
+	)
+}
 
 
 export function Message({ msg }: { msg: AiMessageRead }) {
@@ -395,28 +437,15 @@ export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 }
 
 
-export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) => void } & Omit<InputGroupProps, "children" | "onSubmit">) {
-	const isPending = useIsMutating({ mutationKey: messageCreateKey }) > 0
+type ChatInputProps = {
+	value?: string
+	onValueChange?: (value: string) => void
+	onSend?: () => void
+	onStop?: () => void
+	pending?: boolean
+} & Omit<InputGroupProps, "children">
 
-	const chat = useChatStore((s) => s.activeChat)
-	const chatId = chat ? chat.id : "default"
-
-	const value = useChatStore((s) => s.drafts[chatId])
-	const setDraft = useChatStore((s) => s.setDraft)
-	const setValue = (value: string) => setDraft(chatId, value)
-
-	const handleSend = () => {
-		if (isPending || !value.trim())
-			return
-
-		onSubmit(value)
-		setValue("")
-	}
-
-	const handleStop = () => {
-
-	}
-
+export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...props }: ChatInputProps) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
 	const singleLineHeight = useRef(-1)
 
@@ -433,8 +462,6 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 
 	return (
 		<InputGroup
-			zIndex="10"
-			maxW="2xl"
 			endElement={
 				<HStack
 					mt="auto"
@@ -452,14 +479,14 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 					>
 						<LuMic />
 					</IconButton>
-					{isPending
+					{pending
 						?
 						<IconButton
 							minW="unset"
 							h="auto"
 							p="2"
 							borderRadius="full"
-							onClick={handleStop}
+							onClick={onStop}
 						>
 							<BsStopFill />
 						</IconButton>
@@ -469,7 +496,7 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 							h="auto"
 							p="2"
 							borderRadius="full"
-							onClick={handleSend}
+							onClick={onSend}
 						>
 							<HiArrowUp />
 						</IconButton>
@@ -505,16 +532,16 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 						setMultiLines(false)
 					else
 						setMultiLines(e.currentTarget.scrollHeight > singleLineHeight.current)
-					setValue(e.currentTarget.value)
+					onValueChange?.(e.currentTarget.value)
 				}}
 
+
 				onKeyDown={(e) => {
-					if (e.shiftKey)
+					if (e.key !== "Enter" || e.shiftKey)
 						return
-					if (e.key === "Enter") {
-						e.preventDefault()
-						handleSend()
-					}
+
+					e.preventDefault()
+					onSend?.()
 				}}
 			/>
 		</InputGroup>
