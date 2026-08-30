@@ -11,10 +11,10 @@ import { Fragment, useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScroller } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
-import { messageCreateKey, messagesQueryKey, useChats, useMessages } from "./hooks"
+import { messageCreateKey, useChats, useMessages } from "./hooks"
 import { HiArrowUp } from "react-icons/hi"
 import { BsCircleFill, BsStopFill } from "react-icons/bs"
-import { useIsMutating, useQueryClient } from "@tanstack/react-query"
+import { useIsMutating } from "@tanstack/react-query"
 
 
 
@@ -457,7 +457,7 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 							h="auto"
 							p="2"
 							borderRadius="full"
-							onClick={handleSend}
+							onClick={handleStop}
 						>
 							<BsStopFill />
 						</IconButton>
@@ -467,9 +467,9 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 							h="auto"
 							p="2"
 							borderRadius="full"
-							onClick={handleStop}
+							onClick={handleSend}
 						>
-							<BsStopFill />
+							<HiArrowUp />
 						</IconButton>
 					}
 				</HStack>
