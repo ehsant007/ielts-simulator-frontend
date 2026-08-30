@@ -330,11 +330,12 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 			}}
 		>
 			<Box
-				borderRadius="full"
+				borderStartRadius="3xl"
+				borderEndEndRadius="3xl"
 				bg="primary.muted"
-				p="3"
+				p="4"
 			>
-				<Text>{msg.content}</Text>
+				<Text whiteSpace="pre-wrap">{msg.content}</Text>
 			</Box>
 
 			<HStack
