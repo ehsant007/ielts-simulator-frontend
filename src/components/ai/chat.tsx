@@ -1,11 +1,11 @@
 "use client"
 
 import { AiChatRead, AiMessageRead } from "@/client"
-import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton, Icon } from "@chakra-ui/react"
+import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton, Icon, useBreakpointValue } from "@chakra-ui/react"
 
 import { LuEllipsis, LuMic, LuPin, LuPinOff, LuRefreshCw, LuTrash } from "react-icons/lu"
 
-import type { InputGroupProps, MenuRootProps, StackProps } from "@chakra-ui/react"
+import type { BoxProps, InputGroupProps, MenuRootProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
 import { Fragment, useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
@@ -22,7 +22,7 @@ export function ChatPanel() {
 
 	return (
 		<ChatStoreProvider>
-			<HStack h="100%">
+			<HStack h="100%" gap="0">
 				<ChatList p="2" />
 				<ChatBox maxW="3xl" p="5" />
 			</HStack>
@@ -208,27 +208,38 @@ export function ChatActionMenu({ chat, children, ...props }: { chat: AiChatRead 
 }
 
 
-export function ChatBox(props: StackProps) {
+export function ChatBox(props: BoxProps) {
 	const chat = useChatStore((s) => s.activeChat)
 
 	if (!chat)
-		return <ChatHome />
+		return (
+			<Box display="flex" w="full" h="100%" mx="auto" {...props} >
+				<Center w="full">
+					<VStack w="full" gap="7">
+						<Text fontSize="2xl">Good to see you, Ehsan.</Text>
+						<ChatInput2 />
+					</VStack>
+				</Center>
+			</Box>
+		)
 
 	return (
+		<Box display="flex" w="full" h="100%" pos="relative" mx="auto" {...props} >
+			<StickToBottomScroller variant="always">
+				<Messages chat={chat} />
 
-		<Messages chat={chat} {...props} />
-	)
-}
-
-
-export function ChatHome() {
-	return (
-		<Center w="full">
-			<VStack w="full" gap="7">
-				<Text fontSize="2xl">Good to see you, Ehsan.</Text>
-				<ChatInput2 />
-			</VStack>
-		</Center>
+				<Box
+					position="absolute"
+					bottom="6"
+					width="full"
+					display="flex"
+					alignItems="flex-end"
+					justifyContent="center"
+				>
+					<ChatInput2 key={chat.id} />
+				</Box>
+			</StickToBottomScroller>
+		</Box>
 	)
 }
 
@@ -242,66 +253,50 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 		return (
 			<Center w="full">
 				<Spinner size="xl" color="primary" borderWidth="thick" />
-				{/* <Spinner asChild borderWidth="0" size="lg">
-					<LuLoader />
-				</Spinner> */}
 			</Center>
 		)
 
 	return (
-		<StickToBottomScroller variant="always" pos="relative">
-			<VStack {...props} gap="3" mx="auto">
 
-				{messages.map((msg, index) => {
-					const previous = messages[index - 1]
-					const showDate = !previous || !isSameDay(previous.created_at, msg.created_at)
+		<VStack gap="3" mx="auto" {...props}>
 
-					return (
-						<Fragment key={msg.id}>
-							{showDate && (
-								<Text
-									color="fg.muted"
-									fontWeight="medium"
-									fontSize="small"
-								>
-									<ChatTime dt={msg.created_at} />
-								</Text>
-							)}
+			{messages.map((msg, index) => {
+				const previous = messages[index - 1]
+				const showDate = !previous || !isSameDay(previous.created_at, msg.created_at)
 
-							<Message msg={msg} />
-						</Fragment>
-					)
-				})}
+				return (
+					<Fragment key={msg.id}>
+						{showDate && (
+							<Text
+								color="fg.muted"
+								fontWeight="medium"
+								fontSize="small"
+							>
+								<ChatTime dt={msg.created_at} />
+							</Text>
+						)}
 
-				{isPending &&
-					<Icon
-						as={BsCircleFill}
-						alignSelf={"start"}
-						size="md"
-						color="primary"
-						animationName="breathing"
-						animationDuration="1.5s"
-						animationTimingFunction="ease-in-out"
-						animationIterationCount="infinite"
-					/>
-				}
+						<Message msg={msg} />
+					</Fragment>
+				)
+			})}
+
+			{isPending &&
+				<Icon
+					as={BsCircleFill}
+					alignSelf={"start"}
+					size="md"
+					color="primary"
+					animationName="breathing"
+					animationDuration="1.5s"
+					animationTimingFunction="ease-in-out"
+					animationIterationCount="infinite"
+				/>
+			}
 
 
-				<Box h="10rem" />
-
-				<Box
-					position="absolute"
-					bottom="6"
-					width="full"
-					display="flex"
-					alignItems="flex-end"
-					justifyContent="center"
-				>
-					<ChatInput2 key={chat.id} />
-				</Box>
-
-			</VStack>
-		</StickToBottomScroller>
+			<Box h="10rem" />
+		</VStack>
 	)
 }
 
@@ -313,7 +308,7 @@ export function ChatInput2({ ...props }: ChatInputProps) {
 	const chatId = activeChat?.id ?? "default"
 
 	const userMsg = useChatStore(s => s.drafts[chatId])
-	const setDraft = useChatStore(s=>s.setDraft)
+	const setDraft = useChatStore(s => s.setDraft)
 	const setUserMsg = (value: string) => setDraft(chatId, value)
 
 	const { create: { mutate: createMessage } } = useMessageCreateMutation({
@@ -350,10 +345,6 @@ export function ChatInput2({ ...props }: ChatInputProps) {
 			onSend={handleSend}
 			onStop={() => { }}
 			pending={chatCreateMutation.isPending}
-
-			zIndex="10"
-			maxW="3xl"
-			mx="3"
 			{...props}
 		/>
 	)
@@ -451,6 +442,11 @@ export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...pr
 
 	const [multiLines, setMultiLines] = useState(false)
 
+	const isMobile = useBreakpointValue({ base: true, md: false, })
+
+	const expand = isMobile || multiLines
+
+
 	useEffect(() => {
 		const el = textareaRef.current
 		if (!el)
@@ -466,8 +462,8 @@ export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...pr
 				<HStack
 					mt="auto"
 					position="relative"
-					h={multiLines ? "wrap" : "full"}
-					pb={multiLines ? "2" : "unset"}
+					h={expand ? "wrap" : "full"}
+					pb={expand ? "2" : "unset"}
 					gap="3"
 				>
 					<IconButton
@@ -519,8 +515,8 @@ export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...pr
 				ps="5"
 				pt="4"
 
-				pb={multiLines ? "12" : "4"}
-				pe={multiLines ? "5" : "6rem"}
+				pb={expand ? "4rem" : "4"}
+				pe={expand ? "5" : "6rem"}
 
 				size="lg"
 				autoresize
