@@ -11,9 +11,10 @@ import { Fragment, useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScroller } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
-import { useChats, useMessages } from "./hooks"
+import { messageCreateKey, messagesQueryKey, useChats, useMessages } from "./hooks"
 import { HiArrowUp } from "react-icons/hi"
-import { BsCircleFill } from "react-icons/bs"
+import { BsCircleFill, BsStopFill } from "react-icons/bs"
+import { useIsMutating, useQueryClient } from "@tanstack/react-query"
 
 
 
@@ -393,6 +394,8 @@ export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 
 
 export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) => void } & Omit<InputGroupProps, "children" | "onSubmit">) {
+	const isPending = useIsMutating({ mutationKey: messageCreateKey }) > 0
+
 	const chat = useChatStore((s) => s.activeChat)
 	const chatId = chat ? chat.id : "default"
 
@@ -401,11 +404,15 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 	const setValue = (value: string) => setDraft(chatId, value)
 
 	const handleSend = () => {
-		if (!value.trim())
+		if (isPending || !value.trim())
 			return
 
 		onSubmit(value)
 		setValue("")
+	}
+
+	const handleStop = () => {
+
 	}
 
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -443,15 +450,28 @@ export function ChatInput({ onSubmit, ...props }: { onSubmit: (value: string) =>
 					>
 						<LuMic />
 					</IconButton>
-					<IconButton
-						minW="unset"
-						h="auto"
-						p="2"
-						borderRadius="full"
-						onClick={handleSend}
-					>
-						<HiArrowUp />
-					</IconButton>
+					{isPending
+						?
+						<IconButton
+							minW="unset"
+							h="auto"
+							p="2"
+							borderRadius="full"
+							onClick={handleSend}
+						>
+							<BsStopFill />
+						</IconButton>
+						:
+						<IconButton
+							minW="unset"
+							h="auto"
+							p="2"
+							borderRadius="full"
+							onClick={handleStop}
+						>
+							<BsStopFill />
+						</IconButton>
+					}
 				</HStack>
 			}
 

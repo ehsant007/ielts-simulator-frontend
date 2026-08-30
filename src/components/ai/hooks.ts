@@ -5,8 +5,9 @@ import { SetStateAction } from "react"
 import { v7 as uuid7 } from "uuid"
 
 
-const chatsQueryKey = ["ai-chats"] as const
-const messagesQueryKey = (chat_id: string) => ["ai-chats", chat_id, "messages"] as const
+export const chatsQueryKey = ["ai-chats"] as const
+export const messagesQueryKey = (chat_id: string) => ["ai-chats", chat_id, "messages"] as const
+export const messageCreateKey = ["ai-message-create"] as const
 
 export function useMessageCreateMutation() {
 	const queryClient = useQueryClient()
@@ -20,6 +21,8 @@ export function useMessageCreateMutation() {
 	}
 
 	const createMutation = useMutation({
+		mutationKey: messageCreateKey,
+
 		mutationFn: (data: { chat_id: string, message: string }) => {
 			return createMessage({
 				body: { content: data.message },
