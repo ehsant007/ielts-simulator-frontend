@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Vazirmatn } from "next/font/google";
-//import "./globals.css";
+import "./globals.css";
 import Providers from "@/providers/Providers"
 import { getLocale } from "next-intl/server";
 import { localeDir } from "@/i18n/util"

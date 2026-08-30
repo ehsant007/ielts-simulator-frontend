@@ -1,7 +1,7 @@
 "use client"
 
 import { AiChatRead, AiMessageRead } from "@/client"
-import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton, Input } from "@chakra-ui/react"
+import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton } from "@chakra-ui/react"
 
 import { LuEllipsis, LuMic, LuPin, LuPinOff, LuRefreshCw, LuTrash } from "react-icons/lu"
 
@@ -12,8 +12,6 @@ import { MdEdit } from "react-icons/md"
 import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScroller } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
 import { useChats, useMessages } from "./hooks"
-import { FaArrowUp } from "react-icons/fa6"
-import { BiSolidUpArrow, BiUpArrow, BiUpArrowAlt } from "react-icons/bi"
 import { HiArrowUp } from "react-icons/hi"
 
 
