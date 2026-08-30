@@ -239,8 +239,10 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 
 	const { query: { data: messages = [], isLoading }, createMutation } = useMessages(chat.id)
 
+	const isPending = useIsMutating({mutationKey: messageCreateKey}) > 0
+
 	const sendMessage = (message: string) => {
-		if (!chat || !message.trim() || createMutation.isPending)
+		if (!chat || !message.trim() || isPending)
 			return false
 		createMutation.mutate({ chat_id: chat.id, message })
 		return true
@@ -282,7 +284,7 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 					)
 				})}
 
-				{createMutation.isPending &&
+				{isPending &&
 					<Icon
 						as={BsCircleFill}
 						alignSelf={"start"}

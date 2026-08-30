@@ -171,7 +171,7 @@ export function useChats() {
 }
 
 
-export function useMessages(chat_id: string | null) {
+export function useMessages(chat_id: string | null | undefined) {
 
 	const { createMutation } = useMessageCreateMutation()
 
