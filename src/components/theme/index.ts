@@ -67,8 +67,8 @@ const config = defineConfig({
 					solid: { value: "{colors.primary}" },
 					contrast: { value: "{colors.white}" },
 					fg: { value: { base: "{colors.primary.600}", _dark: "{colors.primary.300}" } },
-					muted: { value: {base: "{colors.primary.100}", _dark: "{colors.primary.800}"} },
-					subtle: { value: {base: "{colors.primary.300}", _dark: "{colors.primary.900}"} },
+					muted: { value: { base: "{colors.primary.100}", _dark: "{colors.primary.800}" } },
+					subtle: { value: { base: "{colors.primary.300}", _dark: "{colors.primary.900}" } },
 					emphasized: { value: { base: "{colors.primary.300}", _dark: "{colors.primary.700}" } },
 					focusRing: { value: "{colors.primary.500}" },
 					border: { value: "colors.primary.400" }
@@ -98,7 +98,14 @@ const config = defineConfig({
 					value: { base: "{colors.yellow.solid}", _dark: "{colors.yellow.800}" },
 				},
 			}
-		}
+		},
+
+		keyframes: {
+			breathing: {
+				"0%, 100%": { transform: "scale(1)" },
+				"50%": { transform: "scale(0.6)" },
+			},
+		},
 	},
 
 	globalCss: {
@@ -118,6 +125,8 @@ const config = defineConfig({
 			bg: "highlight"
 		},
 	},
+
+
 })
 
 export const system = createSystem(defaultConfig, config)

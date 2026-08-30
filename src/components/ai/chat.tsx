@@ -1,7 +1,7 @@
 "use client"
 
 import { AiChatRead, AiMessageRead } from "@/client"
-import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton } from "@chakra-ui/react"
+import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton, Icon } from "@chakra-ui/react"
 
 import { LuEllipsis, LuMic, LuPin, LuPinOff, LuRefreshCw, LuTrash } from "react-icons/lu"
 
@@ -13,6 +13,7 @@ import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScrol
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
 import { useChats, useMessages } from "./hooks"
 import { HiArrowUp } from "react-icons/hi"
+import { BsCircleFill } from "react-icons/bs"
 
 
 
@@ -213,9 +214,8 @@ export function ChatBox(props: StackProps) {
 		return <ChatHome />
 
 	return (
-		<StickToBottomScroller variant="always" pos="relative">
-			<Messages chat={chat} {...props} />
-		</StickToBottomScroller>
+
+		<Messages chat={chat} {...props} />
 	)
 }
 
@@ -248,58 +248,68 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 
 	if (isLoading)
 		return (
-			<HStack gap="3" bg="bg/80" backdropFilter="blur(2px)" rounded="md" p="4" width="min">
-				<Spinner size="sm" colorPalette="blue" />
-				<Text fontSize="sm" color="fg.muted">
-					Loading...
-				</Text>
-			</HStack>
+			<Center w="full">
+				<Spinner size="xl" color="primary" borderWidth="thick" />
+				{/* <Spinner asChild borderWidth="0" size="lg">
+					<LuLoader />
+				</Spinner> */}
+			</Center>
 		)
 
 	return (
-		<VStack {...props} gap="3" mx="auto">
+		<StickToBottomScroller variant="always" pos="relative">
+			<VStack {...props} gap="3" mx="auto">
 
-			{messages.map((msg, index) => {
-				const previous = messages[index - 1]
-				const showDate = !previous || !isSameDay(previous.created_at, msg.created_at)
+				{messages.map((msg, index) => {
+					const previous = messages[index - 1]
+					const showDate = !previous || !isSameDay(previous.created_at, msg.created_at)
 
-				return (
-					<Fragment key={msg.id}>
-						{showDate && (
-							<Text
-								color="fg.muted"
-								fontWeight="medium"
-								fontSize="small"
-							>
-								<ChatTime dt={msg.created_at} />
-							</Text>
-						)}
+					return (
+						<Fragment key={msg.id}>
+							{showDate && (
+								<Text
+									color="fg.muted"
+									fontWeight="medium"
+									fontSize="small"
+								>
+									<ChatTime dt={msg.created_at} />
+								</Text>
+							)}
 
-						<Message msg={msg} />
-					</Fragment>
-				)
-			})}
+							<Message msg={msg} />
+						</Fragment>
+					)
+				})}
 
-			{createMutation.isPending &&
-				<Box alignSelf={"start"}>
-					<Spinner size="sm" color="primary" />
+				{createMutation.isPending &&
+					<Icon
+						as={BsCircleFill}
+						alignSelf={"start"}
+						size="md"
+						color="primary"
+						animationName="breathing"
+						animationDuration="1.5s"
+						animationTimingFunction="ease-in-out"
+						animationIterationCount="infinite"
+					/>
+				}
+
+
+				<Box h="10rem" />
+
+				<Box
+					position="absolute"
+					bottom="6"
+					width="full"
+					display="flex"
+					alignItems="flex-end"
+					justifyContent="center"
+				>
+					<ChatInput key={chat.id} onSubmit={sendMessage} />
 				</Box>
-			}
 
-			<Box h="10rem" />
-
-			<Box
-				position="absolute"
-				bottom="6"
-				width="full"
-				display="flex"
-				alignItems="flex-end"
-				justifyContent="center"
-			>
-				<ChatInput key={chat.id} onSubmit={sendMessage} />
-			</Box>
-
-		</VStack>
+			</VStack>
+		</StickToBottomScroller>
 	)
 }
 
