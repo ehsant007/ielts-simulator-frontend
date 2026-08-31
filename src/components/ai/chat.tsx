@@ -1,11 +1,11 @@
 "use client"
 
 import { AiChatRead, AiMessageRead } from "@/client"
-import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton, Icon, useBreakpointValue, Drawer, CloseButton, Popover } from "@chakra-ui/react"
+import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton, Icon, useBreakpointValue, Drawer, CloseButton, Popover, Separator } from "@chakra-ui/react"
 
 import { LuEllipsis, LuMessageCircle, LuMic, LuPin, LuPinOff, LuRefreshCw, LuTrash } from "react-icons/lu"
 
-import type { BoxProps, ButtonProps, GroupProps, InputGroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
+import type { BoxProps, ButtonProps, GroupProps, IconButtonProps, InputGroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
 import { Fragment, useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
@@ -16,7 +16,8 @@ import { HiArrowUp, HiMenuAlt2 } from "react-icons/hi"
 import { BsCircleFill, BsPinAngle, BsStopFill } from "react-icons/bs"
 import { useIsMutating } from "@tanstack/react-query"
 import { RxPanelLeft } from "react-icons/rx";
-import { AnimatePresence, motion } from "motion/react"
+import { AnimatePresence, motion, number } from "motion/react"
+import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
 
 const MotionBox = motion.create(Box)
 
@@ -635,6 +636,21 @@ export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 }
 
 
+function InputButton({ children, ...props }: IconButtonProps) {
+	return (
+		<IconButton
+			minW="unset"
+			h="auto"
+			p="2"
+			variant="ghost"
+			borderRadius="full"
+			{...props}
+		>
+			{children}
+		</IconButton>
+	)
+}
+
 type ChatInputProps = {
 	value?: string
 	onValueChange?: (value: string) => void
@@ -645,66 +661,51 @@ type ChatInputProps = {
 
 export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...props }: ChatInputProps) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
-	const singleLineHeight = useRef(-1)
+	const singleLineHeight = useRef(Number.MAX_VALUE)
 
 	const [multiLines, setMultiLines] = useState(false)
 
 	const isMobile = useBreakpointValue({ base: true, md: false, })
+	const [expand2, setExpand2] = useState(false)
 
-	const expand = isMobile || multiLines
-
-
-	useEffect(() => {
-		const el = textareaRef.current
-		if (!el)
-			return
-
-		if (singleLineHeight.current < 0)
-			singleLineHeight.current = el.getBoundingClientRect().height
-	}, [])
+	const expand1 = isMobile || multiLines || expand2
 
 	return (
 		<InputGroup
 			endElement={
-				<HStack
-					mt="auto"
-					position="relative"
-					h={expand ? "wrap" : "full"}
-					pb={expand ? "2" : "unset"}
-					gap="3"
+				<VStack
+					h="full"
+					py="2"
 				>
-					<IconButton
-						minW="unset"
-						h="auto"
-						p="2"
-						variant="ghost"
-						borderRadius="full"
-					>
-						<LuMic />
-					</IconButton>
-					{pending
-						?
-						<IconButton
-							minW="unset"
-							h="auto"
-							p="2"
-							borderRadius="full"
-							onClick={onStop}
-						>
-							<BsStopFill />
-						</IconButton>
-						:
-						<IconButton
-							minW="unset"
-							h="auto"
-							p="2"
-							borderRadius="full"
-							onClick={onSend}
-						>
-							<HiArrowUp />
-						</IconButton>
+					{expand1 &&
+						<>
+							<InputButton ms="auto" onClick={() => setExpand2(prev => !prev)}>
+								{expand2 ? <RiCollapseDiagonalLine /> : <RiExpandDiagonalLine />}
+							</InputButton>
+							<Separator flex="1" />
+						</>
 					}
-				</HStack>
+					<HStack
+						mt="auto"
+						position="relative"
+						gap="3"
+						my="auto"
+					>
+						<InputButton>
+							<LuMic />
+						</InputButton>
+						{pending
+							?
+							<InputButton variant="solid" onClick={onStop}>
+								<BsStopFill />
+							</InputButton>
+							:
+							<InputButton variant="solid" onClick={onSend}>
+								<HiArrowUp />
+							</InputButton>
+						}
+					</HStack>
+				</VStack>
 			}
 
 			{...props}
@@ -717,30 +718,30 @@ export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...pr
 				focusRing="none"
 				border="none"
 				shadow="sm"
-				rows={1}
-				alignContent="center"
+				rows={expand2 ? 20 : 1}
 				ps="5"
 				pt="4"
-
-				pb={expand ? "4rem" : "4"}
-				pe={expand ? "5" : "6rem"}
-
+				pb={expand1 ? "4rem" : "4"}
+				pe={expand1 ? "5" : "6rem"}
 				size="lg"
 				autoresize
+				maxH="50dvh"
 				autoFocus
-
 				value={value}
+
 				onChange={(e) => {
-					if (!e.currentTarget.value)
+					singleLineHeight.current = Math.min(singleLineHeight.current, e.currentTarget.scrollHeight)
+					if (e.currentTarget.value === "")
 						setMultiLines(false)
+					else if (e.currentTarget.value.includes("\n"))
+						setMultiLines(true)
 					else
 						setMultiLines(e.currentTarget.scrollHeight > singleLineHeight.current)
 					onValueChange?.(e.currentTarget.value)
 				}}
 
-
 				onKeyDown={(e) => {
-					if (e.key !== "Enter" || e.shiftKey)
+					if (e.key !== "Enter" || e.shiftKey || expand2)
 						return
 
 					e.preventDefault()
