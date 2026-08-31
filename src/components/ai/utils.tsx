@@ -49,11 +49,11 @@ export const StickToBottomScroller = forwardRef<HTMLDivElement, ScrollAreaRootPr
 				<ScrollArea.Content
 					/* eslint-disable-next-line react-hooks/refs */
 					ref={sticky.contentRef}
-					css={{
-						"&[data-overflow-y]": {
-							pe: "3"
-						},
-					}}
+					// css={{
+					// 	"&[data-overflow-y]": {
+					// 		pe: "3"
+					// 	},
+					// }}
 				>
 
 					{children}
