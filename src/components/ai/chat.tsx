@@ -7,7 +7,7 @@ import { LuEllipsis, LuMessageCircle, LuMic, LuPin, LuPinOff, LuRefreshCw, LuTra
 
 import type { BoxProps, ButtonProps, GroupProps, IconButtonProps, InputGroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
-import { Fragment, useEffect, useRef, useState } from "react"
+import { Fragment, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScroller } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
@@ -16,7 +16,7 @@ import { HiArrowUp, HiMenuAlt2 } from "react-icons/hi"
 import { BsCircleFill, BsPinAngle, BsStopFill } from "react-icons/bs"
 import { useIsMutating } from "@tanstack/react-query"
 import { RxPanelLeft } from "react-icons/rx";
-import { AnimatePresence, motion, number } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
 
 const MotionBox = motion.create(Box)
