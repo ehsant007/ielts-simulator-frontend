@@ -1,11 +1,11 @@
 "use client"
 
 import { AiChatRead, AiMessageRead } from "@/client"
-import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton, Icon, useBreakpointValue, Drawer, CloseButton } from "@chakra-ui/react"
+import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton, Icon, useBreakpointValue, Drawer, CloseButton, Popover, Input } from "@chakra-ui/react"
 
 import { LuEllipsis, LuMessageCircle, LuMic, LuPin, LuPinOff, LuRefreshCw, LuTrash } from "react-icons/lu"
 
-import type { BoxProps, ButtonProps, InputGroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
+import type { BoxProps, ButtonProps, GroupProps, InputGroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
 import { Fragment, useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
@@ -16,7 +16,9 @@ import { HiArrowUp, HiMenuAlt2 } from "react-icons/hi"
 import { BsCircleFill, BsPinAngle, BsStopFill } from "react-icons/bs"
 import { useIsMutating } from "@tanstack/react-query"
 import { RxPanelLeft } from "react-icons/rx";
+import { AnimatePresence, motion } from "motion/react"
 
+const MotionBox = motion.create(Box)
 
 
 
@@ -24,57 +26,121 @@ export function ChatPanel() {
 
 	return (
 		<ChatStoreProvider>
-			<HStack h="100%" gap="0" pos="relative">
+			<HStack h="full" gap="0" pos="relative">
 				<ChatSidebar />
-				<ChatBox maxW="3xl" p="5" />
+				<ChatBox maxW="4xl" p="5" mx="auto" />
 			</HStack>
 		</ChatStoreProvider>
+	)
+}
+
+export function ChatBox(props: BoxProps) {
+	const chat = useChatStore((s) => s.activeChat)
+
+	if (!chat)
+		return (
+			<Box display="flex" w="full" h="100%" mx="auto" {...props} >
+				<Center w="full">
+					<VStack w="full" gap="7">
+						<Text fontSize="2xl">Good to see you, Ehsan.</Text>
+						<ChatInput2 />
+					</VStack>
+				</Center>
+			</Box>
+		)
+
+	return (
+		<StickToBottomScroller
+			variant="always"
+			pos="relative"
+		>
+			<Box {...props}>
+				<Messages chat={chat} />
+			</Box>
+
+			<Box
+				position="absolute"
+				bottom="6"
+				left="0"
+				w="full"
+			>
+				<Box {...props}>
+					<ChatInput2 key={chat.id} />
+				</Box>
+			</Box>
+		</StickToBottomScroller>
 	)
 }
 
 
 export function ChatSidebar() {
 	const isMobile = useBreakpointValue({ base: true, md: false, })
-	const [collapse, setCollapse] = useState(false)
 
 	if (isMobile) {
-		return (
-			<Drawer.Root placement="start">
-				<Drawer.Trigger asChild>
-					<IconButton
-						pos="absolute"
-						variant="ghost"
-						size="md"
-						top="2"
-						left="2"
-						zIndex="10"
-					>
-						<HiMenuAlt2 />
-					</IconButton>
-				</Drawer.Trigger>
-				<Portal>
-					<Drawer.Backdrop />
-					<Drawer.Positioner>
-						<Drawer.Content>
-							<Drawer.Header>
-								{/* <Drawer.Title>Drawer Title</Drawer.Title> */}
-							</Drawer.Header>
-							<Drawer.Body pe="0">
-								<ChatList />
-							</Drawer.Body>
-							<Drawer.Footer>
-								{/* <Button variant="outline">Cancel</Button>
-								<Button>Save</Button> */}
-							</Drawer.Footer>
-							<Drawer.CloseTrigger asChild>
-								<CloseButton size="sm" />
-							</Drawer.CloseTrigger>
-						</Drawer.Content>
-					</Drawer.Positioner>
-				</Portal>
-			</Drawer.Root>
-		)
+		return <SmallScreenSidebar />
 	}
+
+	return (
+		<BigScreenSidebar />
+	)
+
+}
+
+export function SmallScreenSidebar() {
+	const { query: { data: chats = [], isLoading } } = useChats()
+	const pinned = chats?.filter((chat) => chat.pinned)
+	const recent = chats?.filter((chat) => !chat.pinned)
+
+	return (
+		<Drawer.Root placement="start">
+			<Drawer.Trigger asChild>
+				<IconButton
+					pos="absolute"
+					variant="ghost"
+					size="md"
+					top="2"
+					left="2"
+					zIndex="10"
+				>
+					<HiMenuAlt2 />
+				</IconButton>
+			</Drawer.Trigger>
+			<Portal>
+				<Drawer.Backdrop />
+				<Drawer.Positioner>
+					<Drawer.Content>
+						<Drawer.Header>
+							{/* <Drawer.Title>Drawer Title</Drawer.Title> */}
+						</Drawer.Header>
+						<Drawer.Body pe="0">
+							<ChatList
+								pe="2"
+								pinedChats={pinned}
+								recentChats={recent}
+								loading={isLoading}
+							/>
+						</Drawer.Body>
+						<Drawer.Footer>
+							{/* <Button variant="outline">Cancel</Button>
+								<Button>Save</Button> */}
+						</Drawer.Footer>
+						<Drawer.CloseTrigger asChild>
+							<CloseButton size="sm" />
+						</Drawer.CloseTrigger>
+					</Drawer.Content>
+				</Drawer.Positioner>
+			</Portal>
+		</Drawer.Root>
+	)
+}
+
+
+export function BigScreenSidebar() {
+	const { query: { data: chats = [], isLoading } } = useChats()
+	const pinned = chats?.filter((chat) => chat.pinned)
+	const recent = chats?.filter((chat) => !chat.pinned)
+
+	const [collapse, setCollapse] = useState(false)
 
 	return (
 		<Box
@@ -99,18 +165,21 @@ export function ChatSidebar() {
 			</IconButton>
 
 			<VStack h="full" >
-				<ActionButtons collapse={collapse} pe="2" />
+				<ActionButtons pinedChats={pinned} recentChats={recent} collapse={collapse} pe="2" />
 
 				<ChatList
 					pe="2"
+					pinedChats={pinned}
+					recentChats={recent}
+					loading={isLoading}
 					opacity={collapse ? "0" : "1"}
 					transition="opacity 0.2s ease"
 				/>
 			</VStack>
 		</Box>
 	)
-
 }
+
 
 
 export function ActionButton(props: ButtonProps) {
@@ -130,7 +199,7 @@ export function ActionButton(props: ButtonProps) {
 	)
 }
 
-export function ActionButtons({ collapse, ...props }: { collapse: boolean } & StackProps) {
+export function ActionButtons({ collapse, pinedChats, recentChats, ...props }: { pinedChats: AiChatRead[], recentChats: AiChatRead[], collapse: boolean } & StackProps) {
 	const setActiveChat = useChatStore((s) => s.setActiveChat)
 
 	const f = (icon: React.ReactNode, name: string) => {
@@ -155,13 +224,32 @@ export function ActionButtons({ collapse, ...props }: { collapse: boolean } & St
 
 			{collapse &&
 				<>
-					<ActionButton>
-						<BsPinAngle />
-					</ActionButton>
+					<ChatListMenu
+						trigger={
+							<ActionButton>
+								<BsPinAngle />
+							</ActionButton>
+						}
+					>
+						<ChatButtonList
+							chats={pinedChats}
+							placeholder="Pin chats to list them here."
+						/>
+					</ChatListMenu>
 
-					<ActionButton>
-						<LuMessageCircle />
-					</ActionButton>
+
+					<ChatListMenu
+						trigger={
+							<ActionButton>
+								<LuMessageCircle />
+							</ActionButton>
+						}
+					>
+						<ChatButtonList
+							chats={recentChats}
+							placeholder="No chats to list!"
+						/>
+					</ChatListMenu>
 				</>
 			}
 
@@ -170,17 +258,57 @@ export function ActionButtons({ collapse, ...props }: { collapse: boolean } & St
 }
 
 
-export function ChatList({ ...props }: ScrollAreaScrollbarProps) {
-	const { query: { data: chats = [], isLoading } } = useChats()
 
-	const pinned = chats?.filter((chat) => chat.pinned)
-	const recent = chats?.filter((chat) => !chat.pinned)
+export function ChatListMenu({ children, trigger }: { children: React.ReactNode, trigger: React.ReactNode }) {
+	return (
+		<Popover.Root positioning={{ placement: "bottom-start", offset: { crossAxis: 0, mainAxis: -50 } }}>
+			<Popover.Trigger asChild>
+				{trigger}
+			</Popover.Trigger>
+			<Portal>
+				<Popover.Positioner>
+					<Popover.Content maxH="40rem" minW="18rem" p="3" ms="2.8rem" maxHeight="40dvh" overflowY="auto">
+						{children}
+					</Popover.Content>
+				</Popover.Positioner>
+			</Portal>
+		</Popover.Root>
+	)
+}
 
+
+export function ChatButtonList({ chats, placeholder }: { chats: AiChatRead[], placeholder?: string }) {
+	return (
+		<VStack alignItems="start" gap="0" mt="1">
+			<AnimatePresence>
+				{chats.map((c) =>
+					<MotionBox
+						w="full"
+						key={c.id}
+						layout
+						initial={{ opacity: 0, scale: 0.0 }}
+						animate={{ opacity: 1, scale: 1 }}
+						exit={{ opacity: 0, scale: 0.0 }}
+						transition={{ duration: 0.2 }}
+					>
+						<ChatButton chat={c} />
+					</MotionBox>
+				)}
+			</AnimatePresence>
+			{chats.length === 0 && placeholder &&
+				<Text color="fg.subtle" mx="auto">{placeholder}</Text>
+			}
+		</VStack>
+	)
+}
+
+
+export function ChatList({ pinedChats, recentChats, loading, ...props }: { pinedChats: AiChatRead[], recentChats: AiChatRead[], loading: boolean } & ScrollAreaScrollbarProps) {
 	return (
 		<Scroller w="full" variant="always" {...props}>
 
 			<VStack alignItems="start" gap="5">
-				{pinned.length > 0 &&
+				{pinedChats.length > 0 &&
 					<Collapse
 						title={
 							<Text fontWeight="medium" fontSize="sm">
@@ -189,11 +317,7 @@ export function ChatList({ ...props }: ScrollAreaScrollbarProps) {
 						}
 						w="full"
 					>
-						<VStack alignItems="start" gap="0" mt="1">
-							{pinned.map((c) =>
-								<ChatButton key={c.id} chat={c} />
-							)}
-						</VStack>
+						<ChatButtonList chats={pinedChats} />
 					</Collapse>
 				}
 
@@ -205,13 +329,9 @@ export function ChatList({ ...props }: ScrollAreaScrollbarProps) {
 					}
 					w="full"
 				>
-					<VStack alignItems="start" gap="0" mt="1">
-						{recent.map((c) =>
-							<ChatButton key={c.id} chat={c} />
-						)}
-					</VStack>
+					<ChatButtonList chats={recentChats} />
 
-					{isLoading &&
+					{loading &&
 						<VStack flex="1">
 							{Array.from({ length: 10 }, (_, i) => (
 								<Skeleton w="full" key={i} height="8" borderRadius="xl" />
@@ -226,7 +346,7 @@ export function ChatList({ ...props }: ScrollAreaScrollbarProps) {
 	)
 }
 
-export function ChatButton({ chat }: { chat: AiChatRead }) {
+export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps) {
 	const activeChat = useChatStore((s) => s.activeChat)
 	const setActiveChat = useChatStore((s) => s.setActiveChat)
 	const { update: { mutate: updateChat } } = useChats()
@@ -245,6 +365,7 @@ export function ChatButton({ chat }: { chat: AiChatRead }) {
 			w="full"
 			attached
 			borderRadius="xl"
+			{...props}
 		>
 			<Button
 				variant="ghost"
@@ -327,40 +448,7 @@ export function ChatActionMenu({ chat, children, ...props }: { chat: AiChatRead 
 }
 
 
-export function ChatBox(props: BoxProps) {
-	const chat = useChatStore((s) => s.activeChat)
 
-	if (!chat)
-		return (
-			<Box display="flex" w="full" h="100%" mx="auto" {...props} >
-				<Center w="full">
-					<VStack w="full" gap="7">
-						<Text fontSize="2xl">Good to see you, Ehsan.</Text>
-						<ChatInput2 />
-					</VStack>
-				</Center>
-			</Box>
-		)
-
-	return (
-		<StickToBottomScroller variant="always">
-			<Box display="flex" w="full" h="100%" pos="relative" mx="auto" {...props} >
-				<Messages chat={chat} />
-
-				<Box
-					position="absolute"
-					bottom="6"
-					width="full"
-					display="flex"
-					alignItems="flex-end"
-					justifyContent="center"
-				>
-					<ChatInput2 key={chat.id} />
-				</Box>
-			</Box>
-		</StickToBottomScroller>
-	)
-}
 
 
 export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) {
@@ -377,7 +465,7 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 
 	return (
 
-		<VStack gap="3" mx="auto" {...props}>
+		<VStack w="full" gap="3" mx="auto" {...props}>
 
 			{messages.map((msg, index) => {
 				const previous = messages[index - 1]
