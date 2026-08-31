@@ -100,14 +100,15 @@ export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...pr
 				value={value}
 
 				onChange={(e) => {
+					const text = e.currentTarget.value
 					singleLineHeight.current = Math.min(singleLineHeight.current, e.currentTarget.scrollHeight)
-					if (e.currentTarget.value === "")
+					if (text === "")
 						setMultiLines(false)
-					else if (e.currentTarget.value.includes("\n"))
+					else if (text.includes("\n"))
 						setMultiLines(true)
 					else
 						setMultiLines(e.currentTarget.scrollHeight > singleLineHeight.current)
-					onValueChange?.(e.currentTarget.value)
+					onValueChange?.(text)
 				}}
 
 				onKeyDown={(e) => {
