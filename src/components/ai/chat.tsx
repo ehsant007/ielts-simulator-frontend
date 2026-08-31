@@ -1,20 +1,22 @@
 "use client"
 
 import { AiChatRead, AiMessageRead } from "@/client"
-import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton, Icon, useBreakpointValue } from "@chakra-ui/react"
+import { VStack, Text, Button, HStack, Box, InputGroup, IconButton, Textarea, Center, Menu, Portal, Group, Spinner, Skeleton, Icon, useBreakpointValue, Drawer, CloseButton } from "@chakra-ui/react"
 
-import { LuEllipsis, LuMic, LuPin, LuPinOff, LuRefreshCw, LuTrash } from "react-icons/lu"
+import { LuEllipsis, LuMessageCircle, LuMic, LuPin, LuPinOff, LuRefreshCw, LuTrash } from "react-icons/lu"
 
-import type { BoxProps, InputGroupProps, MenuRootProps, StackProps } from "@chakra-ui/react"
+import type { BoxProps, ButtonProps, InputGroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
 import { Fragment, useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, Collapse, isSameDay, Scroller, CopyButton, StickToBottomScroller } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
 import { messageCreateKey, useChats, useMessageCreateMutation, useMessages } from "./hooks"
-import { HiArrowUp } from "react-icons/hi"
-import { BsCircleFill, BsStopFill } from "react-icons/bs"
+import { HiArrowUp, HiMenuAlt2 } from "react-icons/hi"
+import { BsCircleFill, BsPinAngle, BsStopFill } from "react-icons/bs"
 import { useIsMutating } from "@tanstack/react-query"
+import { RxPanelLeft } from "react-icons/rx";
+
 
 
 
@@ -22,8 +24,8 @@ export function ChatPanel() {
 
 	return (
 		<ChatStoreProvider>
-			<HStack h="100%" gap="0">
-				<ChatList p="2" />
+			<HStack h="100%" gap="0" pos="relative">
+				<ChatSidebar />
 				<ChatBox maxW="3xl" p="5" />
 			</HStack>
 		</ChatStoreProvider>
@@ -31,36 +33,153 @@ export function ChatPanel() {
 }
 
 
-export function ChatList({ ...props }: StackProps) {
+export function ChatSidebar() {
+	const isMobile = useBreakpointValue({ base: true, md: false, })
+	const [collapse, setCollapse] = useState(false)
+
+	if (isMobile) {
+		return (
+			<Drawer.Root placement="start">
+				<Drawer.Trigger asChild>
+					<IconButton
+						pos="absolute"
+						variant="ghost"
+						size="md"
+						top="2"
+						left="2"
+						zIndex="10"
+					>
+						<HiMenuAlt2 />
+					</IconButton>
+				</Drawer.Trigger>
+				<Portal>
+					<Drawer.Backdrop />
+					<Drawer.Positioner>
+						<Drawer.Content>
+							<Drawer.Header>
+								{/* <Drawer.Title>Drawer Title</Drawer.Title> */}
+							</Drawer.Header>
+							<Drawer.Body pe="0">
+								<ChatList />
+							</Drawer.Body>
+							<Drawer.Footer>
+								{/* <Button variant="outline">Cancel</Button>
+								<Button>Save</Button> */}
+							</Drawer.Footer>
+							<Drawer.CloseTrigger asChild>
+								<CloseButton size="sm" />
+							</Drawer.CloseTrigger>
+						</Drawer.Content>
+					</Drawer.Positioner>
+				</Portal>
+			</Drawer.Root>
+		)
+	}
+
+	return (
+		<Box
+			pt="4rem"
+			ps="3"
+			w={collapse ? "4rem" : "18rem"}
+			h="full"
+			borderEnd="xs"
+			borderColor="border"
+			pos="relative"
+			transition="width 0.2s ease"
+		>
+			<IconButton
+				pos="absolute"
+				variant="ghost"
+				size="md"
+				top="2"
+				right={collapse ? "center" : "2"}
+				onClick={() => setCollapse(prev => !prev)}
+			>
+				<RxPanelLeft />
+			</IconButton>
+
+			<VStack h="full" >
+				<ActionButtons collapse={collapse} pe="2" />
+
+				<ChatList
+					pe="2"
+					opacity={collapse ? "0" : "1"}
+					transition="opacity 0.2s ease"
+				/>
+			</VStack>
+		</Box>
+	)
+
+}
+
+
+export function ActionButton(props: ButtonProps) {
+	return (
+		<Button
+			variant="ghost"
+			color="fg"
+			size="sm"
+			fontWeight="normal"
+			borderRadius="xl"
+			w="full"
+
+			{...props}
+		>
+			{props.children}
+		</Button>
+	)
+}
+
+export function ActionButtons({ collapse, ...props }: { collapse: boolean } & StackProps) {
 	const setActiveChat = useChatStore((s) => s.setActiveChat)
+
+	const f = (icon: React.ReactNode, name: string) => {
+		if (collapse)
+			return icon
+
+		return <>
+			{icon}{name}
+		</>
+	}
+
+	const justify = () => collapse ? "center" : "start"
+
+	return (
+		<VStack w="full" {...props}>
+			<ActionButton
+				justifyContent={justify()}
+				onClick={() => setActiveChat(null)}
+			>
+				{f(<IoCreateOutline />, "New chat")}
+			</ActionButton>
+
+			{collapse &&
+				<>
+					<ActionButton>
+						<BsPinAngle />
+					</ActionButton>
+
+					<ActionButton>
+						<LuMessageCircle />
+					</ActionButton>
+				</>
+			}
+
+		</VStack>
+	)
+}
+
+
+export function ChatList({ ...props }: ScrollAreaScrollbarProps) {
 	const { query: { data: chats = [], isLoading } } = useChats()
 
 	const pinned = chats?.filter((chat) => chat.pinned)
 	const recent = chats?.filter((chat) => !chat.pinned)
 
 	return (
-		<Scroller w="18rem" variant="always" borderEnd="sm" borderColor="border">
+		<Scroller w="full" variant="always" {...props}>
 
-			<VStack alignItems="start" gap="5" {...props}>
-
-				<VStack w="full">
-
-					<Button
-						variant="ghost"
-						color="fg"
-						size="sm"
-						fontWeight="normal"
-						justifyContent="start"
-						borderRadius="xl"
-						w="full"
-						onClick={() => setActiveChat(null)}
-					>
-
-						<IoCreateOutline />New chat
-					</Button>
-				</VStack>
-
-
+			<VStack alignItems="start" gap="5">
 				{pinned.length > 0 &&
 					<Collapse
 						title={
@@ -224,8 +343,8 @@ export function ChatBox(props: BoxProps) {
 		)
 
 	return (
-		<Box display="flex" w="full" h="100%" pos="relative" mx="auto" {...props} >
-			<StickToBottomScroller variant="always">
+		<StickToBottomScroller variant="always">
+			<Box display="flex" w="full" h="100%" pos="relative" mx="auto" {...props} >
 				<Messages chat={chat} />
 
 				<Box
@@ -238,8 +357,8 @@ export function ChatBox(props: BoxProps) {
 				>
 					<ChatInput2 key={chat.id} />
 				</Box>
-			</StickToBottomScroller>
-		</Box>
+			</Box>
+		</StickToBottomScroller>
 	)
 }
 
