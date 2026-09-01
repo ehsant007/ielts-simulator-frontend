@@ -85,10 +85,6 @@ export function ChatSidebar() {
 }
 
 export function SmallScreenSidebar() {
-	const { query: { data: chats = [], isLoading } } = useChats()
-	const pinned = chats?.filter((chat) => chat.pinned)
-	const recent = chats?.filter((chat) => !chat.pinned)
-
 	return (
 		<Drawer.Root placement="start">
 			<Drawer.Trigger asChild>
@@ -111,12 +107,7 @@ export function SmallScreenSidebar() {
 							{/* <Drawer.Title>Drawer Title</Drawer.Title> */}
 						</Drawer.Header>
 						<Drawer.Body pe="0">
-							<ChatList
-								pe="2"
-								pinedChats={pinned}
-								recentChats={recent}
-								loading={isLoading}
-							/>
+							<SideBar />
 						</Drawer.Body>
 						<Drawer.Footer>
 							{/* <Button variant="outline">Cancel</Button>
@@ -134,17 +125,14 @@ export function SmallScreenSidebar() {
 
 
 export function BigScreenSidebar() {
-	const { query: { data: chats = [], isLoading } } = useChats()
-	const pinned = chats?.filter((chat) => chat.pinned)
-	const recent = chats?.filter((chat) => !chat.pinned)
-
 	const [collapse, setCollapse] = useState(false)
 
 	return (
 		<Box
 			pt="4rem"
 			ps="2"
-			w={collapse ? "4rem" : "20rem"}
+			w={collapse ? "4rem" : "16.5rem"}
+			flexShrink="0"
 			h="full"
 			borderEnd="xs"
 			borderColor="border"
@@ -162,19 +150,29 @@ export function BigScreenSidebar() {
 				<RxPanelLeft />
 			</IconButton>
 
-			<VStack h="full" >
-				<ActionButtons pinedChats={pinned} recentChats={recent} collapse={collapse} pe="2" />
-
-				<ChatList
-					pe="2"
-					pinedChats={pinned}
-					recentChats={recent}
-					loading={isLoading}
-					opacity={collapse ? "0" : "1"}
-					transition="opacity 0.2s ease"
-				/>
-			</VStack>
+			<SideBar collapse={collapse} />
 		</Box>
+	)
+}
+
+export function SideBar({ collapse }: { collapse?: boolean }) {
+	const { query: { data: chats = [], isLoading } } = useChats()
+	const pinned = chats?.filter((chat) => chat.pinned)
+	const recent = chats?.filter((chat) => !chat.pinned)
+
+	return (
+		<VStack h="full" >
+			<ActionButtons pinedChats={pinned} recentChats={recent} collapse={collapse} pe="2" pb="3" />
+
+			<ChatList
+				pe="2"
+				pinedChats={pinned}
+				recentChats={recent}
+				loading={isLoading}
+				opacity={collapse ? "0" : "1"}
+				transition="opacity 0.2s ease"
+			/>
+		</VStack>
 	)
 }
 
@@ -188,6 +186,7 @@ export function ActionButton(props: ButtonProps) {
 			size="sm"
 			fontWeight="normal"
 			borderRadius="xl"
+			colorPalette="primary"
 			w="full"
 
 			{...props}
@@ -197,7 +196,7 @@ export function ActionButton(props: ButtonProps) {
 	)
 }
 
-export function ActionButtons({ collapse, pinedChats, recentChats, ...props }: { pinedChats: AiChatRead[], recentChats: AiChatRead[], collapse: boolean } & StackProps) {
+export function ActionButtons({ collapse, pinedChats, recentChats, ...props }: { pinedChats: AiChatRead[], recentChats: AiChatRead[], collapse?: boolean } & StackProps) {
 	const setActiveChat = useChatStore((s) => s.setActiveChat)
 
 	const f = (icon: React.ReactNode, name: string) => {
@@ -392,6 +391,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 				justifyContent="start"
 				borderRadius="xl"
 				flex="1"
+				colorPalette="primary"
 				onClick={() => setActiveChat(chat)}
 			>
 				{chat.title}
@@ -403,6 +403,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 				gap="0"
 			>
 				<IconButton
+					colorPalette="primary"
 					variant="ghost"
 					size="sm"
 					borderRadius="xl"
@@ -417,6 +418,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 					onOpenChange={(e) => setMenuOpen(e.open)}
 				>
 					<IconButton
+						colorPalette="primary"
 						variant="ghost"
 						size="sm"
 						ms="auto"
@@ -444,12 +446,13 @@ export function ChatActionMenu({ chat, children, ...props }: { chat: AiChatRead 
 				<Menu.Positioner>
 					<Menu.Content>
 						<Menu.ItemGroup>
-							<Menu.Item value="rename"><MdEdit />Rename</Menu.Item>
+							<Menu.Item value="rename" cursor="pointer"><MdEdit />Rename</Menu.Item>
 						</Menu.ItemGroup>
 						<Menu.Separator />
 						<Menu.ItemGroup>
 							<Menu.Item
 								value="delete"
+								cursor="pointer"
 								color="fg.error"
 								_hover={{ bg: "bg.error", color: "fg.error" }}
 								onClick={() => deleteChat(chat.id)}
