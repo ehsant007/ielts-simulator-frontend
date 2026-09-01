@@ -45,7 +45,7 @@ export function MD({ children, id }: { children: string, id: string }) {
 			return <Text id={getId()} textStyle="md">{children}</Text>
 		},
 		p({ children }) {
-			return <Text id={getId()} my="2">{children}</Text>
+			return <Text id={getId()} my="2" overflowWrap="anywhere">{children}</Text>
 		},
 		ul({ children }) {
 			return <List.Root ps="5" listStyleType="disc">{children}</List.Root>
@@ -252,7 +252,7 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 				bg="primary.muted"
 				p="4"
 			>
-				<Text whiteSpace="pre-wrap">{msg.content}</Text>
+				<Text whiteSpace="pre-wrap" overflowWrap="anywhere">{msg.content}</Text>
 			</Box>
 
 			<HStack
