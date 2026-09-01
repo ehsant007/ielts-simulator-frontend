@@ -86,7 +86,7 @@ export function ChatPanel() {
 		<ChatStoreProvider>
 			<HStack h="full" gap="0" pos="relative">
 				<ChatSidebar />
-				<ChatBox maxW="50rem" p="5" mx="auto" />
+				<ChatBox maxW="50rem" py="6" px="4" mx="auto" />
 			</HStack>
 		</ChatStoreProvider>
 	)
@@ -146,9 +146,9 @@ export function ChatBox(props: BoxProps) {
 
 			<Box
 				position="absolute"
-				bottom="2"
+				bottom="0"
 				left="0"
-				w="full"
+				right="0"
 			>
 				<Box {...props} pt="0" mt="0">
 					<VStack gap="5">
@@ -184,7 +184,7 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 
 	if (isLoading)
 		return (
-			<Center w="full">
+			<Center position="absolute" inset="0">
 				<Spinner size="xl" color="primary" borderWidth="thick" />
 			</Center>
 		)
