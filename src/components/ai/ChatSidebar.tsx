@@ -1,5 +1,5 @@
 import { AiChatRead } from "@/client"
-import { VStack, Text, Button, HStack, Box, IconButton, Menu, Portal, Group, Skeleton, useBreakpointValue, Drawer, CloseButton, Popover } from "@chakra-ui/react"
+import { VStack, Text, Button, HStack, Box, IconButton, Menu, Portal, Group, Skeleton, Drawer, CloseButton, Popover } from "@chakra-ui/react"
 import { LuEllipsis, LuMessageCircle, LuPin, LuPinOff, LuTrash } from "react-icons/lu"
 import type { ButtonProps, GroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
@@ -16,19 +16,20 @@ import { AnimatePresence, motion } from "motion/react"
 const MotionBox = motion.create(Box)
 
 export function ChatSidebar() {
-	const isMobile = useBreakpointValue({ base: true, md: false, })
-
-	if (isMobile) {
-		return <SmallScreenSidebar />
-	}
-
 	return (
-		<BigScreenSidebar />
-	)
+		<>
+			<Box h="full" display={{ base: "block", md: "none" }}>
+				<MobileSidebar />
+			</Box>
 
+			<Box h="full" display={{ base: "none", md: "block" }}>
+				<DesktopSidebar />
+			</Box>
+		</>
+	)
 }
 
-export function SmallScreenSidebar() {
+export function MobileSidebar() {
 	const [open, setOpen] = useState(false)
 
 	return (
@@ -79,7 +80,7 @@ export function SmallScreenSidebar() {
 }
 
 
-export function BigScreenSidebar() {
+export function DesktopSidebar() {
 	const [collapse, setCollapse] = useState(false)
 
 	return (
