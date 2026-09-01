@@ -101,17 +101,26 @@ export function ChatBox(props: BoxProps) {
 	const [inputHeight, setInputHeight] = useState(0)
 
 	useEffect(() => {
-		if (!inputRef.current)
-			return
+		const element = inputRef.current
+		if (!element) return
+
+		let timeout: ReturnType<typeof setTimeout>
 
 		const observer = new ResizeObserver(([entry]) => {
-			setInputHeight(entry.contentRect.height)
+			clearTimeout(timeout)
+
+			timeout = setTimeout(() => {
+				setInputHeight(entry.contentRect.height)
+			}, 100)
 		})
 
-		observer.observe(inputRef.current)
+		observer.observe(element)
 
-		return () => observer.disconnect()
-	}, [])
+		return () => {
+			clearTimeout(timeout)
+			observer.disconnect()
+		}
+	}, [chat])
 
 	if (!chat)
 		return (
