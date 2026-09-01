@@ -3,7 +3,7 @@ import { VStack, Text, Button, HStack, Box, IconButton, Menu, Portal, Group, Ske
 import { LuEllipsis, LuMessageCircle, LuPin, LuPinOff, LuTrash } from "react-icons/lu"
 import type { ButtonProps, GroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
-import { useState } from "react"
+import { MouseEvent, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { Collapse, Scroller } from "./utils";
 import { useChatStore } from "./ChatProvider";
@@ -29,8 +29,10 @@ export function ChatSidebar() {
 }
 
 export function SmallScreenSidebar() {
+	const [open, setOpen] = useState(false)
+
 	return (
-		<Drawer.Root placement="start">
+		<Drawer.Root open={open} onOpenChange={(e) => setOpen(e.open)} placement="start">
 			<Drawer.Trigger asChild>
 				<IconButton
 					pos="absolute"
@@ -51,7 +53,9 @@ export function SmallScreenSidebar() {
 							{/* <Drawer.Title>Drawer Title</Drawer.Title> */}
 						</Drawer.Header>
 						<Drawer.Body pe="0">
-							<SideBar />
+
+							<SideBar onClick={(e) => setOpen(!(e.target as HTMLElement).getAttribute("data-close-sidebar"))} />
+
 						</Drawer.Body>
 						<Drawer.Footer>
 							{/* <Button variant="outline">Cancel</Button>
@@ -99,13 +103,18 @@ export function BigScreenSidebar() {
 	)
 }
 
-export function SideBar({ collapse }: { collapse?: boolean }) {
+export type SideBarProps = {
+	collapse?: boolean,
+	onClick?: (e: MouseEvent) => void
+}
+
+export function SideBar({ collapse, onClick }: SideBarProps) {
 	const { query: { data: chats = [], isLoading } } = useChats()
 	const pinned = chats?.filter((chat) => chat.pinned)
 	const recent = chats?.filter((chat) => !chat.pinned)
 
 	return (
-		<VStack h="full" >
+		<VStack h="full" onClick={(e) => onClick?.(e)}>
 			<ActionButtons pinedChats={pinned} recentChats={recent} collapse={collapse} pe="2" pb="3" />
 
 			<ChatList
@@ -183,6 +192,7 @@ export function ActionButtons({ collapse, pinedChats, recentChats, ...props }: {
 export function ActionButton(props: ButtonProps) {
 	return (
 		<Button
+			data-close-sidebar
 			variant="ghost"
 			color="fg"
 			size="sm"
@@ -326,6 +336,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 			{...props}
 		>
 			<Button
+				data-close-sidebar
 				variant="ghost"
 				color="fg"
 				size="sm"
