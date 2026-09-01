@@ -3,7 +3,7 @@ import { VStack, Text, Button, HStack, Box, IconButton, Menu, Portal, Group, Ske
 import { LuEllipsis, LuMessageCircle, LuPin, LuPinOff, LuTrash } from "react-icons/lu"
 import type { ButtonProps, GroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
-import { MouseEvent, useState } from "react"
+import { useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { Collapse, Scroller } from "./utils";
 import { useChatStore } from "./ChatProvider";
@@ -32,7 +32,11 @@ export function SmallScreenSidebar() {
 	const [open, setOpen] = useState(false)
 
 	return (
-		<Drawer.Root open={open} onOpenChange={(e) => setOpen(e.open)} placement="start">
+		<Drawer.Root
+			open={open}
+			onOpenChange={(e) => setOpen(e.open)}
+			placement="start"
+		>
 			<Drawer.Trigger asChild>
 				<IconButton
 					pos="absolute"
@@ -52,9 +56,12 @@ export function SmallScreenSidebar() {
 						<Drawer.Header>
 							{/* <Drawer.Title>Drawer Title</Drawer.Title> */}
 						</Drawer.Header>
-						<Drawer.Body pe="0">
+						<Drawer.Body
+							pe="0"
+							onClick={(e) => setOpen(!(e.target as HTMLElement).getAttribute("data-close-sidebar"))}
+						>
 
-							<SideBar onClick={(e) => setOpen(!(e.target as HTMLElement).getAttribute("data-close-sidebar"))} />
+							<SideBar />
 
 						</Drawer.Body>
 						<Drawer.Footer>
@@ -105,16 +112,15 @@ export function BigScreenSidebar() {
 
 export type SideBarProps = {
 	collapse?: boolean,
-	onClick?: (e: MouseEvent) => void
 }
 
-export function SideBar({ collapse, onClick }: SideBarProps) {
+export function SideBar({ collapse }: SideBarProps) {
 	const { query: { data: chats = [], isLoading } } = useChats()
 	const pinned = chats?.filter((chat) => chat.pinned)
 	const recent = chats?.filter((chat) => !chat.pinned)
 
 	return (
-		<VStack h="full" onClick={(e) => onClick?.(e)}>
+		<VStack h="full" >
 			<ActionButtons pinedChats={pinned} recentChats={recent} collapse={collapse} pe="2" pb="3" />
 
 			<ChatList
