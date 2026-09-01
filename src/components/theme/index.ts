@@ -118,9 +118,9 @@ const config = defineConfig({
 			color: "appFg",
 			minH: "100dvh",
 		},
-		button: {
-			colorPalette: "purple",
-		},
+		// button: {
+		// 	colorPalette: "purple",
+		// },
 		".highlight": {
 			bg: "highlight"
 		},

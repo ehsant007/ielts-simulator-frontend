@@ -26,7 +26,7 @@ export function ChatPanel() {
 		<ChatStoreProvider>
 			<HStack h="full" gap="0" pos="relative">
 				<ChatSidebar />
-				<ChatBox maxW="50rem" p="5" mx="auto"/>
+				<ChatBox maxW="50rem" p="5" mx="auto" />
 			</HStack>
 		</ChatStoreProvider>
 	)
@@ -265,7 +265,26 @@ export function ChatListMenu({ children, trigger }: { children: React.ReactNode,
 			</Popover.Trigger>
 			<Portal>
 				<Popover.Positioner>
-					<Popover.Content maxH="40rem" minW="18rem" p="3" ms="2.8rem" maxHeight="40dvh" overflowY="auto">
+					<Popover.Content
+						maxH="40rem"
+						minW="18rem"
+						p="3"
+						ms="2.8rem"
+						maxHeight="40dvh"
+						overflowY="auto"
+						css={{
+							"&::-webkit-scrollbar": {
+								width: "0.4rem",
+							},
+							"&::-webkit-scrollbar-thumb": {
+								bg: "fg.subtle",
+								borderRadius: "full",
+							},
+							"&::-webkit-scrollbar-track": {
+								bg: "transparent",
+							},
+						}}
+					>
 						{children}
 					</Popover.Content>
 				</Popover.Positioner>

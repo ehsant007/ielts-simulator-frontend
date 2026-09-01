@@ -45,11 +45,12 @@ export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...pr
 			endElement={
 				<VStack
 					h="full"
+					gap="auto"
 					py="2"
 				>
 					{expand1 &&
 						<>
-							<InputButton ms="auto" onClick={() => setExpand2(prev => !prev)}>
+							<InputButton ms="auto" color="fg.muted" onClick={() => setExpand2(prev => !prev)}>
 								{expand2 ? <RiCollapseDiagonalLine /> : <RiExpandDiagonalLine />}
 							</InputButton>
 							<Separator flex="1" />
@@ -66,11 +67,11 @@ export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...pr
 						</InputButton>
 						{pending
 							?
-							<InputButton variant="solid" onClick={onStop}>
+							<InputButton variant="solid" colorPalette="primary" onClick={onStop}>
 								<BsStopFill />
 							</InputButton>
 							:
-							<InputButton variant="solid" onClick={onSend}>
+							<InputButton variant="solid" colorPalette="primary" onClick={onSend}>
 								<HiArrowUp />
 							</InputButton>
 						}
@@ -90,7 +91,7 @@ export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...pr
 				shadow="sm"
 				rows={expand2 ? 20 : 1}
 				ps="5"
-				pt="4"
+				pt={expand1 ? "8" : "4"}
 				pb={expand1 ? "4rem" : "4"}
 				pe={expand1 ? "5" : "6rem"}
 				size="lg"
