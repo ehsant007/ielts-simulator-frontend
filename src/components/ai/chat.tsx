@@ -157,8 +157,8 @@ export function ChatBox(props: BoxProps) {
 								size="sm"
 								variant="solid"
 								borderRadius="full"
-								bg="primary.muted"
-								opacity="80%"
+								colorPalette="primary"
+								opacity="40%"
 								_hover={{ opacity: "100%" }}
 								onClick={() => sticky.scrollToBottom()}
 							>
