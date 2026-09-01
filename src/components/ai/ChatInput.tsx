@@ -4,6 +4,8 @@ import { BsStopFill } from "react-icons/bs"
 import { HiArrowUp } from "react-icons/hi"
 import { LuMic } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
+import { useChatStore } from "./ChatProvider"
+import { useChats, useMessageCreateMutation } from "./hooks"
 
 
 function InputButton({ children, ...props }: IconButtonProps) {
@@ -29,7 +31,7 @@ export type ChatInputProps = {
 	pending?: boolean
 } & Omit<InputGroupProps, "children">
 
-export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...props }: ChatInputProps) {
+function ChatInputInner({ value, onValueChange, onSend, onStop, pending, ...props }: ChatInputProps) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
 	const singleLineHeight = useRef(Number.MAX_VALUE)
 
@@ -135,5 +137,55 @@ export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...pr
 				}}
 			/>
 		</InputGroup>
+	)
+}
+
+
+export function ChatInput({ ...props }: ChatInputProps) {
+	const activeChat = useChatStore((s) => s.activeChat)
+	const setActiveChat = useChatStore((s) => s.setActiveChat)
+
+	const chatId = activeChat?.id ?? "default"
+
+	const userMsg = useChatStore(s => s.drafts[chatId])
+	const setDraft = useChatStore(s => s.setDraft)
+	const setUserMsg = (value: string) => setDraft(chatId, value)
+
+	const { create: { mutate: createMessage } } = useMessageCreateMutation({
+		onCreate: () => {
+			setUserMsg("")
+		},
+
+		onError: (msg) => {
+			setUserMsg(msg.content)
+		},
+	})
+
+	const { create: chatCreateMutation } = useChats({
+		onCreateSuccess: (chat) => {
+			setActiveChat(chat)
+			createMessage({ message: userMsg, chat_id: chat.id })
+		}
+	})
+
+	const handleSend = () => {
+		if (!userMsg.trim() || chatCreateMutation.isPending)
+			return
+
+		if (activeChat == null)
+			chatCreateMutation.mutate({ message: userMsg, app_id: null })
+		else
+			createMessage({ message: userMsg, chat_id: activeChat.id })
+	}
+
+	return (
+		<ChatInputInner
+			value={userMsg}
+			onValueChange={(value) => setUserMsg(value)}
+			onSend={handleSend}
+			onStop={() => { }}
+			pending={chatCreateMutation.isPending}
+			{...props}
+		/>
 	)
 }
