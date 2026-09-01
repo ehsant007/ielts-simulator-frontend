@@ -1,4 +1,4 @@
-import { HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, useBreakpointValue, VStack } from "@chakra-ui/react"
+import { HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, VStack } from "@chakra-ui/react"
 import { useRef, useState } from "react"
 import { BsStopFill } from "react-icons/bs"
 import { HiArrowUp } from "react-icons/hi"
@@ -6,6 +6,7 @@ import { LuMic } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
 import { useChatStore } from "./ChatProvider"
 import { useChats, useMessageCreateMutation } from "./hooks"
+import { useIsMobile } from "@/providers/BreakPointProvider"
 
 
 function InputButton({ children, ...props }: IconButtonProps) {
@@ -37,7 +38,8 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, pending, ...prop
 
 	const [multiLines, setMultiLines] = useState(false)
 
-	const isMobile = useBreakpointValue({ base: true, md: false, })
+	//const isMobile = useBreakpointValue({ base: true, md: false, })
+	const { isMobile } = useIsMobile()
 	const [expand2, setExpand2] = useState(false)
 
 	const expand1 = isMobile || multiLines || expand2
@@ -79,7 +81,7 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, pending, ...prop
 						}
 					</HStack>
 				</VStack>
-			}		
+			}
 			{...props}
 		>
 			<Textarea

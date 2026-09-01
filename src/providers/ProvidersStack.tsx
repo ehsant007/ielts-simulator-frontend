@@ -8,6 +8,7 @@ import { type User } from "@/auth";
 import { LangToolsProvider } from "@/components/lang-tools";
 import { PopoverMenu } from "@/components/lang-tools";
 import { Browser } from "@/components/dictionary"
+import { BreakPointProvider } from "./BreakPointProvider";
 
 interface Props {
 	children: React.ReactNode;
@@ -23,18 +24,18 @@ export default function ProvidersStack({ children, user, locale, messages }: Pro
 	return (
 		<NextIntlClientProvider locale={locale} messages={messages} timeZone={timeZone}>
 			<ChakraProvider>
-				<AuthProvider user={user}>
-					<TanstackQueryProvider>
+				<BreakPointProvider>
+					<AuthProvider user={user}>
+						<TanstackQueryProvider>
+							<LangToolsProvider>
+								{children}
 
-						<LangToolsProvider>
-							{children}
-							
-							<Browser />
-							<PopoverMenu />
-						</LangToolsProvider>
-
-					</TanstackQueryProvider>
-				</AuthProvider>
+								<Browser />
+								<PopoverMenu />
+							</LangToolsProvider>
+						</TanstackQueryProvider>
+					</AuthProvider>
+				</BreakPointProvider>
 			</ChakraProvider>
 		</NextIntlClientProvider>
 	)
