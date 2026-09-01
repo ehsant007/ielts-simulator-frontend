@@ -75,7 +75,7 @@ const config = defineConfig({
 				},
 
 				appBg: {
-					value: { base: "{colors.white}", _dark: "{colors.gray.950}" },
+					value: { base: "{colors.white}", _dark: "{colors.black}" },
 				},
 				appFg: {
 					value: { base: "{colors.gray.900}", _dark: "{colors.gray.300}" },

@@ -343,7 +343,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 		>
 			<Button
 				data-close-sidebar
-				variant="ghost"
+				variant="plain"
 				color="fg"
 				size="sm"
 				fontWeight="normal"
