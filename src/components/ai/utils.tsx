@@ -1,10 +1,10 @@
 "use client"
 
 import { Box, ScrollArea, ScrollAreaRootProps, Collapsible, CollapsibleRootProps, IconButton, IconButtonProps } from "@chakra-ui/react"
-import { LuArrowDown, LuCheck, LuChevronRight, LuCopy } from "react-icons/lu"
+import { LuCheck, LuChevronRight, LuCopy } from "react-icons/lu"
 import { forwardRef, useEffect, useState } from "react"
 import { useFormatter } from "next-intl"
-import { useStickToBottom } from "use-stick-to-bottom"
+import { StickToBottomInstance } from "use-stick-to-bottom"
 
 export const Scroller = forwardRef<HTMLDivElement, ScrollAreaRootProps>(({ children, ...props }, ref) => {
 	return (
@@ -32,16 +32,7 @@ export const Scroller = forwardRef<HTMLDivElement, ScrollAreaRootProps>(({ child
 Scroller.displayName = "Scroller"
 
 
-export const StickToBottomScroller = forwardRef<HTMLDivElement, ScrollAreaRootProps>(({ children, ...props }, ref) => {
-	const sticky = useStickToBottom()
-	// const { messages } = useChat()
-
-	// useLayoutEffect(() => {
-	// 	const msg = messages[messages.length - 1]
-	// 	if (msg && msg.role === "user")
-	// 		sticky.scrollToBottom()
-	// }, [messages, sticky])
-
+export const StickToBottomScroller = forwardRef<HTMLDivElement, { sticky: StickToBottomInstance } & ScrollAreaRootProps>(({ children, sticky, ...props }, ref) => {
 	return (
 		<ScrollArea.Root {...props} ref={ref}>
 			{/* eslint-disable-next-line react-hooks/refs */}
@@ -49,11 +40,6 @@ export const StickToBottomScroller = forwardRef<HTMLDivElement, ScrollAreaRootPr
 				<ScrollArea.Content
 					/* eslint-disable-next-line react-hooks/refs */
 					ref={sticky.contentRef}
-					// css={{
-					// 	"&[data-overflow-y]": {
-					// 		pe: "3"
-					// 	},
-					// }}
 				>
 
 					{children}
@@ -64,31 +50,6 @@ export const StickToBottomScroller = forwardRef<HTMLDivElement, ScrollAreaRootPr
 				<ScrollArea.Thumb />
 			</ScrollArea.Scrollbar>
 			<ScrollArea.Corner />
-
-			{/* eslint-disable-next-line react-hooks/refs */}
-			{!sticky.isAtBottom && (
-				<Box
-					position="absolute"
-					bottom="6rem"
-					right="50%"
-					zIndex="10"
-				>
-					<IconButton
-						size="sm"
-						onClick={() => {
-							sticky.scrollToBottom()
-						}}
-
-						variant="solid"
-						borderRadius="full"
-						bg="primary.muted"
-						opacity="80%"
-						_hover={{ opacity: "100%" }}
-					>
-						<LuArrowDown />
-					</IconButton>
-				</Box>)
-			}
 
 		</ScrollArea.Root>
 	)

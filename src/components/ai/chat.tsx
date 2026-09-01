@@ -2,9 +2,9 @@
 
 import { AiChatRead, AiMessageRead } from "@/client"
 import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, List } from "@chakra-ui/react"
-import { LuRefreshCw } from "react-icons/lu"
+import { LuArrowDown, LuRefreshCw } from "react-icons/lu"
 import type { BoxProps, StackProps } from "@chakra-ui/react"
-import { Fragment } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, isSameDay, CopyButton, StickToBottomScroller } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
@@ -19,6 +19,7 @@ import { ChatSidebar } from "./ChatSidebar"
 
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
+import { useStickToBottom } from "use-stick-to-bottom"
 
 export function MD({ children, id }: { children: string, id: string }) {
 	let count = 0
@@ -50,7 +51,7 @@ export function MD({ children, id }: { children: string, id: string }) {
 			return <List.Root ps="5" listStyleType="disc">{children}</List.Root>
 		},
 		li({ children }) {
-			return <Text  id={getId()}>{children}</Text>
+			return <Text id={getId()}>{children}</Text>
 		},
 		strong({ children }) {
 			return (
@@ -94,6 +95,23 @@ export function ChatPanel() {
 
 export function ChatBox(props: BoxProps) {
 	const chat = useChatStore((s) => s.activeChat)
+	const sticky = useStickToBottom()
+
+	const inputRef = useRef<HTMLDivElement>(null)
+	const [inputHeight, setInputHeight] = useState(0)
+
+	useEffect(() => {
+		if (!inputRef.current)
+			return
+
+		const observer = new ResizeObserver(([entry]) => {
+			setInputHeight(entry.contentRect.height)
+		})
+
+		observer.observe(inputRef.current)
+
+		return () => observer.disconnect()
+	}, [])
 
 	if (!chat)
 		return (
@@ -111,9 +129,10 @@ export function ChatBox(props: BoxProps) {
 		<StickToBottomScroller
 			variant="always"
 			pos="relative"
+			sticky={sticky}
 		>
 			<Box {...props}>
-				<Messages chat={chat} />
+				<Messages chat={chat} mb="5rem" pb={`${inputHeight}px`} />
 			</Box>
 
 			<Box
@@ -122,8 +141,26 @@ export function ChatBox(props: BoxProps) {
 				left="0"
 				w="full"
 			>
-				<Box {...props}>
-					<ChatInput key={chat.id} />
+				<Box {...props} pt="0" mt="0">
+					<VStack gap="5">
+						{!sticky.isAtBottom &&
+							<IconButton
+								size="sm"
+								variant="solid"
+								borderRadius="full"
+								bg="primary.muted"
+								opacity="80%"
+								_hover={{ opacity: "100%" }}
+								onClick={() => sticky.scrollToBottom()}
+							>
+								<LuArrowDown />
+							</IconButton>
+						}
+
+						<Box w="full" ref={inputRef}>
+							<ChatInput key={chat.id} />
+						</Box>
+					</VStack>
 				</Box>
 			</Box>
 		</StickToBottomScroller>
@@ -181,8 +218,6 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 				/>
 			}
 
-
-			<Box h="10rem" />
 		</VStack>
 	)
 }
