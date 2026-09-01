@@ -1,7 +1,7 @@
 "use client"
 
 import { AiChatRead, AiMessageRead } from "@/client"
-import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon } from "@chakra-ui/react"
+import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, List } from "@chakra-ui/react"
 import { LuRefreshCw } from "react-icons/lu"
 import type { BoxProps, StackProps } from "@chakra-ui/react"
 import { Fragment } from "react"
@@ -13,6 +13,70 @@ import { BsCircleFill } from "react-icons/bs"
 import { useIsMutating } from "@tanstack/react-query"
 import { ChatInput } from "./ChatInput"
 import { ChatSidebar } from "./ChatSidebar"
+
+
+
+
+import Markdown from "react-markdown"
+import rehypeRaw from "rehype-raw"
+
+export function MD({ children, id }: { children: string, id: string }) {
+	let count = 0
+	const getId = () => `${id}-n${count++}`
+
+	return <Markdown rehypePlugins={[rehypeRaw]} components={{
+		h1({ children }) {
+			return <Text id={getId()} textStyle="4xl">{children}</Text>
+		},
+		h2({ children }) {
+			return <Text id={getId()} textStyle="3xl">{children}</Text>
+		},
+		h3({ children }) {
+			return <Text id={getId()} textStyle="2xl">{children}</Text>
+		},
+		h4({ children }) {
+			return <Text id={getId()} textStyle="xl">{children}</Text>
+		},
+		h5({ children }) {
+			return <Text id={getId()} textStyle="lg">{children}</Text>
+		},
+		h6({ children }) {
+			return <Text id={getId()} textStyle="md">{children}</Text>
+		},
+		p({ children }) {
+			return <Text id={getId()} my="2">{children}</Text>
+		},
+		ul({ children }) {
+			return <List.Root ps="5" listStyleType="disc">{children}</List.Root>
+		},
+		li({ children }) {
+			return <Text  id={getId()}>{children}</Text>
+		},
+		strong({ children }) {
+			return (
+				<Text
+					as="span"
+					fontWeight="bold"
+					id={getId()}
+				>
+					{children}
+				</Text>
+			)
+		},
+		center({ children }) {
+			return (
+				<Center as="span">
+					<Text as="span" textAlign="center" id={getId()}>
+						{children}
+					</Text>
+				</Center>
+			)
+		},
+	}} >
+		{children}
+	</Markdown>
+}
+
 
 
 export function ChatPanel() {
@@ -181,9 +245,9 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 	return (
 		<Box alignSelf="start">
-			<Text>
+			<MD id={msg.id}>
 				{msg.content}
-			</Text>
+			</MD>
 
 			<HStack gap="0" mt="1">
 				<CopyButton text={msg.content} color="fg.muted" />
