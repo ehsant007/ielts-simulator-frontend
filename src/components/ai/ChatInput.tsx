@@ -77,8 +77,7 @@ export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...pr
 						}
 					</HStack>
 				</VStack>
-			}
-
+			}		
 			{...props}
 		>
 			<Textarea
@@ -99,6 +98,8 @@ export function ChatInput({ value, onValueChange, onSend, onStop, pending, ...pr
 				maxH="60dvh"
 				autoFocus
 				value={value}
+
+				transition="padding 0.2s ease-in-out"
 
 				onChange={(e) => {
 					const text = e.currentTarget.value
