@@ -1,5 +1,5 @@
 import { AiChatCreate, AiChatRead, AiChatUpdate, AiMessageRead, createChat, createMessage, deleteChat, readChats, readMessages, updateChat } from "@/client"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { SetStateAction } from "react"
 import { v7 as uuid7 } from "uuid"
 
@@ -183,14 +183,31 @@ export function useMessages(chat_id: string | null | undefined) {
 
 	const { create } = useMessageCreateMutation()
 
-	const query = useQuery({
+	const query = useInfiniteQuery({
 		enabled: !!chat_id,
-		queryFn: ({ signal }) =>
+		queryKey: messagesQueryKey(chat_id ?? "no-active-chat"),
+
+		queryFn: ({ pageParam, signal }) =>
 			readMessages({
 				path: { chat_id: chat_id! },
+				query: {
+					limit: 3,
+					...pageParam,
+				},
 				signal,
 			}).then((res) => res.data),
-		queryKey: messagesQueryKey(chat_id ?? "no-active-chat"),
+
+		initialPageParam: {},
+
+		getPreviousPageParam: (firstPage) =>
+			firstPage.length > 0
+				? { before: firstPage[0].id }
+				: undefined,
+
+		getNextPageParam: (lastPage) =>
+			lastPage.length > 0
+				? { after: lastPage[lastPage.length - 1].id }
+				: undefined,
 	})
 
 	return {

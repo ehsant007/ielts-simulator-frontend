@@ -178,9 +178,50 @@ export function ChatBox(props: BoxProps) {
 
 
 export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) {
-	const { query: { data: messages = [], isLoading } } = useMessages(chat.id)
+	const { query: {
+		data,
+		isLoading,
+		hasPreviousPage,
+		isFetchingPreviousPage,
+		fetchPreviousPage
+	} } = useMessages(chat.id)
+
+	const messages = data?.pages.flatMap((page) => page) ?? []
 
 	const isPending = useIsMutating({ mutationKey: messageCreateKey }) > 0
+
+
+	const topRef = useRef<HTMLDivElement>(null) // Sentinel
+
+	useEffect(() => {
+		const element = topRef.current
+		if (!element) return
+
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (
+					entry.isIntersecting &&
+					hasPreviousPage &&
+					!isFetchingPreviousPage
+				) {
+					fetchPreviousPage()
+				}
+			},
+			{
+				// Start loading before the user actually reaches the top.
+				rootMargin: "500px 0px 0px 0px",
+			}
+		)
+
+		observer.observe(element)
+
+		return () => observer.disconnect()
+	}, [
+		hasPreviousPage,
+		isFetchingPreviousPage,
+		fetchPreviousPage,
+	])
+
 
 	if (isLoading)
 		return (
@@ -192,6 +233,8 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 	return (
 
 		<VStack w="full" gap="3" mx="auto" {...props}>
+
+			<Box ref={topRef} h="1px" />
 
 			{messages.map((msg, index) => {
 				const previous = messages[index - 1]

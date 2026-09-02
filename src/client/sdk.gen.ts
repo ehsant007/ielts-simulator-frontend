@@ -55,26 +55,40 @@ export const createChat = <ThrowOnError extends boolean = true>(options: Options
 };
 
 /**
- * Delete Chat
+ * Read Messages
  */
-export const deleteChat = <ThrowOnError extends boolean = true>(options: Options<DeleteChatData, ThrowOnError>) => {
-    return (options.client ?? client).delete<DeleteChatResponses, DeleteChatErrors, ThrowOnError>({
+export const readMessages = <ThrowOnError extends boolean = true>(options: Options<ReadMessagesData, ThrowOnError>) => {
+    return (options.client ?? client).get<ReadMessagesResponses, ReadMessagesErrors, ThrowOnError>({
         security: [
             {
                 scheme: 'bearer',
                 type: 'http'
             }
         ],
-        url: '/api/v1/ai/chats/{chat_id}',
+        url: '/api/v1/ai/chats/{chat_id}/messages',
         ...options
     });
 };
 
 /**
- * Read Messages
+ * Create Message
  */
-export const readMessages = <ThrowOnError extends boolean = true>(options: Options<ReadMessagesData, ThrowOnError>) => {
-    return (options.client ?? client).get<ReadMessagesResponses, ReadMessagesErrors, ThrowOnError>({
+export const createMessage = <ThrowOnError extends boolean = true>(options: Options<CreateMessageData, ThrowOnError>) => {
+    return (options.client ?? client).post<CreateMessageResponses, CreateMessageErrors, ThrowOnError>({
+        url: '/api/v1/ai/chats/{chat_id}/messages',
+        ...options,
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+        }
+    });
+};
+
+/**
+ * Delete Chat
+ */
+export const deleteChat = <ThrowOnError extends boolean = true>(options: Options<DeleteChatData, ThrowOnError>) => {
+    return (options.client ?? client).delete<DeleteChatResponses, DeleteChatErrors, ThrowOnError>({
         security: [
             {
                 scheme: 'bearer',
@@ -98,20 +112,6 @@ export const updateChat = <ThrowOnError extends boolean = true>(options: Options
             }
         ],
         url: '/api/v1/ai/chats/{chat_id}',
-        ...options,
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        }
-    });
-};
-
-/**
- * Create Message
- */
-export const createMessage = <ThrowOnError extends boolean = true>(options: Options<CreateMessageData, ThrowOnError>) => {
-    return (options.client ?? client).post<CreateMessageResponses, CreateMessageErrors, ThrowOnError>({
-        url: '/api/v1/ai/chats/{chat_id}/messages',
         ...options,
         headers: {
             'Content-Type': 'application/json',
