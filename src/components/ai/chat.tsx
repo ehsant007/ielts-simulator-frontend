@@ -1,6 +1,6 @@
 "use client"
 
-import { AiChatRead, AiMessageRead } from "@/client"
+import { AiChatRead, AiMessageCreate, AiMessageRead } from "@/client"
 import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, List } from "@chakra-ui/react"
 import { LuArrowDown, LuRefreshCw } from "react-icons/lu"
 import type { BoxProps, StackProps } from "@chakra-ui/react"
@@ -10,10 +10,10 @@ import { ChatTime, isSameDay, CopyButton, StickToBottomScroller } from "./utils"
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
 import { messageCreateKey, useMessages } from "./hooks"
 import { BsCircleFill } from "react-icons/bs"
-import { useIsMutating } from "@tanstack/react-query"
+import { useIsMutating, useMutationState } from "@tanstack/react-query"
 import { ChatInput } from "./ChatInput"
 import { ChatSidebar } from "./ChatSidebar"
-
+import { v7 as uuid7 } from "uuid"
 
 
 
@@ -187,6 +187,22 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 	} } = useMessages(chat.id)
 
 	const messages = data?.pages.flatMap((page) => page) ?? []
+
+	const pendingMessages = useMutationState<AiMessageCreate>({
+		filters: {
+			mutationKey: messageCreateKey,
+			status: "pending",
+		},
+		select: mutation => mutation.state.variables as AiMessageCreate,
+	})
+
+	pendingMessages.forEach((pm) => messages.push({
+		id: uuid7(),
+		chat_id: pm.chat_id,
+		content: pm.content,
+		role: "user",
+		created_at: new Date().toISOString(),
+	}))
 
 	const isPending = useIsMutating({ mutationKey: messageCreateKey }) > 0
 

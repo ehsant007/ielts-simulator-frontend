@@ -16,74 +16,6 @@ type UseCollectionProps<T> = {
 	onError?: (data: T) => void
 }
 
-export function useMessageCreateMutation({ onCreate, onCreateSuccess, onError }: UseCollectionProps<AiMessageRead> = {}) {
-	const queryClient = useQueryClient()
-
-	const setMessages = (chat_id: string, set: SetStateAction<AiMessageRead[]>) => {
-		queryClient.setQueryData<AiMessageRead[]>(
-			messagesQueryKey(chat_id),
-			(prev = []) => typeof set === "function" ? set(prev) : set,
-		)
-	}
-
-	const create = useMutation({
-		mutationKey: messageCreateKey,
-
-		mutationFn: (data: { chat_id: string, message: string }) => {
-			return createMessage({
-				body: { content: data.message },
-				path: { chat_id: data.chat_id },
-			})
-		},
-
-		onMutate: (data) => {
-			// Add user message optimistically
-			const optimisticMsg: AiMessageRead = {
-				id: uuid7(),
-				content: data.message,
-				created_at: new Date().toISOString(),
-				chat_id: data.chat_id,
-				role: "user",
-			}
-			setMessages(optimisticMsg.chat_id, prev => [...prev, optimisticMsg])
-
-			onCreate?.()
-
-			return { optimisticMsg }
-		},
-
-		onSuccess: ({ data: { request, response } }, _content, context) => {
-			setMessages(request.chat_id, (prev) => {
-				const index = prev.findIndex((msg) => msg.id === context.optimisticMsg.id)
-
-				if (index === -1)
-					return [...prev, request, response]
-
-				return [
-					...prev.slice(0, index),
-					request,
-					response,
-					...prev.slice(index + 1),
-				]
-			})
-
-			onCreateSuccess?.(response)
-		},
-
-		onError: (_error, _data, context) => {
-			if (!context)
-				return
-
-			const { optimisticMsg } = context
-			setMessages(optimisticMsg.chat_id, prev => prev.filter(msg => msg.id !== optimisticMsg.id))
-			onError?.(context.optimisticMsg)
-		},
-
-	})
-
-	return { create }
-}
-
 
 export function useChats({ onCreateSuccess }: UseCollectionProps<AiChatRead> = {}) {
 	const queryClient = useQueryClient()
@@ -181,21 +113,29 @@ export function useChats({ onCreateSuccess }: UseCollectionProps<AiChatRead> = {
 
 export function useMessages(chat_id: string | null | undefined) {
 
-	const { create } = useMessageCreateMutation()
-
 	const query = useInfiniteQuery({
 		enabled: !!chat_id,
 		queryKey: messagesQueryKey(chat_id ?? "no-active-chat"),
 
-		queryFn: ({ pageParam, signal }) =>
-			readMessages({
-				path: { chat_id: chat_id! },
-				query: {
-					limit: 3,
-					...pageParam,
-				},
-				signal,
-			}).then((res) => res.data),
+queryFn: async ({ pageParam, signal }) => {
+    console.log("QUERY", {
+        chat_id,
+        pageParam,
+    })
+
+    const res = await readMessages({
+        path: { chat_id: chat_id! },
+        query: {
+            limit: 3,
+            ...pageParam,
+        },
+        signal,
+    })
+
+    console.log("RESULT", res.data)
+
+    return res.data ?? []
+},
 
 		initialPageParam: {},
 
@@ -212,6 +152,5 @@ export function useMessages(chat_id: string | null | undefined) {
 
 	return {
 		query,
-		create,
 	}
 }

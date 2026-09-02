@@ -5,8 +5,10 @@ import { HiArrowUp } from "react-icons/hi"
 import { LuMic } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
 import { useChatStore } from "./ChatProvider"
-import { useChats, useMessageCreateMutation } from "./hooks"
+import { messageCreateKey, messagesQueryKey, useChats } from "./hooks"
 import { useIsMobile } from "@/providers/BreakPointProvider"
+import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query"
+import { AiMessageCreate, AiMessageRead, createMessage } from "@/client"
 
 
 function InputButton({ children, ...props }: IconButtonProps) {
@@ -144,6 +146,7 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, pending, ...prop
 
 
 export function ChatInput({ ...props }: ChatInputProps) {
+	const queryClient = useQueryClient()
 	const activeChat = useChatStore((s) => s.activeChat)
 	const setActiveChat = useChatStore((s) => s.setActiveChat)
 
@@ -153,20 +156,55 @@ export function ChatInput({ ...props }: ChatInputProps) {
 	const setDraft = useChatStore(s => s.setDraft)
 	const setUserMsg = (value: string) => setDraft(chatId, value)
 
-	const { create: { mutate: createMessage } } = useMessageCreateMutation({
-		onCreate: () => {
+	const createMessageMut = useMutation({
+		mutationKey: messageCreateKey,
+
+		mutationFn: (data: AiMessageCreate) => {
+			return createMessage({
+				body: data,
+			})
+		},
+
+		onMutate: () => {
 			setUserMsg("")
 		},
 
-		onError: (msg) => {
-			setUserMsg(msg.content)
+		onError: ({ message }) => {
+			setUserMsg(message)
 		},
+
+		onSuccess: ({ data: { request, response } }, { chat_id }) => {
+			queryClient.setQueryData<InfiniteData<AiMessageRead[]>>(
+				messagesQueryKey(chat_id),
+				(prev) => {
+					if (!prev || prev.pages.length === 0) {
+						return prev
+					}
+
+					const pages = prev.pages
+
+					return {
+						...prev,
+						pages: [
+							...pages.slice(0, -1),
+							[...pages[pages.length-1], request, response],
+						],
+					}
+				}
+			)
+		},
+
+		// onSettled: (_data, _error, variables) => {
+		// 	return queryClient.invalidateQueries({
+		// 		queryKey: messagesQueryKey(variables.chat_id),
+		// 	})
+		// },
 	})
 
 	const { create: chatCreateMutation } = useChats({
 		onCreateSuccess: (chat) => {
 			setActiveChat(chat)
-			createMessage({ message: userMsg, chat_id: chat.id })
+			createMessageMut.mutate({ content: userMsg, chat_id: chat.id })
 		}
 	})
 
@@ -177,7 +215,7 @@ export function ChatInput({ ...props }: ChatInputProps) {
 		if (activeChat == null)
 			chatCreateMutation.mutate({ message: userMsg, app_id: null })
 		else
-			createMessage({ message: userMsg, chat_id: activeChat.id })
+			createMessageMut.mutate({ content: userMsg, chat_id: activeChat.id })
 	}
 
 	return (
@@ -191,3 +229,4 @@ export function ChatInput({ ...props }: ChatInputProps) {
 		/>
 	)
 }
+

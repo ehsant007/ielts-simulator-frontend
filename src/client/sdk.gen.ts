@@ -75,7 +75,7 @@ export const readMessages = <ThrowOnError extends boolean = true>(options: Optio
  */
 export const createMessage = <ThrowOnError extends boolean = true>(options: Options<CreateMessageData, ThrowOnError>) => {
     return (options.client ?? client).post<CreateMessageResponses, CreateMessageErrors, ThrowOnError>({
-        url: '/api/v1/ai/chats/{chat_id}/messages',
+        url: '/api/v1/ai/messages',
         ...options,
         headers: {
             'Content-Type': 'application/json',

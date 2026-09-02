@@ -79,6 +79,10 @@ export type AiCreateMessageResponse = {
  */
 export type AiMessageCreate = {
     /**
+     * Chat Id
+     */
+    chat_id: string;
+    /**
      * Content
      */
     content: string;
@@ -2121,14 +2125,9 @@ export type ReadMessagesResponse = ReadMessagesResponses[keyof ReadMessagesRespo
 
 export type CreateMessageData = {
     body: AiMessageCreate;
-    path: {
-        /**
-         * Chat Id
-         */
-        chat_id: string;
-    };
+    path?: never;
     query?: never;
-    url: '/api/v1/ai/chats/{chat_id}/messages';
+    url: '/api/v1/ai/messages';
 };
 
 export type CreateMessageErrors = {
