@@ -1,7 +1,6 @@
-import { AiChatCreate, AiChatRead, AiChatUpdate, AiMessageRead, createChat, createMessage, deleteChat, readChats, readMessages, updateChat } from "@/client"
+import { AiChatCreate, AiChatRead, AiChatUpdate, createChat, deleteChat, readChats, readMessages, updateChat } from "@/client"
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { SetStateAction } from "react"
-import { v7 as uuid7 } from "uuid"
 
 
 export const chatsQueryKey = ["ai-chats"] as const

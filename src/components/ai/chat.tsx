@@ -252,6 +252,10 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 
 			<Box ref={topRef} h="1px" />
 
+			{isFetchingPreviousPage &&
+				<Spinner mt="5rem" size="xl" color="primary" borderWidth="thick" />
+			}
+
 			{messages.map((msg, index) => {
 				const previous = messages[index - 1]
 				const showDate = !previous || !isSameDay(previous.created_at, msg.created_at)
