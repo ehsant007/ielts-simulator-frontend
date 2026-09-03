@@ -1,4 +1,4 @@
-import { AiChatRead } from "@/client"
+import { AiChatRead, readChats } from "@/client"
 import { VStack, Text, Button, HStack, Box, IconButton, Menu, Portal, Group, Skeleton, Drawer, CloseButton, Popover } from "@chakra-ui/react"
 import { LuEllipsis, LuMessageCircle, LuPin, LuPinOff, LuTrash } from "react-icons/lu"
 import type { ButtonProps, GroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
@@ -7,11 +7,12 @@ import { useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { Collapse, Scroller } from "./utils";
 import { useChatStore } from "./ChatProvider";
-import { useChats } from "./hooks"
+import { chatsQueryKey, useChats } from "./hooks"
 import { HiMenuAlt2 } from "react-icons/hi"
 import { BsPinAngle } from "react-icons/bs"
 import { RxPanelLeft } from "react-icons/rx";
 import { AnimatePresence, motion } from "motion/react"
+import { useQuery } from "@tanstack/react-query"
 
 const MotionBox = motion.create(Box)
 
@@ -116,7 +117,13 @@ export type SideBarProps = {
 }
 
 export function SideBar({ collapse }: SideBarProps) {
-	const { query: { data: chats = [], isLoading } } = useChats()
+
+	const { data: chats = [], isLoading } = useQuery({
+		queryFn: () => readChats().then((res) => res.data),
+		queryKey: chatsQueryKey,
+	})
+
+
 	const pinned = chats?.filter((chat) => chat.pinned)
 	const recent = chats?.filter((chat) => !chat.pinned)
 

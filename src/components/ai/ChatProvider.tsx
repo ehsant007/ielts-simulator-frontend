@@ -8,11 +8,11 @@ const ChatStoreContext = createContext<StoreApi<ChatStore> | undefined>(undefine
 
 type ChatStoreProviderProps = {
 	children: React.ReactNode,
+	chatId?: string
 }
 
 export function ChatStoreProvider({ children }: ChatStoreProviderProps) {
-	const [store] = useState(() => createChatStore());
-
+	const [store] = useState(() => createChatStore())
 
 	return (
 		<ChatStoreContext.Provider value={store} >

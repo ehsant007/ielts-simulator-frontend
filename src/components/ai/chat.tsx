@@ -80,10 +80,10 @@ export function MD({ children, id }: { children: string, id: string }) {
 
 
 
-export function ChatPanel() {
+export function ChatPanel({ chatId }: { chatId?: string }) {
 
 	return (
-		<ChatStoreProvider>
+		<ChatStoreProvider chatId={chatId}>
 			<HStack h="full" gap="0" pos="relative">
 				<ChatSidebar />
 				<ChatBox maxW="50rem" py="6" px="4" mx="auto" />
