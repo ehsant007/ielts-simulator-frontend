@@ -1,12 +1,15 @@
 import { AiChatCreate, AiChatRead, AiChatUpdate, createChat, deleteChat, readChats, readMessages, updateChat } from "@/client"
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { InfiniteData, QueryClient, useInfiniteQuery, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query"
 import { SetStateAction } from "react"
 
 
 export const chatsQueryKey = ["ai-chats"] as const
+export const pinnedChatsQueryKey = ["pinned-ai-chats"] as const
 export const messagesQueryKey = (chat_id: string) => ["ai-chats", chat_id, "messages"] as const
 export const messageCreateKey = ["ai-message-create"] as const
 export const chatCreateKey = ["ai-chat-create"] as const
+export const chatRemoveKey = ["ai-chat-remove"] as const
+export const chatUpdateKey = ["ai-chat-update"]
 
 
 type UseCollectionProps<T> = {
@@ -54,57 +57,57 @@ export function useChats({ onCreateSuccess }: UseCollectionProps<AiChatRead> = {
 		},
 	})
 
-	const update = useMutation({
-		mutationFn: ({ chat_id, data }: { chat_id: string, data: AiChatUpdate }) => updateChat({
-			body: data,
-			path: { chat_id },
-		}),
+	// const update = useMutation({
+	// 	mutationFn: ({ chat_id, data }: { chat_id: string, data: AiChatUpdate }) => updateChat({
+	// 		body: data,
+	// 		path: { chat_id },
+	// 	}),
 
-		onMutate: async ({ chat_id, data }) => {
-			await queryClient.cancelQueries({ queryKey: chatsQueryKey })
-			const previous = queryClient.getQueryData<AiChatRead[]>(chatsQueryKey) ?? []
+	// 	onMutate: async ({ chat_id, data }) => {
+	// 		await queryClient.cancelQueries({ queryKey: chatsQueryKey })
+	// 		const previous = queryClient.getQueryData<AiChatRead[]>(chatsQueryKey) ?? []
 
-			// Add changes optimistically
-			setChats(prev => {
-				const i = prev.findIndex((chat) => chat.id === chat_id)
-				if (i === -1)
-					return prev
-				return [
-					...prev.slice(0, i),
-					{ ...prev[i], ...data },
-					...prev.slice(i + 1)
-				]
-			}
-			)
+	// 		// Add changes optimistically
+	// 		setChats(prev => {
+	// 			const i = prev.findIndex((chat) => chat.id === chat_id)
+	// 			if (i === -1)
+	// 				return prev
+	// 			return [
+	// 				...prev.slice(0, i),
+	// 				{ ...prev[i], ...data },
+	// 				...prev.slice(i + 1)
+	// 			]
+	// 		}
+	// 		)
 
-			return { previous }
-		},
+	// 		return { previous }
+	// 	},
 
-		onSuccess: ({ data }, { chat_id }) => {
-			setChats(prev => {
-				const i = prev.findIndex((chat) => chat.id === chat_id)
-				if (i === -1)
-					return prev
-				return [
-					...prev.slice(0, i),
-					data,
-					...prev.slice(i + 1)
-				]
-			}
-			)
-		},
+	// 	onSuccess: ({ data }, { chat_id }) => {
+	// 		setChats(prev => {
+	// 			const i = prev.findIndex((chat) => chat.id === chat_id)
+	// 			if (i === -1)
+	// 				return prev
+	// 			return [
+	// 				...prev.slice(0, i),
+	// 				data,
+	// 				...prev.slice(i + 1)
+	// 			]
+	// 		}
+	// 		)
+	// 	},
 
-		onError: (_error, _variables, context) => {
-			if (context)
-				setChats(context.previous)
-		},
-	})
+	// 	onError: (_error, _variables, context) => {
+	// 		if (context)
+	// 			setChats(context.previous)
+	// 	},
+	// })
 
 
 	return {
 		query,
 		create,
-		update,
+		//update,
 		remove,
 	}
 }
@@ -116,25 +119,25 @@ export function useMessages(chat_id: string | null | undefined) {
 		enabled: !!chat_id,
 		queryKey: messagesQueryKey(chat_id ?? "no-active-chat"),
 
-queryFn: async ({ pageParam, signal }) => {
-    console.log("QUERY", {
-        chat_id,
-        pageParam,
-    })
+		queryFn: async ({ pageParam, signal }) => {
+			console.log("QUERY", {
+				chat_id,
+				pageParam,
+			})
 
-    const res = await readMessages({
-        path: { chat_id: chat_id! },
-        query: {
-            limit: 3,
-            ...pageParam,
-        },
-        signal,
-    })
+			const res = await readMessages({
+				path: { chat_id: chat_id! },
+				query: {
+					limit: 3,
+					...pageParam,
+				},
+				signal,
+			})
 
-    console.log("RESULT", res.data)
+			console.log("RESULT", res.data)
 
-    return res.data ?? []
-},
+			return res.data ?? []
+		},
 
 		initialPageParam: {},
 
@@ -151,5 +154,265 @@ queryFn: async ({ pageParam, signal }) => {
 
 	return {
 		query,
+	}
+}
+
+
+export function findIndex2D<T>(
+	array: T[][],
+	predicate: (item: T) => boolean,
+): [number, number] {
+	for (let i = 0; i < array.length; i++) {
+		for (let j = 0; j < array[i].length; j++) {
+			if (predicate(array[i][j])) {
+				return [i, j]
+			}
+		}
+	}
+
+	return [-1, -1]
+}
+
+export function updateItemInInfiniteCache<T extends { id: string | number }>(
+	qc: QueryClient,
+	queryKey: readonly unknown[],
+	itemId: T["id"],
+	update: ((prevItem: T) => T) | Partial<T>
+) {
+	qc.setQueryData<InfiniteData<T[]>>(queryKey,
+		(prev) => {
+			if (!prev || prev.pages.length === 0) {
+				return prev
+			}
+
+			const pages = prev.pages
+
+			const [p, c] = findIndex2D(pages, (item) => item.id === itemId)
+			if (c === -1)
+				return prev
+
+			const updatedItem =
+				typeof update === "function"
+					? update(pages[p][c])
+					: { ...pages[p][c], ...update }
+
+			return {
+				...prev,
+				pages: [
+					...pages.slice(0, p),
+					[
+						...pages[p].slice(0, c),
+						updatedItem,
+						...pages[p].slice(c + 1),
+					],
+					...pages.slice(p + 1),
+				]
+			}
+		}
+	)
+}
+
+
+export function removeItemFromInfiniteCache<T extends { id: string | number }>(
+	qc: QueryClient,
+	queryKey: readonly unknown[],
+	itemId: T["id"],
+) {
+	qc.setQueryData<InfiniteData<T[]>>(queryKey,
+		(prev) => {
+			if (!prev || prev.pages.length === 0) {
+				return prev
+			}
+			const pages = prev.pages
+
+			const [p, c] = findIndex2D(pages, (item) => item.id === itemId)
+			if (c === -1)
+				return prev
+
+			return {
+				...prev,
+				pages: [
+					...pages.slice(0, p),
+					[
+						...pages[p].slice(0, c),
+						...pages[p].slice(c + 1),
+					],
+					...pages.slice(p + 1),
+				]
+			}
+		}
+	)
+}
+
+
+export function updateItemInCache<T extends { id: string | number }>(
+	qc: QueryClient,
+	queryKey: readonly unknown[],
+	itemId: T["id"],
+	update: ((prevItem: T) => T) | Partial<T>
+) {
+	qc.setQueryData<T[]>(queryKey,
+		(prev) => {
+			if (!prev) {
+				return prev
+			}
+
+			const i = prev.findIndex((item) => item.id === itemId)
+			if (i === -1)
+				return prev
+
+			const updatedItem =
+				typeof update === "function"
+					? update(prev[i])
+					: { ...prev[i], ...update }
+
+			return [
+				...prev.slice(0, i),
+				updatedItem,
+				...prev.slice(i + 1)
+			]
+		}
+	)
+}
+
+
+export function removeItemFromCache<T extends { id: string | number }>(
+	qc: QueryClient,
+	queryKey: readonly unknown[],
+	itemId: T["id"],
+) {
+	qc.setQueryData<T[]>(queryKey,
+		(prev) => {
+			if (!prev) {
+				return prev
+			}
+
+			const i = prev.findIndex((item) => item.id === itemId)
+			if (i === -1)
+				return prev
+
+			return [
+				...prev.slice(0, i),
+				...prev.slice(i + 1)
+			]
+		}
+	)
+}
+
+export function useChats2() {
+
+	const query = useInfiniteQuery({
+		queryKey: chatsQueryKey,
+
+		queryFn: ({ pageParam }) => readChats({
+			query: {
+				...pageParam,
+				limit: 10,
+			}
+		}).then((res) => res.data),
+
+		initialPageParam: {},
+
+		getPreviousPageParam: (firstPage) =>
+			firstPage.length > 0
+				? { after: firstPage[0].last_active }
+				: undefined,
+
+		getNextPageParam: (lastPage) =>
+			lastPage.length > 0
+				? { before: lastPage[lastPage.length - 1].last_active }
+				: undefined,
+	})
+
+	return query;
+}
+
+
+export function useChatUpdateMutation() {
+	const queryClient = useQueryClient()
+
+	const update = useMutation({
+		mutationKey: chatUpdateKey,
+
+		mutationFn: (data: AiChatUpdate) => updateChat({
+			body: data
+		}),
+
+		onSuccess: ({ data: chat }) => {
+			updateItemInInfiniteCache(queryClient, chatsQueryKey, chat.id, chat)
+		},
+
+	})
+
+	return { update }
+}
+
+
+export function useChatRemoveMutation() {
+	const queryClient = useQueryClient()
+
+	const remove = useMutation({
+		mutationKey: chatRemoveKey,
+
+		mutationFn: (chat_id: string) => deleteChat({
+			path: { chat_id }
+		}),
+
+		onSuccess: (_, chat_id) => {
+			removeItemFromInfiniteCache(queryClient, chatsQueryKey, chat_id)
+			removeItemFromCache(queryClient, pinnedChatsQueryKey, chat_id)
+		},
+	})
+
+	return { remove }
+}
+
+
+export function usePinnedChats() {
+	const query = useQuery({
+		queryKey: pinnedChatsQueryKey,
+		queryFn: () =>
+			readChats({
+				query: {
+					pinned: true,
+					limit: 20,
+				},
+			}).then(res => res.data),
+	})
+
+	const pendingRemoves = useMutationState<string>({
+		filters: {
+			mutationKey: chatRemoveKey,
+			status: "pending",
+		},
+		select: mutation => mutation.state.variables as string,
+	})
+
+	const pendingUpdates = useMutationState<AiChatUpdate>({
+		filters: {
+			mutationKey: chatUpdateKey,
+			status: "pending",
+		},
+		select: mutation => mutation.state.variables as AiChatUpdate,
+	})
+
+	const removeIds = new Set(pendingRemoves)
+
+	const updates = new Map(
+		pendingUpdates.map(update => [update.id, update])
+	)
+
+	const pinnedChats = (query.data ?? [])
+		.filter(chat => !removeIds.has(chat.id))
+		.map(chat => {
+			const update = updates.get(chat.id)
+			return update
+				? { ...chat, ...update }
+				: chat
+		})
+
+	return {
+		...query,
+		data: pinnedChats,
 	}
 }

@@ -57,6 +57,10 @@ export type AiChatRead = {
  */
 export type AiChatUpdate = {
     /**
+     * Id
+     */
+    id: string;
+    /**
      * Title
      */
     title?: string | null;
@@ -2038,9 +2042,35 @@ export type AppTranslatorSchemasTranslatorTranslateResponse = {
 export type ReadChatsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Pinned
+         */
+        pinned?: boolean | null;
+        /**
+         * Before
+         */
+        before?: string | null;
+        /**
+         * After
+         */
+        after?: string | null;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
     url: '/api/v1/ai/chats';
 };
+
+export type ReadChatsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadChatsError = ReadChatsErrors[keyof ReadChatsErrors];
 
 export type ReadChatsResponses = {
     /**
@@ -2052,6 +2082,31 @@ export type ReadChatsResponses = {
 };
 
 export type ReadChatsResponse = ReadChatsResponses[keyof ReadChatsResponses];
+
+export type UpdateChatData = {
+    body: AiChatUpdate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ai/chats';
+};
+
+export type UpdateChatErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type UpdateChatError = UpdateChatErrors[keyof UpdateChatErrors];
+
+export type UpdateChatResponses = {
+    /**
+     * Successful Response
+     */
+    200: AiChatRead;
+};
+
+export type UpdateChatResponse = UpdateChatResponses[keyof UpdateChatResponses];
 
 export type CreateChatData = {
     body: AiChatCreate;
@@ -2177,36 +2232,6 @@ export type DeleteChatResponses = {
 };
 
 export type DeleteChatResponse = DeleteChatResponses[keyof DeleteChatResponses];
-
-export type UpdateChatData = {
-    body: AiChatUpdate;
-    path: {
-        /**
-         * Chat Id
-         */
-        chat_id: string;
-    };
-    query?: never;
-    url: '/api/v1/ai/chats/{chat_id}';
-};
-
-export type UpdateChatErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type UpdateChatError = UpdateChatErrors[keyof UpdateChatErrors];
-
-export type UpdateChatResponses = {
-    /**
-     * Successful Response
-     */
-    200: AiChatRead;
-};
-
-export type UpdateChatResponse = UpdateChatResponses[keyof UpdateChatResponses];
 
 export type LookupData = {
     body?: never;

@@ -1,18 +1,18 @@
 import { AiChatRead, readChats } from "@/client"
-import { VStack, Text, Button, HStack, Box, IconButton, Menu, Portal, Group, Skeleton, Drawer, CloseButton, Popover } from "@chakra-ui/react"
+import { VStack, Text, Button, HStack, Box, IconButton, Menu, Portal, Group, Skeleton, Drawer, CloseButton, Popover, Spinner } from "@chakra-ui/react"
 import { LuEllipsis, LuMessageCircle, LuPin, LuPinOff, LuTrash } from "react-icons/lu"
 import type { ButtonProps, GroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { Collapse, Scroller } from "./utils";
 import { useChatStore } from "./ChatProvider";
-import { chatsQueryKey, useChats } from "./hooks"
+import { chatsQueryKey, pinnedChatsQueryKey, useChatRemoveMutation, useChats, useChats2, useChatUpdateMutation, usePinnedChats } from "./hooks"
 import { HiMenuAlt2 } from "react-icons/hi"
 import { BsPinAngle } from "react-icons/bs"
 import { RxPanelLeft } from "react-icons/rx";
 import { AnimatePresence, motion } from "motion/react"
-import { useQuery } from "@tanstack/react-query"
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
 
 const MotionBox = motion.create(Box)
 
@@ -118,24 +118,12 @@ export type SideBarProps = {
 
 export function SideBar({ collapse }: SideBarProps) {
 
-	const { data: chats = [], isLoading } = useQuery({
-		queryFn: () => readChats().then((res) => res.data),
-		queryKey: chatsQueryKey,
-	})
-
-
-	const pinned = chats?.filter((chat) => chat.pinned)
-	const recent = chats?.filter((chat) => !chat.pinned)
-
 	return (
 		<VStack h="full" >
-			<ActionButtons pinedChats={pinned} recentChats={recent} collapse={collapse} pe="2" pb="3" />
+			<ActionButtons collapse={collapse} pe="2" pb="3" />
 
 			<ChatList
 				pe="2"
-				pinedChats={pinned}
-				recentChats={recent}
-				loading={isLoading}
 				opacity={collapse ? "0" : "1"}
 				transition="opacity 0.2s ease"
 			/>
@@ -144,7 +132,7 @@ export function SideBar({ collapse }: SideBarProps) {
 }
 
 
-export function ActionButtons({ collapse, pinedChats, recentChats, ...props }: { pinedChats: AiChatRead[], recentChats: AiChatRead[], collapse?: boolean } & StackProps) {
+export function ActionButtons({ collapse, ...props }: { collapse?: boolean } & StackProps) {
 	const setActiveChat = useChatStore((s) => s.setActiveChat)
 
 	const f = (icon: React.ReactNode, name: string) => {
@@ -176,10 +164,7 @@ export function ActionButtons({ collapse, pinedChats, recentChats, ...props }: {
 							</ActionButton>
 						}
 					>
-						<ChatButtonList
-							chats={pinedChats}
-							placeholder="Pin chats to list them here."
-						/>
+						<PinnedChats />
 					</ChatListMenu>
 
 
@@ -190,10 +175,7 @@ export function ActionButtons({ collapse, pinedChats, recentChats, ...props }: {
 							</ActionButton>
 						}
 					>
-						<ChatButtonList
-							chats={recentChats}
-							placeholder="No chats to list!"
-						/>
+						<RecentChats />
 					</ChatListMenu>
 				</>
 			}
@@ -259,6 +241,125 @@ export function ChatListMenu({ children, trigger }: { children: React.ReactNode,
 }
 
 
+export function ChatList(props: ScrollAreaScrollbarProps) {
+	return (
+		<Scroller w="full" variant="always" {...props}>
+
+			<VStack alignItems="start" gap="5">
+
+				<Collapse
+					title={
+						<Text fontWeight="medium" fontSize="sm">
+							Pinned
+						</Text>
+					}
+					w="full"
+				>
+					<PinnedChats />
+				</Collapse>
+
+
+				<Collapse
+					title={
+						<Text fontWeight="medium" fontSize="sm">
+							Recent
+						</Text>
+					}
+					w="full"
+				>
+					<RecentChats />
+				</Collapse>
+
+			</VStack>
+
+		</Scroller>
+	)
+}
+
+
+export function RecentChats() {
+	const {
+		data,
+		isLoading,
+		hasPreviousPage,
+		isFetchingPreviousPage,
+		fetchPreviousPage,
+	} = useChats2()
+
+	const chats = data?.pages.flatMap(page => page).filter((chat) => !chat.pinned) ?? []
+
+	const topRef = useRef<HTMLDivElement>(null) // Sentinel
+
+	useEffect(() => {
+		const element = topRef.current
+		if (!element) return
+
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (
+					entry.isIntersecting &&
+					hasPreviousPage &&
+					!isFetchingPreviousPage
+				) {
+					fetchPreviousPage()
+				}
+			},
+			{
+				// Start loading before the user actually reaches the bottom.
+				rootMargin: "0px 0px 500px 0px",
+			}
+		)
+
+		observer.observe(element)
+
+		return () => observer.disconnect()
+	}, [
+		hasPreviousPage,
+		isFetchingPreviousPage,
+		fetchPreviousPage,
+	])
+
+
+	return (
+		<VStack>
+			<ChatButtonList chats={chats} placeholder="No chats to list!" />
+
+			{(isLoading || isFetchingPreviousPage) &&
+				<VStack flex="1">
+					{Array.from({ length: 10 }, (_, i) => (
+						<Skeleton w="full" key={i} height="8" borderRadius="xl" />
+					))}
+				</VStack>
+			}
+
+			<Box ref={topRef} h="1px" />
+		</VStack>
+	)
+}
+
+
+export function PinnedChats() {
+	const { data: chats, isLoading } = usePinnedChats()
+
+	if (isLoading)
+		return (
+			<VStack flex="1">
+				{Array.from({ length: 1 }, (_, i) => (
+					<Skeleton w="full" key={i} height="8" borderRadius="xl" />
+				))}
+			</VStack>
+		)
+
+	if (chats.length === 0)
+		return null
+
+	return (
+		<ChatButtonList chats={chats} placeholder="Pin chats to list them here." />
+	)
+}
+
+
+
 export function ChatButtonList({ chats, placeholder }: { chats: AiChatRead[], placeholder?: string }) {
 	return (
 		<VStack alignItems="start" gap="0" mt="1">
@@ -285,53 +386,10 @@ export function ChatButtonList({ chats, placeholder }: { chats: AiChatRead[], pl
 }
 
 
-export function ChatList({ pinedChats, recentChats, loading, ...props }: { pinedChats: AiChatRead[], recentChats: AiChatRead[], loading: boolean } & ScrollAreaScrollbarProps) {
-	return (
-		<Scroller w="full" variant="always" {...props}>
-
-			<VStack alignItems="start" gap="5">
-				{pinedChats.length > 0 &&
-					<Collapse
-						title={
-							<Text fontWeight="medium" fontSize="sm">
-								Pinned
-							</Text>
-						}
-						w="full"
-					>
-						<ChatButtonList chats={pinedChats} />
-					</Collapse>
-				}
-
-				<Collapse
-					title={
-						<Text fontWeight="medium" fontSize="sm">
-							Recent
-						</Text>
-					}
-					w="full"
-				>
-					<ChatButtonList chats={recentChats} />
-
-					{loading &&
-						<VStack flex="1">
-							{Array.from({ length: 10 }, (_, i) => (
-								<Skeleton w="full" key={i} height="8" borderRadius="xl" />
-							))}
-						</VStack>
-					}
-				</Collapse>
-
-			</VStack>
-
-		</Scroller>
-	)
-}
-
 export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps) {
 	const activeChat = useChatStore((s) => s.activeChat)
 	const setActiveChat = useChatStore((s) => s.setActiveChat)
-	const { update: { mutate: updateChat } } = useChats()
+	const { update: { mutate: updateChat } } = useChatUpdateMutation()
 	const [menuOpen, setMenuOpen] = useState(false)
 
 	return (
@@ -374,7 +432,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 					variant="ghost"
 					size="sm"
 					borderRadius="xl"
-					onClick={() => updateChat({ chat_id: chat.id, data: { pinned: !chat.pinned } })}
+					onClick={() => updateChat({ id: chat.id, pinned: !chat.pinned })}
 				>
 					{chat.pinned ? <LuPinOff /> : <LuPin />}
 				</IconButton>
@@ -400,9 +458,8 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 	)
 }
 
-
 export function ChatButtonActionMenu({ chat, children, ...props }: { chat: AiChatRead } & MenuRootProps) {
-	const { remove: { mutate: deleteChat } } = useChats()
+	const { remove: { mutate: deleteChat } } = useChatRemoveMutation()
 
 	return (
 		<Menu.Root {...props}>
