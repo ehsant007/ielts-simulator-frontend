@@ -1,7 +1,6 @@
 import { AiChatCreate, AiChatRead, AiChatUpdate, createChat, deleteChat, readChats, readMessages, updateChat } from "@/client"
 import { InfiniteData, QueryClient, useInfiniteQuery, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query"
 import { SetStateAction } from "react"
-import { v7 as uuid7 } from "uuid"
 
 export const chatsQueryKey = ["ai-chats"] as const
 export const pinnedChatsQueryKey = ["pinned-ai-chats"] as const
@@ -375,13 +374,8 @@ export function useChats2() {
 		})
 	})
 
-	console.log(chats)
-
 	const pinnedChats = chats.filter(chat => chat.pinned).sort((a, b) => b.last_active.localeCompare(a.last_active))
 	const recentChats = chats.filter(chat => !chat.pinned).sort((a, b) => b.last_active.localeCompare(a.last_active))
-
-	console.log(pinnedChats)
-	console.log(recentChats)
 
 	return {
 		query,

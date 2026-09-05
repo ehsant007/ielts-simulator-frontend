@@ -1,5 +1,5 @@
-import { AiChatRead, readChats } from "@/client"
-import { VStack, Text, Button, HStack, Box, IconButton, Menu, Portal, Group, Skeleton, Drawer, CloseButton, Popover, Spinner } from "@chakra-ui/react"
+import { AiChatRead } from "@/client"
+import { VStack, Text, Button, HStack, Box, IconButton, Menu, Portal, Group, Skeleton, Drawer, CloseButton, Popover } from "@chakra-ui/react"
 import { LuEllipsis, LuMessageCircle, LuPin, LuPinOff, LuTrash } from "react-icons/lu"
 import type { ButtonProps, GroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
@@ -7,12 +7,11 @@ import { useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { Collapse, Scroller } from "./utils";
 import { useChatStore } from "./ChatProvider";
-import { chatsQueryKey, pinnedChatsQueryKey, useChatRemoveMutation, useChats, useChats2, useChatUpdateMutation } from "./hooks"
+import { useChatRemoveMutation, useChatUpdateMutation } from "./hooks"
 import { HiMenuAlt2 } from "react-icons/hi"
 import { BsPinAngle } from "react-icons/bs"
 import { RxPanelLeft } from "react-icons/rx";
 import { AnimatePresence, motion } from "motion/react"
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
 import { SidebarProvider, useSidebar } from "./SidebarProvider"
 
 const MotionBox = motion.create(Box)
@@ -243,21 +242,24 @@ export function ChatListMenu({ children, trigger }: { children: React.ReactNode,
 
 
 export function ChatList(props: ScrollAreaScrollbarProps) {
+	const { pinnedChats } = useSidebar()
+
 	return (
 		<Scroller w="full" variant="always" {...props}>
 
 			<VStack alignItems="start" gap="5">
-
-				<Collapse
-					title={
-						<Text fontWeight="medium" fontSize="sm">
-							Pinned
-						</Text>
-					}
-					w="full"
-				>
-					<PinnedChats />
-				</Collapse>
+				{pinnedChats.length > 0 &&
+					<Collapse
+						title={
+							<Text fontWeight="medium" fontSize="sm">
+								Pinned
+							</Text>
+						}
+						w="full"
+					>
+						<PinnedChats />
+					</Collapse>
+				}
 
 
 				<Collapse
@@ -334,7 +336,7 @@ export function RecentChats() {
 				</VStack>
 			}
 
-			<Box ref={topRef} h="1px"/>
+			<Box ref={topRef} h="1px" />
 		</VStack>
 	)
 }
@@ -367,7 +369,7 @@ export function PinnedChats() {
 
 export function ChatButtonList({ chats, placeholder }: { chats: AiChatRead[], placeholder?: string }) {
 	return (
-		<VStack alignItems="start" gap="0" mt="1">
+		<VStack w="full" alignItems="start" gap="0" mt="1">
 			<AnimatePresence>
 				{chats.map((c) =>
 					<MotionBox
