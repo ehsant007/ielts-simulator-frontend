@@ -11,7 +11,7 @@ export type AiChatCreate = {
     /**
      * Id
      */
-    id?: string | null;
+    id?: string;
     /**
      * Title
      */
@@ -90,6 +90,10 @@ export type AiCreateMessageResponse = {
  * AIMessageCreate
  */
 export type AiMessageCreate = {
+    /**
+     * Id
+     */
+    id?: string;
     /**
      * Chat Id
      */

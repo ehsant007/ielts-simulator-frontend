@@ -1,10 +1,10 @@
 import { AiChatRead } from "@/client";
-import { useMessages } from "./hooks";
+import { useMessagesQuery } from "./hooks";
 import { Button, Menu, Portal } from "@chakra-ui/react";
 
 
 export function ChatNav({ chat }: { chat: AiChatRead }) {
-	const { query: { data: messages = [], isLoading } } = useMessages(chat.id)
+	const { query: { data: messages = [], isLoading } } = useMessagesQuery(chat.id)
 
 	const userMessages = messages.filter((msg) => msg.role === "user")
 

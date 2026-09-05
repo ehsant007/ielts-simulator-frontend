@@ -2,7 +2,7 @@
 
 import { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
-import { useChats2 } from "./hooks";
+import { useChatsQuery } from "./hooks";
 import { AiChatRead } from "@/client";
 
 
@@ -21,7 +21,7 @@ type SidebarProps = {
 
 export function SidebarProvider({ children }: SidebarProps) {
 
-	const { query: chatsQuery, pinnedChats, recentChats } = useChats2()
+	const { chatsQuery, pinnedChats, recentChats } = useChatsQuery()
 
 
 	return (
