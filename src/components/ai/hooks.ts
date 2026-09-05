@@ -132,13 +132,13 @@ export function useChatsQuery() {
 			}
 		}).then((res) => res.data),
 
-		initialPageParam: { pinned: true, limit: 100 },
+		initialPageParam: { pinned: true, limit: 20 },
 
 		getPreviousPageParam: undefined,
 
 		getNextPageParam: (lastPage, allPages) => {
-			const limit = 3
-			
+			const limit = 50
+
 			if (allPages.length === 1) {
 				return { pinned: false, limit }
 			}

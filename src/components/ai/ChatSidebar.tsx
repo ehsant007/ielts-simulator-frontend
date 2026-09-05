@@ -247,7 +247,7 @@ export function ChatList(props: ScrollAreaScrollbarProps) {
 	return (
 		<Scroller w="full" variant="always" {...props}>
 
-			<VStack alignItems="start" gap="5">
+			<VStack alignItems="start" gap="5" mb="5rem">
 				{pinnedChats.length > 0 &&
 					<Collapse
 						title={
@@ -329,11 +329,11 @@ export function RecentChats() {
 			<ChatButtonList chats={chats} placeholder="No chats to list!" />
 
 			{(isLoading || isFetchingNextPage) &&
-				<VStack flex="1">
+				<>
 					{Array.from({ length: 10 }, (_, i) => (
 						<Skeleton w="full" key={i} height="8" borderRadius="xl" />
 					))}
-				</VStack>
+				</>
 			}
 
 			<Box ref={topRef} h="1px" />
