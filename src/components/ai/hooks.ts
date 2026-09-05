@@ -33,10 +33,10 @@ export function useMessagesQuery(chat_id: string | null | undefined) {
 				? { before: firstPage[0].id }
 				: undefined,
 
-		getNextPageParam: (lastPage) =>
-			lastPage.length > 0
-				? { after: lastPage[lastPage.length - 1].id }
-				: undefined,
+		getNextPageParam: (lastPage) => undefined,
+			// lastPage.length > 0
+			// 	? { after: lastPage[lastPage.length - 1].id }
+			// 	: undefined,
 	})
 
 
@@ -50,7 +50,9 @@ export function useMessagesQuery(chat_id: string | null | undefined) {
 		select: mutation => mutation.state.variables as AiMessageCreate,
 	})
 
-	pendingMessages.forEach(({ id, chat_id, content }) => {
+	pendingMessages
+	.filter(message => message.chat_id === chat_id)
+	.forEach(({ id, chat_id, content }) => {
 		if (!id)
 			return
 		messages.push({
