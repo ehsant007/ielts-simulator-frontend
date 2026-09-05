@@ -9,6 +9,14 @@ export type ClientOptions = {
  */
 export type AiChatCreate = {
     /**
+     * Id
+     */
+    id?: string | null;
+    /**
+     * Title
+     */
+    title?: string | null;
+    /**
      * Message
      */
     message: string;

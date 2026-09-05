@@ -9,7 +9,7 @@ import { messageCreateKey, messagesQueryKey, useChats } from "./hooks"
 import { useIsMobile } from "@/providers/BreakPointProvider"
 import { InfiniteData, useMutation, useQueryClient } from "@tanstack/react-query"
 import { AiMessageCreate, AiMessageRead, createMessage } from "@/client"
-
+import {v7 as uuid7} from "uuid"
 
 function InputButton({ children, ...props }: IconButtonProps) {
 	return (
@@ -187,7 +187,7 @@ export function ChatInput({ ...props }: ChatInputProps) {
 						...prev,
 						pages: [
 							...pages.slice(0, -1),
-							[...pages[pages.length-1], request, response],
+							[...pages[pages.length - 1], request, response],
 						],
 					}
 				}
@@ -213,7 +213,7 @@ export function ChatInput({ ...props }: ChatInputProps) {
 			return
 
 		if (activeChat == null)
-			chatCreateMutation.mutate({ message: userMsg, app_id: null })
+			chatCreateMutation.mutate({ id: uuid7(), message: userMsg })
 		else
 			createMessageMut.mutate({ content: userMsg, chat_id: activeChat.id })
 	}

@@ -1,49 +1,31 @@
 "use client"
 
-import { InfiniteData, useInfiniteQuery, UseInfiniteQueryResult } from "@tanstack/react-query";
+import { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
-import { chatsQueryKey } from "./hooks";
-import { AiChatRead, readChats } from "@/client";
+import { useChats2 } from "./hooks";
+import { AiChatRead } from "@/client";
 
 
 type SidebarContextType = {
 	chatsQuery: UseInfiniteQueryResult<InfiniteData<AiChatRead[], unknown>, Error>
+	pinnedChats: AiChatRead[],
+	recentChats: AiChatRead[],
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined)
 
 type SidebarProps = {
 	children: React.ReactNode,
-	chatId?: string
+	chatId?: string,
 }
 
 export function SidebarProvider({ children }: SidebarProps) {
 
-	const chatsQuery = useInfiniteQuery({
-		queryKey: chatsQueryKey,
+	const { query: chatsQuery, pinnedChats, recentChats } = useChats2()
 
-		queryFn: ({ pageParam }) => readChats({
-			query: {
-				...pageParam,
-				limit: 3,
-			}
-		}).then((res) => res.data),
-
-		initialPageParam: {},
-
-		getPreviousPageParam: (firstPage) =>
-			firstPage.length > 0
-				? { after: firstPage[0].last_active }
-				: undefined,
-
-		getNextPageParam: (lastPage) =>
-			lastPage.length > 0
-				? { before: lastPage[lastPage.length - 1].last_active }
-				: undefined,
-	})
 
 	return (
-		<SidebarContext.Provider value={{ chatsQuery }} >
+		<SidebarContext.Provider value={{ chatsQuery, pinnedChats, recentChats }} >
 			{children}
 		</SidebarContext.Provider>
 	)

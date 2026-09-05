@@ -7,18 +7,19 @@ import { useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { Collapse, Scroller } from "./utils";
 import { useChatStore } from "./ChatProvider";
-import { chatsQueryKey, pinnedChatsQueryKey, useChatRemoveMutation, useChats, useChats2, useChatUpdateMutation, usePinnedChats } from "./hooks"
+import { chatsQueryKey, pinnedChatsQueryKey, useChatRemoveMutation, useChats, useChats2, useChatUpdateMutation } from "./hooks"
 import { HiMenuAlt2 } from "react-icons/hi"
 import { BsPinAngle } from "react-icons/bs"
 import { RxPanelLeft } from "react-icons/rx";
 import { AnimatePresence, motion } from "motion/react"
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
+import { SidebarProvider, useSidebar } from "./SidebarProvider"
 
 const MotionBox = motion.create(Box)
 
 export function ChatSidebar() {
 	return (
-		<>
+		<SidebarProvider>
 			<Box h="full" display={{ base: "block", md: "none" }}>
 				<MobileSidebar />
 			</Box>
@@ -26,7 +27,7 @@ export function ChatSidebar() {
 			<Box h="full" display={{ base: "none", md: "block" }}>
 				<DesktopSidebar />
 			</Box>
-		</>
+		</SidebarProvider>
 	)
 }
 
@@ -279,14 +280,15 @@ export function ChatList(props: ScrollAreaScrollbarProps) {
 
 export function RecentChats() {
 	const {
-		data,
-		isLoading,
-		hasPreviousPage,
-		isFetchingPreviousPage,
-		fetchPreviousPage,
-	} = useChats2()
+		chatsQuery: {
+			isLoading,
+			hasNextPage,
+			isFetchingNextPage,
+			fetchNextPage,
+		},
+		recentChats: chats,
+	} = useSidebar()
 
-	const chats = data?.pages.flatMap(page => page).filter((chat) => !chat.pinned) ?? []
 
 	const topRef = useRef<HTMLDivElement>(null) // Sentinel
 
@@ -298,10 +300,10 @@ export function RecentChats() {
 			([entry]) => {
 				if (
 					entry.isIntersecting &&
-					hasPreviousPage &&
-					!isFetchingPreviousPage
+					hasNextPage &&
+					!isFetchingNextPage
 				) {
-					fetchPreviousPage()
+					fetchNextPage()
 				}
 			},
 			{
@@ -314,9 +316,9 @@ export function RecentChats() {
 
 		return () => observer.disconnect()
 	}, [
-		hasPreviousPage,
-		isFetchingPreviousPage,
-		fetchPreviousPage,
+		hasNextPage,
+		isFetchingNextPage,
+		fetchNextPage,
 	])
 
 
@@ -324,7 +326,7 @@ export function RecentChats() {
 		<VStack>
 			<ChatButtonList chats={chats} placeholder="No chats to list!" />
 
-			{(isLoading || isFetchingPreviousPage) &&
+			{(isLoading || isFetchingNextPage) &&
 				<VStack flex="1">
 					{Array.from({ length: 10 }, (_, i) => (
 						<Skeleton w="full" key={i} height="8" borderRadius="xl" />
@@ -332,14 +334,17 @@ export function RecentChats() {
 				</VStack>
 			}
 
-			<Box ref={topRef} h="1px" />
+			<Box ref={topRef} h="1px"/>
 		</VStack>
 	)
 }
 
 
 export function PinnedChats() {
-	const { data: chats, isLoading } = usePinnedChats()
+	const {
+		pinnedChats: chats,
+		chatsQuery: { isLoading }
+	} = useSidebar()
 
 	if (isLoading)
 		return (
