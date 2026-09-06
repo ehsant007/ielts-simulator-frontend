@@ -18,7 +18,7 @@ export function createChatStore() {
 		setActiveChat: (value) => set((s) => ({ activeChat: typeof value === "function" ? value(s.activeChat) : value })),
 
 		drafts: { "default": "" },
-		setDraft: (chat_id, value) => set((s) => ({ drafts: { ...s.drafts, [chat_id]: value } }))
+		setDraft: (chat_id, value) => set((s) => ({ drafts: { ...s.drafts, [chat_id]: value } })),
 	}))
 }
 

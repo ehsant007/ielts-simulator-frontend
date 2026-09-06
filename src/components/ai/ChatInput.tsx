@@ -158,26 +158,40 @@ export function ChatInput({ ...props }: ChatInputProps) {
 			setUserMsg("")
 		},
 
-		onError: (message) => {
-			setUserMsg(message)
+		onError: (createData) => {
+			setUserMsg(createData.content)
 		},
 	})
 
 	const chatCreateMutation = useChatCreateMutation({
-		onSuccess: (chat) => {
+		onSuccess: (chat, createData) => {
 			setActiveChat(chat)
-			createMessageMut.mutate({ id: uuid7(), content: userMsg, chat_id: chat.id })
+			createMessageMut.mutate({
+				id: uuid7(),
+				content: createData.message,
+				chat_id: chat.id
+			})
 		},
 	})
 
+	const pending = chatCreateMutation.isPending || createMessageMut.isPending
+
 	const handleSend = () => {
-		if (!userMsg.trim() || chatCreateMutation.isPending)
+		if (!userMsg.trim() || pending)
 			return
 
 		if (activeChat == null)
-			chatCreateMutation.mutate({ id: uuid7(), message: userMsg, title: userMsg.slice(0, 20) })
+			chatCreateMutation.mutate({
+				id: uuid7(),
+				message: userMsg,
+				title: userMsg.slice(0, 20)
+			})
 		else
-			createMessageMut.mutate({ id: uuid7(), content: userMsg, chat_id: activeChat.id })
+			createMessageMut.mutate({
+				id: uuid7(),
+				content: userMsg,
+				chat_id: activeChat.id
+			})
 	}
 
 	return (
@@ -186,7 +200,7 @@ export function ChatInput({ ...props }: ChatInputProps) {
 			onValueChange={(value) => setUserMsg(value)}
 			onSend={handleSend}
 			onStop={() => { }}
-			pending={chatCreateMutation.isPending}
+			pending={pending}
 			{...props}
 		/>
 	)

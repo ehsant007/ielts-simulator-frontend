@@ -52,8 +52,9 @@ export function useMessagesQuery(chat_id: string | null | undefined) {
 	pendingMessages
 		.filter(message => message.chat_id === chat_id)
 		.forEach(({ id, chat_id, content }) => {
-			if (!id)
+			if (!id || messages.some((msg) => msg.id === id))
 				return
+
 			messages.push({
 				id,
 				chat_id,
@@ -70,8 +71,13 @@ export function useMessagesQuery(chat_id: string | null | undefined) {
 	}
 }
 
+export type UseMessageCreateMutationProps = {
+	onMutate?: (createData: AiMessageCreate) => void
+	onError?: (createData: AiMessageCreate) => void
+	onSettled?: (createData: AiMessageCreate) => void
+}
 
-export function useMessageCreateMutation({ onMutate, onError }: { onMutate?: () => void, onError?: (message: string) => void }) {
+export function useMessageCreateMutation({ onMutate, onError, onSettled }: UseMessageCreateMutationProps) {
 	const queryClient = useQueryClient()
 
 	const createMessageMutation = useMutation({
@@ -83,12 +89,12 @@ export function useMessageCreateMutation({ onMutate, onError }: { onMutate?: () 
 			})
 		},
 
-		onMutate: () => {
-			onMutate?.()
+		onMutate: (createData) => {
+			onMutate?.(createData)
 		},
 
-		onError: ({ message }) => {
-			onError?.(message)
+		onError: (_error, createData) => {
+			onError?.(createData)
 		},
 
 		onSuccess: ({ data: { request, response } }, { chat_id }) => {
@@ -112,6 +118,10 @@ export function useMessageCreateMutation({ onMutate, onError }: { onMutate?: () 
 				}
 			)
 		},
+
+		onSettled: (_data, _error, createData) => {
+			onSettled?.(createData)
+		}
 	})
 
 	return createMessageMutation
@@ -206,7 +216,7 @@ export function useChatsQuery() {
 	}
 }
 
-export function useChatCreateMutation({ onSuccess }: { onSuccess?: (chat: AiChatRead) => void }) {
+export function useChatCreateMutation({ onSuccess }: { onSuccess?: (chat: AiChatRead, createData: AiChatCreate) => void }) {
 	const queryClient = useQueryClient()
 
 	const chatCreateMutation = useMutation({
@@ -216,7 +226,7 @@ export function useChatCreateMutation({ onSuccess }: { onSuccess?: (chat: AiChat
 			body: data,
 		}),
 
-		onSuccess: ({ data: newChat }) => {
+		onSuccess: ({ data: newChat }, createData) => {
 			queryClient.setQueryData<InfiniteData<AiChats>>(chatsQueryKey,
 				(prev) => {
 					if (!prev || prev.pages.length < 1) {
@@ -236,7 +246,7 @@ export function useChatCreateMutation({ onSuccess }: { onSuccess?: (chat: AiChat
 				}
 			)
 
-			onSuccess?.(newChat)
+			onSuccess?.(newChat, createData)
 		}
 	})
 

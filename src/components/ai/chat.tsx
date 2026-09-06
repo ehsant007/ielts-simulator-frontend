@@ -1,6 +1,6 @@
 "use client"
 
-import { AiChatRead, AiMessageRead } from "@/client"
+import { AiChatRead, AiMessageCreate, AiMessageRead } from "@/client"
 import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, List } from "@chakra-ui/react"
 import { LuArrowDown, LuRefreshCw } from "react-icons/lu"
 import type { BoxProps, StackProps } from "@chakra-ui/react"
@@ -10,7 +10,7 @@ import { ChatTime, isSameDay, CopyButton, StickToBottomScroller } from "./utils"
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
 import { messageCreateKey, useMessagesQuery } from "./hooks"
 import { BsCircleFill } from "react-icons/bs"
-import { useIsMutating } from "@tanstack/react-query"
+import { useMutationState } from "@tanstack/react-query"
 import { ChatInput } from "./ChatInput"
 import { ChatSidebar } from "./ChatSidebar"
 
@@ -188,7 +188,14 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 	} = useMessagesQuery(chat.id)
 
 
-	const isPending = useIsMutating({ mutationKey: messageCreateKey }) > 0
+	const isMessageCreating = useMutationState({
+		filters: {
+			mutationKey: messageCreateKey,
+			status: "pending",
+		},
+		select: (mutation) =>
+			(mutation.state.variables as AiMessageCreate).chat_id === chat.id,
+	}).some(Boolean)
 
 
 	const topRef = useRef<HTMLDivElement>(null) // Sentinel
@@ -261,7 +268,7 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 				)
 			})}
 
-			{isPending &&
+			{isMessageCreating &&
 				<Icon
 					as={BsCircleFill}
 					alignSelf={"start"}
