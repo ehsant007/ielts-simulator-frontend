@@ -284,9 +284,9 @@ export function RecentChats() {
 	const {
 		chatsQuery: {
 			isLoading,
-			hasNextPage,
-			isFetchingNextPage,
-			fetchNextPage,
+			hasPreviousPage,
+			isFetchingPreviousPage,
+			fetchPreviousPage,
 		},
 		recentChats: chats,
 	} = useSidebar()
@@ -302,10 +302,10 @@ export function RecentChats() {
 			([entry]) => {
 				if (
 					entry.isIntersecting &&
-					hasNextPage &&
-					!isFetchingNextPage
+					hasPreviousPage &&
+					!isFetchingPreviousPage
 				) {
-					fetchNextPage()
+					fetchPreviousPage()
 				}
 			},
 			{
@@ -318,9 +318,9 @@ export function RecentChats() {
 
 		return () => observer.disconnect()
 	}, [
-		hasNextPage,
-		isFetchingNextPage,
-		fetchNextPage,
+		hasPreviousPage,
+		isFetchingPreviousPage,
+		fetchPreviousPage,
 	])
 
 
@@ -328,7 +328,7 @@ export function RecentChats() {
 		<VStack>
 			<ChatButtonList chats={chats} placeholder="No chats to list!" />
 
-			{(isLoading || isFetchingNextPage) &&
+			{(isLoading || isFetchingPreviousPage) &&
 				<>
 					{Array.from({ length: 10 }, (_, i) => (
 						<Skeleton w="full" key={i} height="8" borderRadius="xl" />

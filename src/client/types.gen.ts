@@ -27,6 +27,24 @@ export type AiChatCreate = {
 };
 
 /**
+ * AIChatMessages
+ */
+export type AiChatMessages = {
+    /**
+     * Messages
+     */
+    messages: Array<AiMessageRead>;
+    /**
+     * Next Cursor
+     */
+    next_cursor?: string | null;
+    /**
+     * Previous Cursor
+     */
+    previous_cursor?: string | null;
+};
+
+/**
  * AIChatRead
  */
 export type AiChatRead = {
@@ -76,6 +94,24 @@ export type AiChatUpdate = {
      * Pinned
      */
     pinned?: boolean;
+};
+
+/**
+ * AIChats
+ */
+export type AiChats = {
+    /**
+     * Chats
+     */
+    chats: Array<AiChatRead>;
+    /**
+     * Next Cursor
+     */
+    next_cursor?: string | null;
+    /**
+     * Previous Cursor
+     */
+    previous_cursor?: string | null;
 };
 
 /**
@@ -2086,11 +2122,9 @@ export type ReadChatsError = ReadChatsErrors[keyof ReadChatsErrors];
 
 export type ReadChatsResponses = {
     /**
-     * Response Read Chats
-     *
      * Successful Response
      */
-    200: Array<AiChatRead>;
+    200: AiChats;
 };
 
 export type ReadChatsResponse = ReadChatsResponses[keyof ReadChatsResponses];
@@ -2181,11 +2215,9 @@ export type ReadMessagesError = ReadMessagesErrors[keyof ReadMessagesErrors];
 
 export type ReadMessagesResponses = {
     /**
-     * Response Read Messages
-     *
      * Successful Response
      */
-    200: Array<AiMessageRead>;
+    200: AiChatMessages;
 };
 
 export type ReadMessagesResponse = ReadMessagesResponses[keyof ReadMessagesResponses];

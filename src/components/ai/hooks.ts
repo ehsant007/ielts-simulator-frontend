@@ -1,6 +1,5 @@
-import { AiChatCreate, AiChatRead, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, createMessage, deleteChat, readChats, readMessages, updateChat } from "@/client"
+import { AiChatCreate, AiChatMessages, AiChatRead, AiChats, AiChatUpdate, AiMessageCreate, createChat, createMessage, deleteChat, readChats, readMessages, updateChat } from "@/client"
 import { InfiniteData, useInfiniteQuery, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
-import { removeItemFromInfiniteCache, updateItemInInfiniteCache } from "./tanstack_utils"
 
 export const chatsQueryKey = ["ai-chats"] as const
 export const pinnedChatsQueryKey = ["pinned-ai-chats"] as const
@@ -12,15 +11,15 @@ export const chatUpdateKey = ["ai-chat-update"]
 
 
 export function useMessagesQuery(chat_id: string | null | undefined) {
-
 	const messagesQuery = useInfiniteQuery({
+		staleTime: Infinity,
 		enabled: !!chat_id,
 		queryKey: messagesQueryKey(chat_id ?? "no-active-chat"),
 
 		queryFn: async ({ pageParam, signal }) => readMessages({
 			path: { chat_id: chat_id! },
 			query: {
-				limit: 3,
+				limit: 10,
 				...pageParam,
 			},
 			signal,
@@ -28,19 +27,19 @@ export function useMessagesQuery(chat_id: string | null | undefined) {
 
 		initialPageParam: {},
 
-		getPreviousPageParam: (firstPage) =>
-			firstPage.length > 0
-				? { before: firstPage[0].id }
+		getPreviousPageParam: (page) =>
+			page.previous_cursor
+				? { before: page.previous_cursor }
 				: undefined,
 
-		getNextPageParam: (lastPage) => undefined,
-			// lastPage.length > 0
-			// 	? { after: lastPage[lastPage.length - 1].id }
-			// 	: undefined,
+		getNextPageParam: (page) =>
+			page.next_cursor
+				? { after: page.next_cursor }
+				: undefined,
 	})
 
 
-	const messages = messagesQuery.data?.pages.flatMap((page) => page) ?? []
+	const messages = messagesQuery.data?.pages.flatMap((page) => page.messages) ?? []
 
 	const pendingMessages = useMutationState({
 		filters: {
@@ -51,18 +50,18 @@ export function useMessagesQuery(chat_id: string | null | undefined) {
 	})
 
 	pendingMessages
-	.filter(message => message.chat_id === chat_id)
-	.forEach(({ id, chat_id, content }) => {
-		if (!id)
-			return
-		messages.push({
-			id,
-			chat_id,
-			content,
-			role: "user",
-			created_at: new Date().toISOString(),
+		.filter(message => message.chat_id === chat_id)
+		.forEach(({ id, chat_id, content }) => {
+			if (!id)
+				return
+			messages.push({
+				id,
+				chat_id,
+				content,
+				role: "user",
+				created_at: new Date().toISOString(),
+			})
 		})
-	})
 
 
 	return {
@@ -93,7 +92,7 @@ export function useMessageCreateMutation({ onMutate, onError }: { onMutate?: () 
 		},
 
 		onSuccess: ({ data: { request, response } }, { chat_id }) => {
-			queryClient.setQueryData<InfiniteData<AiMessageRead[]>>(
+			queryClient.setQueryData<InfiniteData<AiChatMessages>>(
 				messagesQueryKey(chat_id),
 				(prev) => {
 					if (!prev || prev.pages.length === 0) {
@@ -101,23 +100,18 @@ export function useMessageCreateMutation({ onMutate, onError }: { onMutate?: () 
 					}
 
 					const pages = prev.pages
+					const lastPage = pages[pages.length - 1]
 
 					return {
 						...prev,
 						pages: [
 							...pages.slice(0, -1),
-							[...pages[pages.length - 1], request, response],
+							{ ...lastPage, messages: [...lastPage.messages, request, response] },
 						],
 					}
 				}
 			)
 		},
-
-		// onSettled: (_data, _error, variables) => {
-		// 	return queryClient.invalidateQueries({
-		// 		queryKey: messagesQueryKey(variables.chat_id),
-		// 	})
-		// },
 	})
 
 	return createMessageMutation
@@ -126,6 +120,7 @@ export function useMessageCreateMutation({ onMutate, onError }: { onMutate?: () 
 
 export function useChatsQuery() {
 	const chatsQuery = useInfiniteQuery({
+		staleTime: Infinity,
 		queryKey: chatsQueryKey,
 
 		queryFn: ({ pageParam }) => readChats({
@@ -136,17 +131,17 @@ export function useChatsQuery() {
 
 		initialPageParam: { pinned: true, limit: 20 },
 
-		getPreviousPageParam: undefined,
+		getNextPageParam: () => undefined,
 
-		getNextPageParam: (lastPage, allPages) => {
-			const limit = 50
+		getPreviousPageParam: (page, allPages) => {
+			const limit = 20
 
 			if (allPages.length === 1) {
 				return { pinned: false, limit }
 			}
 
-			return (lastPage.length > 0
-				? { before: lastPage[lastPage.length - 1].last_active, pinned: false, limit }
+			return (page.previous_cursor
+				? { before: page.previous_cursor, pinned: false, limit }
 				: undefined)
 		}
 	})
@@ -177,7 +172,7 @@ export function useChatsQuery() {
 
 	const pendingUpdateMap = new Map(pendingUpdate.map(update => [update.id, update]))
 
-	const chats = (chatsQuery.data?.pages.flatMap(page => page) ?? [])
+	const chats = (chatsQuery.data?.pages.flatMap(page => page.chats) ?? [])
 		.filter(chat => !pendingRemoves.includes(chat.id))
 		.map(chat => {
 			const update = pendingUpdateMap.get(chat.id)
@@ -222,7 +217,7 @@ export function useChatCreateMutation({ onSuccess }: { onSuccess?: (chat: AiChat
 		}),
 
 		onSuccess: ({ data: newChat }) => {
-			queryClient.setQueryData<InfiniteData<AiChatRead[]>>(chatsQueryKey,
+			queryClient.setQueryData<InfiniteData<AiChats>>(chatsQueryKey,
 				(prev) => {
 					if (!prev || prev.pages.length < 1) {
 						return prev
@@ -232,7 +227,11 @@ export function useChatCreateMutation({ onSuccess }: { onSuccess?: (chat: AiChat
 
 					return {
 						...prev,
-						pages: [pages[0], [newChat, ...pages[1]], ...pages.slice(2)]
+						pages: [
+							pages[0],
+							{ ...pages[1], chats: [newChat, ...pages[1].chats] },
+							...pages.slice(2),
+						]
 					}
 				}
 			)
@@ -255,7 +254,30 @@ export function useChatUpdateMutation() {
 		}),
 
 		onSuccess: ({ data: chat }) => {
-			updateItemInInfiniteCache(queryClient, chatsQueryKey, chat.id, chat)
+			queryClient.setQueryData<InfiniteData<AiChats>>(chatsQueryKey,
+				prev => {
+					if (!prev)
+						return
+
+					return {
+						...prev,
+						pages: prev.pages.map((page) => {
+							const i = page.chats.findIndex(c => c.id === chat.id)
+							if (i === -1)
+								return page
+							return {
+								...page,
+								chats: [
+									...page.chats.slice(0, i),
+									chat,
+									...page.chats.slice(i + 1)
+								]
+							}
+						})
+
+					}
+				}
+			)
 		},
 
 	})
@@ -275,7 +297,29 @@ export function useChatRemoveMutation() {
 		}),
 
 		onSuccess: (_, chat_id) => {
-			removeItemFromInfiniteCache(queryClient, chatsQueryKey, chat_id)
+			queryClient.setQueryData<InfiniteData<AiChats>>(chatsQueryKey,
+				prev => {
+					if (!prev)
+						return
+
+					return {
+						...prev,
+						pages: prev.pages.map((page) => {
+							const i = page.chats.findIndex(c => c.id === chat_id)
+							if (i === -1)
+								return page
+							return {
+								...page,
+								chats: [
+									...page.chats.slice(0, i),
+									...page.chats.slice(i + 1)
+								]
+							}
+						})
+
+					}
+				}
+			)
 		},
 	})
 
