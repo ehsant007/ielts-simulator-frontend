@@ -166,7 +166,7 @@ export function ChatBox(props: BoxProps) {
 						}
 
 						<Box w="full" ref={inputRef}>
-							<ChatInput key={chat.id} />
+							<ChatInput onMessageCreate={() => sticky.scrollToBottom()} key={chat.id} />
 						</Box>
 					</VStack>
 				</Box>

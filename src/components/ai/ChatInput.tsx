@@ -24,7 +24,7 @@ function InputButton({ children, ...props }: IconButtonProps) {
 	)
 }
 
-export type ChatInputProps = {
+export type ChatInputInnerProps = {
 	value?: string
 	onValueChange?: (value: string) => void
 	onSend?: () => void
@@ -32,7 +32,7 @@ export type ChatInputProps = {
 	pending?: boolean
 } & Omit<InputGroupProps, "children">
 
-function ChatInputInner({ value, onValueChange, onSend, onStop, pending, ...props }: ChatInputProps) {
+function ChatInputInner({ value, onValueChange, onSend, onStop, pending, ...props }: ChatInputInnerProps) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
 	const singleLineHeight = useRef(Number.MAX_VALUE)
 
@@ -142,8 +142,11 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, pending, ...prop
 	)
 }
 
+type ChatInputProps = {
+	onMessageCreate?: () => void
+} & ChatInputInnerProps
 
-export function ChatInput({ ...props }: ChatInputProps) {
+export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 	const activeChat = useChatStore((s) => s.activeChat)
 	const setActiveChat = useChatStore((s) => s.setActiveChat)
 
@@ -156,6 +159,7 @@ export function ChatInput({ ...props }: ChatInputProps) {
 	const createMessageMut = useMessageCreateMutation({
 		onMutate: () => {
 			setUserMsg("")
+			onMessageCreate?.()
 		},
 
 		onError: (createData) => {
