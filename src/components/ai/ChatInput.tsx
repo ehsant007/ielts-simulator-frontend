@@ -96,7 +96,7 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, pending, ...prop
 				ps="5"
 				pt={expand1 ? "8" : "4"}
 				pb={expand1 ? "4rem" : "4"}
-				pe={expand1 ? "5" : "6rem"}
+				pe={expand1 ? "3.5rem" : "6rem"}
 				size="lg"
 				autoresize
 				maxH="60dvh"
