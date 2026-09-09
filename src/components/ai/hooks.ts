@@ -2,131 +2,14 @@ import { AiChatCreate, AiChatMessages, AiChatRead, AiChats, AiChatUpdate, AiMess
 import { InfiniteData, useInfiniteQuery, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
 
 export const chatsQueryKey = ["ai-chats"] as const
-export const pinnedChatsQueryKey = ["pinned-ai-chats"] as const
-export const messagesQueryKey = (chat_id: string) => ["ai-chats", chat_id, "messages"] as const
-export const messageCreateKey = ["ai-message-create"] as const
 export const chatCreateKey = ["ai-chat-create"] as const
 export const chatRemoveKey = ["ai-chat-remove"] as const
 export const chatUpdateKey = ["ai-chat-update"]
 
+export const messagesQueryKey = (chat_id: string) => ["ai-chats", chat_id, "messages"] as const
+export const messageCreateKey = ["ai-message-create"] as const
 
-export function useMessagesQuery(chat_id: string | null | undefined) {
-	const messagesQuery = useInfiniteQuery({
-		staleTime: Infinity,
-		enabled: !!chat_id,
-		queryKey: messagesQueryKey(chat_id ?? "no-active-chat"),
-
-		queryFn: async ({ pageParam, signal }) => readMessages({
-			path: { chat_id: chat_id! },
-			query: {
-				limit: 10,
-				...pageParam,
-			},
-			signal,
-		}).then(res => res.data),
-
-		initialPageParam: {},
-
-		getPreviousPageParam: (page) =>
-			page.previous_cursor
-				? { before: page.previous_cursor }
-				: undefined,
-
-		getNextPageParam: (page) =>
-			page.next_cursor
-				? { after: page.next_cursor }
-				: undefined,
-	})
-
-
-	const messages = messagesQuery.data?.pages.flatMap((page) => page.messages) ?? []
-
-	const pendingMessages = useMutationState({
-		filters: {
-			mutationKey: messageCreateKey,
-			status: "pending",
-		},
-		select: mutation => mutation.state.variables as AiMessageCreate,
-	})
-
-	pendingMessages
-		.filter(message => message.chat_id === chat_id)
-		.forEach(({ id, chat_id, content }) => {
-			if (!id || messages.some((msg) => msg.id === id))
-				return
-
-			messages.push({
-				id,
-				chat_id,
-				content,
-				role: "user",
-				created_at: new Date().toISOString(),
-			})
-		})
-
-
-	return {
-		messagesQuery,
-		messages,
-	}
-}
-
-export type UseMessageCreateMutationProps = {
-	onMutate?: (createData: AiMessageCreate) => void
-	onError?: (createData: AiMessageCreate) => void
-	onSettled?: (createData: AiMessageCreate) => void
-}
-
-export function useMessageCreateMutation({ onMutate, onError, onSettled }: UseMessageCreateMutationProps) {
-	const queryClient = useQueryClient()
-
-	const createMessageMutation = useMutation({
-		mutationKey: messageCreateKey,
-
-		mutationFn: (data: AiMessageCreate) => {
-			return createMessage({
-				body: data,
-			})
-		},
-
-		onMutate: (createData) => {
-			onMutate?.(createData)
-		},
-
-		onError: (_error, createData) => {
-			onError?.(createData)
-		},
-
-		onSuccess: ({ data: { request, response } }, { chat_id }) => {
-			queryClient.setQueryData<InfiniteData<AiChatMessages>>(
-				messagesQueryKey(chat_id),
-				(prev) => {
-					if (!prev || prev.pages.length === 0) {
-						return prev
-					}
-
-					const pages = prev.pages
-					const lastPage = pages[pages.length - 1]
-
-					return {
-						...prev,
-						pages: [
-							...pages.slice(0, -1),
-							{ ...lastPage, messages: [...lastPage.messages, request, response] },
-						],
-					}
-				}
-			)
-		},
-
-		onSettled: (_data, _error, createData) => {
-			onSettled?.(createData)
-		}
-	})
-
-	return createMessageMutation
-}
-
+// ------------- Chats -------------------------
 
 export function useChatsQuery() {
 	const chatsQuery = useInfiniteQuery({
@@ -336,3 +219,122 @@ export function useChatRemoveMutation() {
 	return { remove }
 }
 
+
+// ------------- Messages -------------------------
+
+export function useMessagesQuery(chat_id: string | null | undefined) {
+	const messagesQuery = useInfiniteQuery({
+		staleTime: Infinity,
+		enabled: !!chat_id,
+		queryKey: messagesQueryKey(chat_id ?? "no-active-chat"),
+
+		queryFn: async ({ pageParam, signal }) => readMessages({
+			path: { chat_id: chat_id! },
+			query: {
+				limit: 10,
+				...pageParam,
+			},
+			signal,
+		}).then(res => res.data),
+
+		initialPageParam: {},
+
+		getPreviousPageParam: (page) =>
+			page.previous_cursor
+				? { before: page.previous_cursor }
+				: undefined,
+
+		getNextPageParam: (page) =>
+			page.next_cursor
+				? { after: page.next_cursor }
+				: undefined,
+	})
+
+
+	const messages = messagesQuery.data?.pages.flatMap((page) => page.messages) ?? []
+
+	const pendingMessages = useMutationState({
+		filters: {
+			mutationKey: messageCreateKey,
+			status: "pending",
+		},
+		select: mutation => mutation.state.variables as AiMessageCreate,
+	})
+
+	pendingMessages
+		.filter(message => message.chat_id === chat_id)
+		.forEach(({ id, chat_id, content }) => {
+			if (!id || messages.some((msg) => msg.id === id))
+				return
+
+			messages.push({
+				id,
+				chat_id,
+				content,
+				role: "user",
+				created_at: new Date().toISOString(),
+			})
+		})
+
+
+	return {
+		messagesQuery,
+		messages,
+	}
+}
+
+export type UseMessageCreateMutationProps = {
+	onMutate?: (createData: AiMessageCreate) => void
+	onError?: (createData: AiMessageCreate) => void
+	onSettled?: (createData: AiMessageCreate) => void
+}
+
+export function useMessageCreateMutation({ onMutate, onError, onSettled }: UseMessageCreateMutationProps) {
+	const queryClient = useQueryClient()
+
+	const createMessageMutation = useMutation({
+		mutationKey: messageCreateKey,
+
+		mutationFn: (data: AiMessageCreate) => {
+			return createMessage({
+				body: data,
+			})
+		},
+
+		onMutate: (createData) => {
+			onMutate?.(createData)
+		},
+
+		onError: (_error, createData) => {
+			onError?.(createData)
+		},
+
+		onSuccess: ({ data: { request, response } }, { chat_id }) => {
+			queryClient.setQueryData<InfiniteData<AiChatMessages>>(
+				messagesQueryKey(chat_id),
+				(prev) => {
+					if (!prev || prev.pages.length === 0) {
+						return prev
+					}
+
+					const pages = prev.pages
+					const lastPage = pages[pages.length - 1]
+
+					return {
+						...prev,
+						pages: [
+							...pages.slice(0, -1),
+							{ ...lastPage, messages: [...lastPage.messages, request, response] },
+						],
+					}
+				}
+			)
+		},
+
+		onSettled: (_data, _error, createData) => {
+			onSettled?.(createData)
+		}
+	})
+
+	return createMessageMutation
+}
