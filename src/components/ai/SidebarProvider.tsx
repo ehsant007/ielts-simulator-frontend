@@ -3,11 +3,11 @@
 import { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { createContext, useContext } from "react";
 import { useChatsQuery } from "./hooks";
-import { AiChatRead } from "@/client";
+import { AiChatRead, AiChats } from "@/client";
 
 
 type SidebarContextType = {
-	chatsQuery: UseInfiniteQueryResult<InfiniteData<AiChatRead[], unknown>, Error>
+	chatsQuery: UseInfiniteQueryResult<InfiniteData<AiChats, unknown>, Error>
 	pinnedChats: AiChatRead[],
 	recentChats: AiChatRead[],
 }

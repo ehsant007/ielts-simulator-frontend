@@ -79,6 +79,14 @@ export type AiChatRead = {
 };
 
 /**
+ * AIChatTurn
+ */
+export type AiChatTurn = {
+    request: AiMessageRead;
+    response: AiMessageRead;
+};
+
+/**
  * AIChatUpdate
  */
 export type AiChatUpdate = {
@@ -112,14 +120,6 @@ export type AiChats = {
      * Previous Cursor
      */
     previous_cursor?: string | null;
-};
-
-/**
- * AICreateMessageResponse
- */
-export type AiCreateMessageResponse = {
-    request: AiMessageRead;
-    response: AiMessageRead;
 };
 
 /**
@@ -2242,7 +2242,7 @@ export type CreateMessageResponses = {
     /**
      * Successful Response
      */
-    200: AiCreateMessageResponse;
+    200: AiChatTurn;
 };
 
 export type CreateMessageResponse = CreateMessageResponses[keyof CreateMessageResponses];
