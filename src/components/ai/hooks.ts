@@ -343,12 +343,29 @@ export function useMessageCreateMutation({ onMutate, onError, onSettled }: UseMe
 
 
 export type UseMessageCreateStreamMutationProps = {
-	onStream?: (data: string) => void
+	onStream?: (data: string, chat_id: string) => void
 } & UseMessageCreateMutationProps
 
 export function useMessageCreateStreamMutation({ onMutate, onError, onSettled, onStream }: UseMessageCreateStreamMutationProps) {
 	const queryClient = useQueryClient()
 	const controllerRef = useRef<AbortController | null>(null)
+
+	let pending = ""
+	let raf: number | null = null
+
+	function pushDelta(delta: string, chat_id: string) {
+		pending += delta
+
+		if (raf !== null)
+			return
+
+		raf = requestAnimationFrame(() => {
+			const value = pending
+			pending = ""
+			raf = null
+			onStream?.(value, chat_id)
+		})
+	}
 
 	const createMessageMutation = useMutation({
 		mutationKey: messageCreateKey,
@@ -357,7 +374,7 @@ export function useMessageCreateStreamMutation({ onMutate, onError, onSettled, o
 			const controller = new AbortController()
 			controllerRef.current = controller
 
-			let assistantMessageId: string | undefined
+			//let assistantMessageId: string | undefined
 
 			let result: AiChatTurn | undefined = undefined
 
@@ -368,12 +385,12 @@ export function useMessageCreateStreamMutation({ onMutate, onError, onSettled, o
 
 				switch (event.type) {
 
-					case "start":
-						assistantMessageId = event.message_id
-						break
+					// case "start":
+					// 	assistantMessageId = event.message_id
+					// 	break
 
 					case "delta":
-						onStream?.(event.delta)
+						pushDelta(event.delta, data.chat_id)
 						break
 
 					case "done":

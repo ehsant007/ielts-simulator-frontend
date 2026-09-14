@@ -171,9 +171,8 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			setUserMsg(createData.content)
 		},
 
-		onStream: (data) => {
-			if (activeChat)
-				setStreamingMessage(activeChat?.id, prev => prev + data)
+		onStream: (data, chat_id) => {
+			setStreamingMessage(chat_id, prev => prev + data)
 		},
 	})
 
@@ -214,7 +213,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			value={userMsg}
 			onValueChange={(value) => setUserMsg(value)}
 			onSend={handleSend}
-			onStop={() => { }}
+			onStop={() => createMessageMut.cancel()}
 			pending={pending}
 			{...props}
 		/>
