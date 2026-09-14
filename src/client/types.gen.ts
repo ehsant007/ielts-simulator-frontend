@@ -2247,6 +2247,29 @@ export type CreateMessageResponses = {
 
 export type CreateMessageResponse = CreateMessageResponses[keyof CreateMessageResponses];
 
+export type CreateMessageStreamData = {
+    body: AiMessageCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ai/messages/stream';
+};
+
+export type CreateMessageStreamErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateMessageStreamError = CreateMessageStreamErrors[keyof CreateMessageStreamErrors];
+
+export type CreateMessageStreamResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
 export type DeleteChatData = {
     body?: never;
     path: {

@@ -5,7 +5,7 @@ import { HiArrowUp } from "react-icons/hi"
 import { LuMic } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
 import { useChatStore } from "./ChatProvider"
-import { useChatCreateMutation, useMessageCreateMutation } from "./hooks"
+import { useChatCreateMutation, useMessageCreateStreamMutation } from "./hooks"
 import { useIsMobile } from "@/providers/BreakPointProvider"
 import { v7 as uuid7 } from "uuid"
 
@@ -156,14 +156,24 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 	const setDraft = useChatStore(s => s.setDraft)
 	const setUserMsg = (value: string) => setDraft(chatId, value)
 
-	const createMessageMut = useMessageCreateMutation({
+	const setStreamingMessage = useChatStore((s) => s.setStreamingMessage)
+
+	const createMessageMut = useMessageCreateStreamMutation({
 		onMutate: () => {
 			setUserMsg("")
 			onMessageCreate?.()
+
+			if (activeChat)
+				setStreamingMessage(activeChat?.id, undefined)
 		},
 
 		onError: (createData) => {
 			setUserMsg(createData.content)
+		},
+
+		onStream: (data) => {
+			if (activeChat)
+				setStreamingMessage(activeChat?.id, prev => prev + data)
 		},
 	})
 
@@ -174,7 +184,8 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 				id: uuid7(),
 				content: createData.message,
 				chat_id: chat.id
-			})
+			}
+			)
 		},
 	})
 

@@ -1,5 +1,7 @@
-import { AiChatCreate, AiChatMessages, AiChatRead, AiChats, AiChatUpdate, AiMessageCreate, createChat, createMessage, deleteChat, readChats, readMessages, updateChat } from "@/client"
+import { AiChatCreate, AiChatMessages, AiChatRead, AiChats, AiChatTurn, AiChatUpdate, AiMessageCreate, createChat, createMessage, deleteChat, readChats, readMessages, updateChat } from "@/client"
 import { InfiniteData, useInfiniteQuery, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
+import { streamMessage } from "./stream"
+import { useRef } from "react"
 
 export const chatsQueryKey = ["ai-chats"] as const
 export const chatCreateKey = ["ai-chat-create"] as const
@@ -337,4 +339,96 @@ export function useMessageCreateMutation({ onMutate, onError, onSettled }: UseMe
 	})
 
 	return createMessageMutation
+}
+
+
+export type UseMessageCreateStreamMutationProps = {
+	onStream?: (data: string) => void
+} & UseMessageCreateMutationProps
+
+export function useMessageCreateStreamMutation({ onMutate, onError, onSettled, onStream }: UseMessageCreateStreamMutationProps) {
+	const queryClient = useQueryClient()
+	const controllerRef = useRef<AbortController | null>(null)
+
+	const createMessageMutation = useMutation({
+		mutationKey: messageCreateKey,
+
+		mutationFn: async (data: AiMessageCreate) => {
+			const controller = new AbortController()
+			controllerRef.current = controller
+
+			let assistantMessageId: string | undefined
+
+			let result: AiChatTurn | undefined = undefined
+
+			for await (const event of streamMessage(
+				data,
+				controller.signal,
+			)) {
+
+				switch (event.type) {
+
+					case "start":
+						assistantMessageId = event.message_id
+						break
+
+					case "delta":
+						onStream?.(event.delta)
+						break
+
+					case "done":
+						result = event.turn
+						break
+
+					case "error":
+						throw new Error(event.message)
+				}
+			}
+
+			if (!result)
+				throw new Error("Something went wrong.")
+
+			return result
+		},
+
+		onSuccess: ({ request, response }, data) => {
+			queryClient.setQueryData<InfiniteData<AiChatMessages>>(
+				messagesQueryKey(data.chat_id),
+				(prev) => {
+					if (!prev || prev.pages.length === 0) {
+						return prev
+					}
+
+					const pages = prev.pages
+					const lastPage = pages[pages.length - 1]
+
+					return {
+						...prev,
+						pages: [
+							...pages.slice(0, -1),
+							{ ...lastPage, messages: [...lastPage.messages, request, response] },
+						],
+					}
+				}
+			)
+		},
+
+
+		onMutate: (data) => {
+			onMutate?.(data)
+		},
+
+		onError: (_error, data) => {
+			onError?.(data)
+		},
+
+		onSettled: (_data, _error, data) => {
+			onSettled?.(data)
+		}
+	})
+
+	return {
+		...createMessageMutation,
+		cancel: () => controllerRef.current?.abort(),
+	}
 }

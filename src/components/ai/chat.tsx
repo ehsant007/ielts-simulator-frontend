@@ -177,6 +177,16 @@ export function ChatBox(props: BoxProps) {
 
 
 export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) {
+	const streamingMessage = useChatStore((s) => s.streamingMessages[chat.id])
+
+	const streamingMsg: AiMessageRead = {
+		id: "streaming_id",
+		chat_id: chat.id,
+		content: streamingMessage ?? "",
+		role: "assistant",
+		created_at: "now",
+	}
+
 	const {
 		messagesQuery: {
 			isLoading,
@@ -268,18 +278,20 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 				)
 			})}
 
-			{isMessageCreating &&
-				<Icon
-					as={BsCircleFill}
-					alignSelf={"start"}
-					size="md"
-					color="primary"
-					animationName="breathing"
-					animationDuration="1.5s"
-					animationTimingFunction="ease-in-out"
-					animationIterationCount="infinite"
-				/>
-			}
+			{isMessageCreating && (
+				streamingMessage
+					? <AssistantMessage msg={streamingMsg} />
+					: <Icon
+						as={BsCircleFill}
+						alignSelf={"start"}
+						size="md"
+						color="primary"
+						animationName="breathing"
+						animationDuration="1.5s"
+						animationTimingFunction="ease-in-out"
+						animationIterationCount="infinite"
+					/>
+			)}
 
 		</VStack>
 	)

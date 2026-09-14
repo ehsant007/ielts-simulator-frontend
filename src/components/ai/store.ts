@@ -9,6 +9,9 @@ export type ChatStore = {
 
 	drafts: Record<string, string>
 	setDraft: (chat_id: string, value: string) => void
+
+	streamingMessages: Record<string, string | undefined>
+	setStreamingMessage: (chat_id: string, value: SetStateAction<string | undefined>) => void
 }
 
 
@@ -19,6 +22,18 @@ export function createChatStore() {
 
 		drafts: { "default": "" },
 		setDraft: (chat_id, value) => set((s) => ({ drafts: { ...s.drafts, [chat_id]: value } })),
+
+		streamingMessages: {},
+		setStreamingMessage: (chat_id, value) =>
+			set((s) => ({
+				streamingMessages: {
+					...s.streamingMessages,
+					[chat_id]: typeof value === "function"
+						? value(s.streamingMessages[chat_id])
+						: value
+				}
+			})),
+
 	}))
 }
 
