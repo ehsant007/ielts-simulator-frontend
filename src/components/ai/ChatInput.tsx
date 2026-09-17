@@ -5,9 +5,11 @@ import { HiArrowUp } from "react-icons/hi"
 import { LuMic } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
 import { useChatStore } from "./ChatProvider"
-import { useChatCreateMutation, useMessageCreateStreamMutation } from "./hooks"
+import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useChatCreateMutation, useMessageCreateStreamMutation } from "./hooks"
 import { useIsMobile } from "@/providers/BreakPointProvider"
 import { v7 as uuid7 } from "uuid"
+import { InfiniteData, useMutationState, useQueryClient } from "@tanstack/react-query"
+import { AiChatMessages, AiMessageCreate } from "@/client"
 
 function InputButton({ children, ...props }: IconButtonProps) {
 	return (
@@ -147,6 +149,7 @@ type ChatInputProps = {
 } & ChatInputInnerProps
 
 export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
+	const queryClient = useQueryClient()
 	const activeChat = useChatStore((s) => s.activeChat)
 	const setActiveChat = useChatStore((s) => s.setActiveChat)
 
@@ -164,7 +167,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			onMessageCreate?.()
 
 			if (activeChat)
-				setStreamingMessage(activeChat?.id, undefined)
+				setStreamingMessage(activeChat?.id, "")
 		},
 
 		onError: (createData) => {
@@ -178,6 +181,22 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 
 	const chatCreateMutation = useChatCreateMutation({
 		onSuccess: (chat, createData) => {
+
+			// Initialize the messages query cache when a new chat is created
+			queryClient.setQueryData<InfiniteData<AiChatMessages>>(
+				messagesQueryKey(chat.id),
+				{
+					pages: [
+						{
+							messages: [],
+							previous_cursor: null,
+							next_cursor: null,
+						},
+					],
+					pageParams: [{}],
+				}
+			)
+
 			setActiveChat(chat)
 			createMessageMut.mutate({
 				id: uuid7(),
@@ -188,7 +207,15 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 		},
 	})
 
-	const pending = chatCreateMutation.isPending || createMessageMut.isPending
+	const isMessageCreating = useMutationState({
+		filters: {
+			mutationKey: messageCreateKey,
+			status: "pending",
+		},
+		select: mutation => (mutation.state.variables as AiMessageCreate).chat_id === activeChat?.id,
+	}).some(Boolean)
+
+	const pending = chatCreateMutation.isPending || isMessageCreating
 
 	const handleSend = () => {
 		if (!userMsg.trim() || pending)
@@ -213,7 +240,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			value={userMsg}
 			onValueChange={(value) => setUserMsg(value)}
 			onSend={handleSend}
-			onStop={() => createMessageMut.cancel()}
+			onStop={() => cancelMessageCreate(activeChat?.id)}
 			pending={pending}
 			{...props}
 		/>

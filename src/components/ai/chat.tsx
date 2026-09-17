@@ -182,7 +182,7 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 	const streamingMsg: AiMessageRead = {
 		id: "streaming_id",
 		chat_id: chat.id,
-		content: streamingMessage ?? "",
+		content: streamingMessage,
 		role: "assistant",
 		created_at: "now",
 	}

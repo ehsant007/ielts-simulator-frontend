@@ -1,7 +1,6 @@
-import { AiChatCreate, AiChatMessages, AiChatRead, AiChats, AiChatTurn, AiChatUpdate, AiMessageCreate, createChat, createMessage, deleteChat, readChats, readMessages, updateChat } from "@/client"
-import { InfiniteData, useInfiniteQuery, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
+import { AiChatCreate, AiChatMessages, AiChatRead, AiChats, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, createMessage, deleteChat, readChats, readMessages, updateChat } from "@/client"
+import { InfiniteData, infiniteQueryOptions, useInfiniteQuery, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
 import { streamMessage } from "./stream"
-import { useRef } from "react"
 
 export const chatsQueryKey = ["ai-chats"] as const
 export const chatCreateKey = ["ai-chat-create"] as const
@@ -224,8 +223,8 @@ export function useChatRemoveMutation() {
 
 // ------------- Messages -------------------------
 
-export function useMessagesQuery(chat_id: string | null | undefined) {
-	const messagesQuery = useInfiniteQuery({
+export function messagesQueryOptions(chat_id: string | null | undefined) {
+	return infiniteQueryOptions({
 		staleTime: Infinity,
 		enabled: !!chat_id,
 		queryKey: messagesQueryKey(chat_id ?? "no-active-chat"),
@@ -251,7 +250,10 @@ export function useMessagesQuery(chat_id: string | null | undefined) {
 				? { after: page.next_cursor }
 				: undefined,
 	})
+}
 
+export function useMessagesQuery(chat_id: string | null | undefined) {
+	const messagesQuery = useInfiniteQuery(messagesQueryOptions(chat_id))
 
 	const messages = messagesQuery.data?.pages.flatMap((page) => page.messages) ?? []
 
@@ -342,13 +344,39 @@ export function useMessageCreateMutation({ onMutate, onError, onSettled }: UseMe
 }
 
 
+const streamControllers = new Map<string, AbortController>()
+export function cancelMessageCreate(chatId: string | undefined) {
+	if (!chatId)
+		return
+	streamControllers.get(chatId)?.abort()
+}
+
 export type UseMessageCreateStreamMutationProps = {
 	onStream?: (data: string, chat_id: string) => void
 } & UseMessageCreateMutationProps
 
 export function useMessageCreateStreamMutation({ onMutate, onError, onSettled, onStream }: UseMessageCreateStreamMutationProps) {
 	const queryClient = useQueryClient()
-	const controllerRef = useRef<AbortController | null>(null)
+
+	const addMessages = (chat_id: string, values: AiMessageRead[]) => queryClient.setQueryData<InfiniteData<AiChatMessages>>(
+		messagesQueryKey(chat_id),
+		(prev) => {
+			if (!prev || prev.pages.length === 0) {
+				return prev
+			}
+
+			const pages = prev.pages
+			const lastPage = pages[pages.length - 1]
+
+			return {
+				...prev,
+				pages: [
+					...pages.slice(0, -1),
+					{ ...lastPage, messages: [...lastPage.messages, ...values] },
+				],
+			}
+		}
+	)
 
 	let pending = ""
 	let raf: number | null = null
@@ -372,64 +400,45 @@ export function useMessageCreateStreamMutation({ onMutate, onError, onSettled, o
 
 		mutationFn: async (data: AiMessageCreate) => {
 			const controller = new AbortController()
-			controllerRef.current = controller
+			streamControllers.set(data.chat_id, controller)
 
-			//let assistantMessageId: string | undefined
+			let response: AiMessageRead | null = null
 
-			let result: AiChatTurn | undefined = undefined
+			try {
+				for await (const event of streamMessage(
+					data,
+					controller.signal,
+				)) {
 
-			for await (const event of streamMessage(
-				data,
-				controller.signal,
-			)) {
+					switch (event.type) {
 
-				switch (event.type) {
+						case "start":
+							addMessages(data.chat_id, [event.request])
+							response = event.response
+							break
 
-					// case "start":
-					// 	assistantMessageId = event.message_id
-					// 	break
+						case "delta":
+							pushDelta(event.delta, data.chat_id)
+							response!.content += event.delta
+							break
 
-					case "delta":
-						pushDelta(event.delta, data.chat_id)
-						break
+						case "done":
+							break
 
-					case "done":
-						result = event.turn
-						break
-
-					case "error":
-						throw new Error(event.message)
+						case "error":
+							throw new Error(event.message)
+					}
 				}
+			} finally {
+				if (streamControllers.get(data.chat_id) === controller)
+					streamControllers.delete(data.chat_id)
 			}
 
-			if (!result)
-				throw new Error("Something went wrong.")
+			if (response == null)
+				throw new Error("No response from server!")
 
-			return result
+			addMessages(data.chat_id, [response])
 		},
-
-		onSuccess: ({ request, response }, data) => {
-			queryClient.setQueryData<InfiniteData<AiChatMessages>>(
-				messagesQueryKey(data.chat_id),
-				(prev) => {
-					if (!prev || prev.pages.length === 0) {
-						return prev
-					}
-
-					const pages = prev.pages
-					const lastPage = pages[pages.length - 1]
-
-					return {
-						...prev,
-						pages: [
-							...pages.slice(0, -1),
-							{ ...lastPage, messages: [...lastPage.messages, request, response] },
-						],
-					}
-				}
-			)
-		},
-
 
 		onMutate: (data) => {
 			onMutate?.(data)
@@ -444,8 +453,5 @@ export function useMessageCreateStreamMutation({ onMutate, onError, onSettled, o
 		}
 	})
 
-	return {
-		...createMessageMutation,
-		cancel: () => controllerRef.current?.abort(),
-	}
+	return createMessageMutation
 }

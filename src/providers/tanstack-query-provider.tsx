@@ -8,8 +8,13 @@ import { useState } from 'react'
 
 // Error handler for API errors
 const handleApiError = (error: Error) => {
-	const message = typeof error === "string" ? error : "Something went wrong!"
+	let message = "Something went wrong!"
 	
+	if(typeof error === "string")
+		message = error
+	else if(error.message)
+		message = error.message
+
 	toaster.create({
 		title: "Error",
 		type: "error",

@@ -10,8 +10,8 @@ export type ChatStore = {
 	drafts: Record<string, string>
 	setDraft: (chat_id: string, value: string) => void
 
-	streamingMessages: Record<string, string | undefined>
-	setStreamingMessage: (chat_id: string, value: SetStateAction<string | undefined>) => void
+	streamingMessages: Record<string, string>
+	setStreamingMessage: (chat_id: string, value: SetStateAction<string>) => void
 }
 
 
@@ -29,7 +29,7 @@ export function createChatStore() {
 				streamingMessages: {
 					...s.streamingMessages,
 					[chat_id]: typeof value === "function"
-						? value(s.streamingMessages[chat_id])
+						? value(s.streamingMessages[chat_id] ?? "")
 						: value
 				}
 			})),

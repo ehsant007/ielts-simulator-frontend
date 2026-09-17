@@ -1,9 +1,10 @@
-import { AiChatTurn, AiMessageCreate } from "@/client"
+import { AiMessageCreate, AiMessageRead } from "@/client"
 
 type StreamEvent =
 	| {
 		type: "start"
-		message_id: string
+		request: AiMessageRead
+		response: AiMessageRead
 	}
 	| {
 		type: "delta"
@@ -11,7 +12,6 @@ type StreamEvent =
 	}
 	| {
 		type: "done"
-		turn: AiChatTurn
 	}
 	| {
 		type: "error"
@@ -80,6 +80,14 @@ export async function* streamMessage(
 				buffer.slice("data: ".length),
 			) as StreamEvent
 		}
+	}
+	catch (error) {
+		if (error instanceof DOMException && error.name === "AbortError") {
+			// expected cancellation
+			return
+		}
+
+		throw error
 	}
 	finally {
 		reader.releaseLock()
