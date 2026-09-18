@@ -1,6 +1,7 @@
 import { AiChatCreate, AiChatMessages, AiChatRead, AiChats, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, createMessage, deleteChat, readChats, readMessages, updateChat } from "@/client"
 import { InfiniteData, infiniteQueryOptions, useInfiniteQuery, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
 import { streamMessage } from "./stream"
+import { useCallback, useEffect, useRef, useState } from "react"
 
 export const chatsQueryKey = ["ai-chats"] as const
 export const chatCreateKey = ["ai-chat-create"] as const
@@ -455,3 +456,106 @@ export function useMessageCreateStreamMutation({ onMutate, onError, onSettled, o
 
 	return createMessageMutation
 }
+
+
+type RecorderState = "stopping" | "stopped" | "starting" | "recording" | "error"
+
+export function useRecorder() {
+	const recorderRef = useRef<MediaRecorder | null>(null)
+	const chunksRef = useRef<Blob[]>([])
+	const state = useRef<RecorderState>("stopped")
+	const [isRecording, setIsRecording] = useState(false)
+
+	const cleanup = useCallback(() => {
+		const recorder = recorderRef.current
+
+		if (recorder && recorder.state !== "inactive") {
+			recorder.ondataavailable = null
+			recorder.onstop = null
+			recorder.stop()
+		}
+
+		recorder?.stream.getTracks().forEach(track => track.stop())
+
+		recorderRef.current = null
+		chunksRef.current = []
+		state.current = "stopped"
+	}, [])
+
+	useEffect(() => {
+		state.current = "stopped"
+		return cleanup
+	}, [cleanup])
+
+	const start = useCallback(async () => {
+		if (state.current === "starting" || state.current === "stopping")
+			return
+
+		setIsRecording(true)
+
+		let stream: MediaStream | null = null
+
+		try {
+			cleanup()
+			state.current = "starting"
+
+			stream = await navigator.mediaDevices.getUserMedia({
+				audio: true,
+			})
+
+			const recorder = new MediaRecorder(stream)
+			recorderRef.current = recorder
+
+			if (state.current !== "starting") {
+				cleanup()
+				return
+			}
+
+			recorder.ondataavailable = (event) => {
+				if (event.data.size > 0)
+					chunksRef.current.push(event.data)
+			}
+
+			recorder.start()
+			state.current = "recording"
+		} catch (err) {
+			stream?.getTracks().forEach(track => track.stop())
+			recorderRef.current = null
+			state.current = "error"
+			console.error("Failed to start recording:", err)
+		}
+	}, [cleanup])
+
+	const stop = useCallback(() => {
+		const currentState = state.current
+		if (currentState !== "starting" && currentState !== "recording")
+			return Promise.resolve(null)
+
+		state.current = "stopping"
+		const recorder = recorderRef.current
+		if (!recorder)
+			return Promise.resolve(null)
+
+		return new Promise<Blob>((resolve) => {
+			recorder.onstop = () => {
+				const blob = new Blob(chunksRef.current, {
+					type: recorder.mimeType,
+				})
+
+				cleanup()
+				setIsRecording(false)
+				resolve(blob)
+			}
+
+			recorder.stop()
+		})
+	}, [cleanup])
+
+	return {
+		isRecording,
+		state,
+		start,
+		stop,
+	}
+}
+

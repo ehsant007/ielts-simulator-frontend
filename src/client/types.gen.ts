@@ -283,6 +283,16 @@ export type BodyLoginAccessToken = {
 };
 
 /**
+ * Body_transcribe_audio
+ */
+export type BodyTranscribeAudio = {
+    /**
+     * Audio
+     */
+    audio: Blob | File;
+};
+
+/**
  * Content
  */
 export type Content = ({
@@ -2299,6 +2309,31 @@ export type DeleteChatResponses = {
 };
 
 export type DeleteChatResponse = DeleteChatResponses[keyof DeleteChatResponses];
+
+export type TranscribeAudioData = {
+    body: BodyTranscribeAudio;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ai/transcribe';
+};
+
+export type TranscribeAudioErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type TranscribeAudioError = TranscribeAudioErrors[keyof TranscribeAudioErrors];
+
+export type TranscribeAudioResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type TranscribeAudioResponse = TranscribeAudioResponses[keyof TranscribeAudioResponses];
 
 export type LookupData = {
     body?: never;

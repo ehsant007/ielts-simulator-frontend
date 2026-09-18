@@ -1,28 +1,54 @@
-import { HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, VStack } from "@chakra-ui/react"
+import { Text, Box, HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, VStack, Center, Spinner, Progress, StackProps } from "@chakra-ui/react"
 import { useRef, useState } from "react"
 import { BsStopFill } from "react-icons/bs"
 import { HiArrowUp } from "react-icons/hi"
-import { LuMic } from "react-icons/lu"
+import { LuCheck, LuLoader, LuMic, LuX } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
 import { useChatStore } from "./ChatProvider"
-import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useChatCreateMutation, useMessageCreateStreamMutation } from "./hooks"
+import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useChatCreateMutation, useMessageCreateStreamMutation, useRecorder } from "./hooks"
 import { useIsMobile } from "@/providers/BreakPointProvider"
 import { v7 as uuid7 } from "uuid"
-import { InfiniteData, useMutationState, useQueryClient } from "@tanstack/react-query"
-import { AiChatMessages, AiMessageCreate } from "@/client"
+import { InfiniteData, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
+import { AiChatMessages, AiMessageCreate, transcribeAudio } from "@/client"
 
-function InputButton({ children, ...props }: IconButtonProps) {
+function InputButton({ children, waiting, ...props }: { waiting?: boolean } & IconButtonProps) {
 	return (
 		<IconButton
 			minW="unset"
 			h="auto"
 			p="2"
-			variant="ghost"
+			variant="subtle"
 			borderRadius="full"
 			{...props}
 		>
-			{children}
+			{waiting
+				? <Spinner asChild borderWidth="0">
+					<LuLoader />
+				</Spinner>
+				: children
+			}
 		</IconButton>
+	)
+}
+
+function AudioVisualizer({ value, ...props }: { value: number } & StackProps) {
+	return (
+		<HStack gap="0" {...props}>
+			<Box
+				ms="auto"
+				h="full"
+				w={`${value / 2}%`}
+				bg="primary.muted"
+				borderStartRadius={props.borderRadius}
+			/>
+			<Box
+				me="auto"
+				h="full"
+				w={`${value / 2}%`}
+				bg="primary.muted"
+				borderEndRadius={props.borderRadius}
+			/>
+		</HStack>
 	)
 }
 
@@ -31,10 +57,12 @@ export type ChatInputInnerProps = {
 	onValueChange?: (value: string) => void
 	onSend?: () => void
 	onStop?: () => void
-	pending?: boolean
+	onRecordingSubmit?: (audio: Blob) => void
+	sending?: boolean
+	recordingTool?: boolean
 } & Omit<InputGroupProps, "children">
 
-function ChatInputInner({ value, onValueChange, onSend, onStop, pending, ...props }: ChatInputInnerProps) {
+function ChatInputInner({ value, onValueChange, onSend, onStop, onRecordingSubmit, sending, recordingTool, ...props }: ChatInputInnerProps) {
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
 	const singleLineHeight = useRef(Number.MAX_VALUE)
 
@@ -43,6 +71,16 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, pending, ...prop
 	//const isMobile = useBreakpointValue({ base: true, md: false, })
 	const { isMobile } = useIsMobile()
 	const [expand2, setExpand2] = useState(false)
+
+	const recorder = useRecorder()
+
+	const submitRecording = async () => {
+		const blob = await recorder.stop()
+		if (blob)
+			onRecordingSubmit?.(blob)
+	}
+
+	const isProcessRecording = recorder.isRecording || recordingTool
 
 	const expand1 = isMobile || multiLines || expand2
 
@@ -62,84 +100,128 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, pending, ...prop
 							<Separator flex="1" />
 						</>
 					}
-					<HStack
-						mt="auto"
-						position="relative"
-						gap="3"
-						my="auto"
-					>
-						<InputButton>
-							<LuMic />
-						</InputButton>
-						{pending
-							?
-							<InputButton variant="solid" colorPalette="primary" onClick={onStop}>
-								<BsStopFill />
+
+					{!isProcessRecording &&
+						<HStack
+							mt="auto"
+							position="relative"
+							gap="3"
+							my="auto"
+						>
+							<InputButton onClick={recorder.start}>
+								<LuMic />
 							</InputButton>
-							:
-							<InputButton variant="solid" colorPalette="primary" onClick={onSend}>
-								<HiArrowUp />
+							{sending
+								?
+								<InputButton variant="solid" colorPalette="primary" onClick={onStop}>
+									<BsStopFill />
+								</InputButton>
+								:
+								<InputButton variant="solid" colorPalette="primary" onClick={onSend}>
+									<HiArrowUp />
+								</InputButton>
+							}
+						</HStack>
+					}
+
+					{isProcessRecording &&
+						<HStack
+							mt="auto"
+							position="relative"
+							gap="3"
+							my="auto"
+						>
+							<InputButton onClick={recorder.stop}>
+								<LuX />
 							</InputButton>
-						}
-					</HStack>
+							<InputButton onClick={submitRecording} waiting={recordingTool}>
+								<LuCheck />
+							</InputButton>
+						</HStack>
+					}
+
 				</VStack>
 			}
 			{...props}
 		>
-			<Textarea
-				ref={textareaRef}
-				placeholder="Ask anything"
-				borderRadius="4xl"
-				bg="bg.muted"
-				focusRing="none"
-				border="none"
-				shadow="sm"
-				rows={expand2 ? 20 : 1}
-				ps="5"
-				pt={expand1 ? "8" : "4"}
-				pb={expand1 ? "4rem" : "4"}
-				pe={expand1 ? "3.5rem" : "6rem"}
-				size="lg"
-				autoresize
-				maxH="60dvh"
-				autoFocus
-				value={value}
+			<Box
+				w="full"
+				position="relative"
+			>
+				<Textarea
+					ref={textareaRef}
+					display="block"
+					placeholder="Ask anything"
+					borderRadius="4xl"
+					bg="bg.muted"
+					focusRing="none"
+					border="none"
+					shadow="sm"
+					rows={expand2 ? 20 : 1}
+					ps="5"
+					pt={expand1 ? "8" : "4"}
+					pb={expand1 ? "4rem" : "4"}
+					pe={expand1 ? "3.5rem" : "6rem"}
+					size="lg"
+					autoresize
+					maxH="60dvh"
+					autoFocus
+					value={value}
 
-				transition="padding 0.2s ease-in-out"
+					transition="padding 0.2s ease-in-out"
 
-				onChange={(e) => {
-					const text = e.currentTarget.value
-					singleLineHeight.current = Math.min(singleLineHeight.current, e.currentTarget.scrollHeight)
-					if (text === "")
-						setMultiLines(false)
-					else if (text.includes("\n"))
-						setMultiLines(true)
-					else
-						setMultiLines(e.currentTarget.scrollHeight > singleLineHeight.current)
-					onValueChange?.(text)
-				}}
+					onChange={(e) => {
+						const text = e.currentTarget.value
+						singleLineHeight.current = Math.min(singleLineHeight.current, e.currentTarget.scrollHeight)
+						if (text === "")
+							setMultiLines(false)
+						else if (text.includes("\n"))
+							setMultiLines(true)
+						else
+							setMultiLines(e.currentTarget.scrollHeight > singleLineHeight.current)
+						onValueChange?.(text)
+					}}
 
-				onKeyDown={(e) => {
-					if (e.key !== "Enter" || e.shiftKey || expand2)
-						return
+					onKeyDown={(e) => {
+						if (e.key !== "Enter" || e.shiftKey || expand2)
+							return
 
-					e.preventDefault()
-					onSend?.()
-				}}
+						e.preventDefault()
+						onSend?.()
+					}}
 
-				css={{
-					"&::-webkit-scrollbar": {
-						width: "0.4rem",
-					},
-					"&::-webkit-scrollbar-thumb": {
-						bg: "fg.subtle",
-						borderRadius: "full",
-					},
-					"&::-webkit-scrollbar-track": {
-						bg: "transparent",
-					},
-				}}
-			/>
+					css={{
+						"&::-webkit-scrollbar": {
+							width: "0.4rem",
+						},
+						"&::-webkit-scrollbar-thumb": {
+							bg: "fg.subtle",
+							borderRadius: "full",
+						},
+						"&::-webkit-scrollbar-track": {
+							bg: "transparent",
+						},
+					}}
+				/>
+
+				{recorder.isRecording &&
+					<Box
+						position="absolute"
+						bottom="0"
+						left="0"
+						w="full"
+						h={expand1 ? "3.5rem" : "full"}
+						pe="7rem"
+					>
+						<AudioVisualizer
+							borderRadius="4xl"
+							w="full"
+							h="full"
+							value={50}
+						/>
+					</Box>
+				}
+			</Box>
 		</InputGroup>
 	)
 }
@@ -235,13 +317,29 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			})
 	}
 
+	[]
+
+	const transcriber = useMutation({
+		mutationKey: ["transcribe"],
+
+		mutationFn: (audio: Blob) => transcribeAudio({
+			body: {
+				audio: audio,
+			}
+		}).then(res => res.data),
+
+		onSuccess: (data) => setDraft(chatId, prev => (prev ? prev + "\n" : "") + data.message)
+	})
+
 	return (
 		<ChatInputInner
 			value={userMsg}
 			onValueChange={(value) => setUserMsg(value)}
 			onSend={handleSend}
 			onStop={() => cancelMessageCreate(activeChat?.id)}
-			pending={pending}
+			sending={pending}
+			onRecordingSubmit={blob => transcriber.mutate(blob)}
+			recordingTool={transcriber.isPending}
 			{...props}
 		/>
 	)
