@@ -340,7 +340,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 	const transcriberController = useRef<AbortController>(new AbortController())
 
 	const transcriber = useMutation({
-		mutationKey: ["transcribe"],
+		mutationKey: ["transcriber"],
 
 		mutationFn: async (audio: Blob) => {
 			transcriberController.current = new AbortController()
@@ -357,7 +357,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 		onSuccess: (data) => {
 			if (data == null)
 				return
-			setDraft(chatId, prev => (prev ? prev + "\n" : "") + data.message)
+			setDraft(chatId, prev => (prev ? prev + "\n\n" : "") + data.message)
 		},
 	})
 
