@@ -10,8 +10,6 @@ type AudioRecorderVisualizerProps = {
 
 export function AudioRecorderVisualizer({
 	recorder,
-	width = 320,
-	height = 48,
 	barWidth = 3,
 	barGap = 2,
 }: AudioRecorderVisualizerProps) {
@@ -24,6 +22,17 @@ export function AudioRecorderVisualizer({
 		const canvas = canvasRef.current
 		if (!canvas)
 			return
+
+		const boundingRect = canvas.getBoundingClientRect()
+		const width = boundingRect.width
+		const height = boundingRect.height
+
+		canvas.width = width
+		canvas.height = height
+
+		const barColor = getComputedStyle(document.documentElement)
+			.getPropertyValue("--chakra-colors-primary")
+			.trim()
 
 		const ctx = canvas.getContext("2d")
 		if (!ctx)
@@ -40,48 +49,54 @@ export function AudioRecorderVisualizer({
 
 		const data = new Uint8Array(analyser.fftSize)
 
-		const bars: number[] = []
-		const maxBars = Math.ceil(width / (barWidth + barGap))
+		const step = barWidth + barGap
+		const maxBars = Math.ceil(width / step)
+		const bars: number[] = Array(maxBars).fill(0)
 
 		let animationFrame = 0
-		let lastSample = 0
+		let lastSample: number | null = null
+
+		const sampleInterval = 100
 
 		const draw = (time: number) => {
 			animationFrame = requestAnimationFrame(draw)
 
-			// Add a new bar roughly every 30 ms.
-			if (time - lastSample < 30)
-				return
+			if (lastSample === null)
+				lastSample = time
 
-			lastSample = time
+			// Add a new sample every sampleInterval ms.
+			if (time - lastSample >= sampleInterval) {
+				analyser.getByteTimeDomainData(data)
 
-			analyser.getByteTimeDomainData(data)
+				let sum = 0
+				for (const value of data) {
+					const normalized = (value - 128) / 128
+					sum += normalized * normalized
+				}
+				const rms = Math.sqrt(sum / data.length)
+				
+				const level = Math.min(1, rms * 6)
+				bars.push(level)
+				if (bars.length > maxBars)
+					bars.shift()
 
-			let sum = 0
-
-			for (const value of data) {
-				const normalized = (value - 128) / 128
-				sum += normalized * normalized
+				lastSample += sampleInterval
 			}
 
-			const rms = Math.sqrt(sum / data.length)
-
-			// Amplify quiet speech a little.
-			const level = Math.min(1, rms * 4)
-
-			bars.push(level)
-
-			if (bars.length > maxBars)
-				bars.shift()
+			// How far we've progressed toward the next bar.
+			const progress = (time - lastSample) / sampleInterval
+			const offset = progress * step
 
 			ctx.clearRect(0, 0, width, height)
 
 			const centerY = height / 2
 
+			ctx.fillStyle = barColor
+
 			bars.forEach((level, i) => {
-				const x = i * (barWidth + barGap)
 
 				// Give every bar a minimum height so silence is still visible.
+				const x = i * step - offset
 				const barHeight = Math.max(2, level * height)
 
 				ctx.fillRect(
@@ -92,7 +107,6 @@ export function AudioRecorderVisualizer({
 				)
 			})
 		}
-
 		if (audioContext.state === "suspended")
 			void audioContext.resume()
 
@@ -104,16 +118,14 @@ export function AudioRecorderVisualizer({
 			analyser.disconnect()
 			void audioContext.close()
 		}
-	}, [recorder, width, height, barWidth, barGap])
+	}, [recorder, barWidth, barGap])
 
 	return (
 		<canvas
 			ref={canvasRef}
-			width={width}
-			height={height}
 			style={{
 				width: "100%",
-				height,
+				height: "100%",
 				display: "block",
 			}}
 		/>

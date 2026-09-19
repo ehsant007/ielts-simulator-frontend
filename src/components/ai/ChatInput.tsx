@@ -1,8 +1,8 @@
-import { Box, HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, VStack, Spinner, StackProps } from "@chakra-ui/react"
+import { Box, HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, VStack, Spinner, StackProps, Icon, Center } from "@chakra-ui/react"
 import { useRef, useState } from "react"
 import { BsStopFill } from "react-icons/bs"
 import { HiArrowUp } from "react-icons/hi"
-import { LuCheck, LuLoader, LuMic, LuX } from "react-icons/lu"
+import { LuAudioLines, LuCheck, LuLoader, LuMic, LuX } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
 import { useChatStore } from "./ChatProvider"
 import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useChatCreateMutation, useMessageCreateStreamMutation, useRecorder } from "./hooks"
@@ -10,6 +10,8 @@ import { useIsMobile } from "@/providers/BreakPointProvider"
 import { v7 as uuid7 } from "uuid"
 import { InfiniteData, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
 import { AiChatMessages, AiMessageCreate, transcribeAudio } from "@/client"
+import { AudioRecorderVisualizer } from "./RecorderVisualizer"
+import { blob } from "stream/consumers"
 
 
 function InputButton({ children, waiting, ...props }: { waiting?: boolean } & IconButtonProps) {
@@ -78,6 +80,8 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 	const { isMobile } = useIsMobile()
 	const [expand2, setExpand2] = useState(false)
 
+	const [voice, setVoice] = useState<Blob | null>(null)
+
 	const recorder = useRecorder()
 
 	const submitVoice = async () => {
@@ -89,6 +93,7 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 		setSubmittingVoice(true)
 		await recorder.stop()
 		const blob = recorder.getRecording()
+		setVoice(blob)
 		if (blob == null) {
 			setSubmittingVoice(false)
 			return
@@ -138,6 +143,8 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 							<InputButton
 								onClick={() => {
 									setMode("voice")
+									if(value)
+										setMultiLines(true)
 									recorder.start()
 								}}
 							>
@@ -236,7 +243,7 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 					}}
 				/>
 
-				{recorder.isRecording &&
+				{mode === "voice" &&
 					<Box
 						position="absolute"
 						bottom="0"
@@ -244,13 +251,19 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 						w="full"
 						h={expand1 ? "3.5rem" : "full"}
 						pe="7rem"
+						ps="5"
 					>
-						<AudioVisualizer
-							borderRadius="4xl"
-							w="full"
-							h="full"
-							value={50}
-						/>
+						{recorder.isRecording
+							? <AudioRecorderVisualizer recorder={recorder.getRecorder()} />
+							: <Center
+								animation="primaryColorBreath 2s ease-in-out infinite"
+								h="full"
+							>
+								<Icon size="xl"><LuAudioLines /></Icon>
+								<Icon size="xl"><LuAudioLines /></Icon>
+								<Icon size="xl"><LuAudioLines /></Icon>
+							</Center>
+						}
 					</Box>
 				}
 			</Box>

@@ -492,8 +492,6 @@ export function useRecorder() {
 		if (state.current === "starting" || state.current === "stopping")
 			return
 
-		setIsRecording(true)
-
 		let stream: MediaStream | null = null
 
 		try {
@@ -519,6 +517,7 @@ export function useRecorder() {
 
 			recorder.start()
 			state.current = "recording"
+			setIsRecording(true)
 		} catch (err) {
 			stream?.getTracks().forEach(track => track.stop())
 			recorderRef.current = null
@@ -554,6 +553,7 @@ export function useRecorder() {
 	}, [cleanup])
 
 	const getRecording = useCallback(() => recording.current, [])
+	const getRecorder = useCallback(() => recorderRef.current, [])
 
 	return {
 		isRecording,
@@ -561,6 +561,7 @@ export function useRecorder() {
 		start,
 		stop,
 		getRecording,
+		getRecorder,
 	}
 }
 

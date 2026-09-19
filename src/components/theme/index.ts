@@ -105,6 +105,15 @@ const config = defineConfig({
 				"0%, 100%": { transform: "scale(1)" },
 				"50%": { transform: "scale(0.6)" },
 			},
+
+			primaryColorBreath: {
+				"0%, 100%": {
+					color: "var(--chakra-colors-primary-500)",
+				},
+				"50%": {
+					color: "var(--chakra-colors-primary-700)",
+				},
+			},
 		},
 	},
 
