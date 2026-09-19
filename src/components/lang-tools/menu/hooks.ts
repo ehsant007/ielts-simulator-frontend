@@ -4,7 +4,7 @@ import { useKokoroStore, speak as speakAudio } from "../kokoro-tts";
 import { useTextSelection } from "../hooks";
 import { useHighlightStore } from "../highlighter/HighlightProvider";
 
-export function useMenu({ onActionDone }: { onActionDone?: (action?: string) => void }) {
+export function useMenu({ onActionDone }: { onActionDone?: (action?: string) => void } = {}) {
 	const highlight = useHighlightStore((state) => state.highlightSelectedText)
 	const removeHighlight = useHighlightStore((state) => state.removeHighlight)
 	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)

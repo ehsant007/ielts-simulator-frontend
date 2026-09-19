@@ -1,4 +1,4 @@
-import { Text, Box, HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, VStack, Center, Spinner, Progress, StackProps } from "@chakra-ui/react"
+import { Box, HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, VStack, Spinner, StackProps } from "@chakra-ui/react"
 import { useRef, useState } from "react"
 import { BsStopFill } from "react-icons/bs"
 import { HiArrowUp } from "react-icons/hi"
@@ -10,6 +10,7 @@ import { useIsMobile } from "@/providers/BreakPointProvider"
 import { v7 as uuid7 } from "uuid"
 import { InfiniteData, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
 import { AiChatMessages, AiMessageCreate, transcribeAudio } from "@/client"
+
 
 function InputButton({ children, waiting, ...props }: { waiting?: boolean } & IconButtonProps) {
 	return (
@@ -52,21 +53,26 @@ function AudioVisualizer({ value, ...props }: { value: number } & StackProps) {
 	)
 }
 
+type InputMode = "text" | "voice"
+
 export type ChatInputInnerProps = {
 	value?: string
 	onValueChange?: (value: string) => void
 	onSend?: () => void
 	onStop?: () => void
-	onRecordingSubmit?: (audio: Blob) => void
+	onVoiceSubmit?: (audio: Blob) => Promise<void>
+	onVoiceSubmitCancel?: () => void
 	sending?: boolean
-	recordingTool?: boolean
 } & Omit<InputGroupProps, "children">
 
-function ChatInputInner({ value, onValueChange, onSend, onStop, onRecordingSubmit, sending, recordingTool, ...props }: ChatInputInnerProps) {
+function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, onVoiceSubmitCancel, sending, ...props }: ChatInputInnerProps) {
+	const [mode, setMode] = useState<InputMode>("text")
+
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
 	const singleLineHeight = useRef(Number.MAX_VALUE)
 
 	const [multiLines, setMultiLines] = useState(false)
+	const [submittingVoice, setSubmittingVoice] = useState(false)
 
 	//const isMobile = useBreakpointValue({ base: true, md: false, })
 	const { isMobile } = useIsMobile()
@@ -74,13 +80,34 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onRecordingSubmi
 
 	const recorder = useRecorder()
 
-	const submitRecording = async () => {
-		const blob = await recorder.stop()
-		if (blob)
-			onRecordingSubmit?.(blob)
+	const submitVoice = async () => {
+		if (submittingVoice) {
+			onVoiceSubmitCancel?.()
+			return
+		}
+
+		setSubmittingVoice(true)
+		await recorder.stop()
+		const blob = recorder.getRecording()
+		if (blob == null) {
+			setSubmittingVoice(false)
+			return
+		}
+
+		try {
+			await onVoiceSubmit?.(blob)
+			setMode("text")
+		} catch { }
+
+		setSubmittingVoice(false)
 	}
 
-	const isProcessRecording = recorder.isRecording || recordingTool
+	const DiscardVoice = async () => {
+		setMode("text")
+		recorder.stop()
+		if (submittingVoice)
+			onVoiceSubmitCancel?.()
+	}
 
 	const expand1 = isMobile || multiLines || expand2
 
@@ -101,14 +128,19 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onRecordingSubmi
 						</>
 					}
 
-					{!isProcessRecording &&
+					{mode === "text" &&
 						<HStack
 							mt="auto"
 							position="relative"
 							gap="3"
 							my="auto"
 						>
-							<InputButton onClick={recorder.start}>
+							<InputButton
+								onClick={() => {
+									setMode("voice")
+									recorder.start()
+								}}
+							>
 								<LuMic />
 							</InputButton>
 							{sending
@@ -124,17 +156,17 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onRecordingSubmi
 						</HStack>
 					}
 
-					{isProcessRecording &&
+					{mode === "voice" &&
 						<HStack
 							mt="auto"
 							position="relative"
 							gap="3"
 							my="auto"
 						>
-							<InputButton onClick={recorder.stop}>
+							<InputButton onClick={DiscardVoice}>
 								<LuX />
 							</InputButton>
-							<InputButton onClick={submitRecording} waiting={recordingTool}>
+							<InputButton onClick={submitVoice} waiting={submittingVoice}>
 								<LuCheck />
 							</InputButton>
 						</HStack>
@@ -317,18 +349,28 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			})
 	}
 
-	[]
+	const transcriberController = useRef<AbortController>(new AbortController())
 
 	const transcriber = useMutation({
 		mutationKey: ["transcribe"],
 
-		mutationFn: (audio: Blob) => transcribeAudio({
-			body: {
-				audio: audio,
-			}
-		}).then(res => res.data),
+		mutationFn: async (audio: Blob) => {
+			transcriberController.current = new AbortController()
+			const res = await transcribeAudio({
+				body: {
+					audio: audio,
+				},
+				signal: transcriberController.current.signal,
+			})
 
-		onSuccess: (data) => setDraft(chatId, prev => (prev ? prev + "\n" : "") + data.message)
+			return res.data
+		},
+
+		onSuccess: (data) => {
+			if (data == null)
+				return
+			setDraft(chatId, prev => (prev ? prev + "\n" : "") + data.message)
+		},
 	})
 
 	return (
@@ -338,8 +380,10 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			onSend={handleSend}
 			onStop={() => cancelMessageCreate(activeChat?.id)}
 			sending={pending}
-			onRecordingSubmit={blob => transcriber.mutate(blob)}
-			recordingTool={transcriber.isPending}
+			onVoiceSubmit={async blob => {
+				await transcriber.mutateAsync(blob)
+			}}
+			onVoiceSubmitCancel={() => transcriberController.current.abort("Voice submit canceled.")}
 			{...props}
 		/>
 	)

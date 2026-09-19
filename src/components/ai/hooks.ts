@@ -465,6 +465,7 @@ export function useRecorder() {
 	const chunksRef = useRef<Blob[]>([])
 	const state = useRef<RecorderState>("stopped")
 	const [isRecording, setIsRecording] = useState(false)
+	const recording = useRef<Blob | null>(null)
 
 	const cleanup = useCallback(() => {
 		const recorder = recorderRef.current
@@ -544,6 +545,7 @@ export function useRecorder() {
 
 				cleanup()
 				setIsRecording(false)
+				recording.current = blob
 				resolve(blob)
 			}
 
@@ -551,11 +553,14 @@ export function useRecorder() {
 		})
 	}, [cleanup])
 
+	const getRecording = useCallback(() => recording.current, [])
+
 	return {
 		isRecording,
 		state,
 		start,
 		stop,
+		getRecording,
 	}
 }
 

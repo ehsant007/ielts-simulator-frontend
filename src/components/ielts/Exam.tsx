@@ -20,7 +20,6 @@ export function ModuleCard({ module }: { module: ModuleInfo | null }) {
 		<VStack border="md" borderRadius="md" p="3">
 			{icon[module?.type ?? "default"]}
 			<Text>{module?.type ?? "Module type"}</Text>
-			<Text>{module?.tag}</Text>
 		</VStack>
 	</Link>
 }
