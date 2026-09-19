@@ -1,4 +1,4 @@
-import { Box, HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, VStack, Spinner, StackProps, Icon, Center } from "@chakra-ui/react"
+import { Box, HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, VStack, Spinner, Icon, Center } from "@chakra-ui/react"
 import { useRef, useState } from "react"
 import { BsStopFill } from "react-icons/bs"
 import { HiArrowUp } from "react-icons/hi"
@@ -11,7 +11,6 @@ import { v7 as uuid7 } from "uuid"
 import { InfiniteData, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
 import { AiChatMessages, AiMessageCreate, transcribeAudio } from "@/client"
 import { AudioRecorderVisualizer } from "./RecorderVisualizer"
-import { blob } from "stream/consumers"
 
 
 function InputButton({ children, waiting, ...props }: { waiting?: boolean } & IconButtonProps) {
@@ -31,27 +30,6 @@ function InputButton({ children, waiting, ...props }: { waiting?: boolean } & Ic
 				: children
 			}
 		</IconButton>
-	)
-}
-
-function AudioVisualizer({ value, ...props }: { value: number } & StackProps) {
-	return (
-		<HStack gap="0" {...props}>
-			<Box
-				ms="auto"
-				h="full"
-				w={`${value / 2}%`}
-				bg="primary.muted"
-				borderStartRadius={props.borderRadius}
-			/>
-			<Box
-				me="auto"
-				h="full"
-				w={`${value / 2}%`}
-				bg="primary.muted"
-				borderEndRadius={props.borderRadius}
-			/>
-		</HStack>
 	)
 }
 
@@ -80,8 +58,6 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 	const { isMobile } = useIsMobile()
 	const [expand2, setExpand2] = useState(false)
 
-	const [voice, setVoice] = useState<Blob | null>(null)
-
 	const recorder = useRecorder()
 
 	const submitVoice = async () => {
@@ -93,7 +69,6 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 		setSubmittingVoice(true)
 		await recorder.stop()
 		const blob = recorder.getRecording()
-		setVoice(blob)
 		if (blob == null) {
 			setSubmittingVoice(false)
 			return
