@@ -1,5 +1,5 @@
-import { AiChatCreate, AiChatMessages, AiChatRead, AiChats, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, createMessage, deleteChat, readChats, readMessages, updateChat } from "@/client"
-import { InfiniteData, infiniteQueryOptions, useInfiniteQuery, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
+import { AiChatCreate, AiMessagePage, AiChatRead, AiChatPage, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, createMessage, deleteChat, readChatById, readChats, readMessages, updateChat } from "@/client"
+import { InfiniteData, infiniteQueryOptions, useInfiniteQuery, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query"
 import { streamMessage } from "./stream"
 import { useCallback, useEffect, useRef, useState } from "react"
 
@@ -12,6 +12,33 @@ export const messagesQueryKey = (chat_id: string) => ["ai-chats", chat_id, "mess
 export const messageCreateKey = ["ai-message-create"] as const
 
 // ------------- Chats -------------------------
+
+export function useChatQuery(chatId: string | null | undefined) {
+	const queryClient = useQueryClient()
+
+	return useQuery({
+		enabled: !!chatId && chatId !== "home",
+		queryKey: ["ai-chats", chatId],
+
+		queryFn: () =>
+			readChatById({
+				path: { chat_id: chatId! },
+			}).then(res => res.data),
+
+		initialData: () => {
+			const data = queryClient.getQueryData<InfiniteData<AiChatPage>>(chatsQueryKey)
+
+			return data?.pages
+				.flatMap(page => page.chats)
+				.find(chat => chat.id === chatId)
+		},
+
+		initialDataUpdatedAt: () =>
+			queryClient.getQueryState(chatsQueryKey)?.dataUpdatedAt,
+
+		staleTime: Infinity,
+	})
+}
 
 export function useChatsQuery() {
 	const chatsQuery = useInfiniteQuery({
@@ -112,7 +139,7 @@ export function useChatCreateMutation({ onSuccess }: { onSuccess?: (chat: AiChat
 		}),
 
 		onSuccess: ({ data: newChat }, createData) => {
-			queryClient.setQueryData<InfiniteData<AiChats>>(chatsQueryKey,
+			queryClient.setQueryData<InfiniteData<AiChatPage>>(chatsQueryKey,
 				(prev) => {
 					if (!prev || prev.pages.length < 1) {
 						return prev
@@ -149,7 +176,7 @@ export function useChatUpdateMutation() {
 		}),
 
 		onSuccess: ({ data: chat }) => {
-			queryClient.setQueryData<InfiniteData<AiChats>>(chatsQueryKey,
+			queryClient.setQueryData<InfiniteData<AiChatPage>>(chatsQueryKey,
 				prev => {
 					if (!prev)
 						return
@@ -192,7 +219,7 @@ export function useChatRemoveMutation() {
 		}),
 
 		onSuccess: (_, chat_id) => {
-			queryClient.setQueryData<InfiniteData<AiChats>>(chatsQueryKey,
+			queryClient.setQueryData<InfiniteData<AiChatPage>>(chatsQueryKey,
 				prev => {
 					if (!prev)
 						return
@@ -315,7 +342,7 @@ export function useMessageCreateMutation({ onMutate, onError, onSettled }: UseMe
 		},
 
 		onSuccess: ({ data: { request, response } }, { chat_id }) => {
-			queryClient.setQueryData<InfiniteData<AiChatMessages>>(
+			queryClient.setQueryData<InfiniteData<AiMessagePage>>(
 				messagesQueryKey(chat_id),
 				(prev) => {
 					if (!prev || prev.pages.length === 0) {
@@ -359,7 +386,7 @@ export type UseMessageCreateStreamMutationProps = {
 export function useMessageCreateStreamMutation({ onMutate, onError, onSettled, onStream }: UseMessageCreateStreamMutationProps) {
 	const queryClient = useQueryClient()
 
-	const addMessages = (chat_id: string, values: AiMessageRead[]) => queryClient.setQueryData<InfiniteData<AiChatMessages>>(
+	const addMessages = (chat_id: string, values: AiMessageRead[]) => queryClient.setQueryData<InfiniteData<AiMessagePage>>(
 		messagesQueryKey(chat_id),
 		(prev) => {
 			if (!prev || prev.pages.length === 0) {

@@ -4,8 +4,8 @@ import { createStore } from "zustand/vanilla";
 
 
 export type ChatStore = {
-	activeChat: AiChatRead | null
-	setActiveChat: Dispatch<SetStateAction<AiChatRead | null>>
+	activeChat: AiChatRead | null | undefined
+	setActiveChat: Dispatch<SetStateAction<AiChatRead | null | undefined>>
 
 	drafts: Record<string, string>
 	setDraft: (chat_id: string, value: SetStateAction<string>) => void

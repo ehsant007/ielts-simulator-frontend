@@ -21,9 +21,9 @@ export function ChatPanel({ chatId }: { chatId?: string }) {
 
 	return (
 		<ClientOnly>
-			<ChatStoreProvider chatId={chatId}>
+			<ChatStoreProvider>
 				<HStack h="full" gap="0" pos="relative">
-					<ChatSidebar />
+					<ChatSidebar chatId={chatId}/>
 					<ChatBox maxW="50rem" py="6" px="4" mx="auto" />
 				</HStack>
 			</ChatStoreProvider>

@@ -27,13 +27,13 @@ export type AiChatCreate = {
 };
 
 /**
- * AIChatMessages
+ * AIChatPage
  */
-export type AiChatMessages = {
+export type AiChatPage = {
     /**
-     * Messages
+     * Chats
      */
-    messages: Array<AiMessageRead>;
+    chats: Array<AiChatRead>;
     /**
      * Next Cursor
      */
@@ -105,24 +105,6 @@ export type AiChatUpdate = {
 };
 
 /**
- * AIChats
- */
-export type AiChats = {
-    /**
-     * Chats
-     */
-    chats: Array<AiChatRead>;
-    /**
-     * Next Cursor
-     */
-    next_cursor?: string | null;
-    /**
-     * Previous Cursor
-     */
-    previous_cursor?: string | null;
-};
-
-/**
  * AIMessageCreate
  */
 export type AiMessageCreate = {
@@ -138,6 +120,24 @@ export type AiMessageCreate = {
      * Content
      */
     content: string;
+};
+
+/**
+ * AIMessagePage
+ */
+export type AiMessagePage = {
+    /**
+     * Messages
+     */
+    messages: Array<AiMessageRead>;
+    /**
+     * Next Cursor
+     */
+    next_cursor?: string | null;
+    /**
+     * Previous Cursor
+     */
+    previous_cursor?: string | null;
 };
 
 /**
@@ -2097,6 +2097,66 @@ export type AppTranslatorSchemasTranslatorTranslateResponse = {
     translation: string;
 };
 
+export type DeleteChatData = {
+    body?: never;
+    path: {
+        /**
+         * Chat Id
+         */
+        chat_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ai/chats/{chat_id}';
+};
+
+export type DeleteChatErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type DeleteChatError = DeleteChatErrors[keyof DeleteChatErrors];
+
+export type DeleteChatResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type DeleteChatResponse = DeleteChatResponses[keyof DeleteChatResponses];
+
+export type ReadChatByIdData = {
+    body?: never;
+    path: {
+        /**
+         * Chat Id
+         */
+        chat_id: string;
+    };
+    query?: never;
+    url: '/api/v1/ai/chats/{chat_id}';
+};
+
+export type ReadChatByIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadChatByIdError = ReadChatByIdErrors[keyof ReadChatByIdErrors];
+
+export type ReadChatByIdResponses = {
+    /**
+     * Successful Response
+     */
+    200: AiChatRead;
+};
+
+export type ReadChatByIdResponse = ReadChatByIdResponses[keyof ReadChatByIdResponses];
+
 export type ReadChatsData = {
     body?: never;
     path?: never;
@@ -2134,7 +2194,7 @@ export type ReadChatsResponses = {
     /**
      * Successful Response
      */
-    200: AiChats;
+    200: AiChatPage;
 };
 
 export type ReadChatsResponse = ReadChatsResponses[keyof ReadChatsResponses];
@@ -2227,7 +2287,7 @@ export type ReadMessagesResponses = {
     /**
      * Successful Response
      */
-    200: AiChatMessages;
+    200: AiMessagePage;
 };
 
 export type ReadMessagesResponse = ReadMessagesResponses[keyof ReadMessagesResponses];
@@ -2279,36 +2339,6 @@ export type CreateMessageStreamResponses = {
      */
     200: unknown;
 };
-
-export type DeleteChatData = {
-    body?: never;
-    path: {
-        /**
-         * Chat Id
-         */
-        chat_id: string;
-    };
-    query?: never;
-    url: '/api/v1/ai/chats/{chat_id}';
-};
-
-export type DeleteChatErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type DeleteChatError = DeleteChatErrors[keyof DeleteChatErrors];
-
-export type DeleteChatResponses = {
-    /**
-     * Successful Response
-     */
-    200: Message;
-};
-
-export type DeleteChatResponse = DeleteChatResponses[keyof DeleteChatResponses];
 
 export type TranscribeAudioData = {
     body: BodyTranscribeAudio;

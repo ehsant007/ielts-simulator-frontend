@@ -16,9 +16,9 @@ import { SidebarProvider, useSidebar } from "./SidebarProvider"
 
 const MotionBox = motion.create(Box)
 
-export function ChatSidebar() {
+export function ChatSidebar({ chatId }: { chatId?: string }) {
 	return (
-		<SidebarProvider>
+		<SidebarProvider chatId={chatId}>
 			<Box h="full" display={{ base: "block", md: "none" }}>
 				<MobileSidebar />
 			</Box>
@@ -395,9 +395,9 @@ export function ChatButtonList({ chats, placeholder }: { chats: AiChatRead[], pl
 
 export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps) {
 	const activeChat = useChatStore((s) => s.activeChat)
-	const setActiveChat = useChatStore((s) => s.setActiveChat)
 	const { update: { mutate: updateChat } } = useChatUpdateMutation()
 	const [menuOpen, setMenuOpen] = useState(false)
+	const { selectChat } = useSidebar()
 
 	return (
 		<Group
@@ -424,7 +424,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 				borderRadius="xl"
 				flex="1"
 				colorPalette="primary"
-				onClick={() => setActiveChat(chat)}
+				onClick={() => selectChat(chat)}
 			>
 				{chat.title}
 			</Button>
