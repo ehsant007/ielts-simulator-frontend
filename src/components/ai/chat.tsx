@@ -1,7 +1,7 @@
 "use client"
 
 import { AiChatRead, AiMessageCreate, AiMessageRead } from "@/client"
-import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, List } from "@chakra-ui/react"
+import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, List, ClientOnly } from "@chakra-ui/react"
 import { LuArrowDown, LuRefreshCw } from "react-icons/lu"
 import type { BoxProps, StackProps } from "@chakra-ui/react"
 import { Fragment, useEffect, useRef, useState } from "react"
@@ -94,12 +94,14 @@ function MD({ children, id }: { children: string, id: string }) {
 export function ChatPanel({ chatId }: { chatId?: string }) {
 
 	return (
-		<ChatStoreProvider chatId={chatId}>
-			<HStack h="full" gap="0" pos="relative">
-				<ChatSidebar />
-				<ChatBox maxW="50rem" py="6" px="4" mx="auto" />
-			</HStack>
-		</ChatStoreProvider>
+		<ClientOnly>
+			<ChatStoreProvider chatId={chatId}>
+				<HStack h="full" gap="0" pos="relative">
+					<ChatSidebar />
+					<ChatBox maxW="50rem" py="6" px="4" mx="auto" />
+				</HStack>
+			</ChatStoreProvider>
+		</ClientOnly>
 	)
 }
 
