@@ -1,6 +1,8 @@
-.breathing {
+@import "katex/dist/katex.min.css";
+
+/* .breathing {
 	animation: breathing 1.5s ease-in-out infinite;
-}
+} */
 
 /* :root {
   --background: #ffffff;

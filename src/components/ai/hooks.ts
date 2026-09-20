@@ -233,7 +233,7 @@ export function messagesQueryOptions(chat_id: string | null | undefined) {
 		queryFn: async ({ pageParam, signal }) => readMessages({
 			path: { chat_id: chat_id! },
 			query: {
-				limit: 10,
+				limit: 5,
 				...pageParam,
 			},
 			signal,

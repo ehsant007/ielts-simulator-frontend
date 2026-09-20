@@ -14,34 +14,43 @@ import { useMutationState } from "@tanstack/react-query"
 import { ChatInput } from "./ChatInput"
 import { ChatSidebar } from "./ChatSidebar"
 
+import { Prose } from "@/components/ui/prose"
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism"
+
+import remarkGfm from "remark-gfm"
+import remarkMath from "remark-math"
+import rehypeKatex from "rehype-katex"
+
+
 
 
 import Markdown from "react-markdown"
 import rehypeRaw from "rehype-raw"
 import { useStickToBottom } from "use-stick-to-bottom"
 
-export function MD({ children, id }: { children: string, id: string }) {
+function MD({ children, id }: { children: string, id: string }) {
 	let count = 0
 	const getId = () => `${id}-n${count++}`
 
 	return <Markdown rehypePlugins={[rehypeRaw]} components={{
 		h1({ children }) {
-			return <Text id={getId()} textStyle="4xl">{children}</Text>
+			return <Text as="h1" id={getId()} textStyle="4xl">{children}</Text>
 		},
 		h2({ children }) {
-			return <Text id={getId()} textStyle="3xl">{children}</Text>
+			return <Text as="h2" id={getId()} textStyle="3xl">{children}</Text>
 		},
 		h3({ children }) {
-			return <Text id={getId()} textStyle="2xl">{children}</Text>
+			return <Text as="h3" id={getId()} textStyle="2xl">{children}</Text>
 		},
 		h4({ children }) {
-			return <Text id={getId()} textStyle="xl">{children}</Text>
+			return <Text as="h4" id={getId()} textStyle="xl">{children}</Text>
 		},
 		h5({ children }) {
-			return <Text id={getId()} textStyle="lg">{children}</Text>
+			return <Text as="h5" id={getId()} textStyle="lg">{children}</Text>
 		},
 		h6({ children }) {
-			return <Text id={getId()} textStyle="md">{children}</Text>
+			return <Text as="h6" id={getId()} textStyle="md">{children}</Text>
 		},
 		p({ children }) {
 			return <Text id={getId()} my="2" overflowWrap="anywhere">{children}</Text>
@@ -49,8 +58,11 @@ export function MD({ children, id }: { children: string, id: string }) {
 		ul({ children }) {
 			return <List.Root ps="5" listStyleType="disc">{children}</List.Root>
 		},
+		ol({ children }) {
+			return <List.Root ps="5">{children}</List.Root>
+		},
 		li({ children }) {
-			return <Text id={getId()}>{children}</Text>
+			return <List.Item id={getId()}>{children}</List.Item>
 		},
 		strong({ children }) {
 			return (
@@ -355,9 +367,39 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 	return (
 		<Box alignSelf="start">
-			<MD id={msg.id}>
-				{msg.content}
-			</MD>
+
+			<Prose
+				size="lg"
+				maxW="unset"
+			// color="fg"
+			>
+				<Markdown
+					remarkPlugins={[remarkGfm, remarkMath]}
+					rehypePlugins={[rehypeKatex]}
+
+					components={{
+						code({ children, className, ...props }) {
+							const match = /language-(\w+)/.exec(className || "")
+
+							return match ? (
+								<SyntaxHighlighter
+									language={match[1]}
+									style={oneDark}
+									PreTag="div"
+								>
+									{String(children).replace(/\n$/, "")}
+								</SyntaxHighlighter>
+							) : (
+								<code className={className} {...props}>
+									{children}
+								</code>
+							)
+						},
+					}}
+				>
+					{msg.content}
+				</Markdown>
+			</Prose>
 
 			<HStack gap="0" mt="1">
 				<CopyButton text={msg.content} color="fg.muted" />
