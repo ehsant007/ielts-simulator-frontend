@@ -9,7 +9,7 @@ import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useChatCreateM
 import { useIsMobile } from "@/providers/BreakPointProvider"
 import { v7 as uuid7 } from "uuid"
 import { InfiniteData, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
-import { AiChatMessages, AiMessageCreate, transcribeAudio } from "@/client"
+import { AiMessagePage, AiMessageCreate, transcribeAudio } from "@/client"
 import { AudioRecorderVisualizer } from "./RecorderVisualizer"
 
 
@@ -285,7 +285,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 		onSuccess: (chat, createData) => {
 
 			// Initialize the messages query cache when a new chat is created
-			queryClient.setQueryData<InfiniteData<AiChatMessages>>(
+			queryClient.setQueryData<InfiniteData<AiMessagePage>>(
 				messagesQueryKey(chat.id),
 				{
 					pages: [
