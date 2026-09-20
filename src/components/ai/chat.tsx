@@ -1,7 +1,7 @@
 "use client"
 
 import { AiChatRead, AiMessageCreate, AiMessageRead } from "@/client"
-import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, List, ClientOnly } from "@chakra-ui/react"
+import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, ClientOnly } from "@chakra-ui/react"
 import { LuArrowDown, LuRefreshCw } from "react-icons/lu"
 import type { BoxProps, StackProps } from "@chakra-ui/react"
 import { Fragment, useEffect, useRef, useState } from "react"
@@ -13,82 +13,8 @@ import { BsCircleFill } from "react-icons/bs"
 import { useMutationState } from "@tanstack/react-query"
 import { ChatInput } from "./ChatInput"
 import { ChatSidebar } from "./ChatSidebar"
-
-import { Prose } from "@/components/ui/prose"
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism"
-
-import remarkGfm from "remark-gfm"
-import remarkMath from "remark-math"
-import rehypeKatex from "rehype-katex"
-
-
-
-
-import Markdown from "react-markdown"
-import rehypeRaw from "rehype-raw"
 import { useStickToBottom } from "use-stick-to-bottom"
-
-function MD({ children, id }: { children: string, id: string }) {
-	let count = 0
-	const getId = () => `${id}-n${count++}`
-
-	return <Markdown rehypePlugins={[rehypeRaw]} components={{
-		h1({ children }) {
-			return <Text as="h1" id={getId()} textStyle="4xl">{children}</Text>
-		},
-		h2({ children }) {
-			return <Text as="h2" id={getId()} textStyle="3xl">{children}</Text>
-		},
-		h3({ children }) {
-			return <Text as="h3" id={getId()} textStyle="2xl">{children}</Text>
-		},
-		h4({ children }) {
-			return <Text as="h4" id={getId()} textStyle="xl">{children}</Text>
-		},
-		h5({ children }) {
-			return <Text as="h5" id={getId()} textStyle="lg">{children}</Text>
-		},
-		h6({ children }) {
-			return <Text as="h6" id={getId()} textStyle="md">{children}</Text>
-		},
-		p({ children }) {
-			return <Text id={getId()} my="2" overflowWrap="anywhere">{children}</Text>
-		},
-		ul({ children }) {
-			return <List.Root ps="5" listStyleType="disc">{children}</List.Root>
-		},
-		ol({ children }) {
-			return <List.Root ps="5">{children}</List.Root>
-		},
-		li({ children }) {
-			return <List.Item id={getId()}>{children}</List.Item>
-		},
-		strong({ children }) {
-			return (
-				<Text
-					as="span"
-					fontWeight="bold"
-					id={getId()}
-				>
-					{children}
-				</Text>
-			)
-		},
-		center({ children }) {
-			return (
-				<Center as="span">
-					<Text as="span" textAlign="center" id={getId()}>
-						{children}
-					</Text>
-				</Center>
-			)
-		},
-	}} >
-		{children}
-	</Markdown>
-}
-
+import { Markdown } from "./Markdown"
 
 
 export function ChatPanel({ chatId }: { chatId?: string }) {
@@ -370,38 +296,9 @@ export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 	return (
 		<Box alignSelf="start">
 
-			<Prose
-				size="lg"
-				maxW="unset"
-			// color="fg"
-			>
-				<Markdown
-					remarkPlugins={[remarkGfm, remarkMath]}
-					rehypePlugins={[rehypeKatex]}
-
-					components={{
-						code({ children, className, ...props }) {
-							const match = /language-(\w+)/.exec(className || "")
-
-							return match ? (
-								<SyntaxHighlighter
-									language={match[1]}
-									style={oneDark}
-									PreTag="div"
-								>
-									{String(children).replace(/\n$/, "")}
-								</SyntaxHighlighter>
-							) : (
-								<code className={className} {...props}>
-									{children}
-								</code>
-							)
-						},
-					}}
-				>
-					{msg.content}
-				</Markdown>
-			</Prose>
+			<Markdown>
+				{msg.content}
+			</Markdown>
 
 			<HStack gap="0" mt="1">
 				<CopyButton text={msg.content} color="fg.muted" />

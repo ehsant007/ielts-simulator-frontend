@@ -45,6 +45,9 @@ export function MD({ children, id }: { children: string | string[] | null | unde
 		ul({ children }) {
 			return <List.Root ps="5">{children}</List.Root>
 		},
+		ol({ children }) {
+			return <List.Root ps="5">{children}</List.Root>
+		},
 		li({ children }) {
 			return <AdvText as={List.Item} id={getId()}>{children}</AdvText>
 		},
