@@ -2,7 +2,7 @@ import { AiChatCreate, AiMessagePage, AiChatRead, AiChatPage, AiChatUpdate, AiMe
 import { InfiniteData, infiniteQueryOptions, useInfiniteQuery, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query"
 import { streamMessage } from "./stream"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { usePathname, useRouter } from "next/navigation"
+//import { usePathname, useRouter } from "next/navigation"
 import { useChatStore } from "./ChatProvider"
 
 export const chatsQueryKey = ["ai-chats"] as const
@@ -595,23 +595,40 @@ export function useRecorder() {
 }
 
 
+// export function useSelectChat() {
+// 	const pathname = usePathname()
+// 	const { push } = useRouter()
+// 	const setActiveChat = useChatStore(s => s.setActiveChat)
+
+// 	const selectChat = useCallback((chat: AiChatRead | null | undefined) => {
+// 		if (pathname.startsWith("/chat")) {
+// 			if (chat) {
+// 				push(`/chat/${chat.id}`)
+// 			} else {
+// 				push("/chat")
+// 			}
+// 		} else {
+// 			setActiveChat(chat)
+// 		}
+// 	}, [pathname, push, setActiveChat])
+
+// 	return selectChat
+// }
+
+
 export function useSelectChat() {
-	const pathname = usePathname()
-	const { push } = useRouter()
 	const setActiveChat = useChatStore(s => s.setActiveChat)
 
-	const selectChat = useCallback((chat: AiChatRead | null | undefined) => {
-		if (pathname.startsWith("/chat")) {
-			if (chat) {
-				push(`/chat/${chat.id}`)
-			} else {
-				push("/chat")
-			}
-		} else {
-			setActiveChat(chat)
+	return (chat: AiChatRead | null | undefined) => {
+		if (window.location.pathname.startsWith("/chat")) {
+			window.history.pushState(
+				null,
+				"",
+				chat ? `/chat/${chat.id}` : "/chat",
+			)
+
 		}
-	}, [pathname, push, setActiveChat])
 
-	return selectChat
+		setActiveChat(chat)
+	}
 }
-

@@ -1,14 +1,11 @@
+import { ChatPanel } from "@/components/ai/chat";
 import { Box } from "@chakra-ui/react";
 
-export default async function SiteLayout({
-	children,
-}: Readonly<{
-	children: React.ReactNode;
-}>) {
+export default async function SiteLayout() {
 
 	return (
 		<Box h="dvh">
-			{children}
+			<ChatPanel />
 		</Box>
 	)
 }
