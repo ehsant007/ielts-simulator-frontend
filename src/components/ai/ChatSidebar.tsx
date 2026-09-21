@@ -7,13 +7,12 @@ import { useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { Collapse, Scroller } from "./utils";
 import { useChatStore } from "./ChatProvider";
-import { useChatRemoveMutation, useChatUpdateMutation } from "./hooks"
+import { useChatRemoveMutation, useChatUpdateMutation, useSelectChat } from "./hooks"
 import { HiMenuAlt2 } from "react-icons/hi"
 import { BsPinAngle } from "react-icons/bs"
 import { RxPanelLeft } from "react-icons/rx";
 import { AnimatePresence, motion } from "motion/react"
 import { SidebarProvider, useSidebar } from "./SidebarProvider"
-import { usePathname, useRouter } from "next/navigation"
 
 const MotionBox = motion.create(Box)
 
@@ -134,7 +133,7 @@ export function SideBar({ collapse }: SideBarProps) {
 
 
 export function ActionButtons({ collapse, ...props }: { collapse?: boolean } & StackProps) {
-	const setActiveChat = useChatStore((s) => s.setActiveChat)
+	const selectChat = useSelectChat()
 
 	const f = (icon: React.ReactNode, name: string) => {
 		if (collapse)
@@ -151,7 +150,7 @@ export function ActionButtons({ collapse, ...props }: { collapse?: boolean } & S
 		<VStack w="full" {...props}>
 			<ActionButton
 				justifyContent={justify()}
-				onClick={() => setActiveChat(null)}
+				onClick={() => selectChat(null)}
 			>
 				{f(<IoCreateOutline />, "New chat")}
 			</ActionButton>
@@ -399,17 +398,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 	const { update: { mutate: updateChat } } = useChatUpdateMutation()
 	const [menuOpen, setMenuOpen] = useState(false)
 
-	const pathname = usePathname()
-	const { push } = useRouter()
-	const setActiveChat = useChatStore(s => s.setActiveChat)
-
-	const selectChat = (chat: AiChatRead) => {
-		if (pathname.startsWith("/chat")) {
-			push(`/chat/${chat.id}`)
-		} else {
-			setActiveChat(chat)
-		}
-	}
+	const selectChat = useSelectChat()
 
 	return (
 		<Group
