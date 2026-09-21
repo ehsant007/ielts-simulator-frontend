@@ -101,7 +101,8 @@ export function DesktopSidebar() {
 				variant="ghost"
 				size="md"
 				top="2"
-				right={collapse ? "center" : "2"}
+				right={collapse ? "50%" : "2"}
+				transform={collapse ? "translateX(50%)" : "unset"}
 				onClick={() => setCollapse(prev => !prev)}
 			>
 				<RxPanelLeft />
