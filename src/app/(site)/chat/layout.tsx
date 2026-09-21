@@ -6,7 +6,9 @@ export default async function SiteLayout({
 	children: React.ReactNode;
 }>) {
 
-	<Box h="dvh">
-		{children}
-	</Box>
+	return (
+		<Box h="dvh">
+			{children}
+		</Box>
+	)
 }
