@@ -17,13 +17,13 @@ import { useStickToBottom } from "use-stick-to-bottom"
 import { Markdown } from "./Markdown"
 
 
-export function ChatPanel({ chatId }: { chatId?: string }) {
+export function ChatPanel() {
 
 	return (
 		<ClientOnly>
 			<ChatStoreProvider>
 				<HStack h="full" gap="0" pos="relative">
-					<ChatSidebar chatId={chatId}/>
+					<ChatSidebar />
 					<ChatBox maxW="50rem" py="6" px="4" mx="auto" />
 				</HStack>
 			</ChatStoreProvider>

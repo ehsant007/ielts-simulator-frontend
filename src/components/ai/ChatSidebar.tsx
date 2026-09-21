@@ -13,12 +13,13 @@ import { BsPinAngle } from "react-icons/bs"
 import { RxPanelLeft } from "react-icons/rx";
 import { AnimatePresence, motion } from "motion/react"
 import { SidebarProvider, useSidebar } from "./SidebarProvider"
+import { usePathname, useRouter } from "next/navigation"
 
 const MotionBox = motion.create(Box)
 
-export function ChatSidebar({ chatId }: { chatId?: string }) {
+export function ChatSidebar() {
 	return (
-		<SidebarProvider chatId={chatId}>
+		<SidebarProvider>
 			<Box h="full" display={{ base: "block", md: "none" }}>
 				<MobileSidebar />
 			</Box>
@@ -394,10 +395,21 @@ export function ChatButtonList({ chats, placeholder }: { chats: AiChatRead[], pl
 
 
 export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps) {
-	const activeChat = useChatStore((s) => s.activeChat)
+	const activeChatId = useChatStore((s) => s.activeChat?.id)
 	const { update: { mutate: updateChat } } = useChatUpdateMutation()
 	const [menuOpen, setMenuOpen] = useState(false)
-	const { selectChat } = useSidebar()
+
+	const pathname = usePathname()
+	const { push } = useRouter()
+	const setActiveChat = useChatStore(s => s.setActiveChat)
+
+	const selectChat = (chat: AiChatRead) => {
+		if (pathname.startsWith("/chat")) {
+			push(`/chat/${chat.id}`)
+		} else {
+			setActiveChat(chat)
+		}
+	}
 
 	return (
 		<Group
@@ -408,7 +420,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 				},
 				bg: "primary.subtle",
 			}}
-			bg={chat.id === activeChat?.id ? "primary.subtle" : menuOpen ? "primary.subtle/60" : "none"}
+			bg={chat.id === activeChatId ? "primary.subtle" : menuOpen ? "primary.subtle/60" : "none"}
 			w="full"
 			attached
 			borderRadius="xl"
