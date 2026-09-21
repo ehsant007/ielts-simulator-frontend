@@ -6,7 +6,7 @@ import { LuArrowDown, LuRefreshCw } from "react-icons/lu"
 import type { BoxProps, StackProps } from "@chakra-ui/react"
 import { Fragment, useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
-import { ChatTime, isSameDay, CopyButton, StickToBottomScroller } from "./utils";
+import { ChatTime, isSameDay, CopyButton, StickToBottomScroller, PartialCollapse } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
 import { messageCreateKey, useMessagesQuery } from "./hooks"
 import { BsCircleFill } from "react-icons/bs"
@@ -34,7 +34,10 @@ export function ChatPanel() {
 
 export function ChatBox(props: BoxProps) {
 	const chat = useChatStore((s) => s.activeChat)
-	const sticky = useStickToBottom()
+	const sticky = useStickToBottom({
+		initial: "instant",
+		resize: "smooth",
+	})
 
 	const inputRef = useRef<HTMLDivElement>(null)
 	const [inputHeight, setInputHeight] = useState(0)
@@ -267,7 +270,9 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 				bg="primary.muted"
 				p="4"
 			>
-				<Text whiteSpace="pre-wrap" overflowWrap="anywhere">{msg.content}</Text>
+				<PartialCollapse collapsedHeight="20rem" bg="primary.muted">
+					<Text whiteSpace="pre-wrap" overflowWrap="anywhere">{msg.content}</Text>
+				</PartialCollapse>
 			</Box>
 
 			<HStack

@@ -1,8 +1,8 @@
 "use client"
 
-import { Box, ScrollArea, ScrollAreaRootProps, Collapsible, CollapsibleRootProps, IconButton, IconButtonProps } from "@chakra-ui/react"
-import { LuCheck, LuChevronRight, LuCopy } from "react-icons/lu"
-import { forwardRef, useEffect, useState } from "react"
+import { Box, ScrollArea, ScrollAreaRootProps, Collapsible, CollapsibleRootProps, IconButton, IconButtonProps, BoxProps, HStack, Button, Icon } from "@chakra-ui/react"
+import { LuCheck, LuChevronDown, LuChevronRight, LuCopy } from "react-icons/lu"
+import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useFormatter } from "next-intl"
 import { StickToBottomInstance } from "use-stick-to-bottom"
 
@@ -170,3 +170,108 @@ export function TextWriter({ children: text, delay = 30 }: { children: string, d
 	return value
 }
 
+
+export function PartialCollapse({
+	children,
+	collapsedHeight,
+	bg,
+}: {
+	children: React.ReactNode
+	collapsedHeight: string
+	bg: BoxProps["bg"]
+}) {
+	const contentRef = useRef<HTMLDivElement>(null)
+
+	const [contentHeight, setContentHeight] = useState<number | null>(null)
+	const [hasOverflow, setHasOverflow] = useState(false)
+	const [open, setOpen] = useState(false)
+
+	useLayoutEffect(() => {
+		const element = contentRef.current
+		if (!element) return
+
+		const rem = parseFloat(
+			getComputedStyle(document.documentElement).fontSize,
+		)
+		const collapsedHeight = 20 * rem
+
+		const measure = () => {
+			const height = element.scrollHeight
+			setContentHeight(height)
+			setHasOverflow(height > collapsedHeight)
+		}
+
+		measure()
+
+		const observer = new ResizeObserver(measure)
+		observer.observe(element)
+
+		return () => observer.disconnect()
+	}, [])
+
+	const maxHeight =
+		contentHeight === null || !hasOverflow
+			? "none"
+			: open
+				? `${contentHeight}px`
+				: collapsedHeight
+
+	return (
+		<Box>
+			<Box
+				pos="relative"
+				maxH={maxHeight}
+				overflow="hidden"
+				transition="max-height 0.25s ease"
+				background={bg}
+			>
+				<Box ref={contentRef}>
+					{children}
+				</Box>
+
+				{hasOverflow && !open && (
+					<Box
+						pos="absolute"
+						bottom="0"
+						insetInlineStart="0"
+						insetInlineEnd="0"
+						h="4rem"
+						pointerEvents="none"
+						bgGradient="to-b"
+						gradientFrom="transparent"
+						gradientTo={bg?.toString()}
+					/>
+				)}
+			</Box>
+
+			{hasOverflow && (
+				<HStack justify="start" mt="2">
+					<Button
+						variant="plain"
+						size="sm"
+						height="auto"
+						minH="0"
+						p="0"
+						color="fg.muted"
+						_hover={{
+							bg: "transparent",
+							color: "fg",
+						}}
+						_active={{
+							bg: "transparent",
+						}}
+						onClick={() => setOpen(value => !value)}
+					>
+						{open ? "Show Less" : "Show More"}
+						<Icon
+							transition="transform 0.2s"
+							transform={open ? "rotate(180deg)" : "rotate(0deg)"}
+						>
+							<LuChevronDown />
+						</Icon>
+					</Button>
+				</HStack>
+			)}
+		</Box>
+	)
+}
