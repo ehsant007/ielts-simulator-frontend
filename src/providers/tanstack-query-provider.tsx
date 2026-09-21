@@ -5,15 +5,20 @@ import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from '@ta
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useState } from 'react'
 
+type APIError = { status: number, detail: string }
 
 // Error handler for API errors
-const handleApiError = (error: Error) => {
+const handleApiError = (error: unknown) => {
 	let message = "Something went wrong!"
-	
-	if(typeof error === "string")
+
+	if (typeof error === "string")
 		message = error
-	else if(error.message)
-		message = error.message
+	else if (typeof error === "object" && error !== null) {
+		if ("detail" in error)
+			message = (error as APIError).detail
+		else if ("message" in error)
+			message = (error as Error).message
+	}
 
 	toaster.create({
 		title: "Error",
@@ -37,7 +42,17 @@ export default function TanstackQueryProvider({ children }: { children: React.Re
 				// With SSR, we usually want to set some default staleTime
 				// above 0 to avoid refetching immediately on the client
 				staleTime: 1 * 60 * 1000, // 1 minute
+
+				retry: (failureCount, error: unknown) => {
+					const status = (error as APIError).status
+					if (status && status >= 400 && status < 500) {
+						return false
+					}
+
+					return failureCount < 3
+				}
 			},
+
 		},
 	})
 	)
