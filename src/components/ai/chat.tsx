@@ -8,7 +8,7 @@ import { Fragment, useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, isSameDay, CopyButton, StickToBottomScroller, PartialCollapse } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
-import { messageCreateKey, useMessagesQuery } from "./hooks"
+import { messageCreateKey, useActiveChat, useMessagesQuery } from "./hooks"
 import { BsCircleFill } from "react-icons/bs"
 import { useMutationState } from "@tanstack/react-query"
 import { ChatInput } from "./ChatInput"
@@ -33,7 +33,8 @@ export function ChatPanel() {
 
 
 export function ChatBox(props: BoxProps) {
-	const chat = useChatStore((s) => s.activeChat)
+	const chat = useActiveChat()
+
 	const sticky = useStickToBottom({
 		initial: "instant",
 		resize: "smooth",

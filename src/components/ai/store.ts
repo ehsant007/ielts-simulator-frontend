@@ -1,11 +1,13 @@
-import { AiChatRead } from "@/client";
 import { Dispatch, SetStateAction } from "react";
 import { createStore } from "zustand/vanilla";
 
 
 export type ChatStore = {
-	activeChat: AiChatRead | null | undefined
-	setActiveChat: Dispatch<SetStateAction<AiChatRead | null | undefined>>
+	//activeChat: AiChatRead | null | undefined
+	//setActiveChat: Dispatch<SetStateAction<AiChatRead | null | undefined>>
+
+	activeChatId: string | null | undefined
+	setActiveChatId: Dispatch<SetStateAction<string | null | undefined>>
 
 	drafts: Record<string, string>
 	setDraft: (chat_id: string, value: SetStateAction<string>) => void
@@ -17,8 +19,11 @@ export type ChatStore = {
 
 export function createChatStore() {
 	return createStore<ChatStore>((set) => ({
-		activeChat: null,
-		setActiveChat: (value) => set((s) => ({ activeChat: typeof value === "function" ? value(s.activeChat) : value })),
+		//activeChat: null,
+		//setActiveChat: (value) => set((s) => ({ activeChat: typeof value === "function" ? value(s.activeChat) : value })),
+
+		activeChatId: null,
+		setActiveChatId: (value) => set((s) => ({ activeChatId: typeof value === "function" ? value(s.activeChatId) : value })),
 
 		drafts: { "default": "" },
 		setDraft: (chat_id, value) =>

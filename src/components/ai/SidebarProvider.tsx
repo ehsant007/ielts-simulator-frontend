@@ -2,7 +2,7 @@
 
 import { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useEffectEvent } from "react";
-import { useChatQuery, useChatsQuery } from "./hooks";
+import { useChatsQuery } from "./hooks";
 import { AiChatRead, AiChatPage } from "@/client";
 import { useChatStore } from "./ChatProvider";
 import { useParams } from "next/navigation";
@@ -24,21 +24,20 @@ export function SidebarProvider({ children }: SidebarProps) {
 
 	const { chatsQuery, pinnedChats, recentChats } = useChatsQuery()
 
-	const {chatId} = useParams<{chatId?: string}>()
-	const { data: chat } = useChatQuery(chatId)
+	const { chatId } = useParams<{ chatId?: string }>()
 
-	const setActiveChat = useChatStore(s => s.setActiveChat)
+	const setActiveChatId = useChatStore(s => s.setActiveChatId)
 
-	const updateActiveChat = useEffectEvent((chat: AiChatRead | null | undefined) => {
-		setActiveChat(chat)
+	const updateActiveChat = useEffectEvent((chatId: string | null | undefined) => {
+		setActiveChatId(chatId)
 	})
 
 	useEffect(() => {
-		if (chatId) {
-			updateActiveChat(chat)
-		}
-	}, [chatId, chat])
+		updateActiveChat(chatId)
+	}, [chatId])
 
+	console.log("Sidebar provider >>>>>>>>")
+	console.log(chatId)
 	return (
 		<SidebarContext.Provider value={{ chatsQuery, pinnedChats, recentChats }} >
 			{children}

@@ -19,7 +19,7 @@ export function useChatQuery(chatId: string | null | undefined) {
 	const queryClient = useQueryClient()
 
 	return useQuery({
-		enabled: !!chatId && chatId !== "home",
+		enabled: !!chatId,
 		queryKey: ["ai-chats", chatId],
 
 		queryFn: () =>
@@ -601,15 +601,17 @@ export function useRecorder() {
 // 	const setActiveChat = useChatStore(s => s.setActiveChat)
 
 // 	const selectChat = useCallback((chat: AiChatRead | null | undefined) => {
+
 // 		if (pathname.startsWith("/chat")) {
 // 			if (chat) {
 // 				push(`/chat/${chat.id}`)
 // 			} else {
 // 				push("/chat")
 // 			}
-// 		} else {
-// 			setActiveChat(chat)
-// 		}
+// 		} 
+
+// 		setActiveChat(chat)
+
 // 	}, [pathname, push, setActiveChat])
 
 // 	return selectChat
@@ -617,7 +619,7 @@ export function useRecorder() {
 
 
 export function useSelectChat() {
-	const setActiveChat = useChatStore(s => s.setActiveChat)
+	const setActiveChatId = useChatStore(s => s.setActiveChatId)
 
 	return (chat: AiChatRead | null | undefined) => {
 		if (window.location.pathname.startsWith("/chat")) {
@@ -629,6 +631,14 @@ export function useSelectChat() {
 
 		}
 
-		setActiveChat(chat)
+		setActiveChatId(chat?.id)
 	}
+}
+
+
+export function useActiveChat() {
+	const chatId = useChatStore(s => s.activeChatId)
+	const {data: chat} = useChatQuery(chatId)
+
+	return chat
 }

@@ -5,7 +5,7 @@ import { HiArrowUp } from "react-icons/hi"
 import { LuAudioLines, LuCheck, LuLoader, LuMic, LuX } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
 import { useChatStore } from "./ChatProvider"
-import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useChatCreateMutation, useMessageCreateStreamMutation, useRecorder, useSelectChat } from "./hooks"
+import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useActiveChat, useChatCreateMutation, useMessageCreateStreamMutation, useRecorder, useSelectChat } from "./hooks"
 import { useIsMobile } from "@/providers/BreakPointProvider"
 import { v7 as uuid7 } from "uuid"
 import { InfiniteData, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
@@ -252,7 +252,7 @@ type ChatInputProps = {
 
 export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 	const queryClient = useQueryClient()
-	const activeChat = useChatStore((s) => s.activeChat)
+	const activeChat = useActiveChat()
 	const selectChat = useSelectChat()
 
 	const chatId = activeChat?.id ?? "default"

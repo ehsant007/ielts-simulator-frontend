@@ -395,12 +395,12 @@ export function ChatButtonList({ chats, placeholder }: { chats: AiChatRead[], pl
 
 
 export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps) {
-	const activeChatId = useChatStore((s) => s.activeChat?.id)
+	const isActive = useChatStore((s) => s.activeChatId === chat.id)
 	const { update: { mutate: updateChat } } = useChatUpdateMutation()
 	const [menuOpen, setMenuOpen] = useState(false)
 
 	const selectChat = useSelectChat()
-
+console.log(isActive)
 	return (
 		<Group
 			key={chat.id}
@@ -410,7 +410,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 				},
 				bg: "primary.subtle",
 			}}
-			bg={chat.id === activeChatId ? "primary.subtle" : menuOpen ? "primary.subtle/60" : "none"}
+			bg={isActive ? "primary.subtle" : menuOpen ? "primary.subtle/60" : "none"}
 			w="full"
 			attached
 			borderRadius="xl"
