@@ -300,7 +300,7 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 
 export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 	return (
-		<Box alignSelf="start">
+		<Box alignSelf="start" w="full">
 
 			<Markdown>
 				{msg.content}
