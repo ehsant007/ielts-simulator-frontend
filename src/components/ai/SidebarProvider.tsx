@@ -1,11 +1,9 @@
 "use client"
 
 import { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
-import { createContext, useContext, useEffect, useEffectEvent } from "react";
+import { createContext, useContext } from "react";
 import { useChatsQuery } from "./hooks";
 import { AiChatRead, AiChatPage } from "@/client";
-import { useChatStore } from "./ChatProvider";
-
 
 type SidebarContextType = {
 	chatsQuery: UseInfiniteQueryResult<InfiniteData<AiChatPage, unknown>, Error>
