@@ -5,7 +5,6 @@ import { createContext, useContext, useEffect, useEffectEvent } from "react";
 import { useChatsQuery } from "./hooks";
 import { AiChatRead, AiChatPage } from "@/client";
 import { useChatStore } from "./ChatProvider";
-import { useParams } from "next/navigation";
 
 
 type SidebarContextType = {
@@ -17,27 +16,13 @@ type SidebarContextType = {
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined)
 
 type SidebarProps = {
-	children: React.ReactNode,
+	children: React.ReactNode
 }
 
 export function SidebarProvider({ children }: SidebarProps) {
 
 	const { chatsQuery, pinnedChats, recentChats } = useChatsQuery()
 
-	const { chatId } = useParams<{ chatId?: string }>()
-
-	const setActiveChatId = useChatStore(s => s.setActiveChatId)
-
-	const updateActiveChat = useEffectEvent((chatId: string | null | undefined) => {
-		setActiveChatId(chatId)
-	})
-
-	useEffect(() => {
-		updateActiveChat(chatId)
-	}, [chatId])
-
-	console.log("Sidebar provider >>>>>>>>")
-	console.log(chatId)
 	return (
 		<SidebarContext.Provider value={{ chatsQuery, pinnedChats, recentChats }} >
 			{children}

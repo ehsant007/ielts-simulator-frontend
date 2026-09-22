@@ -400,7 +400,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 	const [menuOpen, setMenuOpen] = useState(false)
 
 	const selectChat = useSelectChat()
-console.log(isActive)
+
 	return (
 		<Group
 			key={chat.id}

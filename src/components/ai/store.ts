@@ -17,12 +17,12 @@ export type ChatStore = {
 }
 
 
-export function createChatStore() {
+export function createChatStore(initialChatId?: string) {
 	return createStore<ChatStore>((set) => ({
 		//activeChat: null,
 		//setActiveChat: (value) => set((s) => ({ activeChat: typeof value === "function" ? value(s.activeChat) : value })),
 
-		activeChatId: null,
+		activeChatId: initialChatId,
 		setActiveChatId: (value) => set((s) => ({ activeChatId: typeof value === "function" ? value(s.activeChatId) : value })),
 
 		drafts: { "default": "" },
