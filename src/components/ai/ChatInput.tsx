@@ -40,12 +40,13 @@ export type ChatInputInnerProps = {
 	onValueChange?: (value: string) => void
 	onSend?: () => void
 	onStop?: () => void
+	onCall?: () => void
 	onVoiceSubmit?: (audio: Blob) => Promise<void>
 	onVoiceSubmitCancel?: () => void
 	sending?: boolean
 } & Omit<InputGroupProps, "children">
 
-function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, onVoiceSubmitCancel, sending, ...props }: ChatInputInnerProps) {
+function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, onVoiceSubmitCancel, onCall, sending, ...props }: ChatInputInnerProps) {
 	const [mode, setMode] = useState<InputMode>("text")
 
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -130,10 +131,13 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 								<InputButton variant="solid" colorPalette="primary" onClick={onStop}>
 									<BsStopFill />
 								</InputButton>
-								:
-								<InputButton variant="solid" colorPalette="primary" onClick={onSend}>
-									<HiArrowUp />
-								</InputButton>
+								: value
+									? <InputButton variant="solid" colorPalette="primary" onClick={onSend}>
+										<HiArrowUp />
+									</InputButton>
+									: <InputButton variant="solid" colorPalette="primary" onClick={onCall}>
+										<LuAudioLines />
+									</InputButton>
 							}
 						</HStack>
 					}
