@@ -2,7 +2,7 @@
 
 import { Box, ScrollArea, ScrollAreaRootProps, Collapsible, CollapsibleRootProps, IconButton, IconButtonProps, BoxProps, HStack, Button, Icon } from "@chakra-ui/react"
 import { LuCheck, LuChevronDown, LuChevronRight, LuCopy } from "react-icons/lu"
-import { forwardRef, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useFormatter } from "next-intl"
 import { StickToBottomInstance } from "use-stick-to-bottom"
 
@@ -276,6 +276,86 @@ export function PartialCollapse({
 					</Button>
 				</HStack>
 			)}
+		</Box>
+	)
+}
+
+
+interface HoverScrollTextProps extends BoxProps {
+	children: React.ReactNode
+	speed?: number
+}
+
+export function HoverScrollText({
+	children,
+	speed = 50,
+	...props
+}: HoverScrollTextProps) {
+	const containerRef = useRef<HTMLDivElement>(null)
+	const textRef = useRef<HTMLDivElement>(null)
+
+	const [overflow, setOverflow] = useState(0)
+	const [hovered, setHovered] = useState(false)
+
+	const measure = useCallback(() => {
+		const container = containerRef.current
+		const text = textRef.current
+
+		if (!container || !text) return
+
+		setOverflow(Math.max(0, text.scrollWidth - container.clientWidth))
+	}, [])
+
+	useEffect(() => {
+		measure()
+
+		const container = containerRef.current
+		const text = textRef.current
+
+		if (!container || !text) return
+
+		const observer = new ResizeObserver(measure)
+
+		observer.observe(container)
+		observer.observe(text)
+
+		return () => observer.disconnect()
+	}, [measure])
+
+	const duration = overflow > 0
+		? `${overflow / speed}s`
+		: "0s"
+
+	return (
+		<Box
+			ref={containerRef}
+			h="full"
+			minW="0"
+			overflow="hidden"
+			whiteSpace="nowrap"
+			display="flex"
+			alignItems="center"
+			{...props}
+			onPointerEnter={() => setHovered(true)}
+			onPointerLeave={() => setHovered(false)}
+		>
+			<Box
+				ref={textRef}
+				display="inline-block"
+				flexShrink="0"
+				transform={
+					hovered && overflow > 0
+						? `translateX(-${overflow}px)`
+						: "translateX(0)"
+				}
+				transition={
+					hovered && overflow > 0
+						? `transform ${duration} linear`
+						: "none"
+				}
+			>
+				{children}
+			</Box>
 		</Box>
 	)
 }

@@ -5,7 +5,7 @@ import type { ButtonProps, GroupProps, MenuRootProps, ScrollAreaScrollbarProps, 
 import { IoCreateOutline } from "react-icons/io5"
 import { useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
-import { Collapse, Scroller } from "./utils";
+import { Collapse, HoverScrollText, Scroller } from "./utils";
 import { useChatStore } from "./ChatProvider";
 import { useChatRemoveMutation, useChatUpdateMutation, useSelectChat } from "./hooks"
 import { HiMenuAlt2 } from "react-icons/hi"
@@ -429,7 +429,13 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 				overflow="hidden"
 				onClick={() => selectChat(chat.id)}
 			>
-				{chat.title}
+				<HoverScrollText
+					flex="1"
+					minW="0"
+				>
+					{chat.title}
+				</HoverScrollText>
+
 			</Button>
 
 			<HStack
