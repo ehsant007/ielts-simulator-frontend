@@ -312,7 +312,7 @@ export function useMessagesQuery(chat_id: string | null | undefined) {
 
 
 	return {
-		messagesQuery,
+		...messagesQuery,
 		messages,
 	}
 }

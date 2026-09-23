@@ -15,6 +15,7 @@ import { ChatInput } from "./ChatInput"
 import { ChatSidebar } from "./ChatSidebar"
 import { useStickToBottom } from "use-stick-to-bottom"
 import { Markdown } from "./Markdown"
+import { MessageNavigator } from "./MessageNavigator"
 
 
 export function ChatPanel({ initialChatId }: { initialChatId?: string }) {
@@ -24,7 +25,7 @@ export function ChatPanel({ initialChatId }: { initialChatId?: string }) {
 			<ChatStoreProvider initialChatId={initialChatId}>
 				<HStack h="full" gap="0" pos="relative">
 					<ChatSidebar />
-					<ChatBox maxW="50rem" py="6" px="4" mx="auto" />
+					<ChatBox maxW="2xl" py="6" px="4" mx="auto" />
 				</HStack>
 			</ChatStoreProvider>
 		</ClientOnly>
@@ -115,6 +116,18 @@ export function ChatBox(props: BoxProps) {
 					</VStack>
 				</Box>
 			</Box>
+
+			<Box
+				position="absolute"
+				top="50%"
+				transform="translateY(-50%)"
+				right="0"
+				pe="4"
+				display={{ mdDown: "none", lg: "block" }}
+			>
+				<MessageNavigator chatId={chat.id}/>
+			</Box>
+
 		</StickToBottomScroller>
 	)
 }
@@ -132,12 +145,10 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 	}
 
 	const {
-		messagesQuery: {
-			isLoading,
-			hasPreviousPage,
-			isFetchingPreviousPage,
-			fetchPreviousPage,
-		},
+		isLoading,
+		hasPreviousPage,
+		isFetchingPreviousPage,
+		fetchPreviousPage,
 		messages,
 	} = useMessagesQuery(chat.id)
 
@@ -264,6 +275,8 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 					opacity: 1,
 				},
 			}}
+
+			id={msg.id}
 		>
 			<Box
 				borderStartRadius="3xl"
