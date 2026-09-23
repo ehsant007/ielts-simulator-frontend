@@ -401,19 +401,20 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 
 	const selectChat = useSelectChat()
 
+	const [hovered, setHovered] = useState(false)
+
 	return (
 		<Group
 			key={chat.id}
 			_hover={{
-				"& .chat-action-menu": {
-					opacity: 1,
-				},
 				bg: "primary.subtle",
 			}}
 			bg={isActive ? "primary.subtle" : menuOpen ? "primary.subtle/60" : "none"}
 			w="full"
 			attached
 			borderRadius="xl"
+			onPointerEnter={() => setHovered(true)}
+			onPointerLeave={() => setHovered(false)}
 			{...props}
 		>
 			<Button
@@ -428,48 +429,49 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 				colorPalette="primary"
 				overflow="hidden"
 				onClick={() => selectChat(chat.id)}
+				ps="2"
+				pe={hovered ? "0" : "2"}
 			>
 				<HoverScrollText
 					flex="1"
 					minW="0"
+					hovered={hovered}
 				>
-					{chat.title}
+					{chat.title} this is a very long text
 				</HoverScrollText>
 
 			</Button>
 
-			<HStack
-				className="chat-action-menu"
-				opacity={menuOpen ? "1" : "0"}
-				gap="0"
-			>
-				<IconButton
-					colorPalette="primary"
-					variant="ghost"
-					size="sm"
-					borderRadius="xl"
-					onClick={() => updateChat({ id: chat.id, pinned: !chat.pinned })}
-				>
-					{chat.pinned ? <LuPinOff /> : <LuPin />}
-				</IconButton>
-
-				<ChatButtonActionMenu
-					chat={chat}
-					open={menuOpen}
-					onOpenChange={(e) => setMenuOpen(e.open)}
-				>
+			{hovered &&
+				<HStack gap="0">
 					<IconButton
 						colorPalette="primary"
 						variant="ghost"
 						size="sm"
-						ms="auto"
 						borderRadius="xl"
-						focusRing="none"
+						onClick={() => updateChat({ id: chat.id, pinned: !chat.pinned })}
 					>
-						<LuEllipsis />
+						{chat.pinned ? <LuPinOff /> : <LuPin />}
 					</IconButton>
-				</ChatButtonActionMenu >
-			</HStack>
+
+					<ChatButtonActionMenu
+						chat={chat}
+						open={menuOpen}
+						onOpenChange={(e) => setMenuOpen(e.open)}
+					>
+						<IconButton
+							colorPalette="primary"
+							variant="ghost"
+							size="sm"
+							ms="auto"
+							borderRadius="xl"
+							focusRing="none"
+						>
+							<LuEllipsis />
+						</IconButton>
+					</ChatButtonActionMenu >
+				</HStack>
+			}
 		</Group>
 	)
 }

@@ -284,18 +284,20 @@ export function PartialCollapse({
 interface HoverScrollTextProps extends BoxProps {
 	children: React.ReactNode
 	speed?: number
+	hovered: boolean
 }
 
 export function HoverScrollText({
 	children,
-	speed = 50,
+	speed = 40,
+	hovered,
 	...props
 }: HoverScrollTextProps) {
 	const containerRef = useRef<HTMLDivElement>(null)
 	const textRef = useRef<HTMLDivElement>(null)
 
 	const [overflow, setOverflow] = useState(0)
-	const [hovered, setHovered] = useState(false)
+	//const [hovered, setHovered] = useState(false)
 
 	const measure = useCallback(() => {
 		const container = containerRef.current
@@ -336,8 +338,8 @@ export function HoverScrollText({
 			display="flex"
 			alignItems="center"
 			{...props}
-			onPointerEnter={() => setHovered(true)}
-			onPointerLeave={() => setHovered(false)}
+			//onPointerEnter={() => setHovered(true)}
+			//onPointerLeave={() => setHovered(false)}
 		>
 			<Box
 				ref={textRef}
@@ -350,7 +352,7 @@ export function HoverScrollText({
 				}
 				transition={
 					hovered && overflow > 0
-						? `transform ${duration} linear`
+						? `transform ${duration} 500ms linear`
 						: "none"
 				}
 			>
