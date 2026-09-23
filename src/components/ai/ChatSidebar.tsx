@@ -437,7 +437,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 					minW="0"
 					hovered={hovered}
 				>
-					{chat.title} this is a very long text
+					{chat.title}
 				</HoverScrollText>
 
 			</Button>
