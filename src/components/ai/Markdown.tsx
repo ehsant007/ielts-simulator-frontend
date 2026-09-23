@@ -21,8 +21,8 @@ export function Markdown({ children }: { children: string }) {
 				remarkPlugins={[remarkGfm, remarkMath]}
 				rehypePlugins={[
 					rehypeRaw,
-					rehypeKatex,
 					rehypeSanitize,
+					rehypeKatex,
 				]}
 
 				components={{
