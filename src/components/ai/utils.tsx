@@ -36,15 +36,12 @@ export const Scroller = forwardRef<HTMLDivElement, ScrollAreaRootProps>(({ child
 Scroller.displayName = "Scroller"
 
 
-export const StickToBottomScroller = forwardRef<HTMLDivElement, { sticky: StickToBottomInstance } & ScrollAreaRootProps>(({ children, sticky, ...props }, ref) => {
+export const StickToBottomScroller = forwardRef<HTMLDivElement, { sticky?: StickToBottomInstance } & ScrollAreaRootProps>(({ children, sticky, ...props }, ref) => {
 	return (
 		<ScrollArea.Root {...props} ref={ref}>
-			{/* eslint-disable-next-line react-hooks/refs */}
-			<ScrollArea.Viewport ref={sticky.scrollRef}>
-				<ScrollArea.Content
-					/* eslint-disable-next-line react-hooks/refs */
-					ref={sticky.contentRef}
-				>
+
+			<ScrollArea.Viewport ref={sticky?.scrollRef}>
+				<ScrollArea.Content ref={sticky?.contentRef}>
 
 					{children}
 
@@ -338,8 +335,8 @@ export function HoverScrollText({
 			display="flex"
 			alignItems="center"
 			{...props}
-			//onPointerEnter={() => setHovered(true)}
-			//onPointerLeave={() => setHovered(false)}
+		//onPointerEnter={() => setHovered(true)}
+		//onPointerLeave={() => setHovered(false)}
 		>
 			<Box
 				ref={textRef}
