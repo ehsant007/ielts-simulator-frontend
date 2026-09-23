@@ -1,12 +1,12 @@
 "use client"
 
 import { AiMessageCreate, AiMessageRead } from "@/client"
-import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, ClientOnly } from "@chakra-ui/react"
+import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, ClientOnly, ScrollArea, mergeRefs } from "@chakra-ui/react"
 import { LuArrowDown, LuRefreshCw } from "react-icons/lu"
 import type { BoxProps, StackProps } from "@chakra-ui/react"
-import { Fragment, useEffect, useRef, useState } from "react"
+import { Fragment, RefObject, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
-import { ChatTime, isSameDay, CopyButton, StickToBottomScroller, PartialCollapse } from "./utils";
+import { ChatTime, isSameDay, CopyButton, PartialCollapse } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
 import { messageCreateKey, useMessagesQuery } from "./hooks"
 import { BsCircleFill } from "react-icons/bs"
@@ -40,6 +40,8 @@ export function ChatBox(props: BoxProps) {
 		initial: "instant",
 		resize: "smooth",
 	})
+
+	const scrollRef = useRef<HTMLElement>(null)
 
 	const inputRef = useRef<HTMLDivElement>(null)
 	const [inputHeight, setInputHeight] = useState(0)
@@ -79,62 +81,86 @@ export function ChatBox(props: BoxProps) {
 		)
 
 	return (
-		<StickToBottomScroller
+		<ScrollArea.Root
 			variant="always"
 			pos="relative"
-			sticky={sticky}
 		>
-			<Box {...props}>
-				<Messages chatId={chatId} mb="5rem" pb={`${inputHeight}px`} />
-			</Box>
+			<ScrollArea.Viewport ref={mergeRefs(sticky.scrollRef, scrollRef)}>
+				<ScrollArea.Content ref={sticky?.contentRef} >
 
-			<Box
-				position="absolute"
-				bottom="0"
-				left="0"
-				right="0"
-			>
-				<Box {...props} pt="0" mt="0">
-					<VStack gap="5">
-						{!sticky.isAtBottom &&
-							<IconButton
-								size="sm"
-								variant="solid"
-								borderRadius="full"
-								colorPalette="primary"
-								opacity="40%"
-								_hover={{ opacity: "100%" }}
-								onClick={() => sticky.scrollToBottom()}
-							>
-								<LuArrowDown />
-							</IconButton>
-						}
+					<Box {...props}>
+						<Messages
+							mb="5rem"
+							pb={`${inputHeight}px`}
+							chatId={chatId}
+							scrollRef={scrollRef}
+						/>
+					</Box>
 
-						<Box w="full" ref={inputRef}>
-							<ChatInput onMessageCreate={() => sticky.scrollToBottom()} key={chatId} />
+					<Box
+						position="absolute"
+						bottom="0"
+						left="0"
+						right="0"
+					>
+						<Box {...props} pt="0" mt="0">
+							<VStack gap="5">
+								{!sticky.isAtBottom &&
+									<IconButton
+										size="sm"
+										variant="solid"
+										borderRadius="full"
+										colorPalette="primary"
+										opacity="40%"
+										_hover={{ opacity: "100%" }}
+										onClick={() => sticky.scrollToBottom()}
+									>
+										<LuArrowDown />
+									</IconButton>
+								}
+
+								<Box w="full" ref={inputRef}>
+									<ChatInput onMessageCreate={() => sticky.scrollToBottom()} key={chatId} />
+								</Box>
+							</VStack>
 						</Box>
-					</VStack>
-				</Box>
-			</Box>
+					</Box>
 
-			<Box
-				position="absolute"
-				top="50%"
-				transform="translateY(-50%)"
-				right="0"
-				pe="4"
-				display={{ lgDown: "none", lg: "block" }}
-			>
-				<MessageNavigator chatId={chatId} />
-			</Box>
+					<Box
+						position="absolute"
+						top="50%"
+						transform="translateY(-50%)"
+						right="0"
+						pe="4"
+						display={{ lgDown: "none", lg: "block" }}
+					>
+						<MessageNavigator chatId={chatId} />
+					</Box>
 
-		</StickToBottomScroller>
+				</ScrollArea.Content>
+			</ScrollArea.Viewport>
+			<ScrollArea.Scrollbar>
+				<ScrollArea.Thumb />
+			</ScrollArea.Scrollbar>
+			<ScrollArea.Corner />
+
+		</ScrollArea.Root>
 	)
 }
 
+type MessagesProps = {
+	chatId: string,
+	scrollRef: RefObject<Element | null>
+} & StackProps
 
-export function Messages({ chatId, ...props }: { chatId: string } & StackProps) {
+export function Messages({ chatId, scrollRef, ...props }: MessagesProps) {
 	const streamingMessage = useChatStore((s) => s.streamingMessages[chatId])
+	const topSentinelRef = useRef<HTMLDivElement>(null) // Sentinel
+
+	const scrollStateRef = useRef<{
+		scrollTop: number
+		scrollHeight: number
+	} | null>(null)
 
 	const streamingMsg: AiMessageRead = {
 		id: "streaming_id",
@@ -163,20 +189,44 @@ export function Messages({ chatId, ...props }: { chatId: string } & StackProps) 
 	}).some(Boolean)
 
 
-	const topRef = useRef<HTMLDivElement>(null) // Sentinel
+	useLayoutEffect(() => {
+		const element = scrollRef.current
+		const previous = scrollStateRef.current
+		if (!previous || !element) 
+			return
+
+		const heightDelta = element.scrollHeight - previous.scrollHeight
+		element.scrollTop = previous.scrollTop + heightDelta
+
+		scrollStateRef.current = null
+	}, [scrollRef, messages])
+
 
 	useEffect(() => {
-		const element = topRef.current
+		const element = topSentinelRef.current
 		if (!element) return
 
+		const loadPrevPage = () => {
+			const element = scrollRef.current
+			if (!element) 
+				return
+
+			scrollStateRef.current = {
+				scrollTop: element.scrollTop,
+				scrollHeight: element.scrollHeight,
+			}
+
+			fetchPreviousPage()
+		}
+
 		const observer = new IntersectionObserver(
-			([entry]) => {
+			async ([entry]) => {
 				if (
 					entry.isIntersecting &&
 					hasPreviousPage &&
 					!isFetchingPreviousPage
 				) {
-					fetchPreviousPage()
+					loadPrevPage()
 				}
 			},
 			{
@@ -192,6 +242,7 @@ export function Messages({ chatId, ...props }: { chatId: string } & StackProps) 
 		hasPreviousPage,
 		isFetchingPreviousPage,
 		fetchPreviousPage,
+		scrollRef,
 	])
 
 
@@ -206,7 +257,7 @@ export function Messages({ chatId, ...props }: { chatId: string } & StackProps) 
 
 		<VStack w="full" gap="3" mx="auto" {...props}>
 
-			<Box ref={topRef} h="1px" />
+			<Box ref={topSentinelRef} h="1px" />
 
 			{isFetchingPreviousPage &&
 				<Spinner mt="5rem" size="xl" color="primary" borderWidth="thick" />
@@ -313,7 +364,7 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 
 export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 	return (
-		<Box alignSelf="start" w="full">
+		<Box alignSelf="start" w="full" id={msg.id}>
 
 			<Markdown>
 				{msg.content}
