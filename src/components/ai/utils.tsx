@@ -9,7 +9,7 @@ import { StickToBottomInstance } from "use-stick-to-bottom"
 export const Scroller = forwardRef<HTMLDivElement, ScrollAreaRootProps>(({ children, ...props }, ref) => {
 	return (
 		<ScrollArea.Root {...props} ref={ref}>
-			<ScrollArea.Viewport ref={ref}>
+			<ScrollArea.Viewport>
 				<ScrollArea.Content
 					css={{
 						"&[data-overflow-y]": {
