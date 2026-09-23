@@ -11,6 +11,10 @@ export const Scroller = forwardRef<HTMLDivElement, ScrollAreaRootProps>(({ child
 		<ScrollArea.Root {...props} ref={ref}>
 			<ScrollArea.Viewport>
 				<ScrollArea.Content
+					style={{
+						minWidth: 0,
+					}}
+
 					css={{
 						"&[data-overflow-y]": {
 							pe: "3"
