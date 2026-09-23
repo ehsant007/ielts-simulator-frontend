@@ -1,6 +1,6 @@
 "use client"
 
-import { AiChatRead, AiMessageCreate, AiMessageRead } from "@/client"
+import { AiMessageCreate, AiMessageRead } from "@/client"
 import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, ClientOnly } from "@chakra-ui/react"
 import { LuArrowDown, LuRefreshCw } from "react-icons/lu"
 import type { BoxProps, StackProps } from "@chakra-ui/react"
@@ -8,7 +8,7 @@ import { Fragment, useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, isSameDay, CopyButton, StickToBottomScroller, PartialCollapse } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
-import { messageCreateKey, useActiveChat, useMessagesQuery } from "./hooks"
+import { messageCreateKey, useMessagesQuery } from "./hooks"
 import { BsCircleFill } from "react-icons/bs"
 import { useMutationState } from "@tanstack/react-query"
 import { ChatInput } from "./ChatInput"
@@ -25,7 +25,7 @@ export function ChatPanel({ initialChatId }: { initialChatId?: string }) {
 			<ChatStoreProvider initialChatId={initialChatId}>
 				<HStack h="full" gap="0" pos="relative">
 					<ChatSidebar />
-					<ChatBox maxW="2xl" py="6" px="4" mx="auto" />
+					<ChatBox maxW="3xl" py="6" px="8" mx="auto" />
 				</HStack>
 			</ChatStoreProvider>
 		</ClientOnly>
@@ -34,7 +34,7 @@ export function ChatPanel({ initialChatId }: { initialChatId?: string }) {
 
 
 export function ChatBox(props: BoxProps) {
-	const chat = useActiveChat()
+	const chatId = useChatStore(s => s.activeChatId)
 
 	const sticky = useStickToBottom({
 		initial: "instant",
@@ -64,9 +64,9 @@ export function ChatBox(props: BoxProps) {
 			clearTimeout(timeout)
 			observer.disconnect()
 		}
-	}, [chat])
+	}, [chatId])
 
-	if (!chat)
+	if (!chatId)
 		return (
 			<Box display="flex" w="full" h="100%" mx="auto" {...props} >
 				<Center w="full">
@@ -85,7 +85,7 @@ export function ChatBox(props: BoxProps) {
 			sticky={sticky}
 		>
 			<Box {...props}>
-				<Messages chat={chat} mb="5rem" pb={`${inputHeight}px`} />
+				<Messages chatId={chatId} mb="5rem" pb={`${inputHeight}px`} />
 			</Box>
 
 			<Box
@@ -111,7 +111,7 @@ export function ChatBox(props: BoxProps) {
 						}
 
 						<Box w="full" ref={inputRef}>
-							<ChatInput onMessageCreate={() => sticky.scrollToBottom()} key={chat.id} />
+							<ChatInput onMessageCreate={() => sticky.scrollToBottom()} key={chatId} />
 						</Box>
 					</VStack>
 				</Box>
@@ -123,9 +123,9 @@ export function ChatBox(props: BoxProps) {
 				transform="translateY(-50%)"
 				right="0"
 				pe="4"
-				display={{ mdDown: "none", lg: "block" }}
+				display={{ lgDown: "none", lg: "block" }}
 			>
-				<MessageNavigator chatId={chat.id}/>
+				<MessageNavigator chatId={chatId} />
 			</Box>
 
 		</StickToBottomScroller>
@@ -133,12 +133,12 @@ export function ChatBox(props: BoxProps) {
 }
 
 
-export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) {
-	const streamingMessage = useChatStore((s) => s.streamingMessages[chat.id])
+export function Messages({ chatId, ...props }: { chatId: string } & StackProps) {
+	const streamingMessage = useChatStore((s) => s.streamingMessages[chatId])
 
 	const streamingMsg: AiMessageRead = {
 		id: "streaming_id",
-		chat_id: chat.id,
+		chat_id: chatId,
 		content: streamingMessage,
 		role: "assistant",
 		created_at: "now",
@@ -150,7 +150,7 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 		isFetchingPreviousPage,
 		fetchPreviousPage,
 		messages,
-	} = useMessagesQuery(chat.id)
+	} = useMessagesQuery(chatId)
 
 
 	const isMessageCreating = useMutationState({
@@ -159,7 +159,7 @@ export function Messages({ chat, ...props }: { chat: AiChatRead } & StackProps) 
 			status: "pending",
 		},
 		select: (mutation) =>
-			(mutation.state.variables as AiMessageCreate).chat_id === chat.id,
+			(mutation.state.variables as AiMessageCreate).chat_id === chatId,
 	}).some(Boolean)
 
 

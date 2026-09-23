@@ -375,7 +375,7 @@ export function useMessageCreateMutation({ onMutate, onError, onSettled }: UseMe
 
 
 const streamControllers = new Map<string, AbortController>()
-export function cancelMessageCreate(chatId: string | undefined) {
+export function cancelMessageCreate(chatId: string | undefined | null) {
 	if (!chatId)
 		return
 	streamControllers.get(chatId)?.abort()
@@ -621,17 +621,16 @@ export function useRecorder() {
 export function useSelectChat() {
 	const setActiveChatId = useChatStore(s => s.setActiveChatId)
 
-	return (chat: AiChatRead | null | undefined) => {
+	return (chatId: string | null | undefined) => {
 		if (window.location.pathname.startsWith("/chat")) {
 			window.history.pushState(
 				null,
 				"",
-				chat ? `/chat/${chat.id}` : "/chat",
+				chatId ? `/chat/${chatId}` : "/chat",
 			)
-
 		}
 
-		setActiveChatId(chat?.id)
+		setActiveChatId(chatId)
 	}
 }
 

@@ -5,7 +5,7 @@ import { HiArrowUp } from "react-icons/hi"
 import { LuAudioLines, LuCheck, LuLoader, LuMic, LuX } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
 import { useChatStore } from "./ChatProvider"
-import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useActiveChat, useChatCreateMutation, useMessageCreateStreamMutation, useRecorder, useSelectChat } from "./hooks"
+import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useChatCreateMutation, useMessageCreateStreamMutation, useRecorder, useSelectChat } from "./hooks"
 import { useIsMobile } from "@/providers/BreakPointProvider"
 import { v7 as uuid7 } from "uuid"
 import { InfiniteData, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
@@ -118,7 +118,7 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 							<InputButton
 								onClick={() => {
 									setMode("voice")
-									if(value)
+									if (value)
 										setMultiLines(true)
 									recorder.start()
 								}}
@@ -252,10 +252,10 @@ type ChatInputProps = {
 
 export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 	const queryClient = useQueryClient()
-	const activeChat = useActiveChat()
+	const activeChatId = useChatStore(s => s.activeChatId)
 	const selectChat = useSelectChat()
 
-	const chatId = activeChat?.id ?? "default"
+	const chatId = activeChatId ?? "default"
 
 	const userMsg = useChatStore(s => s.drafts[chatId])
 	const setDraft = useChatStore(s => s.setDraft)
@@ -268,8 +268,8 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			setUserMsg("")
 			onMessageCreate?.()
 
-			if (activeChat)
-				setStreamingMessage(activeChat?.id, "")
+			if (activeChatId)
+				setStreamingMessage(activeChatId, "")
 		},
 
 		onError: (createData) => {
@@ -299,7 +299,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 				}
 			)
 
-			selectChat(chat)
+			selectChat(chat.id)
 			createMessageMut.mutate({
 				id: uuid7(),
 				content: createData.message,
@@ -314,7 +314,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			mutationKey: messageCreateKey,
 			status: "pending",
 		},
-		select: mutation => (mutation.state.variables as AiMessageCreate).chat_id === activeChat?.id,
+		select: mutation => (mutation.state.variables as AiMessageCreate).chat_id === activeChatId,
 	}).some(Boolean)
 
 	const pending = chatCreateMutation.isPending || isMessageCreating
@@ -323,7 +323,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 		if (!userMsg.trim() || pending)
 			return
 
-		if (activeChat == null)
+		if (activeChatId == null)
 			chatCreateMutation.mutate({
 				id: uuid7(),
 				message: userMsg,
@@ -333,7 +333,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			createMessageMut.mutate({
 				id: uuid7(),
 				content: userMsg,
-				chat_id: activeChat.id
+				chat_id: activeChatId
 			})
 	}
 
@@ -366,7 +366,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			value={userMsg}
 			onValueChange={(value) => setUserMsg(value)}
 			onSend={handleSend}
-			onStop={() => cancelMessageCreate(activeChat?.id)}
+			onStop={() => cancelMessageCreate(activeChatId)}
 			sending={pending}
 			onVoiceSubmit={async blob => {
 				await transcriber.mutateAsync(blob)

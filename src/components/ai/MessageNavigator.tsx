@@ -69,7 +69,7 @@ export function MessageNavigator({ chatId }: { chatId: string }) {
 						maxH="70dvh"
 						overflowY="auto"
 						borderRadius="xl"
-						p="3"
+						p="4"
 						minW="30ch"
 					>
 						{isLoading

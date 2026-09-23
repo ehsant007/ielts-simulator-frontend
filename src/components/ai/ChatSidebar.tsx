@@ -426,7 +426,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 				borderRadius="xl"
 				flex="1"
 				colorPalette="primary"
-				onClick={() => selectChat(chat)}
+				onClick={() => selectChat(chat.id)}
 			>
 				{chat.title}
 			</Button>
