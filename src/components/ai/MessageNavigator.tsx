@@ -87,7 +87,7 @@ export function MessageNavigator({ chatId }: { chatId: string }) {
 										_hover={{ bg: "primary.muted" }}
 										onSelect={() => {
 											const msgElement = document.getElementById(msg.id)
-											if(msgElement == null)
+											if (msgElement == null)
 												return
 											msgElement.style.setProperty("scroll-margin-top", "1rem")
 											msgElement?.scrollIntoView({
@@ -96,7 +96,7 @@ export function MessageNavigator({ chatId }: { chatId: string }) {
 											})
 										}}
 									>
-										{msg.content.slice(0, 40)}
+										{msg.content.slice(0, 40)}{(msg.content.length > 40) ? "..." : ""}
 									</Menu.Item>
 								))}
 							</>
