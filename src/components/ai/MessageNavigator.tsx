@@ -86,12 +86,14 @@ export function MessageNavigator({ chatId }: { chatId: string }) {
 										cursor="pointer"
 										_hover={{ bg: "primary.muted" }}
 										onSelect={() => {
-											document
-												.getElementById(msg.id)
-												?.scrollIntoView({
-													behavior: "smooth",
-													block: "center",
-												})
+											const msgElement = document.getElementById(msg.id)
+											if(msgElement == null)
+												return
+											msgElement.style.setProperty("scroll-margin-top", "1rem")
+											msgElement?.scrollIntoView({
+												behavior: "smooth",
+												block: "start",
+											})
 										}}
 									>
 										{msg.content.slice(0, 40)}

@@ -13,7 +13,7 @@ import { BsCircleFill } from "react-icons/bs"
 import { useMutationState } from "@tanstack/react-query"
 import { ChatInput } from "./ChatInput"
 import { ChatSidebar } from "./ChatSidebar"
-import { useStickToBottom } from "use-stick-to-bottom"
+import { StickToBottomInstance, useStickToBottom } from "use-stick-to-bottom"
 import { Markdown } from "./Markdown"
 import { MessageNavigator } from "./MessageNavigator"
 
@@ -94,6 +94,7 @@ export function ChatBox(props: BoxProps) {
 							pb={`${inputHeight}px`}
 							chatId={chatId}
 							scrollRef={scrollRef}
+							sticky={sticky}
 						/>
 					</Box>
 
@@ -149,15 +150,17 @@ export function ChatBox(props: BoxProps) {
 }
 
 type MessagesProps = {
-	chatId: string,
+	chatId: string
 	scrollRef: RefObject<Element | null>
+	sticky: StickToBottomInstance
 } & StackProps
 
-export function Messages({ chatId, scrollRef, ...props }: MessagesProps) {
+
+export function Messages({ chatId, scrollRef, sticky, ...props }: MessagesProps) {
 	const streamingMessage = useChatStore((s) => s.streamingMessages[chatId])
 	const topSentinelRef = useRef<HTMLDivElement>(null) // Sentinel
 
-	const scrollStateRef = useRef<{
+	const scrollStateBeforeFetchRef = useRef<{
 		scrollTop: number
 		scrollHeight: number
 	} | null>(null)
@@ -191,14 +194,14 @@ export function Messages({ chatId, scrollRef, ...props }: MessagesProps) {
 
 	useLayoutEffect(() => {
 		const element = scrollRef.current
-		const previous = scrollStateRef.current
-		if (!previous || !element) 
+		const previous = scrollStateBeforeFetchRef.current
+		if (!previous || !element)
 			return
 
 		const heightDelta = element.scrollHeight - previous.scrollHeight
 		element.scrollTop = previous.scrollTop + heightDelta
 
-		scrollStateRef.current = null
+		scrollStateBeforeFetchRef.current = null
 	}, [scrollRef, messages])
 
 
@@ -208,10 +211,10 @@ export function Messages({ chatId, scrollRef, ...props }: MessagesProps) {
 
 		const loadPrevPage = () => {
 			const element = scrollRef.current
-			if (!element) 
+			if (!element)
 				return
 
-			scrollStateRef.current = {
+			scrollStateBeforeFetchRef.current = {
 				scrollTop: element.scrollTop,
 				scrollHeight: element.scrollHeight,
 			}
@@ -244,6 +247,39 @@ export function Messages({ chatId, scrollRef, ...props }: MessagesProps) {
 		fetchPreviousPage,
 		scrollRef,
 	])
+
+
+	// Preserve last scroll position before unmount and set it after mount
+	const scrollTopRef = useRef(new Map<string, number>())
+	
+	useEffect(() => {
+		const element = scrollRef.current
+		if (!element) return
+
+		const handleScroll = () => {
+			scrollTopRef.current.set(chatId, element.scrollTop)
+		}
+
+		element.addEventListener("scroll", handleScroll, { passive: true })
+
+		return () => {
+			element.removeEventListener("scroll", handleScroll)
+		}
+	}, [scrollRef, chatId])
+
+	const { stopScroll: stopStickyScroll } = sticky
+
+	useEffect(() => {
+		const element = scrollRef.current
+		if (!element || isLoading) return
+
+		const top = scrollTopRef.current.get(chatId)
+
+		if (top !== undefined) {
+			stopStickyScroll()
+			element.scrollTop = top
+		}
+	}, [scrollRef, chatId, isLoading, stopStickyScroll])
 
 
 	if (isLoading)
