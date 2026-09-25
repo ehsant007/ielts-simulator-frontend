@@ -1,3 +1,5 @@
+"use client"
+
 import { useBreakpointValue } from "@chakra-ui/react"
 import { createContext, useContext } from "react"
 
