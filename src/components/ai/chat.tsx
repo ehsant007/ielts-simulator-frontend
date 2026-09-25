@@ -250,14 +250,15 @@ export function Messages({ chatId, scrollRef, sticky, ...props }: MessagesProps)
 
 
 	// Preserve last scroll position before unmount and set it after mount
-	const scrollTopRef = useRef(new Map<string, number>())
-	
+	const lastScrollTop = useRef(new Map<string, number>())
+	const initialScrollToBottomDone = useRef(new Map<string, boolean>())
+
 	useEffect(() => {
 		const element = scrollRef.current
 		if (!element) return
 
 		const handleScroll = () => {
-			scrollTopRef.current.set(chatId, element.scrollTop)
+			lastScrollTop.current.set(chatId, element.scrollTop)
 		}
 
 		element.addEventListener("scroll", handleScroll, { passive: true })
@@ -273,12 +274,17 @@ export function Messages({ chatId, scrollRef, sticky, ...props }: MessagesProps)
 		const element = scrollRef.current
 		if (!element || isLoading) return
 
-		const top = scrollTopRef.current.get(chatId)
-
-		if (top !== undefined) {
-			stopStickyScroll()
-			element.scrollTop = top
+		if (!initialScrollToBottomDone.current.get(chatId)) {
+			initialScrollToBottomDone.current.set(chatId, true)
 		}
+		else {
+			const top = lastScrollTop.current.get(chatId)
+			if (top !== undefined) {
+				stopStickyScroll()
+				element.scrollTop = top
+			}
+		}
+
 	}, [scrollRef, chatId, isLoading, stopStickyScroll])
 
 
