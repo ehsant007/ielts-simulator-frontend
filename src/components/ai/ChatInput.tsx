@@ -1,5 +1,5 @@
 import { Box, HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, VStack, Spinner, Icon, Center } from "@chakra-ui/react"
-import { useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 import { BsStopFill } from "react-icons/bs"
 import { HiArrowUp } from "react-icons/hi"
 import { LuAudioLines, LuCheck, LuLoader, LuMic, LuX } from "react-icons/lu"
@@ -54,6 +54,11 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 
 	const [multiLines, setMultiLines] = useState(false)
 	const [submittingVoice, setSubmittingVoice] = useState(false)
+
+	useLayoutEffect(() => {
+		if (mode === "voice")
+			textareaRef.current?.focus()
+	}, [mode])
 
 	//const isMobile = useBreakpointValue({ base: true, md: false, })
 	const { isMobile } = useIsMobile()
@@ -205,7 +210,10 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 							return
 
 						e.preventDefault()
-						onSend?.()
+						if (mode === "voice")
+							submitVoice()
+						else
+							onSend?.()
 					}}
 
 					css={{
@@ -231,6 +239,7 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 						h={expand1 ? "3.5rem" : "full"}
 						pe="7rem"
 						ps="5"
+						pointerEvents="none"
 					>
 						{recorder.isRecording
 							? <AudioRecorderVisualizer recorder={recorder.getRecorder()} />
@@ -324,7 +333,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 	const pending = chatCreateMutation.isPending || isMessageCreating
 
 	const handleSend = () => {
-		if (!userMsg.trim() || pending)
+		if (!userMsg || !userMsg.trim() || pending)
 			return
 
 		if (activeChatId == null)
