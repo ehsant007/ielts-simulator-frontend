@@ -1,4 +1,5 @@
 allowBuilds:
+  '@google/genai': true
   '@parcel/watcher': true
   '@swc/core': true
   onnxruntime-node: true

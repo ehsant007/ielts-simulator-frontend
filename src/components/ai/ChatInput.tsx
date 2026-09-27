@@ -11,6 +11,7 @@ import { v7 as uuid7 } from "uuid"
 import { InfiniteData, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
 import { AiMessagePage, AiMessageCreate, transcribeAudio } from "@/client"
 import { AudioRecorderVisualizer } from "./RecorderVisualizer"
+import { useGoogleLiveAssistant } from "./live_asistant/hooks"
 
 
 function InputButton({ children, waiting, ...props }: { waiting?: boolean } & IconButtonProps) {
@@ -374,6 +375,8 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 		},
 	})
 
+	const liveAssistant = useGoogleLiveAssistant()
+
 	return (
 		<ChatInputInner
 			value={userMsg}
@@ -385,6 +388,9 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 				await transcriber.mutateAsync(blob)
 			}}
 			onVoiceSubmitCancel={() => transcriberController.current.abort("Voice submit canceled.")}
+
+			onCall={() => liveAssistant.startSession()}
+
 			{...props}
 		/>
 	)

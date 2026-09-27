@@ -712,6 +712,16 @@ export type FileSetRead = {
 };
 
 /**
+ * GeminiToken
+ */
+export type GeminiToken = {
+    /**
+     * Token
+     */
+    token: string;
+};
+
+/**
  * HTTPValidationError
  */
 export type HttpValidationError = {
@@ -2364,6 +2374,22 @@ export type TranscribeAudioResponses = {
 };
 
 export type TranscribeAudioResponse = TranscribeAudioResponses[keyof TranscribeAudioResponses];
+
+export type GetGeminiAuthTokenData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/ai/gemini/auth-token';
+};
+
+export type GetGeminiAuthTokenResponses = {
+    /**
+     * Successful Response
+     */
+    200: GeminiToken;
+};
+
+export type GetGeminiAuthTokenResponse = GetGeminiAuthTokenResponses[keyof GetGeminiAuthTokenResponses];
 
 export type LookupData = {
     body?: never;
