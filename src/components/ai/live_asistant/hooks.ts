@@ -82,6 +82,11 @@ export function useGoogleLiveAssistant() {
 						const binaryData = Uint8Array.from(atob(message.data), (c) => c.charCodeAt(0));
 						streamer.addPCM16(binaryData);
 					}
+
+					if (message.event === "interrupted") {
+						streamer.interrupt()
+					}
+
 				} catch (err) {
 					console.error("Failed to parse WebSocket message:", err);
 				}

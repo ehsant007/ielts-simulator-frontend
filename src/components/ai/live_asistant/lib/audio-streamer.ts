@@ -244,6 +244,44 @@ export class AudioStreamer {
 		this.gainNode.gain.setValueAtTime(1, this.context.currentTime);
 	}
 
+interrupt() {
+      // 1. Stop processing and clear the pending queue
+      this.isPlaying = false;
+      this.isStreamComplete = true;
+      this.audioQueue = [];
+      this.scheduledTime = this.context.currentTime;
+
+      if (this.checkInterval) {
+         clearInterval(this.checkInterval);
+         this.checkInterval = null;
+      }
+
+      // 2. Micro-fade out the OLD gain node to prevent clicks/pops
+      const oldGainNode = this.gainNode;
+      const FADE_OUT_DURATION = 0.015; // 15 milliseconds micro-fade
+
+      try {
+         // Cancel any scheduled volume changes and ramp to 0 in 15ms
+         oldGainNode.gain.cancelScheduledValues(this.context.currentTime);
+         oldGainNode.gain.setValueAtTime(oldGainNode.gain.value, this.context.currentTime);
+         oldGainNode.gain.linearRampToValueAtTime(0, this.context.currentTime + FADE_OUT_DURATION);
+
+         // Clean up the old node from memory after the 15ms fade finishes
+         setTimeout(() => {
+            oldGainNode.disconnect();
+         }, FADE_OUT_DURATION * 1000 + 10);
+      } catch (e) {
+         console.warn("Failed to micro-fade GainNode:", e);
+      }
+
+      // 3. IMMEDIATELY create a new GainNode for the incoming audio stream
+      // Because this happens synchronously, any call to addPCM16() 1ms later 
+      // will connect to this fresh, unmuted node instantly!
+      this.gainNode = this.context.createGain();
+      this.gainNode.gain.setValueAtTime(1, this.context.currentTime);
+      this.gainNode.connect(this.context.destination);
+   }
+
 	complete() {
 		this.isStreamComplete = true;
 		this.onComplete();
