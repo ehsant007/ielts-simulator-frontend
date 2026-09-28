@@ -54,7 +54,7 @@ export function useGoogleLiveAssistant() {
 			recorderRef.current = recorder;
 
 			// 3. Open WebSocket connection
-			const ws = new WebSocket("ws://localhost:8000/api/v1/ai/ws/tutor");
+			const ws = new WebSocket("ws://localhost:8000/api/v1/ai/tutor");
 			wsRef.current = ws;
 
 			ws.onopen = async () => {
@@ -112,3 +112,26 @@ export function useGoogleLiveAssistant() {
 		isRecording,
 	};
 }
+
+
+
+// ws.onmessage = (event) => {
+//   const message = JSON.parse(event.data);
+
+//   switch (message.event) {
+//     case 'audio':
+//       // Feed base64 PCM chunk into Web Audio API / AudioWorklet buffer
+//       playAudioChunk(message.data);
+//       break;
+
+//     case 'model_transcript':
+//       // Append streaming text to live caption overlay or examiner chat bubble
+//       updateExaminerCaptions(message.data, message.partial);
+//       break;
+
+//     case 'user_transcript':
+//       // Display recognized student speech in UI
+//       updateStudentCaptions(message.data);
+//       break;
+//   }
+// };
