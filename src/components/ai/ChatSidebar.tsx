@@ -370,7 +370,7 @@ export function PinnedChats() {
 
 export function ChatButtonList({ chats, placeholder }: { chats: AiChatRead[], placeholder?: string }) {
 	return (
-		<VStack w="full" alignItems="start" gap="0" mt="1">
+		<VStack w="full" alignItems="start" gap="0.5" mt="1">
 			<AnimatePresence>
 				{chats.map((c) =>
 					<MotionBox
