@@ -44,7 +44,7 @@ export class AudioStreamer {
 		this.addPCM16 = this.addPCM16.bind(this);
 	}
 
-	async addWorklet<T extends (d: any) => void>(
+	async addWorklet<T extends (d: unknown) => void>(
 		workletName: string,
 		workletSrc: string,
 		handler: T
