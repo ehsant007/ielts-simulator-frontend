@@ -45,7 +45,7 @@ export const audioContext: (
 				map.set(options.id, ctx);
 			}
 			return ctx;
-		} catch (e) {
+		} catch {
 			await didInteract;
 			if (options?.id && map.has(options.id)) {
 				const ctx = map.get(options.id);
