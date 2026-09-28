@@ -401,7 +401,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 
 	const selectChat = useSelectChat()
 
-	const [hovered, setHovered] = useState(false)
+	const [actionButtonsVisible, setActionButtonsVisible] = useState(false)
 
 	return (
 		<Group
@@ -413,8 +413,8 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 			w="full"
 			attached
 			borderRadius="xl"
-			onPointerEnter={() => setHovered(true)}
-			onPointerLeave={() => setHovered(false)}
+			onPointerEnter={() => setActionButtonsVisible(true)}
+			onPointerLeave={() => setActionButtonsVisible(menuOpen)}
 			{...props}
 		>
 			<Button
@@ -430,19 +430,19 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 				overflow="hidden"
 				onClick={() => selectChat(chat.id)}
 				ps="2"
-				pe={hovered ? "0" : "2"}
+				pe={actionButtonsVisible ? "0" : "2"}
 			>
 				<HoverScrollText
 					flex="1"
 					minW="0"
-					hovered={hovered}
+					hovered={actionButtonsVisible}
 				>
 					{chat.title}
 				</HoverScrollText>
 
 			</Button>
 
-			{hovered &&
+			{actionButtonsVisible &&
 				<HStack gap="0">
 					<IconButton
 						colorPalette="primary"
@@ -457,7 +457,10 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 					<ChatButtonActionMenu
 						chat={chat}
 						open={menuOpen}
-						onOpenChange={(e) => setMenuOpen(e.open)}
+						onOpenChange={(e) => {
+							setMenuOpen(e.open)
+							setActionButtonsVisible(e.open)
+						}}
 					>
 						<IconButton
 							colorPalette="primary"
