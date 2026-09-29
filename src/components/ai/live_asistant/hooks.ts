@@ -37,7 +37,7 @@ export function useGoogleLiveAssistant() {
 	}, []);
 
 	// Start session (instantiates Audio & WebSocket lazily on client click)
-	const startSession = useCallback(async () => {
+	const startSession = useCallback(async (url: string) => {
 		// Prevent starting multiple sessions
 		if (wsRef.current || isConnected) return;
 
@@ -54,7 +54,7 @@ export function useGoogleLiveAssistant() {
 			recorderRef.current = recorder;
 
 			// 3. Open WebSocket connection
-			const ws = new WebSocket("ws://localhost:8000/api/v1/ai/tutor");
+			const ws = new WebSocket(url);
 			wsRef.current = ws;
 
 			ws.onopen = async () => {

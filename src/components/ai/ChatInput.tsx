@@ -314,12 +314,12 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			)
 
 			selectChat(chat.id)
-			createMessageMut.mutate({
-				id: uuid7(),
-				content: createData.message,
-				chat_id: chat.id
-			}
-			)
+			// createMessageMut.mutate({
+			// 	id: uuid7(),
+			// 	content: createData.message,
+			// 	chat_id: chat.id
+			// }
+			// )
 		},
 	})
 
@@ -333,22 +333,31 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 
 	const pending = chatCreateMutation.isPending || isMessageCreating
 
-	const handleSend = () => {
+	const handleSend = async () => {
 		if (!userMsg || !userMsg.trim() || pending)
 			return
 
-		if (activeChatId == null)
-			chatCreateMutation.mutate({
+		const msg = userMsg
+		let chat_id = activeChatId
+
+		if (chat_id == null) {
+			const { data: chat, response } = await chatCreateMutation.mutateAsync({
 				id: uuid7(),
-				message: userMsg,
+				message: msg,
 				title: userMsg.slice(0, 20)
 			})
-		else
-			createMessageMut.mutate({
-				id: uuid7(),
-				content: userMsg,
-				chat_id: activeChatId
-			})
+
+			if (!response.ok)
+				return
+
+			chat_id = chat.id
+		}
+
+		createMessageMut.mutate({
+			id: uuid7(),
+			content: msg,
+			chat_id: chat_id
+		})
 	}
 
 	const transcriberController = useRef<AbortController>(new AbortController())
@@ -377,6 +386,26 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 
 	const liveAssistant = useGoogleLiveAssistant()
 
+
+	const handleCall = async () => {
+		let chat_id = activeChatId
+
+		if (chat_id == null) {
+			const { data: chat, response } = await chatCreateMutation.mutateAsync({
+				id: uuid7(),
+				message: userMsg,
+				title: "New live conversation"
+			})
+
+			if (!response.ok)
+				return
+
+			chat_id = chat.id
+		}
+
+		liveAssistant.startSession(`ws://localhost:8000/api/v1/ai/tutor/${chat_id}`)
+	}
+
 	return (
 		<ChatInputInner
 			value={userMsg}
@@ -389,7 +418,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			}}
 			onVoiceSubmitCancel={() => transcriberController.current.abort("Voice submit canceled.")}
 
-			onCall={() => liveAssistant.startSession()}
+			onCall={handleCall}
 
 			{...props}
 		/>
