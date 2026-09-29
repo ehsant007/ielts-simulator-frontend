@@ -296,7 +296,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 	})
 
 	const chatCreateMutation = useChatCreateMutation({
-		onSuccess: (chat, createData) => {
+		onSuccess: (chat, _createData) => {
 
 			// Initialize the messages query cache when a new chat is created
 			queryClient.setQueryData<InfiniteData<AiMessagePage>>(
