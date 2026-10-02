@@ -1,4 +1,4 @@
-import { Box, HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, VStack, Spinner, Icon, Center } from "@chakra-ui/react"
+import { Box, HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, VStack, Spinner, Icon, Center, AbsoluteCenter } from "@chakra-ui/react"
 import { useLayoutEffect, useRef, useState } from "react"
 import { BsStopFill } from "react-icons/bs"
 import { HiArrowUp } from "react-icons/hi"
@@ -34,7 +34,7 @@ function InputButton({ children, waiting, ...props }: { waiting?: boolean } & Ic
 	)
 }
 
-type InputMode = "text" | "voice"
+type InputMode = "text" | "voice" | "live"
 
 export type ChatInputInnerProps = {
 	value?: string
@@ -42,12 +42,24 @@ export type ChatInputInnerProps = {
 	onSend?: () => void
 	onStop?: () => void
 	onCall?: () => void
+	onEndCall?: () => void
 	onVoiceSubmit?: (audio: Blob) => Promise<void>
 	onVoiceSubmitCancel?: () => void
 	sending?: boolean
 } & Omit<InputGroupProps, "children">
 
-function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, onVoiceSubmitCancel, onCall, sending, ...props }: ChatInputInnerProps) {
+function ChatInputInner({
+	value,
+	onValueChange,
+	onSend,
+	onStop,
+	onVoiceSubmit,
+	onVoiceSubmitCancel,
+	onCall,
+	onEndCall,
+	sending,
+	...props
+}: ChatInputInnerProps) {
 	const [mode, setMode] = useState<InputMode>("text")
 
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -96,6 +108,16 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 			onVoiceSubmitCancel?.()
 	}
 
+	const handleCall = () => {
+		setMode("live")
+		onCall?.()
+	}
+
+	const handleEndCall = () => {
+		setMode("text")
+		onEndCall?.()
+	}
+
 	const expand1 = isMobile || multiLines || expand2
 
 	return (
@@ -115,54 +137,59 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 						</>
 					}
 
-					{mode === "text" &&
-						<HStack
-							mt="auto"
-							position="relative"
-							gap="3"
-							my="auto"
-						>
-							<InputButton
-								onClick={() => {
-									setMode("voice")
-									if (value)
-										setMultiLines(true)
-									recorder.start()
-								}}
-							>
-								<LuMic />
-							</InputButton>
-							{sending
-								?
-								<InputButton variant="solid" colorPalette="primary" onClick={onStop}>
-									<BsStopFill />
+					<HStack
+						mt="auto"
+						position="relative"
+						gap="3"
+						my="auto"
+					>
+						{mode === "text" &&
+							<>
+								<InputButton
+									onClick={() => {
+										setMode("voice")
+										if (value)
+											setMultiLines(true)
+										recorder.start()
+									}}
+								>
+									<LuMic />
 								</InputButton>
-								: value
-									? <InputButton variant="solid" colorPalette="primary" onClick={onSend}>
-										<HiArrowUp />
+								{sending
+									?
+									<InputButton variant="solid" colorPalette="primary" onClick={onStop}>
+										<BsStopFill />
 									</InputButton>
-									: <InputButton variant="solid" colorPalette="primary" onClick={onCall}>
-										<LuAudioLines />
-									</InputButton>
-							}
-						</HStack>
-					}
+									: value
+										? <InputButton variant="solid" colorPalette="primary" onClick={onSend}>
+											<HiArrowUp />
+										</InputButton>
+										: <InputButton variant="solid" colorPalette="primary" onClick={handleCall}>
+											<LuAudioLines />
+										</InputButton>
+								}
+							</>
 
-					{mode === "voice" &&
-						<HStack
-							mt="auto"
-							position="relative"
-							gap="3"
-							my="auto"
-						>
-							<InputButton onClick={DiscardVoice}>
-								<LuX />
+						}
+
+						{mode === "voice" &&
+							<>
+								<InputButton onClick={DiscardVoice}>
+									<LuX />
+								</InputButton>
+								<InputButton onClick={submitVoice} waiting={submittingVoice}>
+									<LuCheck />
+								</InputButton>
+							</>
+						}
+
+						{mode === "live" &&
+							<InputButton variant="solid" colorPalette="primary" onClick={handleEndCall}>
+								<BsStopFill />
 							</InputButton>
-							<InputButton onClick={submitVoice} waiting={submittingVoice}>
-								<LuCheck />
-							</InputButton>
-						</HStack>
-					}
+						}
+
+					</HStack>
 
 				</VStack>
 			}
@@ -255,6 +282,26 @@ function ChatInputInner({ value, onValueChange, onSend, onStop, onVoiceSubmit, o
 						}
 					</Box>
 				}
+
+				{/* {mode === "live" &&
+					<Box
+						position="absolute"
+						bottom="0"
+						left="0"
+						w="full"
+						h={expand1 ? "3.5rem" : "full"}
+						pe="7rem"
+						ps="5"
+						borderRadius="4xl"
+						bg="bg.muted"
+					>
+						<AbsoluteCenter>
+							<InputButton variant="solid" colorPalette="primary" onClick={handleEndCall}>
+								<BsStopFill />
+							</InputButton>
+						</AbsoluteCenter>
+					</Box>
+				} */}
 			</Box>
 		</InputGroup>
 	)
@@ -388,6 +435,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 
 
 	const handleCall = async () => {
+		//return
 		let chat_id = activeChatId
 
 		if (chat_id == null) {
@@ -419,6 +467,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			onVoiceSubmitCancel={() => transcriberController.current.abort("Voice submit canceled.")}
 
 			onCall={handleCall}
+			onEndCall={liveAssistant.stopSession}
 
 			{...props}
 		/>
