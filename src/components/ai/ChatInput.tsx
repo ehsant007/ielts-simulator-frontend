@@ -5,7 +5,7 @@ import { HiArrowUp } from "react-icons/hi"
 import { LuAudioLines, LuCheck, LuLoader, LuMic, LuX } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
 import { useChatStore } from "./ChatProvider"
-import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useChatCreateMutation, useMessageCreateStreamMutation, useRecorder, useSelectChat } from "./hooks"
+import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useAddMessage, useChatCreateMutation, useMessageCreateStreamMutation, useRecorder, useSelectChat } from "./hooks"
 import { useIsMobile } from "@/providers/BreakPointProvider"
 import { v7 as uuid7 } from "uuid"
 import { InfiniteData, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
@@ -325,12 +325,10 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 	const setStreamingMessage = useChatStore((s) => s.setStreamingMessage)
 
 	const createMessageMut = useMessageCreateStreamMutation({
-		onMutate: () => {
+		onMutate: ({ chat_id }) => {
 			setUserMsg("")
 			onMessageCreate?.()
-
-			if (activeChatId)
-				setStreamingMessage(activeChatId, "")
+			setStreamingMessage(chat_id, "")
 		},
 
 		onError: (createData) => {
@@ -338,7 +336,11 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 		},
 
 		onStream: (data, chat_id) => {
-			setStreamingMessage(chat_id, prev => prev + data)
+			setStreamingMessage(chat_id, prev => (prev ?? "") + data)
+		},
+
+		onStreamEnd: (chat_id) => {
+			setStreamingMessage(chat_id, undefined)
 		},
 	})
 
@@ -431,11 +433,26 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 		},
 	})
 
-	const liveAssistant = useGoogleLiveAssistant()
+	const addMessage = useAddMessage()
+
+	const liveAssistant = useGoogleLiveAssistant({
+		onUserTranscript: (text) => {
+			addMessage(chatId, text, "user")
+		},
+
+		onAssistantTranscript: (text, partial) => {
+			if (partial) {
+				setStreamingMessage(chatId, prev => (prev ?? "") + text)
+				return
+			}
+
+			setStreamingMessage(chatId, undefined)
+			addMessage(chatId, text, "assistant")
+		},
+	})
 
 
 	const handleCall = async () => {
-		//return
 		let chat_id = activeChatId
 
 		if (chat_id == null) {
@@ -451,6 +468,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			chat_id = chat.id
 		}
 
+		setStreamingMessage(chat_id, undefined)
 		liveAssistant.startSession(`ws://localhost:8000/api/v1/ai/tutor/${chat_id}`)
 	}
 

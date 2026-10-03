@@ -1,16 +1,15 @@
 "use client"
 
-import { AiMessageCreate, AiMessageRead } from "@/client"
+import {AiMessageRead } from "@/client"
 import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, ClientOnly, ScrollArea, mergeRefs } from "@chakra-ui/react"
 import { LuArrowDown, LuRefreshCw } from "react-icons/lu"
 import type { BoxProps, StackProps } from "@chakra-ui/react"
-import { Fragment, RefObject, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { Fragment, RefObject, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, isSameDay, CopyButton, PartialCollapse } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
-import { messageCreateKey, useMessagesQuery } from "./hooks"
+import { useMessagesQuery } from "./hooks"
 import { BsCircleFill } from "react-icons/bs"
-import { useMutationState } from "@tanstack/react-query"
 import { ChatInput } from "./ChatInput"
 import { ChatSidebar } from "./ChatSidebar"
 import { StickToBottomInstance, useStickToBottom } from "use-stick-to-bottom"
@@ -157,7 +156,6 @@ type MessagesProps = {
 
 
 export function Messages({ chatId, scrollRef, sticky, ...props }: MessagesProps) {
-	const streamingMessage = useChatStore((s) => s.streamingMessages[chatId])
 	const topSentinelRef = useRef<HTMLDivElement>(null) // Sentinel
 
 	const scrollStateBeforeFetchRef = useRef<{
@@ -165,13 +163,6 @@ export function Messages({ chatId, scrollRef, sticky, ...props }: MessagesProps)
 		scrollHeight: number
 	} | null>(null)
 
-	const streamingMsg: AiMessageRead = {
-		id: "streaming_id",
-		chat_id: chatId,
-		content: streamingMessage,
-		role: "assistant",
-		created_at: "now",
-	}
 
 	const {
 		isLoading,
@@ -180,16 +171,6 @@ export function Messages({ chatId, scrollRef, sticky, ...props }: MessagesProps)
 		fetchPreviousPage,
 		messages,
 	} = useMessagesQuery(chatId)
-
-
-	const isMessageCreating = useMutationState({
-		filters: {
-			mutationKey: messageCreateKey,
-			status: "pending",
-		},
-		select: (mutation) =>
-			(mutation.state.variables as AiMessageCreate).chat_id === chatId,
-	}).some(Boolean)
 
 
 	useLayoutEffect(() => {
@@ -328,23 +309,53 @@ export function Messages({ chatId, scrollRef, sticky, ...props }: MessagesProps)
 				)
 			})}
 
-			{isMessageCreating && (
-				streamingMessage
-					? <AssistantMessage msg={streamingMsg} />
-					: <Icon
-						as={BsCircleFill}
-						alignSelf={"start"}
-						size="md"
-						color="primary"
-						animationName="breathing"
-						animationDuration="1.5s"
-						animationTimingFunction="ease-in-out"
-						animationIterationCount="infinite"
-					/>
-			)}
+			<AssistantTypeWriter chatId={chatId} />
 
 		</VStack>
 	)
+}
+
+
+export function AssistantTypeWriter({ chatId }: { chatId: string }) {
+	const streamingMessage = useChatStore((s) => s.streamingMessages[chatId])
+
+	const deferredStreamingMessage = useDeferredValue(streamingMessage)
+
+	const streamingMsg: AiMessageRead = useMemo(() => ({
+		id: "streaming_id",
+		chat_id: chatId,
+		content: deferredStreamingMessage ?? "",
+		role: "assistant",
+		created_at: "now",
+	}), [deferredStreamingMessage, chatId])
+
+	// const isAnyMessageCreating = useMutationState({
+	// 	filters: {
+	// 		mutationKey: messageCreateKey,
+	// 		status: "pending",
+	// 	},
+	// 	select: (mutation) =>
+	// 		(mutation.state.variables as AiMessageCreate).chat_id === chatId,
+	// }).some(Boolean)
+
+	if (deferredStreamingMessage)
+		return <AssistantMessage msg={streamingMsg} />
+
+	if (deferredStreamingMessage == "")
+		return (
+			<Icon
+				as={BsCircleFill}
+				alignSelf={"start"}
+				size="md"
+				color="primary"
+				animationName="breathing"
+				animationDuration="1.5s"
+				animationTimingFunction="ease-in-out"
+				animationIterationCount="infinite"
+			/>
+		)
+
+	return null
 }
 
 

@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AudioRecorder } from "./lib/audio-recorder";
 import { AudioStreamer } from "./lib/audio-streamer";
@@ -9,7 +7,17 @@ interface CustomWindow extends Window {
 	webkitAudioContext?: typeof AudioContext;
 }
 
-export function useGoogleLiveAssistant() {
+export type UseGoogleLiveAssistantProps = {
+	onUserTranscript?: (text: string, partial: boolean) => void
+	onAssistantTranscript?: (text: string, partial: boolean) => void
+}
+
+
+
+export function useGoogleLiveAssistant({
+	onUserTranscript,
+	onAssistantTranscript,
+}: UseGoogleLiveAssistantProps = {}) {
 	const [isConnected, setIsConnected] = useState(false);
 	const [isRecording, setIsRecording] = useState(false);
 
@@ -35,6 +43,28 @@ export function useGoogleLiveAssistant() {
 		setIsRecording(false);
 		setIsConnected(false);
 	}, []);
+
+	const wsEventHandler = useCallback((message: {event:string, data:string, partial?:boolean}) => {
+		const streamer = streamerRef.current
+		if (streamer == null)
+			return
+		//console.log(message)
+		switch (message.event) {
+			case "audio":
+				const binaryData = Uint8Array.from(atob(message.data), (c) => c.charCodeAt(0));
+				streamer.addPCM16(binaryData);
+				break
+			case "interrupted":
+				streamer.interrupt()
+				break
+			case "user_transcript":
+				onUserTranscript?.(message.data, message.partial!)
+				break
+			case "assistant_transcript":
+				onAssistantTranscript?.(message.data, message.partial!)
+				break
+		}
+	}, [onUserTranscript, onAssistantTranscript])
 
 	// Start session (instantiates Audio & WebSocket lazily on client click)
 	const startSession = useCallback(async (url: string) => {
@@ -78,15 +108,7 @@ export function useGoogleLiveAssistant() {
 			ws.onmessage = async (event) => {
 				try {
 					const message = JSON.parse(event.data);
-					if (message.event === "audio") {
-						const binaryData = Uint8Array.from(atob(message.data), (c) => c.charCodeAt(0));
-						streamer.addPCM16(binaryData);
-					}
-
-					if (message.event === "interrupted") {
-						streamer.interrupt()
-					}
-
+					wsEventHandler(message)
 				} catch (err) {
 					console.error("Failed to parse WebSocket message:", err);
 				}
@@ -101,7 +123,7 @@ export function useGoogleLiveAssistant() {
 			console.error("Failed to start session:", err);
 			stopSession();
 		}
-	}, [isConnected, stopSession]);
+	}, [isConnected, stopSession, wsEventHandler]);
 
 	// Clean up if component unmounts while connection is open
 	useEffect(() => {

@@ -12,8 +12,8 @@ export type ChatStore = {
 	drafts: Record<string, string>
 	setDraft: (chat_id: string, value: SetStateAction<string>) => void
 
-	streamingMessages: Record<string, string>
-	setStreamingMessage: (chat_id: string, value: SetStateAction<string>) => void
+	streamingMessages: Record<string, string | undefined>
+	setStreamingMessage: (chat_id: string, value: SetStateAction<string | undefined>) => void
 }
 
 
