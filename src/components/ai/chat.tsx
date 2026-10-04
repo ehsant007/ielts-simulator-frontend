@@ -1,10 +1,10 @@
 "use client"
 
-import {AiMessageRead } from "@/client"
+import { AiMessageRead } from "@/client"
 import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, ClientOnly, ScrollArea, mergeRefs } from "@chakra-ui/react"
 import { LuArrowDown, LuRefreshCw } from "react-icons/lu"
-import type { BoxProps, StackProps } from "@chakra-ui/react"
-import { Fragment, RefObject, useDeferredValue, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
+import type { BoxProps, IconProps, StackProps } from "@chakra-ui/react"
+import { Fragment, RefObject, useDeferredValue, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { ChatTime, isSameDay, CopyButton, PartialCollapse } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
@@ -309,54 +309,57 @@ export function Messages({ chatId, scrollRef, sticky, ...props }: MessagesProps)
 				)
 			})}
 
-			<AssistantTypeWriter chatId={chatId} />
+			{/* <AssistantTypeWriter chatId={chatId} /> */}
 
 		</VStack>
 	)
 }
 
 
-export function AssistantTypeWriter({ chatId }: { chatId: string }) {
-	const streamingMessage = useChatStore((s) => s.streamingMessages[chatId])
 
-	const deferredStreamingMessage = useDeferredValue(streamingMessage)
 
-	const streamingMsg: AiMessageRead = useMemo(() => ({
-		id: "streaming_id",
-		chat_id: chatId,
-		content: deferredStreamingMessage ?? "",
-		role: "assistant",
-		created_at: "now",
-	}), [deferredStreamingMessage, chatId])
 
-	// const isAnyMessageCreating = useMutationState({
-	// 	filters: {
-	// 		mutationKey: messageCreateKey,
-	// 		status: "pending",
-	// 	},
-	// 	select: (mutation) =>
-	// 		(mutation.state.variables as AiMessageCreate).chat_id === chatId,
-	// }).some(Boolean)
+// export function AssistantTypeWriter({ chatId }: { chatId: string }) {
+// 	const streamingMessage = useChatStore((s) => s.streamingMessages[chatId])
 
-	if (deferredStreamingMessage)
-		return <AssistantMessage msg={streamingMsg} />
+// 	const deferredStreamingMessage = useDeferredValue(streamingMessage)
 
-	if (deferredStreamingMessage == "")
-		return (
-			<Icon
-				as={BsCircleFill}
-				alignSelf={"start"}
-				size="md"
-				color="primary"
-				animationName="breathing"
-				animationDuration="1.5s"
-				animationTimingFunction="ease-in-out"
-				animationIterationCount="infinite"
-			/>
-		)
+// 	const streamingMsg: AiMessageRead = useMemo(() => ({
+// 		id: "streaming_id",
+// 		chat_id: chatId,
+// 		content: deferredStreamingMessage ?? "",
+// 		role: "assistant",
+// 		created_at: "now",
+// 	}), [deferredStreamingMessage, chatId])
 
-	return null
-}
+// 	// const isAnyMessageCreating = useMutationState({
+// 	// 	filters: {
+// 	// 		mutationKey: messageCreateKey,
+// 	// 		status: "pending",
+// 	// 	},
+// 	// 	select: (mutation) =>
+// 	// 		(mutation.state.variables as AiMessageCreate).chat_id === chatId,
+// 	// }).some(Boolean)
+
+// 	if (deferredStreamingMessage)
+// 		return <AssistantMessage msg={streamingMsg} />
+
+// 	if (deferredStreamingMessage == "")
+// 		return (
+// 			<Icon
+// 				as={BsCircleFill}
+// 				alignSelf={"start"}
+// 				size="md"
+// 				color="primary"
+// 				animationName="breathing"
+// 				animationDuration="1.5s"
+// 				animationTimingFunction="ease-in-out"
+// 				animationIterationCount="infinite"
+// 			/>
+// 		)
+
+// 	return null
+// }
 
 
 export function Message({ msg }: { msg: AiMessageRead }) {
@@ -417,12 +420,36 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 }
 
 
+export function WaitingIndicator(props: IconProps) {
+	return (
+		<Icon
+			as={BsCircleFill}
+			alignSelf={"start"}
+			size="md"
+			color="primary"
+			animationName="breathing"
+			animationDuration="1.5s"
+			animationTimingFunction="ease-in-out"
+			animationIterationCount="infinite"
+			{...props}
+		/>
+	)
+}
+
 export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
+
+	useChatStore((s) => s.streams[msg.id])
+
+	const content = useDeferredValue(msg.content)
+
+	if (msg.content === "")
+		return <WaitingIndicator />
+
 	return (
 		<Box alignSelf="start" w="full" id={msg.id}>
 
 			<Markdown>
-				{msg.content}
+				{content}
 			</Markdown>
 
 			<HStack gap="0" mt="1">

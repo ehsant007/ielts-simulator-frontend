@@ -1,3 +1,4 @@
+import { AiMessageRead } from "@/client";
 import { Dispatch, SetStateAction } from "react";
 import { createStore } from "zustand/vanilla";
 
@@ -12,8 +13,11 @@ export type ChatStore = {
 	drafts: Record<string, string>
 	setDraft: (chat_id: string, value: SetStateAction<string>) => void
 
-	streamingMessages: Record<string, string | undefined>
-	setStreamingMessage: (chat_id: string, value: SetStateAction<string | undefined>) => void
+
+	streams: Record<string, { message: AiMessageRead, revision: number }>
+	addStream: (message: AiMessageRead) => void
+	removeStream: (messageId: string) => void
+	invalidateStream: (messageId: string) => void
 }
 
 
@@ -36,16 +40,30 @@ export function createChatStore(initialChatId?: string) {
 				}
 			})),
 
-		streamingMessages: {},
-		setStreamingMessage: (chat_id, value) =>
-			set((s) => ({
-				streamingMessages: {
-					...s.streamingMessages,
-					[chat_id]: typeof value === "function"
-						? value(s.streamingMessages[chat_id] ?? "")
-						: value
+		streams: {},
+		addStream: (message) => set((s) => ({ streams: { ...s.streams, [message.id]: { message, revision: 0 } } })),
+		removeStream: (messageId) =>
+			set((s) => {
+				const { [messageId]: _, ...stream } = s.streams
+				return { streams: stream }
+			}),
+		invalidateStream: (messageId) =>
+			set((s) => {
+				const stream = s.streams[messageId]
+
+				if (!stream)
+					return s
+
+				return {
+					streams: {
+						...s.streams,
+						[messageId]: {
+							...stream,
+							revision: stream.revision + 1,
+						},
+					},
 				}
-			})),
+			}),
 
 	}))
 }

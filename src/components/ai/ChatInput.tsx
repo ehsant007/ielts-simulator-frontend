@@ -4,7 +4,7 @@ import { BsStopFill } from "react-icons/bs"
 import { HiArrowUp } from "react-icons/hi"
 import { LuAudioLines, LuCheck, LuLoader, LuMic, LuX } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
-import { useChatStore } from "./ChatProvider"
+import { useChatStore, useChatStoreApi } from "./ChatProvider"
 import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useAddMessage, useChatCreateMutation, useMessageCreateStreamMutation, useRecorder, useSelectChat } from "./hooks"
 import { useIsMobile } from "@/providers/BreakPointProvider"
 import { v7 as uuid7 } from "uuid"
@@ -283,25 +283,6 @@ function ChatInputInner({
 					</Box>
 				}
 
-				{/* {mode === "live" &&
-					<Box
-						position="absolute"
-						bottom="0"
-						left="0"
-						w="full"
-						h={expand1 ? "3.5rem" : "full"}
-						pe="7rem"
-						ps="5"
-						borderRadius="4xl"
-						bg="bg.muted"
-					>
-						<AbsoluteCenter>
-							<InputButton variant="solid" colorPalette="primary" onClick={handleEndCall}>
-								<BsStopFill />
-							</InputButton>
-						</AbsoluteCenter>
-					</Box>
-				} */}
 			</Box>
 		</InputGroup>
 	)
@@ -322,25 +303,19 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 	const setDraft = useChatStore(s => s.setDraft)
 	const setUserMsg = (value: string) => setDraft(chatId, value)
 
-	const setStreamingMessage = useChatStore((s) => s.setStreamingMessage)
+	const addStream = useChatStore((s) => s.addStream)
+	const removeStream = useChatStore((s) => s.removeStream)
+	const invalidateStream = useChatStore((s) => s.invalidateStream)
+	const store = useChatStoreApi()
 
 	const createMessageMut = useMessageCreateStreamMutation({
-		onMutate: ({ chat_id }) => {
+		onMutate: () => {
 			setUserMsg("")
 			onMessageCreate?.()
-			setStreamingMessage(chat_id, "")
 		},
 
 		onError: (createData) => {
 			setUserMsg(createData.content)
-		},
-
-		onStream: (data, chat_id) => {
-			setStreamingMessage(chat_id, prev => (prev ?? "") + data)
-		},
-
-		onStreamEnd: (chat_id) => {
-			setStreamingMessage(chat_id, undefined)
 		},
 	})
 
@@ -363,12 +338,6 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			)
 
 			selectChat(chat.id)
-			// createMessageMut.mutate({
-			// 	id: uuid7(),
-			// 	content: createData.message,
-			// 	chat_id: chat.id
-			// }
-			// )
 		},
 	})
 
@@ -436,18 +405,41 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 	const addMessage = useAddMessage()
 
 	const liveAssistant = useGoogleLiveAssistant({
-		onUserTranscript: (text) => {
-			addMessage(chatId, text, "user")
+		onUserTranscript: ({ id, content }) => {
+			if (!chatId)
+				return
+
+			addMessage({
+				id,
+				chat_id: chatId,
+				content,
+				role: "user",
+				created_at: new Date().toISOString(),
+			})
 		},
 
-		onAssistantTranscript: (text, partial) => {
-			if (partial) {
-				setStreamingMessage(chatId, prev => (prev ?? "") + text)
+		onAssistantTranscript: ({ id, content, partial }) => {
+			let message = store.getState().streams[id]?.message
+			if (message == null) {
+				message = {
+					id,
+					chat_id: chatId,
+					content,
+					role: "assistant",
+					created_at: new Date().toISOString(),
+				}
+				addMessage(message)
+				addStream(message)
 				return
 			}
 
-			setStreamingMessage(chatId, undefined)
-			addMessage(chatId, text, "assistant")
+			if (partial) {
+				message.content += content
+				invalidateStream(message.id)
+			} else {
+				message.content = content
+				removeStream(message.id)
+			}
 		},
 	})
 
@@ -468,7 +460,6 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			chat_id = chat.id
 		}
 
-		setStreamingMessage(chat_id, undefined)
 		liveAssistant.startSession(`ws://localhost:8000/api/v1/ai/tutor/${chat_id}`)
 	}
 

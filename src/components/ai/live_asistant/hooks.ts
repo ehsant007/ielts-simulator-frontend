@@ -7,9 +7,16 @@ interface CustomWindow extends Window {
 	webkitAudioContext?: typeof AudioContext;
 }
 
+export type WebSocketMessage = {
+	event: string
+	id: string
+	content: string
+	partial?: boolean
+}
+
 export type UseGoogleLiveAssistantProps = {
-	onUserTranscript?: (text: string, partial: boolean) => void
-	onAssistantTranscript?: (text: string, partial: boolean) => void
+	onUserTranscript?: (transcript: WebSocketMessage) => void
+	onAssistantTranscript?: (transcript: WebSocketMessage) => void
 }
 
 
@@ -44,24 +51,24 @@ export function useGoogleLiveAssistant({
 		setIsConnected(false);
 	}, []);
 
-	const wsEventHandler = useCallback((message: {event:string, data:string, partial?:boolean}) => {
+	const wsEventHandler = useCallback((message: WebSocketMessage) => {
 		const streamer = streamerRef.current
 		if (streamer == null)
 			return
 		//console.log(message)
 		switch (message.event) {
 			case "audio":
-				const binaryData = Uint8Array.from(atob(message.data), (c) => c.charCodeAt(0));
+				const binaryData = Uint8Array.from(atob(message.content), (c) => c.charCodeAt(0));
 				streamer.addPCM16(binaryData);
 				break
 			case "interrupted":
 				streamer.interrupt()
 				break
 			case "user_transcript":
-				onUserTranscript?.(message.data, message.partial!)
+				onUserTranscript?.(message)
 				break
 			case "assistant_transcript":
-				onAssistantTranscript?.(message.data, message.partial!)
+				onAssistantTranscript?.(message)
 				break
 		}
 	}, [onUserTranscript, onAssistantTranscript])

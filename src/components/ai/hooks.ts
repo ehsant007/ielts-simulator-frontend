@@ -1,10 +1,9 @@
-import { AiChatCreate, AiMessagePage, AiChatRead, AiChatPage, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, createMessage, deleteChat, readChatById, readChats, readMessages, updateChat, AiMessageRole } from "@/client"
+import { AiChatCreate, AiMessagePage, AiChatRead, AiChatPage, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, createMessage, deleteChat, readChatById, readChats, readMessages, updateChat } from "@/client"
 import { InfiniteData, infiniteQueryOptions, useInfiniteQuery, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query"
 import { streamMessage } from "./stream"
 import { useCallback, useEffect, useRef, useState } from "react"
 //import { usePathname, useRouter } from "next/navigation"
 import { useChatStore } from "./ChatProvider"
-import { v7 as uuid7 } from "uuid"
 
 export const chatsQueryKey = ["ai-chats"] as const
 export const chatCreateKey = ["ai-chat-create"] as const
@@ -286,18 +285,9 @@ export function messagesQueryOptions(chat_id: string | null | undefined) {
 export function useAddMessage() {
 	const queryClient = useQueryClient()
 
-	return (chatId: string, content: string, role: AiMessageRole) => {
-
-		const message: AiMessageRead = {
-			id: uuid7(),
-			chat_id:chatId,
-			role,
-			content,
-			created_at: new Date().toISOString(),
-		}
-
+	return (message: AiMessageRead) => {
 		queryClient.setQueryData<InfiniteData<AiMessagePage>>(
-			messagesQueryKey(chatId),
+			messagesQueryKey(message.chat_id),
 			(prev) => {
 				if (!prev || prev.pages.length === 0) {
 					return prev
@@ -418,49 +408,16 @@ export function cancelMessageCreate(chatId: string | undefined | null) {
 }
 
 export type UseMessageCreateStreamMutationProps = {
-	onStream?: (data: string, chat_id: string) => void
+	onStream?: (response: AiMessageRead) => void
 	onStreamEnd?: (chat_id: string) => void
 } & UseMessageCreateMutationProps
 
-export function useMessageCreateStreamMutation({ onMutate, onError, onSettled, onStream, onStreamEnd }: UseMessageCreateStreamMutationProps) {
-	const queryClient = useQueryClient()
+export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessageCreateStreamMutationProps) {
+	const addMessage = useAddMessage()
 
-	const addMessages = (chat_id: string, values: AiMessageRead[]) => queryClient.setQueryData<InfiniteData<AiMessagePage>>(
-		messagesQueryKey(chat_id),
-		(prev) => {
-			if (!prev || prev.pages.length === 0) {
-				return prev
-			}
-
-			const pages = prev.pages
-			const lastPage = pages[pages.length - 1]
-
-			return {
-				...prev,
-				pages: [
-					...pages.slice(0, -1),
-					{ ...lastPage, messages: [...lastPage.messages, ...values] },
-				],
-			}
-		}
-	)
-
-	// let pending = ""
-	// let raf: number | null = null
-
-	// function pushDelta(delta: string, chat_id: string) {
-	// 	pending += delta
-
-	// 	if (raf !== null)
-	// 		return
-
-	// 	raf = requestAnimationFrame(() => {
-	// 		const value = pending
-	// 		pending = ""
-	// 		raf = null
-	// 		onStream?.(value, chat_id)
-	// 	})
-	// }
+	const addStream = useChatStore((s) => s.addStream)
+	const removeStream = useChatStore((s) => s.removeStream)
+	const invalidateStream = useChatStore((s) => s.invalidateStream)
 
 	const createMessageMutation = useMutation({
 		mutationKey: messageCreateKey,
@@ -480,14 +437,15 @@ export function useMessageCreateStreamMutation({ onMutate, onError, onSettled, o
 					switch (event.type) {
 
 						case "start":
-							addMessages(data.chat_id, [event.request])
 							response = event.response
+							addMessage(event.request)
+							addMessage(response)
+							addStream(response)
 							break
 
 						case "delta":
-							//pushDelta(event.delta, data.chat_id)
-							onStream?.(event.delta, data.chat_id)
 							response!.content += event.delta
+							invalidateStream(response!.id)
 							break
 
 						case "done":
@@ -505,7 +463,7 @@ export function useMessageCreateStreamMutation({ onMutate, onError, onSettled, o
 			if (response == null)
 				throw new Error("No response from server!")
 
-			addMessages(data.chat_id, [response])
+			removeStream(response.id)
 		},
 
 		onMutate: (data) => {
@@ -514,16 +472,7 @@ export function useMessageCreateStreamMutation({ onMutate, onError, onSettled, o
 
 		onError: (_error, data) => {
 			onError?.(data)
-			onStreamEnd?.(data.chat_id)
 		},
-
-		onSettled: (_data, _error, data) => {
-			onSettled?.(data)
-		},
-		
-		onSuccess:(_data, {chat_id})=>{
-			onStreamEnd?.(chat_id)
-		}
 	})
 
 	return createMessageMutation
