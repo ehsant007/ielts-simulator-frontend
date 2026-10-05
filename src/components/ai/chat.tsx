@@ -16,6 +16,7 @@ import { StickToBottomInstance, useStickToBottom } from "use-stick-to-bottom"
 import { Markdown } from "./Markdown"
 import { MessageNavigator } from "./MessageNavigator"
 import { useMutationState } from "@tanstack/react-query"
+import { ChatInputProvider } from "./ChatInputProvider"
 
 
 export function ChatPanel({ initialChatId }: { initialChatId?: string }) {
@@ -25,7 +26,9 @@ export function ChatPanel({ initialChatId }: { initialChatId?: string }) {
 			<ChatStoreProvider initialChatId={initialChatId}>
 				<HStack h="full" gap="0" pos="relative">
 					<ChatSidebar />
-					<ChatBox maxW="3xl" py="6" px="8" mx="auto" />
+					<ChatInputProvider>
+						<ChatBox maxW="3xl" py="6" px="8" mx="auto" />
+					</ChatInputProvider>
 				</HStack>
 			</ChatStoreProvider>
 		</ClientOnly>
@@ -121,7 +124,7 @@ export function ChatBox(props: BoxProps) {
 								}
 
 								<Box w="full" ref={inputRef}>
-									<ChatInput onMessageCreate={() => sticky.scrollToBottom()} key={chatId} />
+									<ChatInput onSend={() => sticky.scrollToBottom()} key={chatId} />
 								</Box>
 							</VStack>
 						</Box>

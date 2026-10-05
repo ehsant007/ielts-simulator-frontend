@@ -4,13 +4,10 @@ import { BsStopFill } from "react-icons/bs"
 import { HiArrowUp } from "react-icons/hi"
 import { LuAudioLines, LuCheck, LuLoader, LuMic, LuX } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
-import { useChatStore } from "./ChatProvider"
-import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useChatCreateMutation, useChatLiveAssistant, useMessageCreateStreamMutation, useRecorder, useSelectChat, useTranscriber } from "./hooks"
+import { useRecorder } from "./hooks"
 import { useIsMobile } from "@/providers/BreakPointProvider"
-import { v7 as uuid7 } from "uuid"
-import { InfiniteData, useMutationState, useQueryClient } from "@tanstack/react-query"
-import { AiMessagePage, AiMessageCreate } from "@/client"
 import { AudioRecorderVisualizer } from "./RecorderVisualizer"
+import { useChatInput } from "./ChatInputProvider"
 
 
 function InputButton({ children, waiting, ...props }: { waiting?: boolean } & IconButtonProps) {
@@ -291,142 +288,43 @@ function ChatInputInner({
 }
 
 type ChatInputProps = {
-	onMessageCreate?: () => void
+	onSend?: () => void
 } & Omit<InputGroupProps, "children">
 
-export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
-	const [mode, setMode] = useState<InputMode>("text")
-
-	const queryClient = useQueryClient()
-	const activeChatId = useChatStore(s => s.activeChatId)
-	const selectChat = useSelectChat()
-
-	const chatId = activeChatId ?? "default"
-
-	const userMsg = useChatStore(s => s.drafts[chatId])
-	const setDraft = useChatStore(s => s.setDraft)
-	const setUserMsg = (value: string) => setDraft(chatId, value)
-
-	const createMessageMut = useMessageCreateStreamMutation({
-		onMutate: () => {
-			setUserMsg("")
-			onMessageCreate?.()
-		},
-
-		onError: (createData) => {
-			setUserMsg(createData.content)
-		},
-	})
-
-	const chatCreateMutation = useChatCreateMutation({
-		onSuccess: (chat, _createData) => {
-
-			// Initialize the messages query cache when a new chat is created
-			queryClient.setQueryData<InfiniteData<AiMessagePage>>(
-				messagesQueryKey(chat.id),
-				{
-					pages: [
-						{
-							messages: [],
-							previous_cursor: null,
-							next_cursor: null,
-						},
-					],
-					pageParams: [{}],
-				}
-			)
-
-			selectChat(chat.id)
-		},
-	})
-
-	const isMessageCreating = useMutationState({
-		filters: {
-			mutationKey: messageCreateKey,
-			status: "pending",
-		},
-		select: mutation => (mutation.state.variables as AiMessageCreate).chat_id === activeChatId,
-	}).some(Boolean)
-
-	const pending = chatCreateMutation.isPending || isMessageCreating
-
-	const handleSend = async () => {
-		if (!userMsg || !userMsg.trim() || pending)
-			return
-
-		const msg = userMsg
-		let chat_id = activeChatId
-
-		if (chat_id == null) {
-			const { data: chat, response } = await chatCreateMutation.mutateAsync({
-				id: uuid7(),
-				message: msg,
-				title: userMsg.slice(0, 20)
-			})
-
-			if (!response.ok)
-				return
-
-			chat_id = chat.id
-		}
-
-		createMessageMut.mutate({
-			id: uuid7(),
-			content: msg,
-			chat_id: chat_id
-		})
-	}
-
-
-	const transcriber = useTranscriber({
-		onTranscribe: (text) => {
-			setDraft(chatId, prev => (prev ? prev + "\n\n" : "") + text)
-		},
-	})
-
-
-	const liveAssistant = useChatLiveAssistant({
-		onSessionStop: () => {
-			setMode("text")
-		}
-	})
-
-
-	const handleCall = async () => {
-		let chat_id = activeChatId
-
-		if (chat_id == null) {
-			const { data: chat, response } = await chatCreateMutation.mutateAsync({
-				id: uuid7(),
-				message: userMsg,
-				title: "New live conversation"
-			})
-
-			if (!response.ok)
-				return
-
-			chat_id = chat.id
-		}
-
-		liveAssistant.startSession(`ws://localhost:8000/api/v1/ai/tutor/${chat_id}`)
-	}
+export function ChatInput({ onSend, ...props }: ChatInputProps) {
+	const {
+		mode,
+		setMode,
+		value,
+		setValue,
+		send,
+		cancelSend,
+		isSending,
+		call,
+		endCall,
+		transcriber,
+	} = useChatInput()
 
 	return (
 		<ChatInputInner
 			mode={mode}
-			setMode={(mode) => setMode(mode)}
-			value={userMsg}
-			onValueChange={(value) => setUserMsg(value)}
-			onSend={handleSend}
-			onStop={() => cancelMessageCreate(activeChatId)}
-			sending={pending}
+			setMode={setMode}
+			value={value}
+			onValueChange={setValue}
+			onSend={()=>{
+				send()
+				onSend?.()
+			}}
+			onStop={cancelSend}
+			sending={isSending}
+
 			onVoiceSubmit={async blob => {
 				await transcriber.mutateAsync(blob)
 			}}
 			onVoiceSubmitCancel={transcriber.cancel}
 
-			onCall={handleCall}
-			onEndCall={liveAssistant.stopSession}
+			onCall={call}
+			onEndCall={endCall}
 
 			{...props}
 		/>
