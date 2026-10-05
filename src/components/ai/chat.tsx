@@ -438,11 +438,11 @@ export function WaitingIndicator(props: IconProps) {
 
 export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 
-	useChatStore((s) => s.streams[msg.id])
+	const revision = useChatStore((s) => s.streams[msg.id]?.revision)
 
 	const content = useDeferredValue(msg.content)
 
-	if (msg.content === "")
+	if (revision != null && msg.content === "")
 		return <WaitingIndicator />
 
 	return (
