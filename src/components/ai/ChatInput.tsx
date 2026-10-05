@@ -410,25 +410,22 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 	const addMessage = useAddMessage()
 
 	const liveAssistant = useGoogleLiveAssistant({
-		onUserTranscript: ({ id, content }) => {
-			if (!chatId)
-				return
-
+		onUserTranscript: ({ chat_id, message_id, content }) => {
 			addMessage({
-				id,
-				chat_id: chatId,
+				id: message_id,
+				chat_id: chat_id,
 				content,
 				role: "user",
 				created_at: new Date().toISOString(),
 			})
 		},
 
-		onAssistantTranscript: ({ id, content, partial }) => {
-			let message = store.getState().streams[chatId]?.message
+		onAssistantTranscript: ({ chat_id, message_id, content, partial }) => {
+			let message = store.getState().streams[chat_id]?.message
 			if (message == null) {
 				message = {
-					id,
-					chat_id: chatId,
+					id: message_id,
+					chat_id: chat_id,
 					content,
 					role: "assistant",
 					created_at: new Date().toISOString(),

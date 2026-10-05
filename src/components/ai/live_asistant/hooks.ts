@@ -10,9 +10,10 @@ interface CustomWindow extends Window {
 
 export type WebSocketMessage = {
 	event: string
-	id: string
+	message_id: string
 	content: string
 	partial?: boolean
+	chat_id: string
 }
 
 export type UseGoogleLiveAssistantProps = {
@@ -59,7 +60,7 @@ export function useGoogleLiveAssistant({
 		const streamer = streamerRef.current
 		if (streamer == null)
 			return
-		//console.log(message)
+
 		switch (message.event) {
 			case "audio":
 				const binaryData = Uint8Array.from(atob(message.content), (c) => c.charCodeAt(0));
@@ -127,7 +128,7 @@ export function useGoogleLiveAssistant({
 
 			ws.onclose = (event: CloseEvent) => {
 				if (event.code === 1005) {
-					
+
 				} else if (event.code > 1000) {
 					toaster.create({
 						title: `Error (${event.code})`,
