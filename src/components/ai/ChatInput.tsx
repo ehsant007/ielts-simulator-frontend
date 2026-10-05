@@ -34,9 +34,11 @@ function InputButton({ children, waiting, ...props }: { waiting?: boolean } & Ic
 	)
 }
 
-type InputMode = "text" | "voice" | "live"
+type InputMode = "text" | "voice" | "call"
 
 export type ChatInputInnerProps = {
+	mode: InputMode
+	setMode: (mode: InputMode) => void
 	value?: string
 	onValueChange?: (value: string) => void
 	onSend?: () => void
@@ -49,6 +51,8 @@ export type ChatInputInnerProps = {
 } & Omit<InputGroupProps, "children">
 
 function ChatInputInner({
+	mode,
+	setMode,
 	value,
 	onValueChange,
 	onSend,
@@ -60,7 +64,6 @@ function ChatInputInner({
 	sending,
 	...props
 }: ChatInputInnerProps) {
-	const [mode, setMode] = useState<InputMode>("text")
 
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
 	const singleLineHeight = useRef(Number.MAX_VALUE)
@@ -109,7 +112,7 @@ function ChatInputInner({
 	}
 
 	const handleCall = () => {
-		setMode("live")
+		setMode("call")
 		onCall?.()
 	}
 
@@ -183,7 +186,7 @@ function ChatInputInner({
 							</>
 						}
 
-						{mode === "live" &&
+						{mode === "call" &&
 							<InputButton variant="solid" colorPalette="primary" onClick={handleEndCall}>
 								<BsStopFill />
 							</InputButton>
@@ -290,9 +293,11 @@ function ChatInputInner({
 
 type ChatInputProps = {
 	onMessageCreate?: () => void
-} & ChatInputInnerProps
+} & Omit<InputGroupProps, "children">
 
 export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
+	const [mode, setMode] = useState<InputMode>("text")
+
 	const queryClient = useQueryClient()
 	const activeChatId = useChatStore(s => s.activeChatId)
 	const selectChat = useSelectChat()
@@ -441,6 +446,10 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 				removeStream(message.chat_id)
 			}
 		},
+
+		onSessionStop: () => {
+			setMode("text")
+		}
 	})
 
 
@@ -465,6 +474,8 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 
 	return (
 		<ChatInputInner
+			mode={mode}
+			setMode={(mode) => setMode(mode)}
 			value={userMsg}
 			onValueChange={(value) => setUserMsg(value)}
 			onSend={handleSend}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AudioRecorder } from "./lib/audio-recorder";
 import { AudioStreamer } from "./lib/audio-streamer";
+import { toaster } from "@/components/ui/toaster";
 
 // Legacy property to support outdated iOS devices and Safari versions
 interface CustomWindow extends Window {
@@ -17,6 +18,7 @@ export type WebSocketMessage = {
 export type UseGoogleLiveAssistantProps = {
 	onUserTranscript?: (transcript: WebSocketMessage) => void
 	onAssistantTranscript?: (transcript: WebSocketMessage) => void
+	onSessionStop?: () => void
 }
 
 
@@ -24,6 +26,7 @@ export type UseGoogleLiveAssistantProps = {
 export function useGoogleLiveAssistant({
 	onUserTranscript,
 	onAssistantTranscript,
+	onSessionStop,
 }: UseGoogleLiveAssistantProps = {}) {
 	const [isConnected, setIsConnected] = useState(false);
 	const [isRecording, setIsRecording] = useState(false);
@@ -49,7 +52,8 @@ export function useGoogleLiveAssistant({
 
 		setIsRecording(false);
 		setIsConnected(false);
-	}, []);
+		onSessionStop?.()
+	}, [onSessionStop]);
 
 	const wsEventHandler = useCallback((message: WebSocketMessage) => {
 		const streamer = streamerRef.current
@@ -121,7 +125,19 @@ export function useGoogleLiveAssistant({
 				}
 			};
 
-			ws.onclose = () => stopSession();
+			ws.onclose = (event: CloseEvent) => {
+				if (event.code > 1000) {
+					toaster.create({
+						title: `Error (${event.code})`,
+						type: "error",
+						closable: true,
+						duration: 3000,
+						description: event.reason,
+					})
+				}
+
+				stopSession();
+			}
 			ws.onerror = (err) => {
 				console.error("WebSocket Error:", err);
 				stopSession();
@@ -146,26 +162,3 @@ export function useGoogleLiveAssistant({
 		isRecording,
 	};
 }
-
-
-
-// ws.onmessage = (event) => {
-//   const message = JSON.parse(event.data);
-
-//   switch (message.event) {
-//     case 'audio':
-//       // Feed base64 PCM chunk into Web Audio API / AudioWorklet buffer
-//       playAudioChunk(message.data);
-//       break;
-
-//     case 'model_transcript':
-//       // Append streaming text to live caption overlay or examiner chat bubble
-//       updateExaminerCaptions(message.data, message.partial);
-//       break;
-
-//     case 'user_transcript':
-//       // Display recognized student speech in UI
-//       updateStudentCaptions(message.data);
-//       break;
-//   }
-// };
