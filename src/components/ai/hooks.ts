@@ -445,7 +445,7 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 
 						case "delta":
 							response!.content += event.delta
-							invalidateStream(response!.id)
+							invalidateStream(response!.chat_id)
 							break
 
 						case "done":
@@ -463,7 +463,7 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 			if (response == null)
 				throw new Error("No response from server!")
 
-			removeStream(response.id)
+			removeStream(response.chat_id)
 		},
 
 		onMutate: (data) => {

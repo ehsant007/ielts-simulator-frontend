@@ -16,8 +16,8 @@ export type ChatStore = {
 
 	streams: Record<string, { message: AiMessageRead, revision: number }>
 	addStream: (message: AiMessageRead) => void
-	removeStream: (messageId: string) => void
-	invalidateStream: (messageId: string) => void
+	removeStream: (chatId: string) => void
+	invalidateStream: (chatId: string) => void
 }
 
 
@@ -41,15 +41,20 @@ export function createChatStore(initialChatId?: string) {
 			})),
 
 		streams: {},
-		addStream: (message) => set((s) => ({ streams: { ...s.streams, [message.id]: { message, revision: 0 } } })),
-		removeStream: (messageId) =>
+		addStream: (message) => set((s) => ({
+			streams: {
+				...s.streams,
+				[message.chat_id]: { message, revision: 0 },
+			}
+		})),
+		removeStream: (chatId) =>
 			set((s) => {
-				const { [messageId]: _, ...stream } = s.streams
+				const { [chatId]: _, ...stream } = s.streams
 				return { streams: stream }
 			}),
-		invalidateStream: (messageId) =>
+		invalidateStream: (chatId) =>
 			set((s) => {
-				const stream = s.streams[messageId]
+				const stream = s.streams[chatId]
 
 				if (!stream)
 					return s
@@ -57,14 +62,13 @@ export function createChatStore(initialChatId?: string) {
 				return {
 					streams: {
 						...s.streams,
-						[messageId]: {
+						[chatId]: {
 							...stream,
 							revision: stream.revision + 1,
 						},
 					},
 				}
 			}),
-
 	}))
 }
 

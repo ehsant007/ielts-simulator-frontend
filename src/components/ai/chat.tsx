@@ -1,6 +1,6 @@
 "use client"
 
-import { AiMessageRead } from "@/client"
+import { AiMessageCreate, AiMessageRead } from "@/client"
 import { VStack, Text, HStack, Box, IconButton, Center, Spinner, Icon, ClientOnly, ScrollArea, mergeRefs } from "@chakra-ui/react"
 import { LuArrowDown, LuRefreshCw } from "react-icons/lu"
 import type { BoxProps, IconProps, StackProps } from "@chakra-ui/react"
@@ -8,13 +8,14 @@ import { Fragment, RefObject, useDeferredValue, useEffect, useLayoutEffect, useR
 import { MdEdit } from "react-icons/md"
 import { ChatTime, isSameDay, CopyButton, PartialCollapse } from "./utils";
 import { ChatStoreProvider, useChatStore } from "./ChatProvider";
-import { useMessagesQuery } from "./hooks"
+import { messageCreateKey, useMessagesQuery } from "./hooks"
 import { BsCircleFill } from "react-icons/bs"
 import { ChatInput } from "./ChatInput"
 import { ChatSidebar } from "./ChatSidebar"
 import { StickToBottomInstance, useStickToBottom } from "use-stick-to-bottom"
 import { Markdown } from "./Markdown"
 import { MessageNavigator } from "./MessageNavigator"
+import { useMutationState } from "@tanstack/react-query"
 
 
 export function ChatPanel({ initialChatId }: { initialChatId?: string }) {
@@ -309,7 +310,7 @@ export function Messages({ chatId, scrollRef, sticky, ...props }: MessagesProps)
 				)
 			})}
 
-			{/* <AssistantTypeWriter chatId={chatId} /> */}
+			<WaitingIndicator />
 
 		</VStack>
 	)
@@ -421,12 +422,30 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 
 
 export function WaitingIndicator(props: IconProps) {
+	const chatId = useChatStore((s) => s.activeChatId)
+	const stream = useChatStore((s) => s.streams[chatId ?? "null"])
+
+	const isAnyMessageCreating = useMutationState({
+		filters: {
+			mutationKey: messageCreateKey,
+			status: "pending",
+		},
+		select: (mutation) =>
+			(mutation.state.variables as AiMessageCreate).chat_id === chatId,
+	}).some(Boolean)
+
+	if (!isAnyMessageCreating)
+		return null
+
+	if (stream && stream.message.content !== "")
+		return null
+
 	return (
 		<Icon
 			as={BsCircleFill}
 			alignSelf={"start"}
 			size="md"
-			color="primary"
+			color={stream ? "fg.success" : "primary"}
 			animationName="breathing"
 			animationDuration="1.5s"
 			animationTimingFunction="ease-in-out"
@@ -437,13 +456,17 @@ export function WaitingIndicator(props: IconProps) {
 }
 
 export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
-
-	const revision = useChatStore((s) => s.streams[msg.id]?.revision)
+	const revision = useChatStore((s) => {
+		const stream = s.streams[msg.chat_id]
+		if (stream == null || stream.message.id !== msg.id)
+			return null
+		return stream.revision
+	})
 
 	const content = useDeferredValue(msg.content)
 
 	if (revision != null && msg.content === "")
-		return <WaitingIndicator />
+		return null
 
 	return (
 		<Box alignSelf="start" w="full" id={msg.id}>

@@ -435,10 +435,10 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 
 			if (partial) {
 				message.content += content
-				invalidateStream(message.id)
+				invalidateStream(message.chat_id)
 			} else {
 				message.content = content
-				removeStream(message.id)
+				removeStream(message.chat_id)
 			}
 		},
 	})
