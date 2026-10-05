@@ -424,7 +424,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 		},
 
 		onAssistantTranscript: ({ id, content, partial }) => {
-			let message = store.getState().streams[id]?.message
+			let message = store.getState().streams[chatId]?.message
 			if (message == null) {
 				message = {
 					id,

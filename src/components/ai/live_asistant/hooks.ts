@@ -126,7 +126,9 @@ export function useGoogleLiveAssistant({
 			};
 
 			ws.onclose = (event: CloseEvent) => {
-				if (event.code > 1000) {
+				if (event.code === 1005) {
+					
+				} else if (event.code > 1000) {
 					toaster.create({
 						title: `Error (${event.code})`,
 						type: "error",
