@@ -1,9 +1,10 @@
-import { AiChatCreate, AiMessagePage, AiChatRead, AiChatPage, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, createMessage, deleteChat, readChatById, readChats, readMessages, updateChat } from "@/client"
+import { AiChatCreate, AiMessagePage, AiChatRead, AiChatPage, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, createMessage, deleteChat, readChatById, readChats, readMessages, updateChat, transcribeAudio } from "@/client"
 import { InfiniteData, infiniteQueryOptions, useInfiniteQuery, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query"
 import { streamMessage } from "./stream"
 import { useCallback, useEffect, useRef, useState } from "react"
 //import { usePathname, useRouter } from "next/navigation"
-import { useChatStore } from "./ChatProvider"
+import { useChatStore, useChatStoreApi } from "./ChatProvider"
+import { useGoogleLiveAssistant, UseGoogleLiveAssistantProps } from "./live_asistant/hooks"
 
 export const chatsQueryKey = ["ai-chats"] as const
 export const chatCreateKey = ["ai-chat-create"] as const
@@ -632,4 +633,89 @@ export function useActiveChat() {
 	const { data: chat } = useChatQuery(chatId)
 
 	return chat
+}
+
+
+export function useChatLiveAssistant(props: UseGoogleLiveAssistantProps = {}) {
+	const addStream = useChatStore((s) => s.addStream)
+	const removeStream = useChatStore((s) => s.removeStream)
+	const invalidateStream = useChatStore((s) => s.invalidateStream)
+	const store = useChatStoreApi()
+	const addMessage = useAddMessage()
+
+	const liveAssistant = useGoogleLiveAssistant({
+		onUserTranscript: ({ chat_id, message_id, content }) => {
+			addMessage({
+				id: message_id,
+				chat_id: chat_id,
+				content,
+				role: "user",
+				created_at: new Date().toISOString(),
+			})
+		},
+
+		onAssistantTranscript: ({ chat_id, message_id, content, partial }) => {
+			let message = store.getState().streams[chat_id]?.message
+			if (message == null) {
+				message = {
+					id: message_id,
+					chat_id: chat_id,
+					content,
+					role: "assistant",
+					created_at: new Date().toISOString(),
+				}
+				addMessage(message)
+				addStream(message)
+				return
+			}
+
+			if (partial) {
+				message.content += content
+				invalidateStream(message.chat_id)
+			} else {
+				message.content = content
+				removeStream(message.chat_id)
+			}
+		},
+
+		...props,
+	})
+
+	return liveAssistant
+}
+
+
+export function useTranscriber({ onTranscribe }: { onTranscribe?: (text: string) => void }) {
+	const transcriberController = useRef<AbortController>(new AbortController())
+
+	const transcriber = useMutation({
+		mutationKey: ["transcriber"],
+
+		mutationFn: async (audio: Blob) => {
+			transcriberController.current = new AbortController()
+			const res = await transcribeAudio({
+				body: {
+					audio: audio,
+				},
+				signal: transcriberController.current.signal,
+			})
+
+			return res.data
+		},
+
+		onSuccess: (data) => {
+			if (data == null)
+				return
+			onTranscribe?.(data.message)
+		},
+	})
+
+	const cancel = useCallback(() => {
+		transcriberController.current.abort("Voice submit canceled.")
+	}, [])
+
+	return {
+		...transcriber,
+		cancel,
+	}
 }

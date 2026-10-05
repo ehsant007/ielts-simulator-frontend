@@ -4,14 +4,13 @@ import { BsStopFill } from "react-icons/bs"
 import { HiArrowUp } from "react-icons/hi"
 import { LuAudioLines, LuCheck, LuLoader, LuMic, LuX } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
-import { useChatStore, useChatStoreApi } from "./ChatProvider"
-import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useAddMessage, useChatCreateMutation, useMessageCreateStreamMutation, useRecorder, useSelectChat } from "./hooks"
+import { useChatStore } from "./ChatProvider"
+import { cancelMessageCreate, messageCreateKey, messagesQueryKey, useChatCreateMutation, useChatLiveAssistant, useMessageCreateStreamMutation, useRecorder, useSelectChat, useTranscriber } from "./hooks"
 import { useIsMobile } from "@/providers/BreakPointProvider"
 import { v7 as uuid7 } from "uuid"
-import { InfiniteData, useMutation, useMutationState, useQueryClient } from "@tanstack/react-query"
-import { AiMessagePage, AiMessageCreate, transcribeAudio } from "@/client"
+import { InfiniteData, useMutationState, useQueryClient } from "@tanstack/react-query"
+import { AiMessagePage, AiMessageCreate } from "@/client"
 import { AudioRecorderVisualizer } from "./RecorderVisualizer"
-import { useGoogleLiveAssistant } from "./live_asistant/hooks"
 
 
 function InputButton({ children, waiting, ...props }: { waiting?: boolean } & IconButtonProps) {
@@ -308,11 +307,6 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 	const setDraft = useChatStore(s => s.setDraft)
 	const setUserMsg = (value: string) => setDraft(chatId, value)
 
-	const addStream = useChatStore((s) => s.addStream)
-	const removeStream = useChatStore((s) => s.removeStream)
-	const invalidateStream = useChatStore((s) => s.invalidateStream)
-	const store = useChatStoreApi()
-
 	const createMessageMut = useMessageCreateStreamMutation({
 		onMutate: () => {
 			setUserMsg("")
@@ -383,67 +377,15 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 		})
 	}
 
-	const transcriberController = useRef<AbortController>(new AbortController())
 
-	const transcriber = useMutation({
-		mutationKey: ["transcriber"],
-
-		mutationFn: async (audio: Blob) => {
-			transcriberController.current = new AbortController()
-			const res = await transcribeAudio({
-				body: {
-					audio: audio,
-				},
-				signal: transcriberController.current.signal,
-			})
-
-			return res.data
-		},
-
-		onSuccess: (data) => {
-			if (data == null)
-				return
-			setDraft(chatId, prev => (prev ? prev + "\n\n" : "") + data.message)
+	const transcriber = useTranscriber({
+		onTranscribe: (text) => {
+			setDraft(chatId, prev => (prev ? prev + "\n\n" : "") + text)
 		},
 	})
 
-	const addMessage = useAddMessage()
 
-	const liveAssistant = useGoogleLiveAssistant({
-		onUserTranscript: ({ chat_id, message_id, content }) => {
-			addMessage({
-				id: message_id,
-				chat_id: chat_id,
-				content,
-				role: "user",
-				created_at: new Date().toISOString(),
-			})
-		},
-
-		onAssistantTranscript: ({ chat_id, message_id, content, partial }) => {
-			let message = store.getState().streams[chat_id]?.message
-			if (message == null) {
-				message = {
-					id: message_id,
-					chat_id: chat_id,
-					content,
-					role: "assistant",
-					created_at: new Date().toISOString(),
-				}
-				addMessage(message)
-				addStream(message)
-				return
-			}
-
-			if (partial) {
-				message.content += content
-				invalidateStream(message.chat_id)
-			} else {
-				message.content = content
-				removeStream(message.chat_id)
-			}
-		},
-
+	const liveAssistant = useChatLiveAssistant({
 		onSessionStop: () => {
 			setMode("text")
 		}
@@ -481,7 +423,7 @@ export function ChatInput({ onMessageCreate, ...props }: ChatInputProps) {
 			onVoiceSubmit={async blob => {
 				await transcriber.mutateAsync(blob)
 			}}
-			onVoiceSubmitCancel={() => transcriberController.current.abort("Voice submit canceled.")}
+			onVoiceSubmitCancel={transcriber.cancel}
 
 			onCall={handleCall}
 			onEndCall={liveAssistant.stopSession}
