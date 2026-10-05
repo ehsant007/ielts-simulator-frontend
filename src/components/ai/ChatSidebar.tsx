@@ -1,5 +1,5 @@
-import { AiChatRead } from "@/client"
-import { VStack, Text, Button, HStack, Box, IconButton, Menu, Portal, Group, Skeleton, Drawer, CloseButton, Popover } from "@chakra-ui/react"
+import { AiChatRead, AiMessageCreate } from "@/client"
+import { VStack, Text, Button, HStack, Box, IconButton, Menu, Portal, Group, Skeleton, Drawer, CloseButton, Popover, Spinner, Center } from "@chakra-ui/react"
 import { LuEllipsis, LuMessageCircle, LuPin, LuPinOff, LuTrash } from "react-icons/lu"
 import type { ButtonProps, GroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
@@ -7,12 +7,13 @@ import { useEffect, useRef, useState } from "react"
 import { MdEdit } from "react-icons/md"
 import { Collapse, HoverScrollText, Scroller } from "./utils";
 import { useChatStore } from "./ChatProvider";
-import { useChatRemoveMutation, useChatUpdateMutation, useSelectChat } from "./hooks"
+import { messageCreateKey, useChatRemoveMutation, useChatUpdateMutation, useSelectChat } from "./hooks"
 import { HiMenuAlt2 } from "react-icons/hi"
 import { BsPinAngle } from "react-icons/bs"
 import { RxPanelLeft } from "react-icons/rx";
 import { AnimatePresence, motion } from "motion/react"
 import { SidebarProvider, useSidebar } from "./SidebarProvider"
+import { useMutationState } from "@tanstack/react-query"
 
 const MotionBox = motion.create(Box)
 
@@ -403,6 +404,15 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 
 	const [actionButtonsVisible, setActionButtonsVisible] = useState(false)
 
+	const isAnyMessageCreating = useMutationState({
+		filters: {
+			mutationKey: messageCreateKey,
+			status: "pending",
+		},
+		select: (mutation) =>
+			(mutation.state.variables as AiMessageCreate).chat_id === chat.id,
+	}).some(Boolean)
+
 	return (
 		<Group
 			key={chat.id}
@@ -436,6 +446,7 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 					flex="1"
 					minW="0"
 					hovered={actionButtonsVisible}
+					color="fg.muted"
 				>
 					{chat.title}
 				</HoverScrollText>
@@ -474,6 +485,12 @@ export function ChatButton({ chat, ...props }: { chat: AiChatRead } & GroupProps
 						</IconButton>
 					</ChatButtonActionMenu >
 				</HStack>
+			}
+
+			{!actionButtonsVisible && isAnyMessageCreating &&
+				<Center me="2">
+					<Spinner size="sm" animationDuration="0.8s" />
+				</Center>
 			}
 		</Group>
 	)
