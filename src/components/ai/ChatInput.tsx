@@ -1,5 +1,5 @@
-import { Box, HStack, IconButton, IconButtonProps, InputGroup, InputGroupProps, Separator, Textarea, VStack, Spinner, Icon, Center } from "@chakra-ui/react"
-import { useLayoutEffect, useRef, useState } from "react"
+import { Box, HStack, IconButton, IconButtonProps, InputGroupProps, Textarea, Spinner, Icon, Center, BoxProps, TextareaProps, mergeRefs } from "@chakra-ui/react"
+import { forwardRef, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "react"
 import { BsStopFill } from "react-icons/bs"
 import { HiArrowUp } from "react-icons/hi"
 import { LuAudioLines, LuCheck, LuLoader, LuMic, LuX } from "react-icons/lu"
@@ -30,13 +30,65 @@ function InputButton({ children, waiting, ...props }: { waiting?: boolean } & Ic
 	)
 }
 
+
+type Textarea2Props = {
+	onLineModeChange?: (multiLine: boolean) => void
+} & TextareaProps
+
+export const Textarea2 = forwardRef<HTMLTextAreaElement, Textarea2Props>(({ onLineModeChange, value, ...props }, ref) => {
+	const textareaRef = useRef<HTMLTextAreaElement>(null)
+	const auxRef = useRef<HTMLTextAreaElement>(null)
+	const multiLineRef = useRef<boolean | null>(null)
+
+	const handleChange = useEffectEvent(() => {
+		let multiLine = false
+		if (value !== "" && value != null) {
+			const textarea = textareaRef.current
+			const aux = auxRef.current
+			if (textarea && aux)
+				multiLine = textarea.scrollHeight > aux.scrollHeight
+		}
+
+		if (multiLineRef.current !== multiLine) {
+			multiLineRef.current = multiLine
+			onLineModeChange?.(multiLine)
+		}
+	})
+
+	useLayoutEffect(() => {
+		handleChange()
+	}, [value])
+
+	useEffect(() => {
+		const textarea = textareaRef.current
+		if (!textarea)
+			return
+
+		const observer = new ResizeObserver(() => {
+			handleChange()
+		})
+
+		observer.observe(textarea)
+
+		return () => observer.disconnect()
+	}, [])
+
+	return (
+		<Box position="relative" w="full" h="fit-content">
+			<Textarea w="0" top="0" left="50%" position="absolute" ref={auxRef} border="none" resize="none"/>
+			<Textarea ref={mergeRefs(textareaRef, ref)} value={value} {...props}/>
+		</Box>
+	)
+})
+Textarea2.displayName = "Textarea2"
+
 type InputMode = "text" | "voice" | "call"
 
 export type ChatInputInnerProps = {
 	mode: InputMode
 	setMode: (mode: InputMode) => void
-	value?: string
-	onValueChange?: (value: string) => void
+	value: string
+	setValue: (value: string) => void
 	onSend?: () => void
 	onStop?: () => void
 	onCall?: () => void
@@ -44,13 +96,13 @@ export type ChatInputInnerProps = {
 	onVoiceSubmit?: (audio: Blob) => Promise<void>
 	onVoiceSubmitCancel?: () => void
 	sending?: boolean
-} & Omit<InputGroupProps, "children">
+} & Omit<BoxProps, "children">
 
 function ChatInputInner({
 	mode,
 	setMode,
 	value,
-	onValueChange,
+	setValue,
 	onSend,
 	onStop,
 	onVoiceSubmit,
@@ -62,19 +114,18 @@ function ChatInputInner({
 }: ChatInputInnerProps) {
 
 	const textareaRef = useRef<HTMLTextAreaElement>(null)
-	const singleLineHeight = useRef(Number.MAX_VALUE)
 
-	const [multiLines, setMultiLines] = useState(false)
 	const [submittingVoice, setSubmittingVoice] = useState(false)
 
-	useLayoutEffect(() => {
-		if (mode === "voice")
-			textareaRef.current?.focus()
-	}, [mode])
 
-	//const isMobile = useBreakpointValue({ base: true, md: false, })
+	const [fullExpand, setFullExpand] = useState(false)
+	const [multiLine, setMultiLine] = useState(false)
 	const { isMobile } = useIsMobile()
-	const [expand2, setExpand2] = useState(false)
+	const expand = isMobile || multiLine || fullExpand || (mode === "voice" && value)
+
+	useLayoutEffect(() => {
+		textareaRef.current?.focus()
+	}, [mode, fullExpand])
 
 	const recorder = useRecorder()
 
@@ -117,173 +168,157 @@ function ChatInputInner({
 		onEndCall?.()
 	}
 
-	const expand1 = isMobile || multiLines || expand2
-
 	return (
-		<InputGroup
-			endElement={
-				<VStack
-					h="full"
-					gap="auto"
-					py="2"
-				>
-					{expand1 &&
-						<>
-							<InputButton ms="auto" color="fg.muted" onClick={() => setExpand2(prev => !prev)}>
-								{expand2 ? <RiCollapseDiagonalLine /> : <RiExpandDiagonalLine />}
-							</InputButton>
-							<Separator flex="1" />
-						</>
-					}
-
-					<HStack
-						mt="auto"
-						position="relative"
-						gap="3"
-						my="auto"
-					>
-						{mode === "text" &&
-							<>
-								<InputButton
-									onClick={() => {
-										setMode("voice")
-										if (value)
-											setMultiLines(true)
-										recorder.start()
-									}}
-								>
-									<LuMic />
-								</InputButton>
-								{sending
-									?
-									<InputButton variant="solid" colorPalette="primary" onClick={onStop}>
-										<BsStopFill />
-									</InputButton>
-									: value
-										? <InputButton variant="solid" colorPalette="primary" onClick={onSend}>
-											<HiArrowUp />
-										</InputButton>
-										: <InputButton variant="solid" colorPalette="primary" onClick={handleCall}>
-											<LuAudioLines />
-										</InputButton>
-								}
-							</>
-
-						}
-
-						{mode === "voice" &&
-							<>
-								<InputButton onClick={DiscardVoice}>
-									<LuX />
-								</InputButton>
-								<InputButton onClick={submitVoice} waiting={submittingVoice}>
-									<LuCheck />
-								</InputButton>
-							</>
-						}
-
-						{mode === "call" &&
-							<InputButton variant="solid" colorPalette="primary" onClick={handleEndCall}>
-								<BsStopFill />
-							</InputButton>
-						}
-
-					</HStack>
-
-				</VStack>
-			}
+		<Box
+			w="full"
+			position="relative"
 			{...props}
 		>
-			<Box
-				w="full"
-				position="relative"
-			>
-				<Textarea
-					ref={textareaRef}
-					display="block"
-					placeholder="Ask anything"
-					borderRadius="4xl"
-					bg="bg.muted"
-					focusRing="none"
-					border="none"
-					shadow="sm"
-					rows={expand2 ? 20 : 1}
+			<Textarea2
+				ref={textareaRef}
+				onLineModeChange={(multiline) => setMultiLine(multiline)}
+				display="block"
+				placeholder="Ask anything"
+				borderRadius="4xl"
+				bg="bg.muted"
+				focusRing="none"
+				border="none"
+				shadow="sm"
+				rows={fullExpand ? 20 : 1}
+				ps="5"
+				pt={expand ? "8" : "4"}
+				pb={expand ? "4rem" : "4"}
+				pe={expand ? "3.5rem" : "6rem"}
+				size="lg"
+				autoresize
+				maxH="60dvh"
+				autoFocus
+				value={value}
+
+				transition="padding 0.2s ease-in-out"
+
+				onChange={(e) => setValue(e.currentTarget.value)}
+
+				onKeyDown={(e) => {
+					if (e.key !== "Enter" || e.shiftKey || fullExpand)
+						return
+
+					e.preventDefault()
+					if (mode === "voice")
+						submitVoice()
+					else
+						onSend?.()
+				}}
+
+				css={{
+					"&::-webkit-scrollbar": {
+						width: "0.4rem",
+					},
+					"&::-webkit-scrollbar-thumb": {
+						bg: "fg.subtle",
+						borderRadius: "full",
+					},
+					"&::-webkit-scrollbar-track": {
+						bg: "transparent",
+					},
+				}}
+			/>
+
+			{mode === "voice" &&
+				<Box
+					position="absolute"
+					bottom="0"
+					left="0"
+					w="full"
+					h={expand ? "3.5rem" : "full"}
+					pe="7rem"
 					ps="5"
-					pt={expand1 ? "8" : "4"}
-					pb={expand1 ? "4rem" : "4"}
-					pe={expand1 ? "3.5rem" : "6rem"}
-					size="lg"
-					autoresize
-					maxH="60dvh"
-					autoFocus
-					value={value}
+					pointerEvents="none"
+				>
+					{recorder.isRecording
+						? <AudioRecorderVisualizer recorder={recorder.getRecorder()} />
+						: <Center
+							animation="primaryColorBreath 2s ease-in-out infinite"
+							h="full"
+						>
+							<Icon size="xl"><LuAudioLines /></Icon>
+							<Icon size="xl"><LuAudioLines /></Icon>
+							<Icon size="xl"><LuAudioLines /></Icon>
+						</Center>
+					}
+				</Box>
+			}
 
-					transition="padding 0.2s ease-in-out"
 
-					onChange={(e) => {
-						const text = e.currentTarget.value
-						singleLineHeight.current = Math.min(singleLineHeight.current, e.currentTarget.scrollHeight)
-						if (text === "")
-							setMultiLines(false)
-						else if (text.includes("\n"))
-							setMultiLines(true)
-						else
-							setMultiLines(e.currentTarget.scrollHeight > singleLineHeight.current)
-						onValueChange?.(text)
-					}}
+			{expand &&
+				<Box
+					position="absolute"
+					top="1"
+					right="1"
+					zIndex="3"
+				>
+					<InputButton color="fg.muted" onClick={() => setFullExpand(prev => !prev)}>
+						{fullExpand ? <RiCollapseDiagonalLine /> : <RiExpandDiagonalLine />}
+					</InputButton>
+				</Box>
+			}
 
-					onKeyDown={(e) => {
-						if (e.key !== "Enter" || e.shiftKey || expand2)
-							return
 
-						e.preventDefault()
-						if (mode === "voice")
-							submitVoice()
-						else
-							onSend?.()
-					}}
-
-					css={{
-						"&::-webkit-scrollbar": {
-							width: "0.4rem",
-						},
-						"&::-webkit-scrollbar-thumb": {
-							bg: "fg.subtle",
-							borderRadius: "full",
-						},
-						"&::-webkit-scrollbar-track": {
-							bg: "transparent",
-						},
-					}}
-				/>
-
-				{mode === "voice" &&
-					<Box
-						position="absolute"
-						bottom="0"
-						left="0"
-						w="full"
-						h={expand1 ? "3.5rem" : "full"}
-						pe="7rem"
-						ps="5"
-						pointerEvents="none"
-					>
-						{recorder.isRecording
-							? <AudioRecorderVisualizer recorder={recorder.getRecorder()} />
-							: <Center
-								animation="primaryColorBreath 2s ease-in-out infinite"
-								h="full"
-							>
-								<Icon size="xl"><LuAudioLines /></Icon>
-								<Icon size="xl"><LuAudioLines /></Icon>
-								<Icon size="xl"><LuAudioLines /></Icon>
-							</Center>
+			<HStack
+				position="absolute"
+				bottom="0"
+				right="0"
+				gap="3"
+				pe="2"
+				h={expand ? "3.5rem" : "full"}
+			>
+				{mode === "text" &&
+					<>
+						<InputButton
+							onClick={() => {
+								setMode("voice")
+								recorder.start()
+							}}
+						>
+							<LuMic />
+						</InputButton>
+						{sending
+							?
+							<InputButton variant="solid" colorPalette="primary" onClick={onStop}>
+								<BsStopFill />
+							</InputButton>
+							: value
+								? <InputButton variant="solid" colorPalette="primary" onClick={onSend}>
+									<HiArrowUp />
+								</InputButton>
+								: <InputButton variant="solid" colorPalette="primary" onClick={handleCall}>
+									<LuAudioLines />
+								</InputButton>
 						}
-					</Box>
+					</>
+
 				}
 
-			</Box>
-		</InputGroup>
+				{mode === "voice" &&
+					<>
+						<InputButton onClick={DiscardVoice}>
+							<LuX />
+						</InputButton>
+						<InputButton onClick={submitVoice} waiting={submittingVoice}>
+							<LuCheck />
+						</InputButton>
+					</>
+				}
+
+				{mode === "call" &&
+					<InputButton variant="solid" colorPalette="primary" onClick={handleEndCall}>
+						<BsStopFill />
+					</InputButton>
+				}
+
+			</HStack>
+
+		</Box>
 	)
 }
 
@@ -310,8 +345,8 @@ export function ChatInput({ onSend, ...props }: ChatInputProps) {
 			mode={mode}
 			setMode={setMode}
 			value={value}
-			onValueChange={setValue}
-			onSend={()=>{
+			setValue={setValue}
+			onSend={() => {
 				send()
 				onSend?.()
 			}}
