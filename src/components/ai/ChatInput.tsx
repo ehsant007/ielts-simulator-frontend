@@ -75,8 +75,8 @@ export const Textarea2 = forwardRef<HTMLTextAreaElement, Textarea2Props>(({ onLi
 
 	return (
 		<Box position="relative" w="full" h="fit-content">
-			<Textarea w="0" top="0" left="50%" position="absolute" ref={auxRef} border="none" resize="none"/>
-			<Textarea ref={mergeRefs(textareaRef, ref)} value={value} {...props}/>
+			<Textarea position="absolute" w="1" top="0" left="50%" disabled  ref={auxRef} border="none" resize="none"/>
+			<Textarea ref={mergeRefs(textareaRef, ref)} value={value} {...props} />
 		</Box>
 	)
 })
@@ -253,9 +253,10 @@ function ChatInputInner({
 			{expand &&
 				<Box
 					position="absolute"
-					top="1"
-					right="1"
+					top="0"
+					right="0"
 					zIndex="3"
+					p="2"
 				>
 					<InputButton color="fg.muted" onClick={() => setFullExpand(prev => !prev)}>
 						{fullExpand ? <RiCollapseDiagonalLine /> : <RiExpandDiagonalLine />}
@@ -269,7 +270,7 @@ function ChatInputInner({
 				bottom="0"
 				right="0"
 				gap="3"
-				pe="2"
+				p="2"
 				h={expand ? "3.5rem" : "full"}
 			>
 				{mode === "text" &&
