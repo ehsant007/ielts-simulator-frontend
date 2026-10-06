@@ -124,7 +124,7 @@ export function ChatBox(props: BoxProps) {
 								}
 
 								<Box w="full" ref={inputRef}>
-									<ChatInput onSend={() => sticky.scrollToBottom()} key={chatId} />
+									<ChatInput onSend={() => sticky.scrollToBottom()} />
 								</Box>
 							</VStack>
 						</Box>
