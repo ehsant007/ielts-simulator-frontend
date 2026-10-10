@@ -238,7 +238,7 @@ export type BodyAddFilesToIeltsModule = {
     /**
      * Files
      */
-    files: Array<Blob | File>;
+    files: Array<string>;
 };
 
 /**
@@ -289,7 +289,7 @@ export type BodyTranscribeAudio = {
     /**
      * Audio
      */
-    audio: Blob | File;
+    audio: string;
 };
 
 /**
@@ -300,6 +300,111 @@ export type Content = ({
 } & Table) | ({
     type: 'text';
 } & Text);
+
+/**
+ * CorpusEntryRead
+ */
+export type CorpusEntryRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Lemma
+     */
+    lemma: string;
+    /**
+     * Pos
+     */
+    pos: string;
+};
+
+/**
+ * CorpusLookupResponse
+ */
+export type CorpusLookupResponse = {
+    entry: CorpusEntryRead;
+    /**
+     * Matches
+     */
+    matches: Array<CorpusMatch>;
+};
+
+/**
+ * CorpusMatch
+ */
+export type CorpusMatch = {
+    media: CorpusMediaRead;
+    /**
+     * Matched Segment Index
+     */
+    matched_segment_index: number;
+    /**
+     * Matched Word Index
+     */
+    matched_word_index: number;
+    /**
+     * Context Segments
+     */
+    context_segments: Array<CorpusSegment>;
+};
+
+/**
+ * CorpusMediaRead
+ */
+export type CorpusMediaRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Media Id
+     */
+    media_id: string | null;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Url
+     */
+    url: string;
+    type: MediaType;
+    /**
+     * Category
+     */
+    category: string | null;
+    /**
+     * Cefr Level
+     */
+    cefr_level: number | null;
+};
+
+/**
+ * CorpusSegment
+ */
+export type CorpusSegment = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Start
+     */
+    start: number;
+    /**
+     * End
+     */
+    end: number;
+    /**
+     * Text
+     */
+    text: string;
+    /**
+     * Words
+     */
+    words: Array<Word>;
+};
 
 /**
  * DictionaryCollocation
@@ -918,6 +1023,11 @@ export type ListeningPart = {
 };
 
 /**
+ * MediaType
+ */
+export type MediaType = 'video' | 'audio';
+
+/**
  * Message
  */
 export type Message = {
@@ -1221,7 +1331,7 @@ export type PermissionRead = {
 /**
  * ProfilePublic
  */
-export type ProfilePublic = {
+export type ProfilePublicInput = {
     /**
      * First Name
      */
@@ -1234,6 +1344,32 @@ export type ProfilePublic = {
      * Avatar
      */
     avatar?: string | null;
+};
+
+/**
+ * ProfilePublic
+ */
+export type ProfilePublicOutput = {
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Avatar
+     */
+    avatar?: string | null;
+    /**
+     * Full Name
+     */
+    full_name: string | null;
+    /**
+     * Avatar Url
+     */
+    readonly avatar_url: string;
 };
 
 /**
@@ -1777,7 +1913,7 @@ export type UserMe = {
      * Username
      */
     username: string;
-    profile?: ProfilePublic | null;
+    profile?: ProfilePublicInput | null;
 };
 
 /**
@@ -1892,6 +2028,16 @@ export type ValidationError = {
      * Error Type
      */
     type: string;
+    /**
+     * Input
+     */
+    input?: unknown;
+    /**
+     * Context
+     */
+    ctx?: {
+        [key: string]: unknown;
+    };
 };
 
 /**
@@ -1942,6 +2088,24 @@ export type VisualLabelingGroup = {
      * Image
      */
     image: string;
+};
+
+/**
+ * Word
+ */
+export type Word = {
+    /**
+     * Word
+     */
+    word: string;
+    /**
+     * Start
+     */
+    start: number;
+    /**
+     * End
+     */
+    end: number;
 };
 
 /**
@@ -2105,6 +2269,24 @@ export type AppTranslatorSchemasTranslatorTranslateResponse = {
      * Full translation in target language
      */
     translation: string;
+};
+
+/**
+ * ProfilePublic
+ */
+export type ProfilePublicOutputWritable = {
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Avatar
+     */
+    avatar?: string | null;
 };
 
 export type DeleteChatData = {
@@ -2450,6 +2632,48 @@ export type SearchResponses = {
 };
 
 export type SearchResponse = SearchResponses[keyof SearchResponses];
+
+export type MediaCorpusLookupData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Lemma
+         */
+        lemma: string;
+        /**
+         * Pos
+         */
+        pos?: string | null;
+        /**
+         * Context Size
+         */
+        context_size?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/media-corpus/lookup';
+};
+
+export type MediaCorpusLookupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type MediaCorpusLookupError = MediaCorpusLookupErrors[keyof MediaCorpusLookupErrors];
+
+export type MediaCorpusLookupResponses = {
+    /**
+     * Successful Response
+     */
+    200: CorpusLookupResponse;
+};
+
+export type MediaCorpusLookupResponse = MediaCorpusLookupResponses[keyof MediaCorpusLookupResponses];
 
 export type TranslateData = {
     body: AppTranslatorSchemasTranslatorTranslateRequest;

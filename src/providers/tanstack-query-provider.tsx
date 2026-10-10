@@ -7,17 +7,43 @@ import { useState } from 'react'
 
 type APIError = { status: number, detail: string }
 
+type ErrorObject = Record<string, unknown>
+
+const isObject = (value: unknown): value is ErrorObject =>
+	typeof value === "object" && value !== null
+
+const getErrorMessage = (value: unknown): string | undefined => {
+	if (typeof value === "string")
+		return value
+
+	if (Array.isArray(value)) {
+		const messages = value.flatMap(item =>
+			isObject(item) && typeof item.msg === "string"
+				? [item.msg]
+				: [],
+		)
+
+		return messages.length ? messages.join("\n") : undefined
+	}
+
+	if (isObject(value) && typeof value.msg === "string")
+		return value.msg
+
+	return undefined
+}
+
 // Error handler for API errors
 const handleApiError = (error: unknown) => {
 	let message = "Something went wrong!"
 
 	if (typeof error === "string")
 		message = error
-	else if (typeof error === "object" && error !== null) {
-		if ("detail" in error)
-			message = (error as APIError).detail
-		else if ("message" in error)
-			message = (error as Error).message
+	else if (isObject(error)) {
+		message =
+			getErrorMessage(error.detail) ??
+			(typeof error.message === "string" ? error.message : undefined) ??
+			getErrorMessage(error) ??
+			message
 	}
 
 	toaster.create({
