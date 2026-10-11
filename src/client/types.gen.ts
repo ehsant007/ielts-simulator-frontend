@@ -403,7 +403,7 @@ export type CorpusSegment = {
     /**
      * Words
      */
-    words: Array<Word>;
+    words: Array<SegmentWord>;
 };
 
 /**
@@ -1539,6 +1539,24 @@ export type RoleRead = {
 };
 
 /**
+ * SegmentWord
+ */
+export type SegmentWord = {
+    /**
+     * Word
+     */
+    word: string;
+    /**
+     * Start
+     */
+    start: number;
+    /**
+     * End
+     */
+    end: number;
+};
+
+/**
  * Sense
  */
 export type Sense = {
@@ -2088,24 +2106,6 @@ export type VisualLabelingGroup = {
      * Image
      */
     image: string;
-};
-
-/**
- * Word
- */
-export type Word = {
-    /**
-     * Word
-     */
-    word: string;
-    /**
-     * Start
-     */
-    start: number;
-    /**
-     * End
-     */
-    end: number;
 };
 
 /**

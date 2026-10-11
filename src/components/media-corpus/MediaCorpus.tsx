@@ -18,7 +18,7 @@ export function MediaCorpus() {
 				<Input value={pos} onChange={(e) => setPos(e.currentTarget.value)} placeholder="pos" />
 			</HStack>
 			{data &&
-				<CorpusYoutubePlayer match={data.matches[0]} />
+				<CorpusYoutubePlayer matches={data.matches} />
 			}
 			{/* <CorpusYoutubePlayer videoId="1zaoRUTkv7A"/> */}
 		</VStack>

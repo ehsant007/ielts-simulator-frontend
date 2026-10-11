@@ -1,20 +1,19 @@
 "use client"
 
-import { CorpusMatch } from "@/client"
-import { Box, Button } from "@chakra-ui/react"
-import { useRef } from "react"
-import YouTube, { type YouTubeProps } from "react-youtube"
+import { CorpusMatch, CorpusSegment, SegmentWord } from "@/client"
+import { Box, Button, Text } from "@chakra-ui/react"
+import { RefObject, useCallback, useEffect, useRef, useState } from "react"
+import YouTube, { YouTubePlayer, type YouTubeProps } from "react-youtube"
 
-type YouTubePlayer = Parameters<
-	NonNullable<YouTubeProps["onReady"]>
->[0]["target"]
 
 type Props = {
-	match: CorpusMatch
+	matches: CorpusMatch[]
 }
 
-export function CorpusYoutubePlayer({ match }: Props) {
+export function CorpusYoutubePlayer({ matches }: Props) {
 	const playerRef = useRef<YouTubePlayer | null>(null)
+	const [index, setIndex] = useState(0)
+	const match = matches[index]
 
 	const onReady: YouTubeProps["onReady"] = (event) => {
 		playerRef.current = event.target
@@ -33,8 +32,27 @@ export function CorpusYoutubePlayer({ match }: Props) {
 		// height: "390",
 		playerVars: {
 			autoplay: 0,
+			//controls: 0,
 		},
 	}
+
+
+	const handleNext = () => {
+		setIndex(prev => (prev + 1 + matches.length) % matches.length)
+	}
+
+	const handlePrev = () => {
+		setIndex(prev => (prev - 1 + matches.length) % matches.length)
+	}
+
+	const playAtSegmentStart = useCallback(() => {
+		playAt(match.context_segments[match.matched_segment_index].start)
+	}, [match])
+
+	useEffect(() => {
+		playAtSegmentStart()
+	}, [index, playAtSegmentStart])
+
 
 	return (
 		<Box>
@@ -44,9 +62,55 @@ export function CorpusYoutubePlayer({ match }: Props) {
 				onReady={onReady}
 			/>
 
-			<Button onClick={() => playAt(match.context_segments[match.matched_segment_index].start)}>
+			<Button onClick={playAtSegmentStart} >
 				Play from matched word
 			</Button>
+
+			<Text>{index + 1}/{matches.length}</Text>
+			<Button onClick={handlePrev}>Prev</Button>
+			<Button onClick={handleNext}>Next</Button>
 		</Box>
+	)
+}
+
+
+type SubtitleViewProps = {
+	mediaId: string,
+	playerRef: RefObject<YouTubePlayer | null>,
+}
+
+function SubtitleView({ mediaId, playerRef }: SubtitleViewProps) {
+	const [segment, setSegment] = useState<CorpusSegment | null>(null)
+	const [time, setTime] = useState(-1)
+
+
+	const isMyTime = (word: SegmentWord) => {
+		return (time >= word.start && time < word.end)
+	}
+
+	useEffect(() => {
+
+		const interval = window.setInterval(async () => {
+			const player = playerRef.current
+			if (player)
+				setTime(await player.getCurrentTime())
+		}, 100)
+
+		return () => window.clearInterval(interval)
+	}, [playerRef])
+
+	return (
+		<>
+			{segment?.words.map((w, i) => (
+				<span
+					key={i}
+					style={{
+						background: isMyTime(w) ? "red" : "none"
+					}}
+				>
+					{w.word}
+				</span>
+			))}
+		</>
 	)
 }
