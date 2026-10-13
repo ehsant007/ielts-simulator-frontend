@@ -1,5 +1,6 @@
 import { mediaCorpusLookup, readSubtitleChunk } from "@/client";
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 
 export function useCorpusMediaQuery(lemma: string, pos: string | null) {
@@ -24,41 +25,39 @@ export function useCorpusMediaQuery(lemma: string, pos: string | null) {
 
 
 
+
 const CHUNK_SECONDS = 30
+
+function subtitleChunkQueryOptions(media_id: number, start: number) {
+	return queryOptions({
+		queryKey: ["subtitle-chunk", media_id, start],
+		staleTime: Infinity,
+		queryFn: () =>
+			readSubtitleChunk({
+				query: {
+					media_id,
+					start,
+					end: start + CHUNK_SECONDS,
+				},
+			}).then(res => res.data),
+	})
+}
+
 export function useSubtitleChunkQuery(media_id: number, time: number) {
+	const queryClient = useQueryClient()
 
 	const start = time - time % CHUNK_SECONDS
 	const end = start + CHUNK_SECONDS
+	const shouldPrefetchNext = time > start + 0.75 * CHUNK_SECONDS
 
-	const query = useQuery({
-		queryKey: ["subtitle-chunk", media_id, start],
-		staleTime: Infinity,
+	const query = useQuery(subtitleChunkQueryOptions(media_id, start))
 
-		queryFn: () => readSubtitleChunk({
-			query: {
-				media_id,
-				start,
-				end,
-			}
-		}).then(res => res.data),
+	useEffect(() => {
+		if (!shouldPrefetchNext)
+			return
 
-	})
-
-	// Prefetch next chuck
-	useQuery({
-		enabled: time > (start + 0.75 * CHUNK_SECONDS),
-		queryKey: ["subtitle-chunk", media_id, end],
-		staleTime: Infinity,
-
-		queryFn: () => readSubtitleChunk({
-			query: {
-				media_id,
-				start: end,
-				end: end + CHUNK_SECONDS,
-			}
-		}).then(res => res.data),
-
-	})
+		queryClient.query(subtitleChunkQueryOptions(media_id, end)).catch(() => undefined)
+	}, [queryClient, media_id, end, shouldPrefetchNext])
 
 	return query
 }
