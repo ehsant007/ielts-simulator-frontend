@@ -1822,6 +1822,24 @@ export type SpeakingQuestionGroup = {
 };
 
 /**
+ * SubtitleChunk
+ */
+export type SubtitleChunk = {
+    /**
+     * Start
+     */
+    start: number;
+    /**
+     * End
+     */
+    end: number;
+    /**
+     * Segments
+     */
+    segments: Array<CorpusSegment>;
+};
+
+/**
  * Table
  */
 export type Table = {
@@ -2674,6 +2692,44 @@ export type MediaCorpusLookupResponses = {
 };
 
 export type MediaCorpusLookupResponse = MediaCorpusLookupResponses[keyof MediaCorpusLookupResponses];
+
+export type ReadSubtitleChunkData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Media Id
+         */
+        media_id: number;
+        /**
+         * Start
+         */
+        start: number;
+        /**
+         * End
+         */
+        end: number;
+    };
+    url: '/api/v1/media-corpus/subtitles/chunks';
+};
+
+export type ReadSubtitleChunkErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ReadSubtitleChunkError = ReadSubtitleChunkErrors[keyof ReadSubtitleChunkErrors];
+
+export type ReadSubtitleChunkResponses = {
+    /**
+     * Successful Response
+     */
+    200: SubtitleChunk;
+};
+
+export type ReadSubtitleChunkResponse = ReadSubtitleChunkResponses[keyof ReadSubtitleChunkResponses];
 
 export type TranslateData = {
     body: AppTranslatorSchemasTranslatorTranslateRequest;
