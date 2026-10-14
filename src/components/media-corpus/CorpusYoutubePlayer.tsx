@@ -130,10 +130,7 @@ function SubtitleView({ mediaId, playerRef }: SubtitleViewProps) {
 			{segment?.words.map((w, i) => (
 				<Fragment key={i}>
 					<span
-
-						style={{
-							background: isMyTime(w) ? "orange" : "none"
-						}}
+						className={isMyTime(w) ? "highlight" : ""}
 					>
 						{w.word}
 					</span>

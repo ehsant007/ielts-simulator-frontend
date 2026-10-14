@@ -1,4 +1,4 @@
-import { mediaCorpusLookup, readSubtitleChunk } from "@/client";
+import { mediaCorpusLookup, readSubtitleChunk, SubtitleChunk } from "@/client";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 
@@ -28,9 +28,11 @@ export function useCorpusMediaQuery(lemma: string, pos: string | null) {
 
 const CHUNK_SECONDS = 30
 
+export const subtitleChunkKey = (media_id: number, time: number) => ["subtitle-chunk", media_id, time] as const
+
 function subtitleChunkQueryOptions(media_id: number, start: number) {
 	return queryOptions({
-		queryKey: ["subtitle-chunk", media_id, start],
+		queryKey: subtitleChunkKey(media_id, start),
 		staleTime: Infinity,
 		queryFn: () =>
 			readSubtitleChunk({
@@ -46,7 +48,7 @@ function subtitleChunkQueryOptions(media_id: number, start: number) {
 export function useSubtitleChunkQuery(media_id: number, time: number) {
 	const queryClient = useQueryClient()
 
-	const start = time - time % CHUNK_SECONDS
+	const start = Math.floor(time / CHUNK_SECONDS) * CHUNK_SECONDS
 	const end = start + CHUNK_SECONDS
 	const shouldPrefetchNext = time > start + 0.75 * CHUNK_SECONDS
 
