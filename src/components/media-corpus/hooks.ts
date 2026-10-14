@@ -1,4 +1,4 @@
-import { mediaCorpusLookup, readSubtitleChunk, SubtitleChunk } from "@/client";
+import { mediaCorpusLookup, readSubtitleChunk } from "@/client";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 

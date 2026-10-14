@@ -1,6 +1,6 @@
 "use client"
 
-import { CorpusMatch, CorpusSegment, SegmentWord, SubtitleChunk } from "@/client"
+import { CorpusMatch, CorpusSegment, SegmentWord } from "@/client"
 import { Box, Button, Text } from "@chakra-ui/react"
 import { Fragment, RefObject, useCallback, useEffect, useRef, useState } from "react"
 import YouTube, { YouTubePlayer, type YouTubeProps } from "react-youtube"
