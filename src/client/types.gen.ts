@@ -302,6 +302,21 @@ export type Content = ({
 } & Text);
 
 /**
+ * CorpusEntryOccurrenceRead
+ */
+export type CorpusEntryOccurrenceRead = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Word Index
+     */
+    word_index: number;
+    segment: CorpusSegmentRead;
+};
+
+/**
  * CorpusEntryRead
  */
 export type CorpusEntryRead = {
@@ -325,28 +340,15 @@ export type CorpusEntryRead = {
 export type CorpusLookupResponse = {
     entry: CorpusEntryRead;
     /**
-     * Matches
+     * Media
      */
-    matches: Array<CorpusMatch>;
-};
-
-/**
- * CorpusMatch
- */
-export type CorpusMatch = {
-    media: CorpusMediaRead;
+    media: {
+        [key: string]: CorpusMediaRead;
+    };
     /**
-     * Matched Segment Index
+     * Occurrences
      */
-    matched_segment_index: number;
-    /**
-     * Matched Word Index
-     */
-    matched_word_index: number;
-    /**
-     * Context Segments
-     */
-    context_segments: Array<CorpusSegment>;
+    occurrences: Array<CorpusEntryOccurrenceRead>;
 };
 
 /**
@@ -381,13 +383,17 @@ export type CorpusMediaRead = {
 };
 
 /**
- * CorpusSegment
+ * CorpusSegmentRead
  */
-export type CorpusSegment = {
+export type CorpusSegmentRead = {
     /**
      * Id
      */
     id: number;
+    /**
+     * Media Id
+     */
+    media_id: number;
     /**
      * Start
      */
@@ -1836,7 +1842,7 @@ export type SubtitleChunk = {
     /**
      * Segments
      */
-    segments: Array<CorpusSegment>;
+    segments: Array<CorpusSegmentRead>;
 };
 
 /**
@@ -2663,10 +2669,6 @@ export type MediaCorpusLookupData = {
          * Pos
          */
         pos?: string | null;
-        /**
-         * Context Size
-         */
-        context_size?: number;
         /**
          * Limit
          */

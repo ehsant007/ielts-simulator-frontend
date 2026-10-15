@@ -203,8 +203,6 @@ export const search = <ThrowOnError extends boolean = true>(options: Options<Sea
 
 /**
  * Media Corpus Lookup
- *
- * Find occurrences of a vocabulary entry by lemma and part of speech across the media corpus. Each match includes the source media, the position of the matched segment and word, and surrounding transcript segments to provide additional context. Use `context_size` to control the number of neighboring segments included on each side, and `limit` to restrict the number of matches returned.
  */
 export const mediaCorpusLookup = <ThrowOnError extends boolean = true>(options: Options<MediaCorpusLookupData, ThrowOnError>) => {
     return (options.client ?? client).get<MediaCorpusLookupResponses, MediaCorpusLookupErrors, ThrowOnError>({

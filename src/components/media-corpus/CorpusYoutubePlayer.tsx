@@ -1,136 +1,79 @@
 "use client"
 
-import { CorpusMatch, CorpusSegment, SegmentWord } from "@/client"
 import { Box, Button, Text } from "@chakra-ui/react"
-import { Fragment, RefObject, useCallback, useEffect, useRef, useState } from "react"
-import YouTube, { YouTubePlayer, type YouTubeProps } from "react-youtube"
-import { useSubtitleChunkQuery } from "./hooks"
+import { Fragment } from "react"
+import YouTube, { type YouTubeProps } from "react-youtube"
+import { useCorpusLookup, useCurrentSubtitleSegment } from "./hooks"
+import { PlayerProvider, usePlayer, usePlayerTime } from "./PlayerProvider"
 
 
 type Props = {
-	matches: CorpusMatch[]
+	lemma: string,
+	pos: string
 }
 
-export function CorpusYoutubePlayer({ matches }: Props) {
-	const playerRef = useRef<YouTubePlayer | null>(null)
-	const [index, setIndex] = useState(0)
-	const match = matches[index]
+export function CorpusYoutubePlayer({ lemma, pos }: Props) {
 
-	const onReady: YouTubeProps["onReady"] = (event) => {
-		playerRef.current = event.target
-	}
+	return (
+		<PlayerProvider>
+			<CorpusYoutubePlayerInner lemma={lemma} pos={pos} />
+		</PlayerProvider>
+	)
+}
 
-	function playAt(seconds: number) {
-		const player = playerRef.current
-		if (!player) return
 
-		player.seekTo(seconds, true)
-		player.playVideo()
-	}
+export function CorpusYoutubePlayerInner({ lemma, pos }: Props) {
+	const { player, setPlayer } = usePlayer()
+	const { nextSegment, prevSegment, segment, media, isPending, index, total } = useCorpusLookup(lemma, pos)
 
 	const options: YouTubeProps["opts"] = {
 		// width: "640",
 		// height: "390",
 		playerVars: {
 			autoplay: 0,
-			//controls: 0,
 		},
 	}
 
 
-	const handleNext = () => {
-		setIndex(prev => (prev + 1 + matches.length) % matches.length)
-	}
-
-	const handlePrev = () => {
-		setIndex(prev => (prev - 1 + matches.length) % matches.length)
-	}
-
-	const playAtSegmentStart = useCallback(() => {
-		playAt(match.context_segments[match.matched_segment_index].start)
-	}, [match])
-
-	useEffect(() => {
-		playAtSegmentStart()
-	}, [index, playAtSegmentStart])
-
-
 	return (
 		<Box>
-			<YouTube
-				videoId={match.media.media_id!}
-				opts={options}
-				onReady={onReady}
-			/>
-
-			<Button onClick={playAtSegmentStart} >
+			{media &&
+				<YouTube
+					videoId={media.media_id!}
+					opts={options}
+					onReady={(event) => setPlayer(event.target)}
+				/>
+			}
+			<Button >
 				Play from matched word
 			</Button>
 
-			<Text>{index + 1}/{matches.length}</Text>
-			<Button onClick={handlePrev}>Prev</Button>
-			<Button onClick={handleNext}>Next</Button>
-			<Box>
-				<SubtitleView mediaId={match.media.id} playerRef={playerRef} />
-			</Box>
+			<Text>{index + 1}/{total}</Text>
+			<Button onClick={prevSegment}>Prev</Button>
+			<Button onClick={nextSegment}>Next</Button>
+
+			{media &&
+				<Text>
+					<SubtitleView mediaId={media.id} />
+				</Text>
+			}
 		</Box>
 	)
 }
 
 
-function findSegment(segments: CorpusSegment[], time: number) {
-	let low = 0
-	let high = segments.length - 1
 
-	while (low <= high) {
-		const mid = Math.floor((low + high) / 2)
-		if (segments[mid].start > time)
-			high = mid - 1
-		else if (segments[mid].end <= time)
-			low = mid + 1
-		else
-			return segments[mid]
-	}
-
-	return null
-}
-
-
-
-
-type SubtitleViewProps = {
-	mediaId: number,
-	playerRef: RefObject<YouTubePlayer | null>,
-}
-
-function SubtitleView({ mediaId, playerRef }: SubtitleViewProps) {
-	//const [segment, setSegment] = useState<CorpusSegment | null>(null)
-	const [time, setTime] = useState(0)
-
-	const { data: chunk } = useSubtitleChunkQuery(mediaId, time)
-
-	const segment = chunk ? findSegment(chunk.segments, time) : null
-
-	const isMyTime = (word: SegmentWord) => {
-		return (time >= word.start && time < word.end)
-	}
-
-	useEffect(() => {
-		const interval = window.setInterval(async () => {
-			const player = playerRef.current
-			if (player)
-				setTime(await player.getCurrentTime())
-		}, 100)
-
-		return () => window.clearInterval(interval)
-	}, [playerRef])
+function SubtitleView({ mediaId }: { mediaId: number }) {
+	const { player, time } = usePlayerTime(50)
+	const { segment, isCurrentWord } = useCurrentSubtitleSegment(mediaId, time)
 
 	return (
 		<>
 			{segment?.words.map((w, i) => (
 				<Fragment key={i}>
 					<span
-						className={isMyTime(w) ? "highlight" : ""}
+						className={isCurrentWord(w) ? "highlight" : ""}
+						onClick={() => player?.seekTo(w.start, true)}
 					>
 						{w.word}
 					</span>
