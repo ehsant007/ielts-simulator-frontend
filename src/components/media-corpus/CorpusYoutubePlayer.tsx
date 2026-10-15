@@ -1,10 +1,11 @@
 "use client"
 
-import { Box, Button, Text } from "@chakra-ui/react"
-import { Fragment } from "react"
+import { Box, Button, Progress, Text } from "@chakra-ui/react"
+import { Fragment, useState } from "react"
 import YouTube, { type YouTubeProps } from "react-youtube"
 import { useCorpusLookup, useCurrentSubtitleSegment } from "./hooks"
 import { PlayerProvider, usePlayer, usePlayerTime } from "./PlayerProvider"
+import type { MouseEvent } from "react"
 
 
 type Props = {
@@ -52,6 +53,8 @@ export function CorpusYoutubePlayerInner({ lemma, pos }: Props) {
 			<Button onClick={prevSegment}>Prev</Button>
 			<Button onClick={nextSegment}>Next</Button>
 
+			<TimeLine />
+
 			{media &&
 				<Text>
 					<SubtitleView mediaId={media.id} />
@@ -62,9 +65,48 @@ export function CorpusYoutubePlayerInner({ lemma, pos }: Props) {
 }
 
 
+function TimeLine() {
+	const [progress, setProgress] = useState(0)
+
+	const { player, duration } = usePlayerTime({
+		deltaMs: 100,
+		onTick: time => {
+			const p = duration ? time / duration * 100 : 0
+			setProgress(p)
+		}
+	})
+
+	const handleSeek = (e: MouseEvent<HTMLDivElement>) => {
+		const rect = e.currentTarget.getBoundingClientRect()
+		const x = e.clientX - rect.left
+		const p = x / rect.width
+		if (duration) {
+			setProgress(p * 100)
+			player?.seekTo(p * duration, true)
+		}
+	}
+
+	return (
+		<Progress.Root
+			value={progress}
+			cursor="pointer"
+			colorPalette="primary"
+			onClick={handleSeek}
+			size = "xs"
+		>
+			<Progress.Label mb="2">
+				Time
+			</Progress.Label>
+			<Progress.Track>
+				<Progress.Range transition="none"/>
+			</Progress.Track>
+		</Progress.Root>
+	)
+}
+
 
 function SubtitleView({ mediaId }: { mediaId: number }) {
-	const { player, time } = usePlayerTime(50)
+	const { player, time } = usePlayerTime({ deltaMs: 50 })
 	const { segment, isCurrentWord } = useCurrentSubtitleSegment(mediaId, time)
 
 	return (
