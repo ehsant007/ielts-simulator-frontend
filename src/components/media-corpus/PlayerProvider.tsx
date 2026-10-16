@@ -5,17 +5,20 @@ type PlayerContextType = {
 	player: YouTubePlayer | null
 	setPlayer: Dispatch<SetStateAction<YouTubePlayer | null>>
 	duration: number | undefined
+	state: number
+	setState: Dispatch<SetStateAction<number>>
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined)
 
-type SidebarProps = {
+type PlayerProviderProps = {
 	children: React.ReactNode
 }
 
-export function PlayerProvider({ children }: SidebarProps) {
+export function PlayerProvider({ children }: PlayerProviderProps) {
 	const [player, setPlayer] = useState<YouTubePlayer | null>(null)
 	const [duration, setDuration] = useState<number | undefined>(undefined)
+	const [state, setState] = useState(-1)
 
 	useEffect(() => {
 		const asyncWork = async () => {
@@ -27,27 +30,40 @@ export function PlayerProvider({ children }: SidebarProps) {
 	}, [player])
 
 	return (
-		<PlayerContext.Provider value={{ player, setPlayer, duration }} >
+		<PlayerContext.Provider value={{ player, setPlayer, duration, state, setState }} >
 			{children}
 		</PlayerContext.Provider>
 	)
 }
 
-export function usePlayer() {
+type UsePlayerProps = {
+	onStateChange?: (state: number) => void
+}
+
+export function usePlayer({ onStateChange }: UsePlayerProps = {}) {
 	const context = useContext(PlayerContext)
 	if (!context)
 		throw new Error("usePlayer must be used within PlayerProvider")
+
+	const handleStateChange = useEffectEvent((state: number) => {
+		onStateChange?.(state)
+	})
+
+	useEffect(() => {
+		handleStateChange(context.state)
+	}, [context.state])
+
 	return context
 }
 
 
-type UserPlayerTimeProps = {
+type UsePlayerTimeProps = {
 	deltaMs: number
 	onTick?: (time: number) => void
-}
+} & UsePlayerProps
 
-export function usePlayerTime({ deltaMs, onTick }: UserPlayerTimeProps) {
-	const context = usePlayer()
+export function usePlayerTime({ deltaMs, onTick, ...props }: UsePlayerTimeProps) {
+	const context = usePlayer(props)
 	const [time, setTime] = useState(0)
 	const { player } = context
 	const timeRef = useRef(-1)
