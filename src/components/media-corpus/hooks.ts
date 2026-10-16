@@ -61,14 +61,15 @@ const CHUNK_SECONDS = 30
 
 export const subtitleChunkKey = (media_id: number, time: number) => ["subtitle-chunk", media_id, time] as const
 
-function subtitleChunkQueryOptions(media_id: number, start: number) {
+function subtitleChunkQueryOptions(media_id: number | undefined | null, start: number) {
 	return queryOptions({
-		queryKey: subtitleChunkKey(media_id, start),
+		enabled: media_id != null,
+		queryKey: subtitleChunkKey(media_id!, start),
 		staleTime: Infinity,
 		queryFn: () =>
 			readSubtitleChunk({
 				query: {
-					media_id,
+					media_id: media_id!,
 					start,
 					end: start + CHUNK_SECONDS,
 				},
@@ -76,7 +77,7 @@ function subtitleChunkQueryOptions(media_id: number, start: number) {
 	})
 }
 
-export function useSubtitleChunkQuery(media_id: number, time: number) {
+export function useSubtitleChunkQuery(media_id: number | undefined | null, time: number) {
 	const queryClient = useQueryClient()
 
 	const start = Math.floor(time / CHUNK_SECONDS) * CHUNK_SECONDS
@@ -115,7 +116,7 @@ function findSegment(segments: CorpusSegmentRead[], time: number) {
 }
 
 
-export function useCurrentSubtitleSegment(mediaId: number, time: number) {
+export function useCurrentSubtitleSegment(mediaId: number | null | undefined, time: number) {
 	const { data: chunk } = useSubtitleChunkQuery(mediaId, time)
 	const segment = chunk ? findSegment(chunk.segments, time) : null
 
@@ -123,5 +124,5 @@ export function useCurrentSubtitleSegment(mediaId: number, time: number) {
 		return (time >= word.start && time < word.end)
 	}, [time])
 
-	return {segment, isCurrentWord}
+	return { segment, isCurrentWord }
 }

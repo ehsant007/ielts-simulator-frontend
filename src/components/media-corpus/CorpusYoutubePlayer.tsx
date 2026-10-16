@@ -1,7 +1,7 @@
 "use client"
 
 import { Center, HStack, IconButton, Progress, Spinner, Text, VStack } from "@chakra-ui/react"
-import { Fragment, useState } from "react"
+import { Fragment, useEffect, useEffectEvent, useRef, useState } from "react"
 import YouTube, { type YouTubeProps } from "react-youtube"
 import { useCurrentSubtitleSegment } from "./hooks"
 import { PlayerProvider, usePlayer, usePlayerTime } from "./PlayerProvider"
@@ -18,18 +18,50 @@ type Props = {
 export function CorpusYoutubePlayer({ lemma, pos }: Props) {
 
 	return (
-		<LookupProvider lemma={lemma} pos={pos}>
-			<PlayerProvider>
+		<PlayerProvider>
+			<LookupProvider lemma={lemma} pos={pos} key={JSON.stringify([lemma, pos])}>
 				<CorpusYoutubePlayerInner />
-			</PlayerProvider>
-		</LookupProvider>
+			</LookupProvider>
+		</PlayerProvider>
 	)
 }
 
 
 export function CorpusYoutubePlayerInner() {
-	const { setPlayer, setState } = usePlayer()
-	const { media, index, total } = useCorpusLookupContext()
+	const pauseSignal = useRef(false)
+	const volume = useRef(100)
+
+	const { player, setPlayer, setState } = usePlayer({
+		onStateChange: (state) => {
+			if (state === 1 && pauseSignal.current) {
+				pauseSignal.current = false
+				player?.pauseVideo()
+				player?.setVolume(volume.current)
+			}
+		}
+	})
+
+	const { media, index, total, segment } = useCorpusLookupContext()
+
+	const handleSegmentChange = useEffectEvent(async () => {
+		if (!player || !segment)
+			return
+
+		const seekPromise = player.seekTo(segment.start, true)
+		const state = await player.getPlayerState()
+		await seekPromise
+
+		if (state === 5) {
+			pauseSignal.current = true
+			volume.current = await player.getVolume()
+			await player.setVolume(0)
+			await player.playVideo()
+		}
+	})
+
+	useEffect(() => {
+		handleSegmentChange()
+	}, [player, segment])
 
 	const options: YouTubeProps["opts"] = {
 		// width: "640",
@@ -54,7 +86,7 @@ export function CorpusYoutubePlayerInner() {
 			<PlayerControls />
 			{media &&
 				<Text textAlign="center">
-					<SubtitleView mediaId={media.id} />
+					<SubtitleView />
 				</Text>
 			}
 		</VStack>
@@ -80,10 +112,12 @@ function PlayerButtons() {
 
 	const { player } = usePlayer({
 		onStateChange: state => {
-			if (state < 2)
+			if (state < 3)
 				setIsPlaying(state === 1)
 
 			setIsLoading(state === 3)
+
+			console.log("state>>> ", state)
 		}
 	})
 
@@ -220,9 +254,10 @@ function TimeLine() {
 }
 
 
-function SubtitleView({ mediaId }: { mediaId: number }) {
+function SubtitleView() {
+	const { media } = useCorpusLookupContext()
 	const { player, time } = usePlayerTime({ deltaMs: 50 })
-	const { segment, isCurrentWord } = useCurrentSubtitleSegment(mediaId, time)
+	const { segment, isCurrentWord } = useCurrentSubtitleSegment(media?.id, time)
 
 	return (
 		<>
