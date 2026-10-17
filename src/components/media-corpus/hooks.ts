@@ -107,9 +107,9 @@ export function useSubtitleChunkQuery(media_id: number | undefined | null, time:
 }
 
 
-function findSegment(segments: CorpusSegmentRead[] | undefined, time: number) {
+function findSegment(segments: CorpusSegmentRead[] | undefined, time: number, holdDuration: number) {
 	if (segments == null)
-		return []
+		return null
 
 	let low = 0
 	let high = segments.length - 1
@@ -117,31 +117,36 @@ function findSegment(segments: CorpusSegmentRead[] | undefined, time: number) {
 	while (low <= high) {
 		const mid = Math.floor((low + high) / 2)
 		const start = segments[mid].start
-		const end = segments[mid + 1] ? segments[mid + 1].start : segments[mid].end + 5
+		//const end = segments[mid + 1] ? segments[mid + 1].start : segments[mid].end + 5
+		const end = Math.min(
+			segments[mid].end + holdDuration,
+			segments[mid + 1] ? segments[mid + 1].start : Infinity
+		)
+	
 		if (start > time)
 			high = mid - 1
 		else if (end <= time)
 			low = mid + 1
 		else
-			return [segments[mid - 1], segments[mid], segments[mid + 1]]
+			return segments[mid]
 	}
 
-	return []
+	return null
 }
 
 
-export function useCurrentSubtitleSegment(mediaId: number | null | undefined, time: number) {
+export function useCurrentSubtitleSegment(mediaId: number | null | undefined, time: number, holdDuration: number) {
 	useSubtitleChunkQuery(mediaId, time)
 	const subtitle = useCorpusStore(s => mediaId ? s.subtitles[mediaId] : undefined)
 
-	const segments = useMemo(
-		() => findSegment(subtitle, time),
-		[subtitle, time],
+	const segment = useMemo(
+		() => findSegment(subtitle, time, holdDuration),
+		[subtitle, time, holdDuration],
 	)
 
 	const isCurrentWord = useCallback((word: SegmentWord) => {
 		return (time >= word.start && time < word.end)
 	}, [time])
 
-	return { segments, isCurrentWord }
+	return { segment, isCurrentWord }
 }

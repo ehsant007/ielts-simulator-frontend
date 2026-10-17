@@ -259,14 +259,16 @@ function TimeLine() {
 function SubtitleView() {
 	const { media } = useCorpusLookupContext()
 	const { time } = usePlayerTime({ deltaMs: 50 })
-	const { segments, isCurrentWord } = useCurrentSubtitleSegment(media?.id, time)
+	const { segment, isCurrentWord } = useCurrentSubtitleSegment(media?.id, time, 5)
+
+	if (segment == null)
+		return null
 
 	return (
-		<VStack>
-			<SegmentView segment={segments[0]} />
-			<SegmentView segment={segments[1]} highlightWord={isCurrentWord} />
-			<SegmentView segment={segments[2]} />
-		</VStack>
+		<SegmentView
+			segment={segment}
+			highlightWord={isCurrentWord}
+		/>
 	)
 }
 
@@ -278,7 +280,7 @@ function SegmentView({ segment, highlightWord, ...props }: {
 	const { player } = usePlayer()
 
 	return (
-		<Text {...props }>
+		<Text {...props}>
 			{segment?.words.map((w, i) => (
 				<Fragment key={i}>
 					<span
