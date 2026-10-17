@@ -1,6 +1,6 @@
 "use client"
 
-import { Center, HStack, IconButton, Progress, Spinner, Text, VStack } from "@chakra-ui/react"
+import { Box, Center, HStack, IconButton, Progress, Spinner, Text, VStack } from "@chakra-ui/react"
 import { Fragment, useEffect, useEffectEvent, useRef, useState } from "react"
 import YouTube, { type YouTubeProps } from "react-youtube"
 import { useCurrentSubtitleSegment } from "./hooks"
@@ -85,9 +85,9 @@ export function CorpusYoutubePlayerInner() {
 			<Text>{index + 1} / {total}</Text>
 			<PlayerControls />
 			{media &&
-				<Text textAlign="center">
+				<Box textAlign="center">
 					<SubtitleView />
-				</Text>
+				</Box>
 			}
 		</VStack>
 	)
@@ -116,8 +116,6 @@ function PlayerButtons() {
 				setIsPlaying(state === 1)
 
 			setIsLoading(state === 3)
-
-			console.log("state>>> ", state)
 		}
 	})
 
@@ -259,19 +257,31 @@ function SubtitleView() {
 	const { player, time } = usePlayerTime({ deltaMs: 50 })
 	const { segment, isCurrentWord } = useCurrentSubtitleSegment(media?.id, time)
 
+	// const when = segment ? segment.start : time
+	// const history = cache ? cache.values().filter(seg => seg.start < when).toArray().sort((a, b) => a.start - b.start) : undefined
+
+
 	return (
-		<>
-			{segment?.words.map((w, i) => (
-				<Fragment key={i}>
-					<span
-						className={isCurrentWord(w) ? "highlight" : ""}
-						onClick={() => player?.seekTo(w.start, true)}
-					>
-						{w.word}
-					</span>
-					{" "}
-				</Fragment>
-			))}
-		</>
+		<VStack>
+			{/* {history?.map(seg => (
+				<Text key={seg.id}>
+					{seg.text}
+				</Text>
+			))} */}
+
+			<Text>
+				{segment?.words.map((w, i) => (
+					<Fragment key={i}>
+						<span
+							className={isCurrentWord(w) ? "highlight" : ""}
+							onClick={() => player?.seekTo(w.start, true)}
+						>
+							{w.word}
+						</span>
+						{" "}
+					</Fragment>
+				))}
+			</Text>
+		</VStack>
 	)
 }
