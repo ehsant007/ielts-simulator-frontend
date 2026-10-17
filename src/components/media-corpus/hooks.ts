@@ -1,6 +1,6 @@
 import { CorpusSegmentRead, mediaCorpusLookup, readSubtitleChunk, SegmentWord } from "@/client";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 
 export function useCorpusOccurrencesQuery(lemma: string, pos: string | null) {
@@ -117,7 +117,10 @@ function findSegment(segments: CorpusSegmentRead[], time: number) {
 
 export function useCurrentSubtitleSegment(mediaId: number | null | undefined, time: number) {
 	const { data: chunk } = useSubtitleChunkQuery(mediaId, time)
-	const segment = chunk ? findSegment(chunk.segments, time) : null
+	const segment = useMemo(
+		() => chunk ? findSegment(chunk.segments, time) : null, 
+		[chunk, time]
+	)
 
 	const isCurrentWord = useCallback((word: SegmentWord) => {
 		return (time >= word.start && time < word.end)
