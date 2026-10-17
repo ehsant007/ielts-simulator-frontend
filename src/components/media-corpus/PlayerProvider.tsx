@@ -73,6 +73,9 @@ export function usePlayerTime({ deltaMs, onTick, ...props }: UsePlayerTimeProps)
 	})
 
 	useEffect(() => {
+		if(context.state !== 1)
+			return
+
 		const interval = window.setInterval(async () => {
 			if (player) {
 				const t = await player.getCurrentTime()
@@ -85,7 +88,7 @@ export function usePlayerTime({ deltaMs, onTick, ...props }: UsePlayerTimeProps)
 		}, deltaMs)
 
 		return () => window.clearInterval(interval)
-	}, [player, deltaMs])
+	}, [player, deltaMs, context.state])
 
 	return { ...context, time }
 }

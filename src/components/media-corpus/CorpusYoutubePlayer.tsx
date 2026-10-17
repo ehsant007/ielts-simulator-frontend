@@ -1,6 +1,6 @@
 "use client"
 
-import { Box, Center, HStack, IconButton, Progress, Spinner, Text, VStack } from "@chakra-ui/react"
+import { Box, Center, HStack, IconButton, Progress, Spinner, Text, TextProps, VStack } from "@chakra-ui/react"
 import { Fragment, useEffect, useEffectEvent, useRef, useState } from "react"
 import YouTube, { type YouTubeProps } from "react-youtube"
 import { useCurrentSubtitleSegment } from "./hooks"
@@ -9,6 +9,8 @@ import type { MouseEvent } from "react"
 import { LuPause, LuPlay, LuSkipBack, LuSkipForward } from "react-icons/lu"
 import { LookupProvider, useCorpusLookupContext } from "./LookupProvider"
 import { TbRewindBackward5, TbRewindForward5 } from "react-icons/tb";
+import { CorpusStoreProvider } from "./CorpusStoreProvider"
+import { CorpusSegmentRead, SegmentWord } from "@/client"
 
 type Props = {
 	lemma: string,
@@ -18,11 +20,13 @@ type Props = {
 export function CorpusYoutubePlayer({ lemma, pos }: Props) {
 
 	return (
-		<PlayerProvider>
-			<LookupProvider lemma={lemma} pos={pos} key={JSON.stringify([lemma, pos])}>
-				<CorpusYoutubePlayerInner />
-			</LookupProvider>
-		</PlayerProvider>
+		<CorpusStoreProvider>
+			<PlayerProvider>
+				<LookupProvider lemma={lemma} pos={pos} key={JSON.stringify([lemma, pos])}>
+					<CorpusYoutubePlayerInner />
+				</LookupProvider>
+			</PlayerProvider>
+		</CorpusStoreProvider>
 	)
 }
 
@@ -254,34 +258,38 @@ function TimeLine() {
 
 function SubtitleView() {
 	const { media } = useCorpusLookupContext()
-	const { player, time } = usePlayerTime({ deltaMs: 50 })
-	const { segment, isCurrentWord } = useCurrentSubtitleSegment(media?.id, time)
-
-	// const when = segment ? segment.start : time
-	// const history = cache ? cache.values().filter(seg => seg.start < when).toArray().sort((a, b) => a.start - b.start) : undefined
-
+	const { time } = usePlayerTime({ deltaMs: 50 })
+	const { segments, isCurrentWord } = useCurrentSubtitleSegment(media?.id, time)
 
 	return (
 		<VStack>
-			{/* {history?.map(seg => (
-				<Text key={seg.id}>
-					{seg.text}
-				</Text>
-			))} */}
-
-			<Text>
-				{segment?.words.map((w, i) => (
-					<Fragment key={i}>
-						<span
-							className={isCurrentWord(w) ? "highlight" : ""}
-							onClick={() => player?.seekTo(w.start, true)}
-						>
-							{w.word}
-						</span>
-						{" "}
-					</Fragment>
-				))}
-			</Text>
+			<SegmentView segment={segments[0]} />
+			<SegmentView segment={segments[1]} highlightWord={isCurrentWord} />
+			<SegmentView segment={segments[2]} />
 		</VStack>
+	)
+}
+
+
+function SegmentView({ segment, highlightWord, ...props }: {
+	segment: CorpusSegmentRead,
+	highlightWord?: (word: SegmentWord) => boolean,
+} & TextProps) {
+	const { player } = usePlayer()
+
+	return (
+		<Text {...props }>
+			{segment?.words.map((w, i) => (
+				<Fragment key={i}>
+					<span
+						className={highlightWord?.(w) ? "highlight" : ""}
+						onClick={() => player?.seekTo(w.start, true)}
+					>
+						{w.word}
+					</span>
+					{" "}
+				</Fragment>
+			))}
+		</Text>
 	)
 }

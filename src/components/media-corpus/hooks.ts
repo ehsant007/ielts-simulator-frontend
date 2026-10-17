@@ -1,7 +1,7 @@
 import { CorpusSegmentRead, mediaCorpusLookup, readSubtitleChunk, SegmentWord } from "@/client";
 import { queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
-
+import { useCorpusStore } from "./CorpusStoreProvider"
 
 export function useCorpusOccurrencesQuery(lemma: string, pos: string | null) {
 	const query = useQuery({
@@ -61,70 +61,87 @@ const CHUNK_SECONDS = 30
 
 export const subtitleChunkKey = (media_id: number, time: number) => ["subtitle-chunk", media_id, time] as const
 
-function subtitleChunkQueryOptions(media_id: number | undefined | null, chunkStart: number) {
+function subtitleChunkQueryOptions(
+	media_id: number | undefined | null,
+	chunkStart: number,
+	addSubtitleChunk: (mediaId: number, segments: CorpusSegmentRead[]) => void,
+) {
 	return queryOptions({
 		enabled: media_id != null,
 		queryKey: subtitleChunkKey(media_id!, chunkStart),
 		staleTime: Infinity,
-		queryFn: () => readSubtitleChunk({
-			query: {
-				media_id: media_id!,
-				start: chunkStart,
-				end: chunkStart + CHUNK_SECONDS,
-			},
-		}).then(res => res.data)
+		queryFn: async () => {
+			const res = await readSubtitleChunk({
+				query: {
+					media_id: media_id!,
+					start: chunkStart,
+					end: chunkStart + CHUNK_SECONDS,
+				},
+			})
+
+			addSubtitleChunk(media_id!, res.data.segments)
+			return res.data
+		}
 	})
 }
 
 
 export function useSubtitleChunkQuery(media_id: number | undefined | null, time: number) {
 	const queryClient = useQueryClient()
+	const addSubtitleChunk = useCorpusStore(s => s.addSubtitleChunk)
 
 	const start = Math.floor(time / CHUNK_SECONDS) * CHUNK_SECONDS
 	const end = start + CHUNK_SECONDS
 	const shouldPrefetchNext = time > start + 0.75 * CHUNK_SECONDS
 
-	const query = useQuery(subtitleChunkQueryOptions(media_id, start))
+	const query = useQuery(subtitleChunkQueryOptions(media_id, start, addSubtitleChunk))
 
 	useEffect(() => {
 		if (!shouldPrefetchNext)
 			return
 
-		queryClient.query(subtitleChunkQueryOptions(media_id, end)).catch(() => undefined)
-	}, [queryClient, media_id, end, shouldPrefetchNext])
+		queryClient.query(subtitleChunkQueryOptions(media_id, end, addSubtitleChunk)).catch(() => undefined)
+	}, [queryClient, media_id, end, shouldPrefetchNext, addSubtitleChunk])
 
 	return query
 }
 
 
-function findSegment(segments: CorpusSegmentRead[], time: number) {
+function findSegment(segments: CorpusSegmentRead[] | undefined, time: number) {
+	if (segments == null)
+		return []
+
 	let low = 0
 	let high = segments.length - 1
 
 	while (low <= high) {
 		const mid = Math.floor((low + high) / 2)
-		if (segments[mid].start > time)
+		const start = segments[mid].start
+		const end = segments[mid + 1] ? segments[mid + 1].start : segments[mid].end + 5
+		if (start > time)
 			high = mid - 1
-		else if (segments[mid].end <= time)
+		else if (end <= time)
 			low = mid + 1
 		else
-			return segments[mid]
+			return [segments[mid - 1], segments[mid], segments[mid + 1]]
 	}
 
-	return null
+	return []
 }
 
 
 export function useCurrentSubtitleSegment(mediaId: number | null | undefined, time: number) {
-	const { data: chunk } = useSubtitleChunkQuery(mediaId, time)
-	const segment = useMemo(
-		() => chunk ? findSegment(chunk.segments, time) : null, 
-		[chunk, time]
+	useSubtitleChunkQuery(mediaId, time)
+	const subtitle = useCorpusStore(s => mediaId ? s.subtitles[mediaId] : undefined)
+
+	const segments = useMemo(
+		() => findSegment(subtitle, time),
+		[subtitle, time],
 	)
 
 	const isCurrentWord = useCallback((word: SegmentWord) => {
 		return (time >= word.start && time < word.end)
 	}, [time])
 
-	return { segment, isCurrentWord }
+	return { segments, isCurrentWord }
 }
