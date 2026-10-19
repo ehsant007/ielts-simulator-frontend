@@ -55,16 +55,18 @@ export function CorpusYoutubePlayerInner() {
 		if (!player || !segment)
 			return
 
-		const seekPromise = player.seekTo(segment.start, true)
-		const state = await player.getPlayerState()
-		await seekPromise
+		try {
+			const seekPromise = player.seekTo(segment.start, true)
+			const state = await player.getPlayerState()
+			await seekPromise
 
-		if (state === 5) {
-			pauseSignal.current = true
-			volume.current = await player.getVolume()
-			await player.setVolume(0)
-			await player.playVideo()
-		}
+			if (state === 5) {
+				pauseSignal.current = true
+				volume.current = await player.getVolume()
+				await player.setVolume(0)
+				await player.playVideo()
+			}
+		} catch { }
 	})
 
 	useEffect(() => {
