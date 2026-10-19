@@ -22,7 +22,11 @@ export function CorpusYoutubePlayer({ lemma, pos }: Props) {
 	return (
 		<CorpusStoreProvider>
 			<PlayerProvider>
-				<LookupProvider lemma={lemma} pos={pos} key={JSON.stringify([lemma, pos])}>
+				<LookupProvider
+					lemma={lemma}
+					pos={pos}
+					key={JSON.stringify([lemma, pos])}
+				>
 					<CorpusYoutubePlayerInner />
 				</LookupProvider>
 			</PlayerProvider>
