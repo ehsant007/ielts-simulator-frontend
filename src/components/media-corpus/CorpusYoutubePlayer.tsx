@@ -2,7 +2,7 @@
 
 import { Box, Center, HStack, IconButton, Progress, Spinner, Text, TextProps, VStack } from "@chakra-ui/react"
 import { Fragment, useEffect, useEffectEvent, useRef, useState } from "react"
-import YouTube, { type YouTubeProps } from "react-youtube"
+import YouTube, { YouTubeEvent, type YouTubeProps } from "react-youtube"
 import { useCurrentSubtitleSegment } from "./hooks"
 import { PlayerProvider, usePlayer, usePlayerTime } from "./PlayerProvider"
 import type { MouseEvent } from "react"
@@ -11,6 +11,7 @@ import { LookupProvider, useCorpusLookupContext } from "./LookupProvider"
 import { TbRewindBackward5, TbRewindForward5 } from "react-icons/tb";
 import { CorpusStoreProvider } from "./CorpusStoreProvider"
 import { CorpusSegmentRead, SegmentWord } from "@/client"
+import { MdReplay } from "react-icons/md"
 
 type Props = {
 	lemma: string,
@@ -39,15 +40,7 @@ export function CorpusYoutubePlayerInner() {
 	const pauseSignal = useRef(false)
 	const volume = useRef(100)
 
-	const { player, setPlayer, setState } = usePlayer({
-		onStateChange: (state) => {
-			if (state === 1 && pauseSignal.current) {
-				pauseSignal.current = false
-				player?.pauseVideo()
-				player?.setVolume(volume.current)
-			}
-		}
-	})
+	const { player, setPlayer, setState, setDuration } = usePlayer()
 
 	const { media, index, total, segment } = useCorpusLookupContext()
 
@@ -55,17 +48,20 @@ export function CorpusYoutubePlayerInner() {
 		if (!player || !segment)
 			return
 
-		try {
-			const seekPromise = player.seekTo(segment.start, true)
-			const state = await player.getPlayerState()
-			await seekPromise
 
-			if (state === 5) {
-				pauseSignal.current = true
-				volume.current = await player.getVolume()
-				await player.setVolume(0)
-				await player.playVideo()
-			}
+
+		try {
+			//await player.seekTo(segment.start, true)
+			// const state = await player.getPlayerState()
+			// console.log("state >>> ", state)
+			// await seekPromise
+
+			// if (state === 5) {
+			// 	pauseSignal.current = true
+			// 	volume.current = await player.getVolume()
+			// 	await player.setVolume(0)
+			// 	await player.playVideo()
+			// }
 		} catch { }
 	})
 
@@ -85,6 +81,21 @@ export function CorpusYoutubePlayerInner() {
 		},
 	}
 
+	const handleStateChange = async (event: YouTubeEvent) => {
+		const state = event.data
+		setState(state)
+
+		const duration = await player?.getDuration()
+		setDuration(duration ?? -1)
+
+
+
+		// if (state === 1 && pauseSignal.current) {
+		// 	pauseSignal.current = false
+		// 	player?.pauseVideo()
+		// 	player?.setVolume(volume.current)
+		// }
+	}
 
 	return (
 		<VStack>
@@ -93,7 +104,7 @@ export function CorpusYoutubePlayerInner() {
 					videoId={media.media_id!}
 					opts={options}
 					onReady={(event) => setPlayer(event.target)}
-					onStateChange={(event) => setState(event.data)}
+					onStateChange={handleStateChange}
 				/>
 			}
 			<Text>{index + 1} / {total}</Text>
@@ -122,34 +133,56 @@ function PlayerControls() {
 function PlayerButtons() {
 	const [isPlaying, setIsPlaying] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
-	const { nextSegment, prevSegment } = useCorpusLookupContext()
+	const { nextSegment, prevSegment, segment } = useCorpusLookupContext()
+	const stateRef = useRef(1)
 
 	const { player } = usePlayer({
-		onStateChange: state => {
+		onStateChange: async (state) => {
 			if (state < 3)
 				setIsPlaying(state === 1)
 
 			setIsLoading(state === 3)
+
+			if (!player || !segment)
+				return
+
+			if (stateRef.current === 1) {
+				stateRef.current = -1
+				await player.seekTo(segment.start, true)
+			} else if (stateRef.current === 2) {
+				stateRef.current = -1
+				await player.seekTo(segment.start, true)
+				await player.pauseVideo()
+			}
 		}
 	})
 
 	const togglePlayback = () => {
 		if (isPlaying) {
 			setIsPlaying(false)
-			if(player)
+			if (player)
 				player.pauseVideo()
 		}
 		else {
 			setIsPlaying(true)
-			if(player)
+			if (player)
 				player.playVideo()
 		}
 	}
 
 	const move = async (step: number) => {
-		if(!player)
+		if (!player)
 			return
 		await player.seekTo(await player.getCurrentTime() + step, true)
+	}
+
+
+	const changeSegment = async (which: string) => {
+		stateRef.current = (await player?.getPlayerState()) ?? -1
+		if (which === "next")
+			nextSegment()
+		else
+			prevSegment()
 	}
 
 	if (!player)
@@ -160,7 +193,15 @@ function PlayerButtons() {
 			<IconButton
 				colorPalette="primary"
 				borderRadius="full"
-				onClick={prevSegment}
+				onClick={() => segment && player.seekTo(segment.start, true)}
+			>
+				<MdReplay />
+			</IconButton>
+
+			<IconButton
+				colorPalette="primary"
+				borderRadius="full"
+				onClick={() => changeSegment("prev")}
 			>
 				<LuSkipBack />
 			</IconButton>
@@ -200,7 +241,7 @@ function PlayerButtons() {
 			<IconButton
 				colorPalette="primary"
 				borderRadius="full"
-				onClick={nextSegment}
+				onClick={() => changeSegment("next")}
 			>
 				<LuSkipForward />
 			</IconButton>

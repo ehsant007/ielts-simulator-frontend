@@ -4,7 +4,8 @@ import { YouTubePlayer } from "react-youtube";
 type PlayerContextType = {
 	player: YouTubePlayer | null
 	setPlayer: Dispatch<SetStateAction<YouTubePlayer | null>>
-	duration: number | undefined
+	duration: number
+	setDuration: Dispatch<SetStateAction<number>>
 	state: number
 	setState: Dispatch<SetStateAction<number>>
 }
@@ -17,20 +18,11 @@ type PlayerProviderProps = {
 
 export function PlayerProvider({ children }: PlayerProviderProps) {
 	const [player, setPlayer] = useState<YouTubePlayer | null>(null)
-	const [duration, setDuration] = useState<number | undefined>(undefined)
+	const [duration, setDuration] = useState<number>(-1)
 	const [state, setState] = useState(-1)
 
-	useEffect(() => {
-		const asyncWork = async () => {
-			const duration = await player?.getDuration()
-			setDuration(duration)
-		}
-
-		asyncWork()
-	}, [player])
-
 	return (
-		<PlayerContext.Provider value={{ player, setPlayer, duration, state, setState }} >
+		<PlayerContext.Provider value={{ player, setPlayer, duration, setDuration, state, setState}} >
 			{children}
 		</PlayerContext.Provider>
 	)
@@ -73,7 +65,7 @@ export function usePlayerTime({ deltaMs, onTick, ...props }: UsePlayerTimeProps)
 	})
 
 	useEffect(() => {
-		if(context.state !== 1)
+		if (context.state !== 1)
 			return
 
 		const interval = window.setInterval(async () => {
