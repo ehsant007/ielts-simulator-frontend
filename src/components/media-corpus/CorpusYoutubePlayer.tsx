@@ -133,24 +133,27 @@ function PlayerButtons() {
 		}
 	})
 
-
-	if (!player)
-		return null
-
 	const togglePlayback = () => {
 		if (isPlaying) {
 			setIsPlaying(false)
-			void player.pauseVideo()
+			if(player)
+				player.pauseVideo()
 		}
 		else {
 			setIsPlaying(true)
-			void player.playVideo()
+			if(player)
+				player.playVideo()
 		}
 	}
 
 	const move = async (step: number) => {
+		if(!player)
+			return
 		await player.seekTo(await player.getCurrentTime() + step, true)
 	}
+
+	if (!player)
+		return null
 
 	return (
 		<HStack>
