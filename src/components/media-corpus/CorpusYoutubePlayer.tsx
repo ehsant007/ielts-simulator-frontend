@@ -78,6 +78,10 @@ export function CorpusYoutubePlayerInner() {
 		// height: "390",
 		playerVars: {
 			autoplay: 0,
+			origin: typeof window !== "undefined"
+				? window.location.origin
+				: undefined,
+			enablejsapi: 1,
 		},
 	}
 

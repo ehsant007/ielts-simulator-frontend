@@ -11,8 +11,8 @@ export function MediaCorpus() {
 	return (
 		<VStack>
 			<HStack>
-				<Input value={lemma} onChange={(e) => setLemma(e.currentTarget.value)} placeholder="lemma" />
-				<Input value={pos} onChange={(e) => setPos(e.currentTarget.value)} placeholder="pos" />
+				<Input id="lemma" value={lemma} onChange={(e) => setLemma(e.currentTarget.value)} placeholder="lemma" />
+				<Input id="pos" value={pos} onChange={(e) => setPos(e.currentTarget.value)} placeholder="pos" />
 			</HStack>
 
 				<CorpusYoutubePlayer lemma={lemma} pos={pos} />
