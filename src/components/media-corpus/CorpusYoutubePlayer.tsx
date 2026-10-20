@@ -1,7 +1,7 @@
 "use client"
 
 import { Box, Center, HStack, IconButton, Progress, Spinner, Text, TextProps, VStack } from "@chakra-ui/react"
-import { Fragment, useEffect, useEffectEvent, useRef, useState } from "react"
+import { Fragment, useState } from "react"
 import YouTube, { YouTubeEvent, type YouTubeProps } from "react-youtube"
 import { useCurrentSubtitleSegment } from "./hooks"
 import { PlayerProvider, usePlayer, usePlayerTime } from "./PlayerProvider"
@@ -37,47 +37,19 @@ export function CorpusYoutubePlayer({ lemma, pos }: Props) {
 
 
 export function CorpusYoutubePlayerInner() {
-	const pauseSignal = useRef(false)
-	const volume = useRef(100)
-
 	const { player, setPlayer, setState, setDuration } = usePlayer()
-
 	const { media, index, total, segment } = useCorpusLookupContext()
-
-	const handleSegmentChange = useEffectEvent(async () => {
-		if (!player || !segment)
-			return
-
-
-
-		try {
-			//await player.seekTo(segment.start, true)
-			// const state = await player.getPlayerState()
-			// console.log("state >>> ", state)
-			// await seekPromise
-
-			// if (state === 5) {
-			// 	pauseSignal.current = true
-			// 	volume.current = await player.getVolume()
-			// 	await player.setVolume(0)
-			// 	await player.playVideo()
-			// }
-		} catch { }
-	})
-
-	useEffect(() => {
-		handleSegmentChange()
-	}, [player, segment])
 
 	const options: YouTubeProps["opts"] = {
 		// width: "640",
 		// height: "390",
 		playerVars: {
-			autoplay: 0,
+			autoplay: 1,
 			origin: typeof window !== "undefined"
 				? window.location.origin
 				: undefined,
 			enablejsapi: 1,
+			start: Math.floor(segment?.start ?? 0)
 		},
 	}
 
@@ -87,14 +59,10 @@ export function CorpusYoutubePlayerInner() {
 
 		const duration = await player?.getDuration()
 		setDuration(duration ?? -1)
+	}
 
-
-
-		// if (state === 1 && pauseSignal.current) {
-		// 	pauseSignal.current = false
-		// 	player?.pauseVideo()
-		// 	player?.setVolume(volume.current)
-		// }
+	const onReady = async (event: YouTubeEvent) => {
+		setPlayer(event.target)
 	}
 
 	return (
@@ -103,7 +71,7 @@ export function CorpusYoutubePlayerInner() {
 				<YouTube
 					videoId={media.media_id!}
 					opts={options}
-					onReady={(event) => setPlayer(event.target)}
+					onReady={onReady}
 					onStateChange={handleStateChange}
 				/>
 			}
@@ -134,7 +102,6 @@ function PlayerButtons() {
 	const [isPlaying, setIsPlaying] = useState(false)
 	const [isLoading, setIsLoading] = useState(false)
 	const { nextSegment, prevSegment, segment } = useCorpusLookupContext()
-	const stateRef = useRef(1)
 
 	const { player } = usePlayer({
 		onStateChange: async (state) => {
@@ -142,18 +109,6 @@ function PlayerButtons() {
 				setIsPlaying(state === 1)
 
 			setIsLoading(state === 3)
-
-			if (!player || !segment)
-				return
-
-			if (stateRef.current === 1) {
-				stateRef.current = -1
-				await player.seekTo(segment.start, true)
-			} else if (stateRef.current === 2) {
-				stateRef.current = -1
-				await player.seekTo(segment.start, true)
-				await player.pauseVideo()
-			}
 		}
 	})
 
@@ -177,14 +132,6 @@ function PlayerButtons() {
 	}
 
 
-	const changeSegment = async (which: string) => {
-		stateRef.current = (await player?.getPlayerState()) ?? -1
-		if (which === "next")
-			nextSegment()
-		else
-			prevSegment()
-	}
-
 	if (!player)
 		return null
 
@@ -201,7 +148,7 @@ function PlayerButtons() {
 			<IconButton
 				colorPalette="primary"
 				borderRadius="full"
-				onClick={() => changeSegment("prev")}
+				onClick={prevSegment}
 			>
 				<LuSkipBack />
 			</IconButton>
@@ -241,7 +188,7 @@ function PlayerButtons() {
 			<IconButton
 				colorPalette="primary"
 				borderRadius="full"
-				onClick={() => changeSegment("next")}
+				onClick={nextSegment}
 			>
 				<LuSkipForward />
 			</IconButton>
@@ -340,6 +287,7 @@ function SegmentView({ segment, highlightWord, ...props }: {
 					<span
 						className={highlightWord?.(w) ? "highlight" : ""}
 						onClick={() => player?.seekTo(w.start, true)}
+						style={{ cursor: "pointer" }}
 					>
 						{w.word}
 					</span>
