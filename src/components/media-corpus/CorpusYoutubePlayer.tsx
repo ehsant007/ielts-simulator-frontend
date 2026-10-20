@@ -41,8 +41,6 @@ export function CorpusYoutubePlayerInner() {
 	const { media, index, total, segment } = useCorpusLookupContext()
 
 	const options: YouTubeProps["opts"] = {
-		// width: "640",
-		// height: "390",
 		playerVars: {
 			autoplay: 1,
 			origin: typeof window !== "undefined"
