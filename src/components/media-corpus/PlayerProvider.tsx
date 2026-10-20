@@ -4,8 +4,8 @@ import { YouTubePlayer } from "react-youtube";
 type PlayerContextType = {
 	player: YouTubePlayer | null
 	setPlayer: Dispatch<SetStateAction<YouTubePlayer | null>>
-	duration: number
-	setDuration: Dispatch<SetStateAction<number>>
+	duration: number | undefined
+	setDuration: Dispatch<SetStateAction<number | undefined>>
 	state: number
 	setState: Dispatch<SetStateAction<number>>
 }
@@ -18,11 +18,18 @@ type PlayerProviderProps = {
 
 export function PlayerProvider({ children }: PlayerProviderProps) {
 	const [player, setPlayer] = useState<YouTubePlayer | null>(null)
-	const [duration, setDuration] = useState<number>(-1)
+	const [duration, setDuration] = useState<number | undefined>(-1)
 	const [state, setState] = useState(-1)
 
 	return (
-		<PlayerContext.Provider value={{ player, setPlayer, duration, setDuration, state, setState}} >
+		<PlayerContext.Provider value={{
+			player,
+			setPlayer,
+			duration,
+			setDuration,
+			state,
+			setState
+		}} >
 			{children}
 		</PlayerContext.Provider>
 	)
