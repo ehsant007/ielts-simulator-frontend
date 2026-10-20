@@ -218,10 +218,6 @@ function TimeLine() {
 	const { player, duration, time } = usePlayerTime({
 		deltaMs: 100,
 		onTick: time => {
-			if (duration == null) {
-				setProgress(0)
-				return
-			}
 			const p = duration ? time / duration * 100 : 0
 			setProgress(p)
 		}
