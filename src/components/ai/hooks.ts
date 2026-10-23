@@ -6,6 +6,8 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { useChatStore, useChatStoreApi } from "./ChatProvider"
 import { useGoogleLiveAssistant, UseGoogleLiveAssistantProps } from "./live_asistant/hooks"
 
+import { v7 as uuid7 } from "uuid"
+
 export const chatsQueryKey = ["ai-chats"] as const
 export const chatCreateKey = ["ai-chat-create"] as const
 export const chatRemoveKey = ["ai-chat-remove"] as const
@@ -338,6 +340,17 @@ export function useMessagesQuery(chat_id: string | null | undefined) {
 			})
 		})
 
+	const streaming_msg = useChatStore((s) => {
+		if (chat_id == null)
+			return undefined
+		const stream = s.streams[chat_id]
+		if (stream == null)
+			return undefined
+		return stream.message
+	})
+
+	if(streaming_msg)
+		messages.push(streaming_msg)
 
 	return {
 		...messagesQuery,
@@ -384,20 +397,25 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 				)) {
 
 					switch (event.type) {
-
-						case "start":
-							response = event.response
-							addMessage(event.request)
-							addMessage(response)
-							addStream(response)
-							break
-
 						case "delta":
+							if (response == null) {
+								response = {
+									id: "streaming",
+									chat_id: data.chat_id,
+									parent_id: null,
+									content: "",
+									role: "assistant",
+									created_at: new Date().toISOString(),
+								}
+								addStream(response)
+							}
+
 							response!.content += event.delta
 							invalidateStream(response!.chat_id)
 							break
 
 						case "done":
+							event.messages.forEach(msg => addMessage(msg))
 							break
 
 						case "error":
@@ -407,12 +425,13 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 			} finally {
 				if (streamControllers.get(data.chat_id) === controller)
 					streamControllers.delete(data.chat_id)
+
+				if(response)
+					removeStream(response.chat_id)
 			}
 
 			if (response == null)
-				throw new Error("No response from server!")
-
-			removeStream(response.chat_id)
+				throw new Error("No response from server!")			
 		},
 
 		onMutate: (data) => {

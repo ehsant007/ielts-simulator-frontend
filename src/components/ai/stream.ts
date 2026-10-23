@@ -12,6 +12,7 @@ type StreamEvent =
 	}
 	| {
 		type: "done"
+		messages: AiMessageRead[]
 	}
 	| {
 		type: "error"
