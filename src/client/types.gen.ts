@@ -76,14 +76,10 @@ export type AiChatRead = {
      * Pinned
      */
     pinned: boolean;
-};
-
-/**
- * AIChatTurn
- */
-export type AiChatTurn = {
-    request: AiMessageRead;
-    response: AiMessageRead;
+    /**
+     * Active Leaf Id
+     */
+    active_leaf_id?: string | null;
 };
 
 /**
@@ -117,27 +113,13 @@ export type AiMessageCreate = {
      */
     chat_id: string;
     /**
+     * Parent Id
+     */
+    parent_id?: string | null;
+    /**
      * Content
      */
     content: string;
-};
-
-/**
- * AIMessagePage
- */
-export type AiMessagePage = {
-    /**
-     * Messages
-     */
-    messages: Array<AiMessageRead>;
-    /**
-     * Next Cursor
-     */
-    next_cursor?: string | null;
-    /**
-     * Previous Cursor
-     */
-    previous_cursor?: string | null;
 };
 
 /**
@@ -152,11 +134,15 @@ export type AiMessageRead = {
      * Chat Id
      */
     chat_id: string;
-    role: AiMessageRole;
+    /**
+     * Parent Id
+     */
+    parent_id: string | null;
     /**
      * Content
      */
     content: string;
+    role: AiMessageRole;
     /**
      * Created At
      */
@@ -2475,13 +2461,9 @@ export type ReadMessagesData = {
     };
     query?: {
         /**
-         * Before
+         * Cursor
          */
-        before?: string | null;
-        /**
-         * After
-         */
-        after?: string | null;
+        cursor?: string | null;
         /**
          * Limit
          */
@@ -2501,37 +2483,14 @@ export type ReadMessagesError = ReadMessagesErrors[keyof ReadMessagesErrors];
 
 export type ReadMessagesResponses = {
     /**
+     * Response Read Messages
+     *
      * Successful Response
      */
-    200: AiMessagePage;
+    200: Array<AiMessageRead>;
 };
 
 export type ReadMessagesResponse = ReadMessagesResponses[keyof ReadMessagesResponses];
-
-export type CreateMessageData = {
-    body: AiMessageCreate;
-    path?: never;
-    query?: never;
-    url: '/api/v1/ai/messages';
-};
-
-export type CreateMessageErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type CreateMessageError = CreateMessageErrors[keyof CreateMessageErrors];
-
-export type CreateMessageResponses = {
-    /**
-     * Successful Response
-     */
-    200: AiChatTurn;
-};
-
-export type CreateMessageResponse = CreateMessageResponses[keyof CreateMessageResponses];
 
 export type CreateMessageStreamData = {
     body: AiMessageCreate;
