@@ -123,6 +123,24 @@ export type AiMessageCreate = {
 };
 
 /**
+ * AIMessagePage
+ */
+export type AiMessagePage = {
+    /**
+     * Messages
+     */
+    messages: Array<AiMessageRead>;
+    /**
+     * Next Cursor
+     */
+    next_cursor?: string | null;
+    /**
+     * Previous Cursor
+     */
+    previous_cursor?: string | null;
+};
+
+/**
  * AIMessageRead
  */
 export type AiMessageRead = {
@@ -2483,11 +2501,9 @@ export type ReadMessagesError = ReadMessagesErrors[keyof ReadMessagesErrors];
 
 export type ReadMessagesResponses = {
     /**
-     * Response Read Messages
-     *
      * Successful Response
      */
-    200: Array<AiMessageRead>;
+    200: AiMessagePage;
 };
 
 export type ReadMessagesResponse = ReadMessagesResponses[keyof ReadMessagesResponses];

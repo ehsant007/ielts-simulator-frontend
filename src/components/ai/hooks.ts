@@ -1,4 +1,4 @@
-import { AiChatCreate, AiChatRead, AiChatPage, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, deleteChat, readChatById, readChats, readMessages, updateChat, transcribeAudio } from "@/client"
+import { AiChatCreate, AiChatRead, AiChatPage, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, deleteChat, readChatById, readChats, readMessages, updateChat, transcribeAudio, AiMessagePage } from "@/client"
 import { InfiniteData, infiniteQueryOptions, useInfiniteQuery, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query"
 import { streamMessage } from "./stream"
 import { useCallback, useEffect, useRef, useState } from "react"
@@ -272,11 +272,14 @@ export function messagesQueryOptions(chat_id: string | null | undefined) {
 		initialPageParam: {},
 
 		getPreviousPageParam: (page) =>
-			page.length > 0 && page[0].parent_id
-				? { cursor: page[0].parent_id }
+			page.previous_cursor
+				? { cursor: page.previous_cursor }
 				: undefined,
 
-		getNextPageParam: () => undefined
+		getNextPageParam: (page) =>
+			page.next_cursor
+				? { cursor: page.next_cursor }
+				: undefined,
 	})
 }
 
@@ -284,7 +287,7 @@ export function useAddMessage() {
 	const queryClient = useQueryClient()
 
 	return (message: AiMessageRead) => {
-		queryClient.setQueryData<InfiniteData<AiMessageRead[]>>(
+		queryClient.setQueryData<InfiniteData<AiMessagePage>>(
 			messagesQueryKey(message.chat_id),
 			(prev) => {
 				if (!prev || prev.pages.length === 0) {
@@ -298,7 +301,7 @@ export function useAddMessage() {
 					...prev,
 					pages: [
 						...pages.slice(0, -1),
-						[...lastPage, message],
+						{ ...lastPage, messages: [...lastPage.messages, message] },
 					],
 				}
 			}
@@ -309,7 +312,7 @@ export function useAddMessage() {
 export function useMessagesQuery(chat_id: string | null | undefined) {
 	const messagesQuery = useInfiniteQuery(messagesQueryOptions(chat_id))
 
-	const messages = messagesQuery.data?.pages.flat() ?? []
+	const messages = messagesQuery.data?.pages.flatMap((page) => page.messages) ?? []
 
 	const pendingMessages = useMutationState({
 		filters: {
