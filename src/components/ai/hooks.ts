@@ -349,7 +349,7 @@ export function useMessagesQuery(chat_id: string | null | undefined) {
 		return stream.message
 	})
 
-	if(streaming_msg)
+	if (streaming_msg)
 		messages.push(streaming_msg)
 
 	return {
@@ -426,12 +426,12 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 				if (streamControllers.get(data.chat_id) === controller)
 					streamControllers.delete(data.chat_id)
 
-				if(response)
+				if (response)
 					removeStream(response.chat_id)
-			}
+			} 
 
 			if (response == null)
-				throw new Error("No response from server!")			
+				throw new Error("No response from server!")
 		},
 
 		onMutate: (data) => {
