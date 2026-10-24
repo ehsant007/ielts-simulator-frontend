@@ -3,8 +3,8 @@ import { AiMessageCreate, AiMessageRead } from "@/client"
 type StreamEvent =
 	| {
 		type: "start"
-		request: AiMessageRead
-		response: AiMessageRead
+		request_id: string
+		response_id: string
 	}
 	| {
 		type: "delta"

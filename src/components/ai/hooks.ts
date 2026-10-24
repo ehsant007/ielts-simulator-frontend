@@ -287,8 +287,7 @@ export function messagesQueryOptions(chat_id: string | null | undefined) {
 
 export function useAddMessage() {
 	const queryClient = useQueryClient()
-
-	return (message: AiMessageRead) => {
+	const addMessage = useCallback((message: AiMessageRead) => {
 		queryClient.setQueryData<InfiniteData<AiMessagePage>>(
 			messagesQueryKey(message.chat_id),
 			(prev) => {
@@ -308,7 +307,9 @@ export function useAddMessage() {
 				}
 			}
 		)
-	}
+	}, [queryClient])
+
+	return addMessage
 }
 
 export function useMessagesQuery(chat_id: string | null | undefined) {
@@ -340,17 +341,17 @@ export function useMessagesQuery(chat_id: string | null | undefined) {
 			})
 		})
 
-	const streaming_msg = useChatStore((s) => {
-		if (chat_id == null)
-			return undefined
-		const stream = s.streams[chat_id]
-		if (stream == null)
-			return undefined
-		return stream.message
-	})
+	// const streaming_msg = useChatStore((s) => {
+	// 	if (chat_id == null)
+	// 		return undefined
+	// 	const stream = s.streams[chat_id]
+	// 	if (stream == null)
+	// 		return undefined
+	// 	return stream.message
+	// })
 
-	if (streaming_msg)
-		messages.push(streaming_msg)
+	// if (streaming_msg)
+	// 	messages.push(streaming_msg)
 
 	return {
 		...messagesQuery,
@@ -389,6 +390,7 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 			streamControllers.set(data.chat_id, controller)
 
 			let response: AiMessageRead | null = null
+			let response_id = ""
 
 			try {
 				for await (const event of streamMessage(
@@ -397,25 +399,38 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 				)) {
 
 					switch (event.type) {
+						case "start":
+							const request: AiMessageRead = {
+								id: event.request_id,
+								chat_id: data.chat_id,
+								parent_id: null,
+								content: data.content,
+								role: "user",
+								created_at: new Date().toISOString(),
+							}
+							addMessage(request)
+							response_id = event.request_id
+							break
+
 						case "delta":
 							if (response == null) {
 								response = {
-									id: "streaming",
+									id: response_id,
 									chat_id: data.chat_id,
 									parent_id: null,
 									content: "",
 									role: "assistant",
 									created_at: new Date().toISOString(),
 								}
+								addMessage(response)
 								addStream(response)
 							}
-
-							response!.content += event.delta
-							invalidateStream(response!.chat_id)
+							response.content += event.delta
+							invalidateStream(response.chat_id)
 							break
 
 						case "done":
-							event.messages.forEach(msg => addMessage(msg))
+							//event.messages.forEach(msg => addMessage(msg))
 							break
 
 						case "error":
@@ -428,7 +443,7 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 
 				if (response)
 					removeStream(response.chat_id)
-			} 
+			}
 
 			if (response == null)
 				throw new Error("No response from server!")

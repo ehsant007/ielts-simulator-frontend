@@ -479,7 +479,7 @@ export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
 			</Markdown>
 
 			<HStack gap="0" mt="1">
-				<CopyButton text={msg.content} color="fg.muted" />
+				<CopyButton text={content} color="fg.muted" />
 				<IconButton
 					aria-label="Try again"
 					size="xs"
