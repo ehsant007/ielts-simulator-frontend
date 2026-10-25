@@ -1,7 +1,7 @@
 import { AiChatCreate, AiChatRead, AiChatPage, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, deleteChat, readChatById, readChats, readMessages, updateChat, transcribeAudio, AiMessagePage } from "@/client"
 import { InfiniteData, infiniteQueryOptions, useInfiniteQuery, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query"
 import { streamMessage } from "./stream"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react"
 //import { usePathname, useRouter } from "next/navigation"
 import { useChatStore, useChatStoreApi } from "./ChatProvider"
 import { useGoogleLiveAssistant, UseGoogleLiveAssistantProps } from "./live_asistant/hooks"
@@ -285,8 +285,9 @@ export function messagesQueryOptions(chat_id: string | null | undefined) {
 	})
 }
 
-export function useAddMessage() {
+export function useMessagesHelpers() {
 	const queryClient = useQueryClient()
+
 	const addMessage = useCallback((message: AiMessageRead) => {
 		queryClient.setQueryData<InfiniteData<AiMessagePage>>(
 			messagesQueryKey(message.chat_id),
@@ -309,7 +310,88 @@ export function useAddMessage() {
 		)
 	}, [queryClient])
 
-	return addMessage
+	const upsertMessage = useCallback((message: AiMessageRead) => {
+		queryClient.setQueryData<InfiniteData<AiMessagePage>>(
+			messagesQueryKey(message.chat_id),
+			(prev) => {
+				if (!prev || prev.pages.length === 0) {
+					return prev
+				}
+
+				const { pages } = prev
+
+				// Search from the newest page backwards: the message is most likely there
+				for (let p = pages.length - 1; p >= 0; p--) {
+					const i = pages[p].messages.findIndex((m) => m.id === message.id)
+					if (i === -1)
+						continue
+
+					// Found: replace it, copying only the page that changes
+					const messages = pages[p].messages.slice()
+					messages[i] = message
+
+					const nextPages = pages.slice()
+					nextPages[p] = { ...pages[p], messages }
+					return { ...prev, pages: nextPages }
+				}
+
+				// Not found: append to the last page
+				const lastPage = pages[pages.length - 1]
+				return {
+					...prev,
+					pages: [
+						...pages.slice(0, -1),
+						{ ...lastPage, messages: [...lastPage.messages, message] },
+					],
+				}
+			}
+		)
+	}, [queryClient])
+
+	const removeMessage = useCallback((message: AiMessageRead) => {
+		queryClient.setQueryData<InfiniteData<AiMessagePage>>(
+			messagesQueryKey(message.chat_id),
+			(prev) => {
+				if (!prev || prev.pages.length === 0) {
+					return prev
+				}
+
+				const { pages } = prev
+
+				// Search from the newest page backwards: the message is most likely there
+				for (let p = pages.length - 1; p >= 0; p--) {
+					const i = pages[p].messages.findIndex((m) => m.id === message.id)
+					if (i === -1)
+						continue
+
+					// Found: remove it, copying only the page that changes
+					const messages = pages[p].messages.toSpliced(i, 1)
+
+					const nextPages = pages.slice()
+					nextPages[p] = { ...pages[p], messages }
+					return { ...prev, pages: nextPages }
+				}
+
+				return prev
+			}
+		)
+	}, [queryClient])
+
+	const setMessages = useCallback((chatId: string, set: SetStateAction<InfiniteData<AiMessagePage> | undefined>) => {
+		queryClient.setQueryData<InfiniteData<AiMessagePage>>(
+			messagesQueryKey(chatId),
+			(prev) => {
+				const state = typeof set === "function" ? set(prev) : set
+				return state
+			}
+		)
+	}, [queryClient])
+
+	const getMessages = useCallback((chatId: string) => {
+		return queryClient.getQueryData<InfiniteData<AiMessagePage>>(messagesQueryKey(chatId))
+	}, [queryClient])
+
+	return { getMessages, setMessages, addMessage, upsertMessage, removeMessage }
 }
 
 export function useMessagesQuery(chat_id: string | null | undefined) {
@@ -376,7 +458,7 @@ export type UseMessageCreateStreamMutationProps = {
 }
 
 export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessageCreateStreamMutationProps) {
-	const addMessage = useAddMessage()
+	const { addMessage, upsertMessage, removeMessage } = useMessagesHelpers()
 
 	const addStream = useChatStore((s) => s.addStream)
 	const removeStream = useChatStore((s) => s.removeStream)
@@ -389,6 +471,7 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 			const controller = new AbortController()
 			streamControllers.set(data.chat_id, controller)
 
+			let request: AiMessageRead | null = null
 			let response: AiMessageRead | null = null
 			let response_id = ""
 
@@ -400,7 +483,7 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 
 					switch (event.type) {
 						case "start":
-							const request: AiMessageRead = {
+							request = {
 								id: event.request_id,
 								chat_id: data.chat_id,
 								parent_id: null,
@@ -409,7 +492,7 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 								created_at: new Date().toISOString(),
 							}
 							addMessage(request)
-							response_id = event.request_id
+							response_id = event.response_id
 							break
 
 						case "delta":
@@ -430,10 +513,14 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 							break
 
 						case "done":
-							//event.messages.forEach(msg => addMessage(msg))
+							event.messages.forEach(msg => upsertMessage(msg))
 							break
 
 						case "error":
+							if(request)
+								removeMessage(request)
+							if(response)
+								removeMessage(response)
 							throw new Error(event.message)
 					}
 				}
@@ -623,7 +710,7 @@ export function useChatLiveAssistant(props: UseGoogleLiveAssistantProps = {}) {
 	const removeStream = useChatStore((s) => s.removeStream)
 	const invalidateStream = useChatStore((s) => s.invalidateStream)
 	const store = useChatStoreApi()
-	const addMessage = useAddMessage()
+	const addMessage = useMessagesHelpers()
 
 	const liveAssistant = useGoogleLiveAssistant({
 		onUserTranscript: ({ chat_id, message_id, content }) => {
