@@ -75,7 +75,7 @@ export const Textarea2 = forwardRef<HTMLTextAreaElement, Textarea2Props>(({ onLi
 
 	return (
 		<Box position="relative" w="full" h="fit-content">
-			<Textarea position="absolute" w="1" top="0" left="50%" disabled  ref={auxRef} border="none" resize="none"/>
+			<Textarea position="absolute" w="1" top="0" left="50%" disabled ref={auxRef} border="none" resize="none" />
 			<Textarea ref={mergeRefs(textareaRef, ref)} value={value} {...props} />
 		</Box>
 	)
@@ -117,6 +117,7 @@ function ChatInputInner({
 
 	const [submittingVoice, setSubmittingVoice] = useState(false)
 
+	const [error, setError] = useState("")
 
 	const [fullExpand, setFullExpand] = useState(false)
 	const [multiLine, setMultiLine] = useState(false)
@@ -130,6 +131,7 @@ function ChatInputInner({
 	const recorder = useRecorder()
 
 	const submitVoice = async () => {
+		setError("")
 		if (submittingVoice) {
 			onVoiceSubmitCancel?.()
 			return
@@ -146,12 +148,15 @@ function ChatInputInner({
 		try {
 			await onVoiceSubmit?.(blob)
 			setMode("text")
-		} catch { }
+		} catch {
+			setError("Failed to transcribe!")
+		}
 
 		setSubmittingVoice(false)
 	}
 
 	const DiscardVoice = async () => {
+		setError("")
 		setMode("text")
 		recorder.stop()
 		if (submittingVoice)
@@ -159,11 +164,13 @@ function ChatInputInner({
 	}
 
 	const handleCall = () => {
+		setError("")
 		setMode("call")
 		onCall?.()
 	}
 
 	const handleEndCall = () => {
+		setError("")
 		setMode("text")
 		onEndCall?.()
 	}
@@ -182,7 +189,8 @@ function ChatInputInner({
 				borderRadius="4xl"
 				bg="bg.muted"
 				focusRing="none"
-				border="none"
+				border={error ? "sm" : "none"}
+				borderColor={error ? "border.error" : "transparent"}
 				shadow="sm"
 				rows={fullExpand ? 20 : 1}
 				ps="5"
