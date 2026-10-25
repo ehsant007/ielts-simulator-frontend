@@ -1,12 +1,10 @@
 import { AiChatCreate, AiChatRead, AiChatPage, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, deleteChat, readChatById, readChats, readMessages, updateChat, transcribeAudio, AiMessagePage } from "@/client"
 import { InfiniteData, infiniteQueryOptions, useInfiniteQuery, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query"
 import { streamMessage } from "./stream"
-import { Dispatch, SetStateAction, useCallback, useEffect, useRef, useState } from "react"
+import { SetStateAction, useCallback, useEffect, useRef, useState } from "react"
 //import { usePathname, useRouter } from "next/navigation"
 import { useChatStore, useChatStoreApi } from "./ChatProvider"
 import { useGoogleLiveAssistant, UseGoogleLiveAssistantProps } from "./live_asistant/hooks"
-
-import { v7 as uuid7 } from "uuid"
 
 export const chatsQueryKey = ["ai-chats"] as const
 export const chatCreateKey = ["ai-chat-create"] as const
@@ -517,9 +515,9 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 							break
 
 						case "error":
-							if(request)
+							if (request)
 								removeMessage(request)
-							if(response)
+							if (response)
 								removeMessage(response)
 							throw new Error(event.message)
 					}
@@ -710,13 +708,14 @@ export function useChatLiveAssistant(props: UseGoogleLiveAssistantProps = {}) {
 	const removeStream = useChatStore((s) => s.removeStream)
 	const invalidateStream = useChatStore((s) => s.invalidateStream)
 	const store = useChatStoreApi()
-	const addMessage = useMessagesHelpers()
+	const { addMessage } = useMessagesHelpers()
 
 	const liveAssistant = useGoogleLiveAssistant({
 		onUserTranscript: ({ chat_id, message_id, content }) => {
 			addMessage({
 				id: message_id,
 				chat_id: chat_id,
+				parent_id: null,
 				content,
 				role: "user",
 				created_at: new Date().toISOString(),
@@ -729,6 +728,7 @@ export function useChatLiveAssistant(props: UseGoogleLiveAssistantProps = {}) {
 				message = {
 					id: message_id,
 					chat_id: chat_id,
+					parent_id: null,
 					content,
 					role: "assistant",
 					created_at: new Date().toISOString(),

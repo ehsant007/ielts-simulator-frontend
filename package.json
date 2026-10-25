@@ -45,7 +45,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@hey-api/openapi-ts": "0.87.1",
+    "@hey-api/openapi-ts": "0.99.0",
     "@tanstack/eslint-plugin-query": "^5.101.2",
     "@tanstack/react-query-devtools": "^5.101.2",
     "@types/node": "^20",
@@ -57,6 +57,7 @@
     "baseline-browser-mapping": "^2.10.32",
     "eslint": "^9",
     "eslint-config-next": "16.3.6",
+    "prettier": "^3.9.10",
     "typescript": "^5"
   },
   "packageManager": "pnpm@11.18.0"
