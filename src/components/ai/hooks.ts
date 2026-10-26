@@ -724,7 +724,10 @@ export function useChatLiveAssistant(props: UseGoogleLiveAssistantProps = {}) {
 
 		onAssistantTranscript: ({ chat_id, message_id, content, partial }) => {
 			let message = store.getState().streams[chat_id]?.message
-			if (message == null) {
+
+			if (message == null || message.id !== message_id) {
+				if(message)
+					removeStream(message.chat_id)
 				message = {
 					id: message_id,
 					chat_id: chat_id,
@@ -743,7 +746,6 @@ export function useChatLiveAssistant(props: UseGoogleLiveAssistantProps = {}) {
 				invalidateStream(message.chat_id)
 			} else {
 				message.content = content
-				removeStream(message.chat_id)
 			}
 		},
 
