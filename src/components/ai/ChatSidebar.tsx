@@ -14,6 +14,7 @@ import { RxPanelLeft } from "react-icons/rx";
 import { AnimatePresence, motion } from "motion/react"
 import { SidebarProvider, useSidebar } from "./SidebarProvider"
 import { useMutationState } from "@tanstack/react-query"
+import { ColorModeButton } from "../ui/color-mode";
 
 const MotionBox = motion.create(Box)
 
@@ -109,6 +110,7 @@ export function DesktopSidebar() {
 				<RxPanelLeft />
 			</IconButton>
 
+			<ColorModeButton />
 			<SideBar collapse={collapse} />
 		</Box>
 	)
