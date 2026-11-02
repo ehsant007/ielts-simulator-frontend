@@ -1,10 +1,10 @@
-import { AiChatCreate, AiChatRead, AiChatPage, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, deleteChat, readChatById, readChats, readMessages, updateChat, transcribeAudio, AiMessagePage } from "@/client"
+import { AiChatCreate, AiChatRead, AiChatPage, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, deleteChat, readChatById, readChats, readMessages, updateChat, transcribeAudio, AiMessagePage, AiMessageRole } from "@/client"
 import { InfiniteData, infiniteQueryOptions, useInfiniteQuery, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query"
 import { streamMessage } from "./stream"
 import { SetStateAction, useCallback, useEffect, useRef, useState } from "react"
 //import { usePathname, useRouter } from "next/navigation"
 import { useChatStore, useChatStoreApi } from "./ChatProvider"
-import { useGoogleLiveAssistant, UseGoogleLiveAssistantProps } from "./live_asistant/hooks"
+import { useGoogleLiveAssistant, UseGoogleLiveAssistantProps, WebSocketMessage } from "./live_asistant/hooks"
 
 export const chatsQueryKey = ["ai-chats"] as const
 export const chatCreateKey = ["ai-chat-create"] as const
@@ -507,7 +507,7 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 								addStream(response)
 							}
 							response.content += event.delta
-							invalidateStream(response.chat_id)
+							invalidateStream(response.id)
 							break
 
 						case "done":
@@ -527,7 +527,7 @@ export function useMessageCreateStreamMutation({ onMutate, onError }: UseMessage
 					streamControllers.delete(data.chat_id)
 
 				if (response)
-					removeStream(response.chat_id)
+					removeStream(response.id)
 			}
 
 			if (response == null)
@@ -710,43 +710,41 @@ export function useChatLiveAssistant(props: UseGoogleLiveAssistantProps = {}) {
 	const store = useChatStoreApi()
 	const { addMessage } = useMessagesHelpers()
 
-	const liveAssistant = useGoogleLiveAssistant({
-		onUserTranscript: ({ chat_id, message_id, content }) => {
-			addMessage({
+
+	const handleTranscriptStream = (role: AiMessageRole, { chat_id, message_id, content, partial }: WebSocketMessage) => {
+		let message = store.getState().streams[message_id]?.message
+
+		if (message == null || message.id !== message_id) {
+			if (message)
+				removeStream(message.id)
+			message = {
 				id: message_id,
 				chat_id: chat_id,
 				parent_id: null,
 				content,
-				role: "user",
+				role: role,
 				created_at: new Date().toISOString(),
-			})
+			}
+			addMessage(message)
+			addStream(message)
+			return
+		}
+
+		if (partial) {
+			message.content += content
+			invalidateStream(message.id)
+		} else {
+			message.content = content
+		}
+	}
+
+	const liveAssistant = useGoogleLiveAssistant({
+		onUserTranscript: (data) => {
+			handleTranscriptStream("user", data)
 		},
 
-		onAssistantTranscript: ({ chat_id, message_id, content, partial }) => {
-			let message = store.getState().streams[chat_id]?.message
-
-			if (message == null || message.id !== message_id) {
-				if(message)
-					removeStream(message.chat_id)
-				message = {
-					id: message_id,
-					chat_id: chat_id,
-					parent_id: null,
-					content,
-					role: "assistant",
-					created_at: new Date().toISOString(),
-				}
-				addMessage(message)
-				addStream(message)
-				return
-			}
-
-			if (partial) {
-				message.content += content
-				invalidateStream(message.chat_id)
-			} else {
-				message.content = content
-			}
+		onAssistantTranscript: (data) => {
+			handleTranscriptStream("assistant", data)
 		},
 
 		...props,

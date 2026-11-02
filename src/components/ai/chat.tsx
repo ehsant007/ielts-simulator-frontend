@@ -377,6 +377,9 @@ export function Message({ msg }: { msg: AiMessageRead }) {
 
 
 export function UserMessage({ msg }: { msg: AiMessageRead }) {
+	useChatStore(s => s.streams[msg.id]?.revision)
+	const content = useDeferredValue(msg.content)
+
 	return (
 		<Box
 			position="relative"
@@ -398,7 +401,7 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 				p="4"
 			>
 				<PartialCollapse collapsedHeight="20rem" bg="primary.muted">
-					<Text whiteSpace="pre-wrap" overflowWrap="anywhere">{msg.content}</Text>
+					<Text whiteSpace="pre-wrap" overflowWrap="anywhere">{content}</Text>
 				</PartialCollapse>
 			</Box>
 
@@ -410,7 +413,7 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 				opacity="0"
 				gap="0"
 			>
-				<CopyButton text={msg.content} />
+				<CopyButton text={content} />
 				<IconButton
 					aria-label="Edit message"
 					size="xs"
@@ -423,6 +426,36 @@ export function UserMessage({ msg }: { msg: AiMessageRead }) {
 	)
 }
 
+
+export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
+	const revision = useChatStore(s => s.streams[msg.id]?.revision)
+	const content = useDeferredValue(msg.content)
+
+	if (revision != null && msg.content === "")
+		return null
+
+	return (
+		<Box alignSelf="start" w="full" id={msg.id}>
+
+			<Markdown>
+				{content}
+			</Markdown>
+
+			<HStack gap="0" mt="1">
+				<CopyButton text={content} color="fg.muted" />
+				<IconButton
+					aria-label="Try again"
+					size="xs"
+					variant="ghost"
+					transition="opacity 0.15s"
+					color="fg.muted"
+				>
+					<LuRefreshCw />
+				</IconButton>
+			</HStack>
+		</Box>
+	)
+}
 
 export function WaitingIndicator(props: IconProps) {
 	const chatId = useChatStore((s) => s.activeChatId)
@@ -455,41 +488,5 @@ export function WaitingIndicator(props: IconProps) {
 			animationIterationCount="infinite"
 			{...props}
 		/>
-	)
-}
-
-export function AssistantMessage({ msg }: { msg: AiMessageRead }) {
-	const revision = useChatStore((s) => {
-		const stream = s.streams[msg.chat_id]
-		if (stream == null || stream.message.id !== msg.id)
-			return null
-		return stream.revision
-	})
-
-	const content = useDeferredValue(msg.content)
-
-	if (revision != null && msg.content === "")
-		return null
-
-	return (
-		<Box alignSelf="start" w="full" id={msg.id}>
-
-			<Markdown>
-				{content}
-			</Markdown>
-
-			<HStack gap="0" mt="1">
-				<CopyButton text={content} color="fg.muted" />
-				<IconButton
-					aria-label="Try again"
-					size="xs"
-					variant="ghost"
-					transition="opacity 0.15s"
-					color="fg.muted"
-				>
-					<LuRefreshCw />
-				</IconButton>
-			</HStack>
-		</Box>
 	)
 }
