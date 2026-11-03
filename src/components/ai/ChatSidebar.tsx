@@ -1,5 +1,5 @@
 import { AiChatRead, AiMessageCreate } from "@/client"
-import { VStack, Text, Button, HStack, Box, IconButton, Menu, Portal, Group, Skeleton, Drawer, CloseButton, Popover, Spinner, Center } from "@chakra-ui/react"
+import { VStack, Text, Button, HStack, Box, IconButton, Menu, Portal, Group, Skeleton, Drawer, CloseButton, Popover, Spinner, Center, Flex } from "@chakra-ui/react"
 import { LuEllipsis, LuMessageCircle, LuPin, LuPinOff, LuTrash } from "react-icons/lu"
 import type { ButtonProps, GroupProps, MenuRootProps, ScrollAreaScrollbarProps, StackProps } from "@chakra-ui/react"
 import { IoCreateOutline } from "react-icons/io5"
@@ -87,12 +87,14 @@ export function DesktopSidebar() {
 	const [collapse, setCollapse] = useState(false)
 
 	return (
-		<Box
+		<Flex
+			direction="column"
 			pt="4rem"
 			ps="2"
 			w={collapse ? "4rem" : "16.5rem"}
 			flexShrink="0"
 			h="full"
+			minH="0"
 			borderEnd="xs"
 			borderColor="border"
 			pos="relative"
@@ -112,7 +114,7 @@ export function DesktopSidebar() {
 
 			<ColorModeButton />
 			<SideBar collapse={collapse} />
-		</Box>
+		</Flex>
 	)
 }
 
@@ -121,12 +123,13 @@ export type SideBarProps = {
 }
 
 export function SideBar({ collapse }: SideBarProps) {
-
 	return (
-		<VStack h="full" >
+		<VStack flex="1" minH="0" w="full">
 			<ActionButtons collapse={collapse} pe="2" pb="3" />
 
 			<ChatList
+				flex="1"
+				minH="0"
 				pe="2"
 				opacity={collapse ? "0" : "1"}
 				transition="opacity 0.2s ease"
