@@ -5,10 +5,10 @@ import { useState } from "react";
 import { LuMaximize2, LuMinus, LuSquare, LuX } from "react-icons/lu";
 import { MdOutlineArrowBack, MdOutlineArrowForward } from "react-icons/md";
 import { useLangToolsStore } from "../lang-tools/LangToolsProvider";
-import { BrowserTabs, HistoryMenu, SearchInput } from "./dict";
+import { LookupBody, LookupHistoryMenu, LookupInput } from "./LookupBody";
 
 
-export function Browser() {
+export function LookupFloating() {
 	const word = useLangToolsStore((state) => state.wordQuery)
 	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
 	const history = useLangToolsStore((state) => state.translateHistory)
@@ -65,9 +65,9 @@ export function Browser() {
 								</IconButton>
 							</Group>
 
-							<HistoryMenu />
+							<LookupHistoryMenu />
 
-							<SearchInput key={word} defaultValue={word} onQuerySubmit={(query) => setWordQuery(query)} />
+							<LookupInput key={word} defaultValue={word} onQuerySubmit={(query) => setWordQuery(query)} />
 
 							<FloatingPanel.DragTrigger h="full">
 								{/* <LuGripHorizontal /> */}
@@ -104,7 +104,7 @@ export function Browser() {
 
 						<FloatingPanel.Body display="flex" flexDir="column" minH="0" flex="1" p="0">
 
-							<BrowserTabs word={word} />
+							<LookupBody word={word} />
 
 						</FloatingPanel.Body>
 

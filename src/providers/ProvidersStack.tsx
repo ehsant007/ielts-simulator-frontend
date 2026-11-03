@@ -1,14 +1,13 @@
 "use client"
 
-import TanstackQueryProvider from "./tanstack-query-provider"
-import ChakraProvider from "@/components/ui/chakra-provider"
 import { Locale, NextIntlClientProvider } from 'next-intl';
-import { AuthProvider } from "@/auth/AuthProvider"
 import { type User } from "@/auth";
-import { LangToolsProvider } from "@/components/lang-tools";
-import { PopoverMenu } from "@/components/lang-tools";
-import { Browser } from "@/components/dictionary"
+import { AuthProvider } from "@/auth/AuthProvider"
+import { LangToolsProvider, PopoverMenu } from "@/components/lang-tools";
+import { LookupFloating } from "@/components/lookup"
+import ChakraProvider from "@/components/ui/chakra-provider"
 import { BreakPointProvider } from "./BreakPointProvider";
+import TanstackQueryProvider from "./tanstack-query-provider"
 
 interface Props {
 	children: React.ReactNode;
@@ -30,7 +29,7 @@ export default function ProvidersStack({ children, user, locale, messages }: Pro
 							<LangToolsProvider>
 								{children}
 
-								<Browser />
+								<LookupFloating />
 								<PopoverMenu />
 							</LangToolsProvider>
 						</TanstackQueryProvider>

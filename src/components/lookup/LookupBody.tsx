@@ -20,11 +20,11 @@ import { LuSearch } from "react-icons/lu"
 import { MdHistory } from "react-icons/md"
 import { useDebounce } from "use-debounce"
 import { search } from "@/client"
+import { Dictionary } from "../dictionary/Dictionary"
+import { WordNet } from "../dictionary/Wordnet"
 import { useLangToolsStore } from "../lang-tools/LangToolsProvider"
-import { Dictionary } from "./Dictionary"
-import { WordNet } from "./Wordnet"
 
-export function BrowserTabs({ word }: { word: string }) {
+export function LookupBody({ word }: { word: string }) {
 	return (
 		<Tabs.Root
 			display="flex"
@@ -111,7 +111,7 @@ function TabContent({
 	)
 }
 
-export function HistoryMenu() {
+export function LookupHistoryMenu() {
 	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
 	const history = useLangToolsStore((state) => state.translateHistory)
 
@@ -143,7 +143,7 @@ type SearchInputProps = {
 	defaultValue?: string | undefined
 }
 
-export function SearchInput({ onQuerySubmit, defaultValue }: SearchInputProps) {
+export function LookupInput({ onQuerySubmit, defaultValue }: SearchInputProps) {
 	const [query, setQuery] = useState<string | undefined>(undefined)
 	const [inputValue, setInputValue] = useState<string>(defaultValue ?? "")
 	const [open, setOpen] = useState(false)
