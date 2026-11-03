@@ -45,6 +45,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@biomejs/biome": "^2.6.4",
     "@hey-api/openapi-ts": "0.99.0",
     "@tanstack/eslint-plugin-query": "^5.101.2",
     "@tanstack/react-query-devtools": "^5.101.2",
