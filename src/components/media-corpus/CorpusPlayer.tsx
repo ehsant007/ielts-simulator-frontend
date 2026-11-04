@@ -5,9 +5,11 @@ import {
 	Box,
 	type BoxProps,
 	Center,
+	Grid,
 	Highlight,
 	HStack,
 	IconButton,
+	type IconButtonProps,
 	Progress,
 	Spinner,
 	type StackProps,
@@ -31,7 +33,7 @@ import { PlayerProvider, usePlayer, usePlayerTime } from "./PlayerProvider"
 type Props = {
 	lemma: string
 	partOfSpeech?: string
-}&StackProps
+} & StackProps
 
 export function CorpusPlayer({ lemma, partOfSpeech, ...props }: Props) {
 	return (
@@ -41,7 +43,7 @@ export function CorpusPlayer({ lemma, partOfSpeech, ...props }: Props) {
 				partOfSpeech={partOfSpeech}
 				key={JSON.stringify([lemma, partOfSpeech])}
 			>
-				<CorpusYoutubePlayerInner {...props}/>
+				<CorpusYoutubePlayerInner {...props} />
 			</CorpusLookupProvider>
 		</PlayerProvider>
 	)
@@ -107,8 +109,18 @@ function PlayerControls(props: StackProps) {
 	return (
 		<VStack {...props}>
 			<TimeLine />
-			<PlayerButtons />
+			<Box mt="5" w="full">
+				<PlayerButtons />
+			</Box>
 		</VStack>
+	)
+}
+
+function PlayerButton({ children, ...props }: IconButtonProps) {
+	return (
+		<IconButton colorPalette="primary" borderRadius="full" {...props}>
+			{children}
+		</IconButton>
 	)
 }
 
@@ -143,63 +155,69 @@ function PlayerButtons() {
 	if (!player) return null
 
 	return (
-		<HStack>
-			<IconButton
+		<Grid templateColumns="1fr auto 1fr" alignItems="center" w="full">
+			<HStack gridColumn="2">
+				<PlayerButton
+					colorPalette="primary"
+					borderRadius="full"
+					onClick={prevSegment}
+				>
+					<LuSkipBack />
+				</PlayerButton>
+
+				<PlayerButton
+					colorPalette="primary"
+					borderRadius="full"
+					onClick={() => move(-5)}
+				>
+					<TbRewindBackward5 />
+				</PlayerButton>
+
+				<PlayerButton
+					aria-label={isPlaying ? "Pause video" : "Play video"}
+					colorPalette="primary"
+					borderRadius="full"
+					onClick={togglePlayback}
+					pos="relative"
+					size="xl"
+				>
+					{isPlaying ? <LuPause /> : <LuPlay />}
+
+					{isLoading && (
+						<Center pos="absolute">
+							<Spinner size="lg" />
+						</Center>
+					)}
+				</PlayerButton>
+
+				<PlayerButton
+					colorPalette="primary"
+					borderRadius="full"
+					onClick={() => move(5)}
+				>
+					<TbRewindForward5 />
+				</PlayerButton>
+
+				<PlayerButton
+					colorPalette="primary"
+					borderRadius="full"
+					onClick={nextSegment}
+				>
+					<LuSkipForward />
+				</PlayerButton>
+			</HStack>
+
+			<PlayerButton
+				justifySelf="start"
+				ms="10"
+				gridColumn="3"
 				colorPalette="primary"
 				borderRadius="full"
 				onClick={() => segment && player.seekTo(segment.start, true)}
 			>
 				<MdReplay />
-			</IconButton>
-
-			<IconButton
-				colorPalette="primary"
-				borderRadius="full"
-				onClick={prevSegment}
-			>
-				<LuSkipBack />
-			</IconButton>
-
-			<IconButton
-				colorPalette="primary"
-				borderRadius="full"
-				onClick={() => move(-5)}
-			>
-				<TbRewindBackward5 />
-			</IconButton>
-
-			<IconButton
-				aria-label={isPlaying ? "Pause video" : "Play video"}
-				colorPalette="primary"
-				borderRadius="full"
-				onClick={togglePlayback}
-				pos="relative"
-			>
-				{isPlaying ? <LuPause /> : <LuPlay />}
-
-				{isLoading && (
-					<Center pos="absolute">
-						<Spinner size="lg" />
-					</Center>
-				)}
-			</IconButton>
-
-			<IconButton
-				colorPalette="primary"
-				borderRadius="full"
-				onClick={() => move(5)}
-			>
-				<TbRewindForward5 />
-			</IconButton>
-
-			<IconButton
-				colorPalette="primary"
-				borderRadius="full"
-				onClick={nextSegment}
-			>
-				<LuSkipForward />
-			</IconButton>
-		</HStack>
+			</PlayerButton>
+		</Grid>
 	)
 }
 
