@@ -8,11 +8,11 @@ const PlayerContext = createContext<LookupContextType | undefined>(undefined)
 type SidebarProps = {
 	children: React.ReactNode
 	lemma: string
-	pos?: string
+	partOfSpeech?: string
 }
 
-export function CorpusLookupProvider({ children, lemma, pos }: SidebarProps) {
-	const result = useCorpusLookup(lemma, pos)
+export function CorpusLookupProvider({ children, lemma, partOfSpeech }: SidebarProps) {
+	const result = useCorpusLookup(lemma, partOfSpeech)
 
 	return (
 		<PlayerContext.Provider value={result} >

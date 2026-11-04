@@ -48,9 +48,9 @@ export function LookupBody({ word }: { word: string }) {
 				</TabContent>
 
 				<TabContent value="video">
-					<CorpusYoutubePlayer lemma={word} />
+					<CorpusYoutubePlayer lemma={word} m="3"/>
 				</TabContent>
-				
+
 				<TabContent value="wordnet">
 					<WordNet headword={word} />
 				</TabContent>

@@ -15,7 +15,7 @@ export function MediaCorpus() {
 				<Input id="pos" value={pos} onChange={(e) => setPos(e.currentTarget.value)} placeholder="pos" />
 			</HStack>
 
-				<CorpusYoutubePlayer lemma={lemma} pos={pos} />
+				<CorpusYoutubePlayer lemma={lemma} partOfSpeech={pos} />
 
 		</VStack>
 	)

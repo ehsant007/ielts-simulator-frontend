@@ -69,7 +69,7 @@ function subtitleChunkQueryOptions(
 	addSubtitleChunk: (mediaId: number, segments: CorpusSegmentRead[]) => void,
 ) {
 	return queryOptions({
-		enabled: media_id != null,
+		enabled: media_id != null && Number.isFinite(chunkStart),
 		queryKey: subtitleChunkKey(media_id ?? -1, chunkStart),
 		staleTime: Infinity,
 		queryFn: async () => {
@@ -103,7 +103,11 @@ export function useSubtitleChunkQuery(
 	)
 
 	useEffect(() => {
-		if (!shouldPrefetchNext) return
+		if(media_id == null || !Number.isFinite(end))
+			return
+
+		if (!shouldPrefetchNext) 
+			return
 
 		queryClient
 			.query(subtitleChunkQueryOptions(media_id, end, addSubtitleChunk))

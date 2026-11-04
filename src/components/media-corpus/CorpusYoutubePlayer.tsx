@@ -21,32 +21,33 @@ import { MdReplay } from "react-icons/md"
 import { TbRewindBackward5, TbRewindForward5 } from "react-icons/tb"
 import YouTube, { type YouTubeEvent, type YouTubeProps } from "react-youtube"
 import type { CorpusSegmentRead } from "@/client"
-import { CorpusLookupProvider, useCorpusLookupContext } from "./CorpusLookupProvider"
+import {
+	CorpusLookupProvider,
+	useCorpusLookupContext,
+} from "./CorpusLookupProvider"
 import { useCurrentSubtitleSegment } from "./hooks"
 import { PlayerProvider, usePlayer, usePlayerTime } from "./PlayerProvider"
 
 type Props = {
 	lemma: string
-	pos?: string
-}
+	partOfSpeech?: string
+}&StackProps
 
-export function CorpusYoutubePlayer({ lemma, pos }: Props) {
+export function CorpusYoutubePlayer({ lemma, partOfSpeech, ...props }: Props) {
 	return (
-
-			<PlayerProvider>
-				<CorpusLookupProvider
-					lemma={lemma}
-					pos={pos}
-					key={JSON.stringify([lemma, pos])}
-				>
-					<CorpusYoutubePlayerInner />
-				</CorpusLookupProvider>
-			</PlayerProvider>
-
+		<PlayerProvider>
+			<CorpusLookupProvider
+				lemma={lemma}
+				partOfSpeech={partOfSpeech}
+				key={JSON.stringify([lemma, partOfSpeech])}
+			>
+				<CorpusYoutubePlayerInner {...props}/>
+			</CorpusLookupProvider>
+		</PlayerProvider>
 	)
 }
 
-export function CorpusYoutubePlayerInner() {
+export function CorpusYoutubePlayerInner(props: StackProps) {
 	const { setPlayer, setState, setDuration } = usePlayer()
 	const { media, index, total, segment } = useCorpusLookupContext()
 
@@ -73,7 +74,7 @@ export function CorpusYoutubePlayerInner() {
 	}
 
 	return (
-		<VStack w="full">
+		<VStack {...props}>
 			{media && (
 				<AspectRatio
 					ratio={16 / 9}
@@ -260,22 +261,11 @@ function TimeLine() {
 function SubtitleView() {
 	const { media } = useCorpusLookupContext()
 	const { time } = usePlayerTime({ deltaMs: 50 })
-	const { segment } = useCurrentSubtitleSegment(
-		media?.id,
-		time,
-		5,
-	)
+	const { segment } = useCurrentSubtitleSegment(media?.id, time, 5)
 
 	if (segment == null) return null
 
-	return (
-		<SegmentView
-			mt="1rem"
-			fontSize="lg"
-			segment={segment}
-			time={time}
-		/>
-	)
+	return <SegmentView mt="1rem" fontSize="lg" segment={segment} time={time} />
 }
 
 function SegmentView({
@@ -296,7 +286,7 @@ function SegmentView({
 					<Fragment key={i}>
 						<button
 							type="button"
-							className={(time >= w.start && time < w.end) ? "highlight" : ""}
+							className={time >= w.start && time < w.end ? "highlight" : ""}
 							onClick={() => player?.seekTo(w.start, true)}
 							style={{
 								cursor: "pointer",
