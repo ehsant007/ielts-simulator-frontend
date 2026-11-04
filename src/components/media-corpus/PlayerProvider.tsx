@@ -1,5 +1,5 @@
-import { createContext, Dispatch, SetStateAction, useContext, useEffect, useEffectEvent, useRef, useState } from "react";
-import { YouTubePlayer } from "react-youtube";
+import { createContext, type Dispatch, type SetStateAction, useContext, useEffect, useEffectEvent, useRef, useState } from "react";
+import type { YouTubePlayer } from "react-youtube";
 
 type PlayerContextType = {
 	player: YouTubePlayer | null
@@ -72,8 +72,8 @@ export function usePlayerTime({ deltaMs, onTick, ...props }: UsePlayerTimeProps)
 	})
 
 	useEffect(() => {
-		if (context.state !== 1)
-			return
+		// if (context.state !== 1)
+		// 	return
 
 		const interval = window.setInterval(async () => {
 			if (player) {
@@ -87,7 +87,7 @@ export function usePlayerTime({ deltaMs, onTick, ...props }: UsePlayerTimeProps)
 		}, deltaMs)
 
 		return () => window.clearInterval(interval)
-	}, [player, deltaMs, context.state])
+	}, [player, deltaMs])
 
 	return { ...context, time }
 }

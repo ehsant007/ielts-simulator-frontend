@@ -1,25 +1,37 @@
 "use client"
 
-import { Box, Center, HStack, IconButton, Progress, Spinner, Text, TextProps, VStack } from "@chakra-ui/react"
-import { Fragment, useState } from "react"
-import YouTube, { YouTubeEvent, type YouTubeProps } from "react-youtube"
-import { useCurrentSubtitleSegment } from "./hooks"
-import { PlayerProvider, usePlayer, usePlayerTime } from "./PlayerProvider"
+import {
+	AspectRatio,
+	Box,
+	type BoxProps,
+	Center,
+	Highlight,
+	HStack,
+	IconButton,
+	Progress,
+	Spinner,
+	type StackProps,
+	Text,
+	VStack,
+} from "@chakra-ui/react"
 import type { MouseEvent } from "react"
+import { Fragment, useState } from "react"
 import { LuPause, LuPlay, LuSkipBack, LuSkipForward } from "react-icons/lu"
-import { LookupProvider, useCorpusLookupContext } from "./LookupProvider"
-import { TbRewindBackward5, TbRewindForward5 } from "react-icons/tb";
-import { CorpusStoreProvider } from "./CorpusStoreProvider"
-import { CorpusSegmentRead, SegmentWord } from "@/client"
 import { MdReplay } from "react-icons/md"
+import { TbRewindBackward5, TbRewindForward5 } from "react-icons/tb"
+import YouTube, { type YouTubeEvent, type YouTubeProps } from "react-youtube"
+import type { CorpusSegmentRead } from "@/client"
+import { CorpusStoreProvider } from "./CorpusStoreProvider"
+import { useCurrentSubtitleSegment } from "./hooks"
+import { LookupProvider, useCorpusLookupContext } from "./LookupProvider"
+import { PlayerProvider, usePlayer, usePlayerTime } from "./PlayerProvider"
 
 type Props = {
-	lemma: string,
+	lemma: string
 	pos: string
 }
 
 export function CorpusYoutubePlayer({ lemma, pos }: Props) {
-
 	return (
 		<CorpusStoreProvider>
 			<PlayerProvider>
@@ -35,7 +47,6 @@ export function CorpusYoutubePlayer({ lemma, pos }: Props) {
 	)
 }
 
-
 export function CorpusYoutubePlayerInner() {
 	const { player, setPlayer, setState, setDuration } = usePlayer()
 	const { media, index, total, segment } = useCorpusLookupContext()
@@ -43,11 +54,10 @@ export function CorpusYoutubePlayerInner() {
 	const options: YouTubeProps["opts"] = {
 		playerVars: {
 			autoplay: 1,
-			origin: typeof window !== "undefined"
-				? window.location.origin
-				: undefined,
+			origin:
+				typeof window !== "undefined" ? window.location.origin : undefined,
 			enablejsapi: 1,
-			start: Math.floor(segment?.start ?? 0)
+			start: Math.floor(segment?.start ?? 0),
 		},
 	}
 
@@ -64,37 +74,43 @@ export function CorpusYoutubePlayerInner() {
 	}
 
 	return (
-		<VStack>
-			{media &&
-				<YouTube
-					videoId={media.media_id!}
-					opts={options}
-					onReady={onReady}
-					onStateChange={handleStateChange}
-				/>
-			}
-			<Text>{index + 1} / {total}</Text>
-			<PlayerControls />
-			{media &&
+		<VStack w="full">
+			{media && (
+				<AspectRatio
+					ratio={16 / 9}
+					w="full"
+					css={{ "& iframe": { width: "100%", height: "100%" } }}
+				>
+					<YouTube
+						videoId={media?.media_id ?? undefined}
+						opts={options}
+						onReady={onReady}
+						onStateChange={handleStateChange}
+						style={{ width: "100%", height: "100%" }}
+					/>
+				</AspectRatio>
+			)}
+			<Text>
+				{index + 1} / {total}
+			</Text>
+			<PlayerControls w="full" />
+			{media && (
 				<Box textAlign="center">
 					<SubtitleView />
 				</Box>
-			}
+			)}
 		</VStack>
 	)
 }
 
-
-function PlayerControls() {
+function PlayerControls(props: StackProps) {
 	return (
-		<VStack w="full">
+		<VStack {...props}>
 			<TimeLine />
 			<PlayerButtons />
 		</VStack>
 	)
 }
-
-
 
 function PlayerButtons() {
 	const [isPlaying, setIsPlaying] = useState(false)
@@ -103,35 +119,28 @@ function PlayerButtons() {
 
 	const { player } = usePlayer({
 		onStateChange: async (state) => {
-			if (state < 3)
-				setIsPlaying(state === 1)
+			if (state < 3) setIsPlaying(state === 1)
 
 			setIsLoading(state === 3)
-		}
+		},
 	})
 
 	const togglePlayback = () => {
 		if (isPlaying) {
 			setIsPlaying(false)
-			if (player)
-				player.pauseVideo()
-		}
-		else {
+			if (player) player.pauseVideo()
+		} else {
 			setIsPlaying(true)
-			if (player)
-				player.playVideo()
+			if (player) player.playVideo()
 		}
 	}
 
 	const move = async (step: number) => {
-		if (!player)
-			return
-		await player.seekTo(await player.getCurrentTime() + step, true)
+		if (!player) return
+		await player.seekTo((await player.getCurrentTime()) + step, true)
 	}
 
-
-	if (!player)
-		return null
+	if (!player) return null
 
 	return (
 		<HStack>
@@ -168,11 +177,11 @@ function PlayerButtons() {
 			>
 				{isPlaying ? <LuPause /> : <LuPlay />}
 
-				{isLoading &&
+				{isLoading && (
 					<Center pos="absolute">
 						<Spinner size="lg" />
 					</Center>
-				}
+				)}
 			</IconButton>
 
 			<IconButton
@@ -194,20 +203,15 @@ function PlayerButtons() {
 	)
 }
 
-
 function Time({ value }: { value: number }) {
-	const minutes = Math.floor(value / 60);
-	const seconds = Math.floor(value % 60);
+	const minutes = Math.floor(value / 60)
+	const seconds = Math.floor(value % 60)
 
 	return (
-		<Text
-			fontSize="1xl"
-			fontFamily="mono"
-			as="span"
-		>
+		<Text fontSize="1xl" fontFamily="mono" as="span">
 			{String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
 		</Text>
-	);
+	)
 }
 
 function TimeLine() {
@@ -215,10 +219,10 @@ function TimeLine() {
 
 	const { player, duration, time } = usePlayerTime({
 		deltaMs: 100,
-		onTick: time => {
-			const p = duration ? time / duration * 100 : 0
+		onTick: (time) => {
+			const p = duration ? (time / duration) * 100 : 0
 			setProgress(p)
-		}
+		},
 	})
 
 	const handleSeek = (e: MouseEvent<HTMLDivElement>) => {
@@ -254,44 +258,67 @@ function TimeLine() {
 	)
 }
 
-
 function SubtitleView() {
 	const { media } = useCorpusLookupContext()
 	const { time } = usePlayerTime({ deltaMs: 50 })
-	const { segment, isCurrentWord } = useCurrentSubtitleSegment(media?.id, time, 5)
+	const { segment } = useCurrentSubtitleSegment(
+		media?.id,
+		time,
+		5,
+	)
 
-	if (segment == null)
-		return null
+	if (segment == null) return null
 
 	return (
 		<SegmentView
+			mt="1rem"
+			fontSize="lg"
 			segment={segment}
-			highlightWord={isCurrentWord}
+			time={time}
 		/>
 	)
 }
 
-
-function SegmentView({ segment, highlightWord, ...props }: {
-	segment: CorpusSegmentRead,
-	highlightWord?: (word: SegmentWord) => boolean,
-} & TextProps) {
+function SegmentView({
+	segment,
+	time,
+	...props
+}: {
+	segment: CorpusSegmentRead
+	time: number
+} & BoxProps) {
 	const { player } = usePlayer()
+	const { entry: { lemma } = {} } = useCorpusLookupContext()
 
 	return (
-		<Text {...props}>
-			{segment?.words.map((w, i) => (
-				<Fragment key={i}>
-					<span
-						className={highlightWord?.(w) ? "highlight" : ""}
-						onClick={() => player?.seekTo(w.start, true)}
-						style={{ cursor: "pointer" }}
-					>
-						{w.word}
-					</span>
-					{" "}
-				</Fragment>
-			))}
-		</Text>
+		<Box {...props} pos="relative">
+			<Box>
+				{segment?.words.map((w, i) => (
+					<Fragment key={i}>
+						<button
+							type="button"
+							className={(time >= w.start && time < w.end) ? "highlight" : ""}
+							onClick={() => player?.seekTo(w.start, true)}
+							style={{
+								cursor: "pointer",
+								color: "transparent",
+								font: "inherit",
+								lineHeight: "inherit",
+								padding: 0,
+								border: 0,
+							}}
+						>
+							{w.word}
+						</button>{" "}
+					</Fragment>
+				))}
+			</Box>
+
+			<Box position="absolute" inset="0" pointerEvents="none">
+				<Highlight query={lemma ?? []} styles={{ color: "orange.fg" }}>
+					{segment.text}
+				</Highlight>
+			</Box>
+		</Box>
 	)
 }
