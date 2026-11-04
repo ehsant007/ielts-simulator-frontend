@@ -5,9 +5,9 @@ import {
 	mediaCorpusLookup,
 	readSubtitleChunk,
 } from "@/client"
-import { useCorpusStore } from "./CorpusStoreProvider"
+import { useCorpusStore } from "./store"
 
-export function useCorpusOccurrencesQuery(lemma: string, pos: string | null) {
+export function useCorpusOccurrencesQuery(lemma: string, pos?: string) {
 	const query = useQuery({
 		queryKey: ["corpus-occurrences", lemma, pos],
 		staleTime: Infinity,
@@ -26,7 +26,7 @@ export function useCorpusOccurrencesQuery(lemma: string, pos: string | null) {
 	return query
 }
 
-export function useCorpusLookup(lemma: string, pos: string | null) {
+export function useCorpusLookup(lemma: string, pos?: string) {
 	const { data: { occurrences, media, entry } = {}, isPending } =
 		useCorpusOccurrencesQuery(lemma, pos)
 
@@ -37,7 +37,7 @@ export function useCorpusLookup(lemma: string, pos: string | null) {
 
 	const nextSegment = useCallback(() => {
 		if (occurrences == null) return
-		setIndex((prev) => (prev + 1 + occurrences.length) % occurrences.length)
+		setIndex((prev) => (prev + 1) % occurrences.length)
 	}, [occurrences])
 
 	const prevSegment = useCallback(() => {

@@ -21,34 +21,33 @@ import { MdReplay } from "react-icons/md"
 import { TbRewindBackward5, TbRewindForward5 } from "react-icons/tb"
 import YouTube, { type YouTubeEvent, type YouTubeProps } from "react-youtube"
 import type { CorpusSegmentRead } from "@/client"
-import { CorpusStoreProvider } from "./CorpusStoreProvider"
+import { CorpusLookupProvider, useCorpusLookupContext } from "./CorpusLookupProvider"
 import { useCurrentSubtitleSegment } from "./hooks"
-import { LookupProvider, useCorpusLookupContext } from "./LookupProvider"
 import { PlayerProvider, usePlayer, usePlayerTime } from "./PlayerProvider"
 
 type Props = {
 	lemma: string
-	pos: string
+	pos?: string
 }
 
 export function CorpusYoutubePlayer({ lemma, pos }: Props) {
 	return (
-		<CorpusStoreProvider>
+
 			<PlayerProvider>
-				<LookupProvider
+				<CorpusLookupProvider
 					lemma={lemma}
 					pos={pos}
 					key={JSON.stringify([lemma, pos])}
 				>
 					<CorpusYoutubePlayerInner />
-				</LookupProvider>
+				</CorpusLookupProvider>
 			</PlayerProvider>
-		</CorpusStoreProvider>
+
 	)
 }
 
 export function CorpusYoutubePlayerInner() {
-	const { player, setPlayer, setState, setDuration } = usePlayer()
+	const { setPlayer, setState, setDuration } = usePlayer()
 	const { media, index, total, segment } = useCorpusLookupContext()
 
 	const options: YouTubeProps["opts"] = {
@@ -65,7 +64,7 @@ export function CorpusYoutubePlayerInner() {
 		const state = event.data
 		setState(state)
 
-		const duration = await player?.getDuration()
+		const duration = await event.target.getDuration()
 		setDuration(duration)
 	}
 

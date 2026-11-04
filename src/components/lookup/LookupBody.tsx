@@ -7,7 +7,7 @@ import {
 	InputGroup,
 	Menu,
 	Popover,
-	Portal, 
+	Portal,
 	ScrollArea,
 	Spinner,
 	Tabs,
@@ -23,6 +23,7 @@ import { search } from "@/client"
 import { Dictionary } from "../dictionary/Dictionary"
 import { WordNet } from "../dictionary/Wordnet"
 import { useLangToolsStore } from "../lang-tools/LangToolsProvider"
+import { CorpusYoutubePlayer } from "../media-corpus/CorpusYoutubePlayer"
 
 export function LookupBody({ word }: { word: string }) {
 	return (
@@ -37,17 +38,21 @@ export function LookupBody({ word }: { word: string }) {
 		>
 			<Tabs.List>
 				<Tabs.Trigger value="dictionary">Dictionary</Tabs.Trigger>
-
+				<Tabs.Trigger value="video">Videos</Tabs.Trigger>
 				<Tabs.Trigger value="wordnet">Wordnet</Tabs.Trigger>
 			</Tabs.List>
 
 			<Box flex="1" minH="0" pos="relative">
-				<TabContent value="wordnet">
-					<WordNet headword={word} />
-				</TabContent>
-
 				<TabContent value="dictionary">
 					<Dictionary headword={word} />
+				</TabContent>
+
+				<TabContent value="video">
+					<CorpusYoutubePlayer lemma={word} />
+				</TabContent>
+				
+				<TabContent value="wordnet">
+					<WordNet headword={word} />
 				</TabContent>
 			</Box>
 		</Tabs.Root>
