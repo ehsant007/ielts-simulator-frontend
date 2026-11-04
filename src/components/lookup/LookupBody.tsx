@@ -23,7 +23,7 @@ import { search } from "@/client"
 import { Dictionary } from "../dictionary/Dictionary"
 import { WordNet } from "../dictionary/Wordnet"
 import { useLangToolsStore } from "../lang-tools/LangToolsProvider"
-import { CorpusYoutubePlayer } from "../media-corpus/CorpusYoutubePlayer"
+import { CorpusPlayer } from "../media-corpus/CorpusPlayer"
 
 export function LookupBody({ word }: { word: string }) {
 	return (
@@ -48,7 +48,7 @@ export function LookupBody({ word }: { word: string }) {
 				</TabContent>
 
 				<TabContent value="video">
-					<CorpusYoutubePlayer lemma={word} m="3"/>
+					<CorpusPlayer lemma={word} m="3"/>
 				</TabContent>
 
 				<TabContent value="wordnet">

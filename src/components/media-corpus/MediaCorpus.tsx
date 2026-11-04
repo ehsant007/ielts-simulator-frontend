@@ -2,7 +2,7 @@
 
 import { HStack, Input, VStack } from "@chakra-ui/react"
 import { useState } from "react"
-import { CorpusYoutubePlayer } from "./CorpusYoutubePlayer"
+import { CorpusPlayer } from "./CorpusPlayer"
 
 export function MediaCorpus() {
 	const [lemma, setLemma] = useState("open")
@@ -15,7 +15,7 @@ export function MediaCorpus() {
 				<Input id="pos" value={pos} onChange={(e) => setPos(e.currentTarget.value)} placeholder="pos" />
 			</HStack>
 
-				<CorpusYoutubePlayer lemma={lemma} partOfSpeech={pos} />
+				<CorpusPlayer lemma={lemma} partOfSpeech={pos} />
 
 		</VStack>
 	)

@@ -33,7 +33,7 @@ type Props = {
 	partOfSpeech?: string
 }&StackProps
 
-export function CorpusYoutubePlayer({ lemma, partOfSpeech, ...props }: Props) {
+export function CorpusPlayer({ lemma, partOfSpeech, ...props }: Props) {
 	return (
 		<PlayerProvider>
 			<CorpusLookupProvider
