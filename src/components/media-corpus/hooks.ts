@@ -28,7 +28,7 @@ export function useCorpusOccurrencesQuery(lemma: string, pos?: string) {
 }
 
 export function useCorpusLookup(lemma: string, pos?: string) {
-	const { data: { occurrences, media, entry } = {}, ...queryState } =
+	const { data: { occurrences, media, match, partOfSpeech } = {}, ...queryState } =
 		useCorpusOccurrencesQuery(lemma, pos)
 
 	const [index, setIndex] = useState(0)
@@ -52,9 +52,9 @@ export function useCorpusLookup(lemma: string, pos?: string) {
 		nextSegment,
 		prevSegment,
 		segment: occurrence?.segment,
-		wordIndex: occurrence?.word_index,
+		startWordIndex: occurrence?.start_word_index,
 		media: segmentMedia,
-		entry,
+		match, partOfSpeech,
 		...queryState,
 	}
 }

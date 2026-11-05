@@ -316,35 +316,28 @@ export type CorpusEntryOccurrenceRead = {
    */
   id: number;
   /**
-   * Word Index
+   * Start Word Index
    */
-  word_index: number;
-  segment: CorpusSegmentRead;
-};
-
-/**
- * CorpusEntryRead
- */
-export type CorpusEntryRead = {
+  start_word_index: number;
   /**
-   * Id
+   * Words Count
    */
-  id: number;
-  /**
-   * Lemma
-   */
-  lemma: string;
-  /**
-   * Pos
-   */
-  pos: string;
+  words_count?: number;
+  segment: CorpusSegmentOptRead;
 };
 
 /**
  * CorpusLookupResponse
  */
 export type CorpusLookupResponse = {
-  entry: CorpusEntryRead;
+  /**
+   * Match
+   */
+  match: string;
+  /**
+   * Partofspeech
+   */
+  partOfSpeech: string;
   /**
    * Media
    */
@@ -386,6 +379,28 @@ export type CorpusMediaRead = {
    * Cefr Level
    */
   cefr_level: number | null;
+};
+
+/**
+ * CorpusSegmentOptRead
+ */
+export type CorpusSegmentOptRead = {
+  /**
+   * Id
+   */
+  id: number;
+  /**
+   * Media Id
+   */
+  media_id: number;
+  /**
+   * Start
+   */
+  start: number;
+  /**
+   * Text
+   */
+  text: string;
 };
 
 /**

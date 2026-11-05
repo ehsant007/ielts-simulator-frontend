@@ -30,7 +30,7 @@ import {
 import { useCurrentSubtitleSegment } from "./hooks"
 import { PlayerProvider, usePlayer, usePlayerTime } from "./PlayerProvider"
 
-type Props = {
+type CorpusPlayerProps = {
 	lemma: string
 	partOfSpeech?: string
 	play?: boolean
@@ -43,7 +43,7 @@ export function CorpusPlayer({
 	play,
 	pause,
 	...props
-}: Props) {
+}: CorpusPlayerProps) {
 	return (
 		<PlayerProvider key={JSON.stringify([lemma, partOfSpeech])}>
 			<CorpusLookupProvider lemma={lemma} partOfSpeech={partOfSpeech}>
@@ -343,7 +343,7 @@ function SegmentView({
 	time: number
 } & BoxProps) {
 	const { player } = usePlayer()
-	const { entry: { lemma } = {} } = useCorpusLookupContext()
+	const { match } = useCorpusLookupContext()
 
 	return (
 		<Box {...props} pos="relative">
@@ -370,7 +370,7 @@ function SegmentView({
 			</Box>
 
 			<Box position="absolute" inset="0" pointerEvents="none">
-				<Highlight query={lemma ?? []} styles={{ color: "orange.fg" }}>
+				<Highlight query={match ?? []} styles={{ color: "orange.fg" }}>
 					{segment.text}
 				</Highlight>
 			</Box>

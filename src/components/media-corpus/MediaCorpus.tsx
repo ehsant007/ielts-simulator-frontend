@@ -11,12 +11,21 @@ export function MediaCorpus() {
 	return (
 		<VStack>
 			<HStack>
-				<Input id="lemma" value={lemma} onChange={(e) => setLemma(e.currentTarget.value)} placeholder="lemma" />
-				<Input id="pos" value={pos} onChange={(e) => setPos(e.currentTarget.value)} placeholder="pos" />
+				<Input
+					id="lemma"
+					value={lemma}
+					onChange={(e) => setLemma(e.currentTarget.value)}
+					placeholder="lemma"
+				/>
+				<Input
+					id="pos"
+					value={pos}
+					onChange={(e) => setPos(e.currentTarget.value)}
+					placeholder="pos"
+				/>
 			</HStack>
 
-				<CorpusPlayer lemma={lemma} partOfSpeech={pos} />
-
+			<CorpusPlayer w="full" lemma={lemma} partOfSpeech={pos} />
 		</VStack>
 	)
 }
