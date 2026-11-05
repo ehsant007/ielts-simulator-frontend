@@ -318,11 +318,11 @@ export type CorpusEntryOccurrenceRead = {
   /**
    * Start Word Index
    */
-  start_word_index: number;
+  start_word_index?: number | null;
   /**
-   * Words Count
+   * Match
    */
-  words_count?: number;
+  match?: string | null;
   segment: CorpusSegmentOptRead;
 };
 
@@ -331,13 +331,13 @@ export type CorpusEntryOccurrenceRead = {
  */
 export type CorpusLookupResponse = {
   /**
-   * Match
+   * Expression
    */
-  match: string;
+  expression: string;
   /**
    * Partofspeech
    */
-  partOfSpeech: string;
+  partOfSpeech: string | null;
   /**
    * Media
    */
@@ -2684,13 +2684,13 @@ export type MediaCorpusLookupData = {
   path?: never;
   query: {
     /**
-     * Lemma
+     * Expression
      */
-    lemma: string;
+    expression: string;
     /**
-     * Pos
+     * Partofspeech
      */
-    pos?: string | null;
+    partOfSpeech?: string | null;
     /**
      * Limit
      */

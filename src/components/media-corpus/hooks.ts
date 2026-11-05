@@ -7,18 +7,21 @@ import {
 } from "@/client"
 import { useCorpusStore } from "./store"
 
-export function useCorpusOccurrencesQuery(lemma: string, pos?: string) {
+export function useCorpusOccurrencesQuery(
+	expression: string,
+	partOfSpeech?: string,
+) {
 	const query = useQuery({
-		queryKey: ["corpus-occurrences", lemma, pos],
+		queryKey: ["corpus-occurrences", expression, partOfSpeech],
 		staleTime: Infinity,
-		enabled: !!lemma,
+		enabled: !!expression,
 		throwOnError: false,
 		meta: { silent: true },
 		queryFn: () =>
 			mediaCorpusLookup({
 				query: {
-					lemma,
-					pos,
+					expression,
+					partOfSpeech,
 					limit: 10,
 				},
 			}).then((res) => res.data),
@@ -27,9 +30,11 @@ export function useCorpusOccurrencesQuery(lemma: string, pos?: string) {
 	return query
 }
 
-export function useCorpusLookup(lemma: string, pos?: string) {
-	const { data: { occurrences, media, match, partOfSpeech } = {}, ...queryState } =
-		useCorpusOccurrencesQuery(lemma, pos)
+export function useCorpusLookup(expression: string, partOfSpeech?: string) {
+	const {
+		data: { occurrences, media, expression:expr, partOfSpeech: pos } = {},
+		...queryState
+	} = useCorpusOccurrencesQuery(expression, partOfSpeech)
 
 	const [index, setIndex] = useState(0)
 	const occurrence = occurrences ? occurrences[index] : null
@@ -53,8 +58,10 @@ export function useCorpusLookup(lemma: string, pos?: string) {
 		prevSegment,
 		segment: occurrence?.segment,
 		startWordIndex: occurrence?.start_word_index,
+		match: occurrence?.match,
 		media: segmentMedia,
-		match, partOfSpeech,
+		expression: expr,
+		partOfSpeech: pos,
 		...queryState,
 	}
 }
