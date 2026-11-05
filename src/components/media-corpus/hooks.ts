@@ -12,7 +12,8 @@ export function useCorpusOccurrencesQuery(lemma: string, pos?: string) {
 		queryKey: ["corpus-occurrences", lemma, pos],
 		staleTime: Infinity,
 		enabled: !!lemma,
-
+		throwOnError: false,
+		meta: { silent: true },
 		queryFn: () =>
 			mediaCorpusLookup({
 				query: {
@@ -27,7 +28,7 @@ export function useCorpusOccurrencesQuery(lemma: string, pos?: string) {
 }
 
 export function useCorpusLookup(lemma: string, pos?: string) {
-	const { data: { occurrences, media, entry } = {}, isPending } =
+	const { data: { occurrences, media, entry } = {}, ...queryState } =
 		useCorpusOccurrencesQuery(lemma, pos)
 
 	const [index, setIndex] = useState(0)
@@ -53,8 +54,8 @@ export function useCorpusLookup(lemma: string, pos?: string) {
 		segment: occurrence?.segment,
 		wordIndex: occurrence?.word_index,
 		media: segmentMedia,
-		isPending,
 		entry,
+		...queryState,
 	}
 }
 
@@ -103,11 +104,9 @@ export function useSubtitleChunkQuery(
 	)
 
 	useEffect(() => {
-		if(media_id == null || !Number.isFinite(end))
-			return
+		if (media_id == null || !Number.isFinite(end)) return
 
-		if (!shouldPrefetchNext) 
-			return
+		if (!shouldPrefetchNext) return
 
 		queryClient
 			.query(subtitleChunkQueryOptions(media_id, end, addSubtitleChunk))

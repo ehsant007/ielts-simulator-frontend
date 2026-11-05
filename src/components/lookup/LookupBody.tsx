@@ -26,8 +26,11 @@ import { useLangToolsStore } from "../lang-tools/LangToolsProvider"
 import { CorpusPlayer } from "../media-corpus/CorpusPlayer"
 
 export function LookupBody({ word }: { word: string }) {
+	const [tab, setTab] = useState("dictionary")
+
 	return (
 		<Tabs.Root
+			lazyMount
 			display="flex"
 			flexDir="column"
 			flex="1"
@@ -35,10 +38,12 @@ export function LookupBody({ word }: { word: string }) {
 			w="full"
 			defaultValue="dictionary"
 			size="sm"
+			value={tab}
+			onValueChange={(e) => setTab(e.value)}
 		>
 			<Tabs.List>
 				<Tabs.Trigger value="dictionary">Dictionary</Tabs.Trigger>
-				<Tabs.Trigger value="video">Videos</Tabs.Trigger>
+				<Tabs.Trigger value="videos">Videos</Tabs.Trigger>
 				<Tabs.Trigger value="wordnet">Wordnet</Tabs.Trigger>
 			</Tabs.List>
 
@@ -47,8 +52,8 @@ export function LookupBody({ word }: { word: string }) {
 					<Dictionary headword={word} />
 				</TabContent>
 
-				<TabContent value="video">
-					<CorpusPlayer lemma={word} m="3"/>
+				<TabContent value="videos">
+					<CorpusPlayer pause={tab!=="videos"} lemma={word} m="3" maxW="3xl" mx="auto"/>
 				</TabContent>
 
 				<TabContent value="wordnet">

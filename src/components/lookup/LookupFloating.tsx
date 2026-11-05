@@ -14,7 +14,7 @@ export function LookupFloating() {
 	const history = useLangToolsStore((state) => state.translateHistory)
 
 	const minSize = { width: 620, height: 400 }
-	const [size, setSize] = useState({ width: 800, height: 600 })
+	const [size, setSize] = useState({ width: 800, height: 900 })
 	const [position, setPosition] = useState<{ x: number, y: number } | undefined>(undefined)
 
 	const isOpen = Boolean(word)

@@ -1,13 +1,13 @@
-import { Box, HStack, IconButton, IconButtonProps, InputGroupProps, Textarea, Spinner, Icon, Center, BoxProps, TextareaProps, mergeRefs } from "@chakra-ui/react"
+import { Box, BoxProps, Center, HStack, Icon, IconButton, IconButtonProps, InputGroupProps, mergeRefs, Spinner, Textarea, TextareaProps } from "@chakra-ui/react"
 import { forwardRef, useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "react"
 import { BsStopFill } from "react-icons/bs"
 import { HiArrowUp } from "react-icons/hi"
 import { LuAudioLines, LuCheck, LuLoader, LuMic, LuX } from "react-icons/lu"
 import { RiCollapseDiagonalLine, RiExpandDiagonalLine } from "react-icons/ri"
-import { useRecorder } from "./hooks"
 import { useIsMobile } from "@/providers/BreakPointProvider"
-import { AudioRecorderVisualizer } from "./RecorderVisualizer"
 import { useChatInput } from "./ChatInputProvider"
+import { useRecorder } from "./hooks"
+import { AudioRecorderVisualizer } from "./RecorderVisualizer"
 
 
 function InputButton({ children, waiting, ...props }: { waiting?: boolean } & IconButtonProps) {
@@ -155,7 +155,7 @@ function ChatInputInner({
 		setSubmittingVoice(false)
 	}
 
-	const DiscardVoice = async () => {
+	const discardVoice = async () => {
 		setError("")
 		setMode("text")
 		recorder.stop()
@@ -263,7 +263,6 @@ function ChatInputInner({
 					position="absolute"
 					top="0"
 					right="0"
-					zIndex="3"
 					p="2"
 				>
 					<InputButton color="fg.muted" onClick={() => setFullExpand(prev => !prev)}>
@@ -310,7 +309,7 @@ function ChatInputInner({
 
 				{mode === "voice" &&
 					<>
-						<InputButton onClick={DiscardVoice}>
+						<InputButton onClick={discardVoice}>
 							<LuX />
 						</InputButton>
 						<InputButton onClick={submitVoice} waiting={submittingVoice}>

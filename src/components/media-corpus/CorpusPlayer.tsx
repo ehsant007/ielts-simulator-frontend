@@ -17,7 +17,7 @@ import {
 	VStack,
 } from "@chakra-ui/react"
 import type { MouseEvent } from "react"
-import { Fragment, useState } from "react"
+import { Fragment, useEffect, useState } from "react"
 import { LuPause, LuPlay, LuSkipBack, LuSkipForward } from "react-icons/lu"
 import { MdReplay } from "react-icons/md"
 import { TbRewindBackward5, TbRewindForward5 } from "react-icons/tb"
@@ -33,25 +33,33 @@ import { PlayerProvider, usePlayer, usePlayerTime } from "./PlayerProvider"
 type Props = {
 	lemma: string
 	partOfSpeech?: string
+	play?: boolean
+	pause?: boolean
 } & StackProps
 
-export function CorpusPlayer({ lemma, partOfSpeech, ...props }: Props) {
+export function CorpusPlayer({
+	lemma,
+	partOfSpeech,
+	play,
+	pause,
+	...props
+}: Props) {
 	return (
-		<PlayerProvider>
-			<CorpusLookupProvider
-				lemma={lemma}
-				partOfSpeech={partOfSpeech}
-				key={JSON.stringify([lemma, partOfSpeech])}
-			>
-				<CorpusYoutubePlayerInner {...props} />
+		<PlayerProvider key={JSON.stringify([lemma, partOfSpeech])}>
+			<CorpusLookupProvider lemma={lemma} partOfSpeech={partOfSpeech}>
+				<CorpusYoutubePlayerInner play={play} pause={pause} {...props} />
 			</CorpusLookupProvider>
 		</PlayerProvider>
 	)
 }
 
-export function CorpusYoutubePlayerInner(props: StackProps) {
-	const { setPlayer, setState, setDuration } = usePlayer()
-	const { media, index, total, segment } = useCorpusLookupContext()
+export function CorpusYoutubePlayerInner({
+	play,
+	pause,
+	...props
+}: { play?: boolean; pause?: boolean } & StackProps) {
+	const { player, setPlayer, setState, setDuration } = usePlayer()
+	const { media, segment, isError } = useCorpusLookupContext()
 
 	const options: YouTubeProps["opts"] = {
 		playerVars: {
@@ -62,6 +70,24 @@ export function CorpusYoutubePlayerInner(props: StackProps) {
 			start: Math.floor(segment?.start ?? 0),
 		},
 	}
+
+	useEffect(() => {
+		if (!player || play == null) return
+		try {
+			if (play) player.playVideo()
+		} catch {
+			// player was destroyed or is not ready yet
+		}
+	}, [play, player])
+
+	useEffect(() => {
+		if (!player || pause == null) return
+		try {
+			if (pause) player.pauseVideo()
+		} catch {
+			// player was destroyed or is not ready yet
+		}
+	}, [pause, player])
 
 	const handleStateChange = async (event: YouTubeEvent) => {
 		const state = event.data
@@ -77,32 +103,49 @@ export function CorpusYoutubePlayerInner(props: StackProps) {
 
 	return (
 		<VStack {...props}>
-			{media && (
-				<AspectRatio
-					ratio={16 / 9}
-					w="full"
-					css={{ "& iframe": { width: "100%", height: "100%" } }}
-				>
-					<YouTube
-						videoId={media?.media_id ?? undefined}
-						opts={options}
-						onReady={onReady}
-						onStateChange={handleStateChange}
-						style={{ width: "100%", height: "100%" }}
-					/>
-				</AspectRatio>
-			)}
-			<Text>
-				{index + 1} / {total}
-			</Text>
-			<PlayerControls w="full" />
-			{media && (
-				<Box textAlign="center">
-					<SubtitleView />
+			<AspectRatio
+				ratio={16 / 9}
+				w="full"
+				css={{ "& iframe": { width: "100%", height: "100%" } }}
+			>
+				<Box bg={isError ? "bg.warning" : "bg.emphasized"}>
+					{media && (
+						<YouTubePlayer
+							videoId={media?.media_id ?? undefined}
+							opts={options}
+							onReady={onReady}
+							onStateChange={handleStateChange}
+							style={{ width: "100%", height: "100%" }}
+						/>
+					)}
+
+					{isError && (
+						<Center>
+							<Text m="6" color="fg.warning" fontWeight="medium">
+								No video found for this expression!
+							</Text>
+						</Center>
+					)}
 				</Box>
-			)}
+			</AspectRatio>
+
+			<PlayerControls w="full" />
+
+			<Box textAlign="center">
+				<SubtitleView />
+			</Box>
 		</VStack>
 	)
+}
+
+function YouTubePlayer(props: YouTubeProps) {
+	const { setPlayer } = usePlayer()
+
+	useEffect(() => {
+		return () => setPlayer(null)
+	}, [setPlayer])
+
+	return <YouTube {...props} />
 }
 
 function PlayerControls(props: StackProps) {
@@ -152,7 +195,7 @@ function PlayerButtons() {
 		await player.seekTo((await player.getCurrentTime()) + step, true)
 	}
 
-	if (!player) return null
+	//if (!player) return null
 
 	return (
 		<Grid templateColumns="1fr auto 1fr" alignItems="center" w="full">
@@ -213,7 +256,7 @@ function PlayerButtons() {
 				gridColumn="3"
 				colorPalette="primary"
 				borderRadius="full"
-				onClick={() => segment && player.seekTo(segment.start, true)}
+				onClick={() => segment && player?.seekTo(segment.start, true)}
 			>
 				<MdReplay />
 			</PlayerButton>
@@ -234,6 +277,7 @@ function Time({ value }: { value: number }) {
 
 function TimeLine() {
 	const [progress, setProgress] = useState(0)
+	const { index, total } = useCorpusLookupContext()
 
 	const { player, duration, time } = usePlayerTime({
 		deltaMs: 100,
@@ -262,11 +306,15 @@ function TimeLine() {
 			size="xs"
 			w="full"
 		>
-			<Progress.Label mb="21">
+			<Progress.Label mb="21" w="full">
 				<Text fontWeight="bold">
 					<Time value={time} />
 					<span> / </span>
 					<Time value={duration ?? 0} />
+				</Text>
+
+				<Text ms="auto" fontFamily="mono" fontWeight="bold">
+					{index + 1} / {total}
 				</Text>
 			</Progress.Label>
 			<Progress.Track>
