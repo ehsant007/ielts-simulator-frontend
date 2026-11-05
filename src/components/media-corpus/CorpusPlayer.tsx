@@ -343,7 +343,9 @@ function SegmentView({
 	time: number
 } & BoxProps) {
 	const { player } = usePlayer()
-	const { match } = useCorpusLookupContext()
+	const { match, expression } = useCorpusLookupContext()
+
+	const highlight_query = match ?? expression ?? []
 
 	return (
 		<Box {...props} pos="relative">
@@ -370,7 +372,12 @@ function SegmentView({
 			</Box>
 
 			<Box position="absolute" inset="0" pointerEvents="none">
-				<Highlight query={match ?? []} styles={{ color: "orange.fg" }}>
+				<Highlight
+					query={highlight_query}
+					styles={{ color: "orange.fg" }}
+					ignoreCase
+					matchAll
+				>
 					{segment.text}
 				</Highlight>
 			</Box>
