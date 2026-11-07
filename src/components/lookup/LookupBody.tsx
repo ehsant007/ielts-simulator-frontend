@@ -262,7 +262,9 @@ export function SearchInput({ onQuerySubmit, defaultValue }: SearchInputProps) {
 												size="sm"
 											>
 												{res.text}
-												<Text as="span" color="fg.subtle" fontWeight="normal">{res.partOfSpeech}</Text>
+												<Text as="span" color="fg.subtle" fontWeight="normal">
+													{res.partOfSpeech}
+												</Text>
 											</Button>
 										))
 									) : (
