@@ -322,7 +322,7 @@ export type CorpusEntryOccurrenceRead = {
   /**
    * Match
    */
-  match?: string | null;
+  match: string;
   segment: CorpusSegmentOptRead;
 };
 
@@ -2619,7 +2619,7 @@ export type GetGeminiAuthTokenResponses = {
 export type GetGeminiAuthTokenResponse =
   GetGeminiAuthTokenResponses[keyof GetGeminiAuthTokenResponses];
 
-export type LookupData = {
+export type DictionaryLookupData = {
   body?: never;
   path?: never;
   query: {
@@ -2631,25 +2631,27 @@ export type LookupData = {
   url: "/api/v1/dictionary/lookup";
 };
 
-export type LookupErrors = {
+export type DictionaryLookupErrors = {
   /**
    * Validation Error
    */
   422: HttpValidationError;
 };
 
-export type LookupError = LookupErrors[keyof LookupErrors];
+export type DictionaryLookupError =
+  DictionaryLookupErrors[keyof DictionaryLookupErrors];
 
-export type LookupResponses = {
+export type DictionaryLookupResponses = {
   /**
    * Successful Response
    */
   200: DictionaryLookupResponse;
 };
 
-export type LookupResponse = LookupResponses[keyof LookupResponses];
+export type DictionaryLookupResponse2 =
+  DictionaryLookupResponses[keyof DictionaryLookupResponses];
 
-export type SearchData = {
+export type DictionarySearchData = {
   body?: never;
   path?: never;
   query: {
@@ -2661,23 +2663,25 @@ export type SearchData = {
   url: "/api/v1/dictionary/search";
 };
 
-export type SearchErrors = {
+export type DictionarySearchErrors = {
   /**
    * Validation Error
    */
   422: HttpValidationError;
 };
 
-export type SearchError = SearchErrors[keyof SearchErrors];
+export type DictionarySearchError =
+  DictionarySearchErrors[keyof DictionarySearchErrors];
 
-export type SearchResponses = {
+export type DictionarySearchResponses = {
   /**
    * Successful Response
    */
   200: DictionarySearchResponse;
 };
 
-export type SearchResponse = SearchResponses[keyof SearchResponses];
+export type DictionarySearchResponse2 =
+  DictionarySearchResponses[keyof DictionarySearchResponses];
 
 export type MediaCorpusLookupData = {
   body?: never;

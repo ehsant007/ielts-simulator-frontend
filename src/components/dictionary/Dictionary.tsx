@@ -1,61 +1,79 @@
 "use client"
 
-import { VStack, Box, List, HStack, Text, Collapsible, Separator, Tabs, Highlight, StackProps, BoxProps } from "@chakra-ui/react";
-import { DictionaryCollocation, DictionaryEntry, DictionaryExample, DictionarySense, DictionaryVerbForm, lookup } from "@/client";
-import { Text as AdvText } from "@chakra-ui/react";
-import { TTSButton } from "../lang-tools/tts";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { LuChevronRight, LuMinus, LuPlus } from "react-icons/lu";
-import { useMemo, useState } from "react";
-import { DictionaryEntryProvider, useDictionaryEntry } from "./DictionaryEntryProvider";
-import { useLangToolsStore } from "../lang-tools/LangToolsProvider";
+import {
+	Text as AdvText,
+	Box,
+	type BoxProps,
+	Collapsible,
+	Highlight,
+	HStack,
+	List,
+	Separator,
+	type StackProps,
+	Tabs,
+	Text,
+	VStack,
+} from "@chakra-ui/react"
+import { useSuspenseQuery } from "@tanstack/react-query"
+import { useMemo, useState } from "react"
+import { LuChevronRight, LuMinus, LuPlus } from "react-icons/lu"
+import {
+	type DictionaryCollocation,
+	type DictionaryEntry,
+	type DictionaryExample,
+	type DictionarySense,
+	type DictionaryVerbForm,
+	dictionaryLookup,
+} from "@/client"
+import { useLangToolsStore } from "../lang-tools/LangToolsProvider"
+import { TTSButton } from "../lang-tools/tts"
+import {
+	DictionaryEntryProvider,
+	useDictionaryEntry,
+} from "./DictionaryEntryProvider"
 
-
-function groupBy<T, K>(
-	array: T[],
-	key: (item: T) => K
-): Map<K, T[]> {
+function groupBy<T, K>(array: T[], key: (item: T) => K): Map<K, T[]> {
 	return array.reduce((result, item) => {
-		const groupName = key(item);
-		const group = result.get(groupName) ?? [];
+		const groupName = key(item)
+		const group = result.get(groupName) ?? []
 
-		group.push(item);
-		result.set(groupName, group);
+		group.push(item)
+		result.set(groupName, group)
 
-		return result;
-	}, new Map<K, T[]>());
+		return result
+	}, new Map<K, T[]>())
 }
-
 
 function groupSenses(senses: DictionarySense[]) {
 	const sorted = senses.toSorted((a, b) => {
 		const groupOrder =
-			(a.sense_group?.sort_order ?? 0) -
-			(b.sense_group?.sort_order ?? 0);
+			(a.sense_group?.sort_order ?? 0) - (b.sense_group?.sort_order ?? 0)
 
 		if (groupOrder !== 0) {
-			return groupOrder;
+			return groupOrder
 		}
 
-		return a.sort_order - b.sort_order;
-	});
+		return a.sort_order - b.sort_order
+	})
 
-	return groupBy(sorted, sense => sense.sense_group?.topic);
+	return groupBy(sorted, (sense) => sense.sense_group?.topic)
 }
 
 export function Dictionary({ headword }: { headword: string }) {
-
 	const { data: entries } = useSuspenseQuery({
-		queryFn: () => lookup({
-			query: { q: headword! },
-		}).then((res) => res.data.entries)
-		,
+		queryFn: () =>
+			dictionaryLookup({
+				query: { q: headword ?? "" },
+			}).then((res) => res.data.entries),
 		queryKey: ["dictionary", headword],
 	})
 
-
-	if (entries.length == 0)
-		return <Text m="6" color="fg.warning" fontWeight="medium">No definitions found for this query!</Text>
+	if (entries.length === 0)
+		return (
+			<Text m="6" color="fg.warning" fontWeight="medium">
+				No definitions found for this query!
+			</Text>
+		)
 
 	return (
 		<VStack alignItems="start" gap="3">
@@ -65,20 +83,28 @@ export function Dictionary({ headword }: { headword: string }) {
 					p="5"
 					title={
 						<Text>
-							<Text as="span" fontWeight="bold" fontSize="lg">{entry.headword} </Text>
-							<Text as="span" color="fg.subtle" fontWeight="semibold" fontStyle="italic" ms="1">{entry.pos}</Text>
+							<Text as="span" fontWeight="bold" fontSize="lg">
+								{entry.headword}{" "}
+							</Text>
+							<Text
+								as="span"
+								color="fg.subtle"
+								fontWeight="semibold"
+								fontStyle="italic"
+								ms="1"
+							>
+								{entry.pos}
+							</Text>
 						</Text>
 					}
 				>
 					<DictionaryEntryProvider entry={entry}>
 						<VStack alignItems="start" gap="5">
-
 							<Pronunciation entry={entry} />
 
 							<Extras entry={entry} />
 
 							<Senses senses={entry.senses} />
-
 						</VStack>
 					</DictionaryEntryProvider>
 				</EntryCollapse>
@@ -87,9 +113,7 @@ export function Dictionary({ headword }: { headword: string }) {
 	)
 }
 
-
 function Pronunciation({ entry }: { entry: DictionaryEntry }) {
-
 	if (entry.ipa_us === entry.ipa_gb)
 		return (
 			<HStack>
@@ -98,7 +122,6 @@ function Pronunciation({ entry }: { entry: DictionaryEntry }) {
 				<TTSButton text={entry.headword} colorPalette="red" ipa="UK" />
 			</HStack>
 		)
-
 
 	return (
 		<VStack>
@@ -115,55 +138,53 @@ function Pronunciation({ entry }: { entry: DictionaryEntry }) {
 	)
 }
 
-
 function Examples({ examples }: { examples: DictionaryExample[] }) {
 	const entry = useDictionaryEntry()
 	const query = useLangToolsStore((state) => state.wordQuery)
 
-	const highlightQuery = useMemo(
-		() => {
-			const values = [...entry.verb_forms.map(form => form.form_text), entry.headword]
-			if (query)
-				values.push(query)
-			return [...new Set(values)].sort((a, b) => b.length - a.length)
-		},
-		[entry, query],
-	)
+	const highlightQuery = useMemo(() => {
+		const values = [
+			...entry.verb_forms.map((form) => form.form_text),
+			entry.headword,
+		]
+		if (query) values.push(query)
+		return [...new Set(values)].sort((a, b) => b.length - a.length)
+	}, [entry, query])
 
 	return (
 		<List.Root mt="1" ms="4" listStyleType="disc">
-			{examples.sort((a, b) => a.sort_order - b.sort_order).map((example, example_index) => (
-				<List.Item
-					mt="1"
-					key={example_index}
-					fontStyle="italic"
-					as={AdvText}
-					id={`$example${example.id}`}
-				>
-					<Highlight
-						ignoreCase
-						query={highlightQuery}
-						styles={{
-							px: "0.5",
-							//bg: "orange.subtle",
-							color: "orange.fg",
-							fontWeight: "medium",
-							m: "0",
-							p: "0",
-						}}
+			{examples
+				.sort((a, b) => a.sort_order - b.sort_order)
+				.map((example, example_index) => (
+					<List.Item
+						mt="1"
+						key={example_index}
+						fontStyle="italic"
+						as={AdvText}
+						id={`$example${example.id}`}
 					>
-						{example.text}
-					</Highlight>
-				</List.Item>
-			))}
+						<Highlight
+							ignoreCase
+							query={highlightQuery}
+							styles={{
+								px: "0.5",
+								//bg: "orange.subtle",
+								color: "orange.fg",
+								fontWeight: "medium",
+								m: "0",
+								p: "0",
+							}}
+						>
+							{example.text}
+						</Highlight>
+					</List.Item>
+				))}
 		</List.Root>
 	)
 }
 
 function CEFRLevel({ value }: { value?: string | null }) {
-
-	if (value == null)
-		return null
+	if (value == null) return null
 
 	return (
 		<Text
@@ -183,37 +204,42 @@ function CEFRLevel({ value }: { value?: string | null }) {
 	)
 }
 
-
 function Sense({ sense }: { sense: DictionarySense }) {
-	const baseId = `dic-sense-${sense.id}`;
+	const baseId = `dic-sense-${sense.id}`
 
 	return (
 		<Box>
 			<Text>
 				<CEFRLevel value={sense.cefr_level} />
-				{sense.grammar &&
-					<AdvText as="span" color="fg.muted" id={`${baseId}-grammar`}>{sense.grammar} </AdvText>
-				}
-				<AdvText as="span" fontWeight="medium" id={`${baseId}-def`}>{sense.definition}</AdvText>
+				{sense.grammar && (
+					<AdvText as="span" color="fg.muted" id={`${baseId}-grammar`}>
+						{sense.grammar}{" "}
+					</AdvText>
+				)}
+				<AdvText as="span" fontWeight="medium" id={`${baseId}-def`}>
+					{sense.definition}
+				</AdvText>
 			</Text>
 			<Examples examples={sense.examples} />
 		</Box>
 	)
 }
 
-
-function Senses({ senses, ...props }: { senses: DictionarySense[] } & StackProps) {
+function Senses({
+	senses,
+	...props
+}: { senses: DictionarySense[] } & StackProps) {
 	return (
 		<VStack gap="5" w="full" alignItems="start" {...props}>
-			{
-				Array.from(groupSenses(senses).entries()).map(([groupName, senses], group_index) => (
+			{Array.from(groupSenses(senses).entries()).map(
+				([groupName, senses], group_index) => (
 					<Box key={groupName ?? group_index} w="full">
-						{senses[0].sense_group &&
+						{senses[0].sense_group && (
 							<>
 								<AdvText fontWeight="medium">{groupName}</AdvText>
 								<Separator mt="0.5" mb="2" width="full" />
 							</>
-						}
+						)}
 
 						<List.Root
 							as="ol"
@@ -222,20 +248,29 @@ function Senses({ senses, ...props }: { senses: DictionarySense[] } & StackProps
 							{...{ start: senses[0].sense_num }}
 						>
 							{senses.map((sense) => (
-								<List.Item key={sense.id} _marker={{fontWeight: "medium", fontSize: "small"}}>
+								<List.Item
+									key={sense.id}
+									_marker={{ fontWeight: "medium", fontSize: "small" }}
+								>
 									<Sense sense={sense} />
 								</List.Item>
 							))}
 						</List.Root>
 					</Box>
-				))
-			}
+				),
+			)}
 		</VStack>
 	)
 }
 
-
-function EntryCollapse({ children, title, ...props }: { children: React.ReactNode, title: React.ReactNode } & Omit<BoxProps, "title">) {
+function EntryCollapse({
+	children,
+	title,
+	...props
+}: { children: React.ReactNode; title: React.ReactNode } & Omit<
+	BoxProps,
+	"title"
+>) {
 	return (
 		<Collapsible.Root defaultOpen w="full" bg="bg.muted">
 			<Collapsible.Trigger
@@ -257,128 +292,49 @@ function EntryCollapse({ children, title, ...props }: { children: React.ReactNod
 				{title}
 			</Collapsible.Trigger>
 			<Collapsible.Content>
-				<Box {...props}>
-					{children}
-				</Box>
+				<Box {...props}>{children}</Box>
 			</Collapsible.Content>
 		</Collapsible.Root>
 	)
 }
 
-
-// function EntryContentCollapse({ children, title, ...props }: { children: React.ReactNode, title: React.ReactNode } & Omit<CollapsibleRootProps, "title">) {
-// 	const [open, setOpen] = useState(false)
-
-// 	return (
-// 		<Collapsible.Root
-// 			open={open}
-// 			onOpenChange={(e) => setOpen(e.open)}
-// 			w="full"
-// 			bg="primary.subtle/30"
-// 			borderStart="lg"
-// 			borderColor="primary.solid/50"
-// 			{...props}
-// 		>
-// 			<Collapsible.Trigger
-// 				alignItems="center"
-// 				bg="primary.emphasized/40"
-// 				cursor="pointer"
-// 				display="flex"
-// 				w="full"
-// 				gap="2"
-// 				py="3"
-// 				px="2"
-// 			>
-// 				<Collapsible.Indicator color="purple.border/80">
-// 					{open ? <LuMinus strokeWidth="4" /> : <LuPlus strokeWidth="4" />}
-// 				</Collapsible.Indicator>
-// 				{title}
-// 			</Collapsible.Trigger>
-// 			<Collapsible.Content>
-// 				<Box px="5" py="4">
-// 					{children}
-// 				</Box>
-// 			</Collapsible.Content>
-// 		</Collapsible.Root>
-// 	)
-// }
-
-
 function VerbFormsInner({ values }: { values: DictionaryVerbForm[] }) {
 	return (
 		<>
-			{values.map((form) =>
+			{values.map((form) => (
 				<AdvText id={`verb-form${form.id}`} key={form.id} mb="1">
 					{form.tag}
 					<Text as="span" fontWeight="medium" color="primary.fg" ms="1">
 						{form.form_text}
 					</Text>
 				</AdvText>
-			)}
+			))}
 		</>
 	)
 }
-
-
-// function VerbForms({ values }: { values?: DictionaryVerbForm[] | null }) {
-// 	if (values == null)
-// 		return null
-
-// 	if (values.length == 0)
-// 		return null
-
-// 	return (
-// 		<EntryContentCollapse
-// 			mt="2"
-// 			mb="6"
-// 			title={
-// 				<Text fontWeight="medium">Verb Forms</Text>
-// 			}
-// 		>
-// 			<VerbFormsInner values={values} />
-// 		</EntryContentCollapse>
-// 	)
-// }
 
 function CollocationsInner({ values }: { values: DictionaryCollocation[] }) {
 	return (
 		<>
-			{values.map((value) =>
+			{values.map((value) => (
 				<Box key={value.id} mb="4">
-					<Text fontWeight="medium">
-						{value.category}
-					</Text>
+					<Text fontWeight="medium">{value.category}</Text>
 					<Text fontWeight="medium" color="primary.fg" ms="1">
 						{value.words}
 					</Text>
 				</Box>
-			)}
+			))}
 		</>
 	)
 }
 
-
-// function Collocations({ values }: { values?: DictionaryCollocation[] | null }) {
-// 	if (values == null)
-// 		return null
-
-// 	if (values.length == 0)
-// 		return null
-
-// 	return (
-// 		<EntryContentCollapse
-// 			mt="2"
-// 			mb="6"
-// 			title={
-// 				<Text fontWeight="medium">Collocations</Text>
-// 			}
-// 		>
-// 			<CollocationsInner values={values} />
-// 		</EntryContentCollapse>
-// 	)
-// }
-
-function TabContent({ children, value }: { children: React.ReactNode, value: string }) {
+function TabContent({
+	children,
+	value,
+}: {
+	children: React.ReactNode
+	value: string
+}) {
 	return (
 		<Tabs.Content
 			p="0"
@@ -392,17 +348,14 @@ function TabContent({ children, value }: { children: React.ReactNode, value: str
 				animationDuration: "120ms",
 			}}
 		>
-
 			{children}
-
 		</Tabs.Content>
 	)
 }
 
 function Extras({ entry }: { entry: DictionaryEntry }) {
-
 	const [open, setOpen] = useState(false)
-	const extras: { title: string, node: React.ReactNode }[] = []
+	const extras: { title: string; node: React.ReactNode }[] = []
 
 	if (entry.verb_forms.length > 0)
 		extras.push({
@@ -418,8 +371,7 @@ function Extras({ entry }: { entry: DictionaryEntry }) {
 
 	const [tab, setTab] = useState<string>(extras[0]?.title)
 
-	if (extras.length == 0)
-		return null
+	if (extras.length === 0) return null
 
 	return (
 		<Tabs.Root
@@ -430,7 +382,7 @@ function Extras({ entry }: { entry: DictionaryEntry }) {
 			bg="primary.subtle/30"
 			borderStart="lg"
 			borderColor="primary.solid/50"
-			variant={extras.length == 1 ? "plain" : "line"}
+			variant={extras.length === 1 ? "plain" : "line"}
 		>
 			<HStack
 				w="full"
@@ -438,30 +390,23 @@ function Extras({ entry }: { entry: DictionaryEntry }) {
 				bg="primary.emphasized/40"
 				onClick={(e) => {
 					const target_tab = (e.target as HTMLElement).dataset.tab
-					if (target_tab == null)
-						setOpen(prev => !prev)
-					else
-						setOpen(open ? target_tab !== tab : true)
+					if (target_tab == null) setOpen((prev) => !prev)
+					else setOpen(open ? target_tab !== tab : true)
 				}}
 			>
 				<Box color="purple.border/80" ms="2">
 					{open ? <LuMinus strokeWidth="4" /> : <LuPlus strokeWidth="4" />}
 				</Box>
 				<Tabs.List w="full">
-
 					{extras.map(({ title }) => (
 						<Tabs.Trigger data-tab={title} key={title} value={title}>
 							{title}
 						</Tabs.Trigger>
 					))}
-
 				</Tabs.List>
 			</HStack>
 
-			<Collapsible.Root
-				open={open}
-				onOpenChange={(e) => setOpen(e.open)}
-			>
+			<Collapsible.Root open={open} onOpenChange={(e) => setOpen(e.open)}>
 				<Collapsible.Content>
 					<Box p="3">
 						{extras.map(({ title, node }) => (
@@ -472,8 +417,6 @@ function Extras({ entry }: { entry: DictionaryEntry }) {
 					</Box>
 				</Collapsible.Content>
 			</Collapsible.Root>
-
 		</Tabs.Root>
 	)
 }
-

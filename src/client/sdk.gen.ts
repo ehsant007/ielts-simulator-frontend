@@ -52,6 +52,12 @@ import type {
   DeleteUserMeData,
   DeleteUserMeResponses,
   DeleteUserResponses,
+  DictionaryLookupData,
+  DictionaryLookupErrors,
+  DictionaryLookupResponses,
+  DictionarySearchData,
+  DictionarySearchErrors,
+  DictionarySearchResponses,
   GetGeminiAuthTokenData,
   GetGeminiAuthTokenResponses,
   HealthCheckData,
@@ -59,9 +65,6 @@ import type {
   LoginAccessTokenData,
   LoginAccessTokenErrors,
   LoginAccessTokenResponses,
-  LookupData,
-  LookupErrors,
-  LookupResponses,
   MediaCorpusLookupData,
   MediaCorpusLookupErrors,
   MediaCorpusLookupResponses,
@@ -133,9 +136,6 @@ import type {
   ResetPasswordData,
   ResetPasswordErrors,
   ResetPasswordResponses,
-  SearchData,
-  SearchErrors,
-  SearchResponses,
   TestEmailData,
   TestEmailErrors,
   TestEmailResponses,
@@ -359,26 +359,36 @@ export const getGeminiAuthToken = <ThrowOnError extends boolean = true>(
   });
 
 /**
- * Lookup
+ * Dictionary Lookup
  */
-export const lookup = <ThrowOnError extends boolean = true>(
-  options: Options<LookupData, ThrowOnError>,
-): RequestResult<LookupResponses, LookupErrors, ThrowOnError> =>
-  (options.client ?? client).get<LookupResponses, LookupErrors, ThrowOnError>({
-    url: "/api/v1/dictionary/lookup",
-    ...options,
-  });
+export const dictionaryLookup = <ThrowOnError extends boolean = true>(
+  options: Options<DictionaryLookupData, ThrowOnError>,
+): RequestResult<
+  DictionaryLookupResponses,
+  DictionaryLookupErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).get<
+    DictionaryLookupResponses,
+    DictionaryLookupErrors,
+    ThrowOnError
+  >({ url: "/api/v1/dictionary/lookup", ...options });
 
 /**
- * Search
+ * Dictionary Search
  */
-export const search = <ThrowOnError extends boolean = true>(
-  options: Options<SearchData, ThrowOnError>,
-): RequestResult<SearchResponses, SearchErrors, ThrowOnError> =>
-  (options.client ?? client).get<SearchResponses, SearchErrors, ThrowOnError>({
-    url: "/api/v1/dictionary/search",
-    ...options,
-  });
+export const dictionarySearch = <ThrowOnError extends boolean = true>(
+  options: Options<DictionarySearchData, ThrowOnError>,
+): RequestResult<
+  DictionarySearchResponses,
+  DictionarySearchErrors,
+  ThrowOnError
+> =>
+  (options.client ?? client).get<
+    DictionarySearchResponses,
+    DictionarySearchErrors,
+    ThrowOnError
+  >({ url: "/api/v1/dictionary/search", ...options });
 
 /**
  * Media Corpus Lookup

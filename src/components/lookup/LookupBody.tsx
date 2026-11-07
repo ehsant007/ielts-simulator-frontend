@@ -14,19 +14,21 @@ import {
 	Text,
 	VStack,
 } from "@chakra-ui/react"
-import { useQuery } from "@tanstack/react-query"
+
 import { Suspense, useState } from "react"
 import { LuSearch } from "react-icons/lu"
 import { MdHistory } from "react-icons/md"
 import { useDebounce } from "use-debounce"
-import { search } from "@/client"
 import { Dictionary } from "../dictionary/Dictionary"
 import { WordNet } from "../dictionary/Wordnet"
 import { useLangToolsStore } from "../lang-tools/LangToolsProvider"
 import { CorpusPlayer } from "../media-corpus/CorpusPlayer"
+import { useSearch } from "./hooks"
+import { useLookupContext } from "./LookupProvider"
+import type { LookupMethod, SearchResultItem } from "./types"
 
 export function LookupBody({ word }: { word: string }) {
-	const [tab, setTab] = useState("dictionary")
+	const { lookupMethod, setLookupMethod } = useLookupContext()
 
 	return (
 		<Tabs.Root
@@ -38,12 +40,12 @@ export function LookupBody({ word }: { word: string }) {
 			w="full"
 			defaultValue="dictionary"
 			size="sm"
-			value={tab}
-			onValueChange={(e) => setTab(e.value)}
+			value={lookupMethod}
+			onValueChange={(e) => setLookupMethod(e.value as LookupMethod)}
 		>
 			<Tabs.List>
 				<Tabs.Trigger value="dictionary">Dictionary</Tabs.Trigger>
-				<Tabs.Trigger value="videos">Videos</Tabs.Trigger>
+				<Tabs.Trigger value="corpus">Videos</Tabs.Trigger>
 				<Tabs.Trigger value="wordnet">Wordnet</Tabs.Trigger>
 			</Tabs.List>
 
@@ -52,8 +54,14 @@ export function LookupBody({ word }: { word: string }) {
 					<Dictionary headword={word} />
 				</TabContent>
 
-				<TabContent value="videos">
-					<CorpusPlayer pause={tab!=="videos"} lemma={word} m="3" maxW="3xl" mx="auto"/>
+				<TabContent value="corpus">
+					<CorpusPlayer
+						pause={lookupMethod !== "corpus"}
+						lemma={word}
+						m="3"
+						maxW="3xl"
+						mx="auto"
+					/>
 				</TabContent>
 
 				<TabContent value="wordnet">
@@ -148,42 +156,35 @@ export function LookupHistoryMenu() {
 	)
 }
 
-type SearchInputProps = {
-	onQuerySubmit: (query: string) => void
+export type SearchInputProps = {
+	onQuerySubmit: (result: string | SearchResultItem) => void
 	defaultValue?: string | undefined
 }
 
-export function LookupInput({ onQuerySubmit, defaultValue }: SearchInputProps) {
-	const [query, setQuery] = useState<string | undefined>(undefined)
+export function SearchInput({ onQuerySubmit, defaultValue }: SearchInputProps) {
+	const { lookupMethod } = useLookupContext()
 	const [inputValue, setInputValue] = useState<string>(defaultValue ?? "")
 	const [open, setOpen] = useState(false)
 
-	const [debouncedQuery] = useDebounce(query, 300)
-
-	const { data: headwords, isLoading } = useQuery({
-		enabled: !!debouncedQuery,
-		queryFn: () =>
-			search({
-				query: { q: debouncedQuery ?? "" },
-			}).then((res) => res.data.headwords),
-		queryKey: ["dictionary-search", debouncedQuery],
-	})
+	const [debounced] = useDebounce(inputValue, 300)
+	const { searchResult, isSearchLoading } = useSearch(lookupMethod, debounced)
 
 	const handleInputChange = (value: string) => {
 		setInputValue(value)
-		setQuery(value)
 		setOpen(!!value)
 	}
 
-	const handleSelect = (value: string) => {
-		setInputValue(value)
+	const handleSelect = (result: SearchResultItem) => {
+		setInputValue(result.text)
 		setOpen(false)
-		onQuerySubmit(value)
+		onQuerySubmit(result)
 	}
 
 	const submitInputValue = () => {
 		setOpen(false)
-		if (inputValue) onQuerySubmit(inputValue)
+		if (inputValue) {
+			onQuerySubmit(inputValue)
+		}
 	}
 
 	return (
@@ -232,7 +233,7 @@ export function LookupInput({ onQuerySubmit, defaultValue }: SearchInputProps) {
 						width="fit-content"
 					>
 						<Popover.Body>
-							{isLoading ? (
+							{isSearchLoading ? (
 								<HStack
 									gap="3"
 									bg="bg/80"
@@ -249,18 +250,18 @@ export function LookupInput({ onQuerySubmit, defaultValue }: SearchInputProps) {
 								</HStack>
 							) : (
 								<VStack alignItems="start" gap="0">
-									{(headwords?.length ?? 0) > 0 ? (
-										headwords?.map((headword) => (
+									{(searchResult?.length ?? 0) > 0 ? (
+										searchResult?.map((res) => (
 											<Button
 												variant="ghost"
 												borderRadius="none"
-												key={headword}
-												onClick={() => handleSelect(headword)}
+												key={res.id}
+												onClick={() => handleSelect(res)}
 												w="full"
 												justifyContent="start"
 												size="sm"
 											>
-												{headword}
+												{res.text}
 											</Button>
 										))
 									) : (

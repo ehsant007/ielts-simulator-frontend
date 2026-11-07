@@ -8,7 +8,7 @@ import {
 import { useCorpusStore } from "./store"
 
 export function useCorpusOccurrencesQuery(
-	expression: string,
+	expression: string | undefined | null,
 	partOfSpeech?: string,
 ) {
 	const query = useQuery({
@@ -20,7 +20,7 @@ export function useCorpusOccurrencesQuery(
 		queryFn: () =>
 			mediaCorpusLookup({
 				query: {
-					expression,
+					expression: expression ?? "",
 					partOfSpeech,
 					limit: 10,
 				},
@@ -30,9 +30,12 @@ export function useCorpusOccurrencesQuery(
 	return query
 }
 
-export function useCorpusLookup(expression: string, partOfSpeech?: string) {
+export function useCorpusLookup(
+	expression: string,
+	partOfSpeech?: string,
+) {
 	const {
-		data: { occurrences, media, expression:expr, partOfSpeech: pos } = {},
+		data: { occurrences, media, expression: expr, partOfSpeech: pos } = {},
 		...queryState
 	} = useCorpusOccurrencesQuery(expression, partOfSpeech)
 
