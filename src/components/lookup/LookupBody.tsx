@@ -94,7 +94,7 @@ function TabContent({
 				animationDuration: "120ms",
 			}}
 		>
-			<ScrollArea.Root>
+			<ScrollArea.Root size="lg">
 				<ScrollArea.Viewport>
 					<ScrollArea.Content spaceY="4" textStyle="sm">
 						<Suspense
@@ -262,6 +262,7 @@ export function SearchInput({ onQuerySubmit, defaultValue }: SearchInputProps) {
 												size="sm"
 											>
 												{res.text}
+												<Text as="span" color="fg.subtle" fontWeight="normal">{res.partOfSpeech}</Text>
 											</Button>
 										))
 									) : (

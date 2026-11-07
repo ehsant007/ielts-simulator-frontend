@@ -48,6 +48,7 @@ export function LookupFloating() {
 							border="sm"
 							borderColor="fg.subtle"
 							shadow="md"
+							className="floating-panel"
 						>
 							<FloatingPanel.Header>
 								<Group gap="1">

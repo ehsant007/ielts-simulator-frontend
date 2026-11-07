@@ -7,7 +7,7 @@ export function useSearch(
 	query: string | undefined | null,
 ) {
 	const dictQuery = useDictionarySearch(
-		method === "dictionary" ? query : undefined,
+		method === "dictionary" || method === "wordnet" ? query : undefined,
 	)
 	const corpusQuery = useCorpusOccurrencesQuery(
 		method === "corpus" ? query : undefined,
@@ -26,7 +26,11 @@ export function useSearch(
 			break
 		case "corpus":
 			corpusQuery.data?.occurrences.forEach((occur) => {
-				searchResult.push({ id: occur.id, text: occur.match })
+				searchResult.push({
+					id: occur.id,
+					text: occur.match,
+					partOfSpeech: corpusQuery.data.partOfSpeech,
+				})
 			})
 			isSearchLoading = corpusQuery.isLoading
 			break
