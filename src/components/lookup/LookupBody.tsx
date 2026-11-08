@@ -15,13 +15,16 @@ import {
 	VStack,
 } from "@chakra-ui/react"
 
-import { Suspense, useState } from "react"
+import { Suspense, useEffect, useRef, useState } from "react"
 import { LuSearch } from "react-icons/lu"
 import { MdHistory } from "react-icons/md"
 import { useDebounce } from "use-debounce"
 import { Dictionary } from "../dictionary/Dictionary"
+import { useDictionaryHistory } from "../dictionary/hooks"
 import { WordNet } from "../dictionary/Wordnet"
-import { useLangToolsStore } from "../lang-tools/LangToolsProvider"
+import {
+	useLangToolsStore,
+} from "../lang-tools/LangToolsProvider"
 import { CorpusPlayer } from "../media-corpus/CorpusPlayer"
 import { useSearch } from "./hooks"
 import { useLookupContext } from "./LookupProvider"
@@ -133,6 +136,37 @@ export function LookupHistoryMenu() {
 	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
 	const history = useLangToolsStore((state) => state.translateHistory)
 
+	const {
+		data: dictionaryHistory = [],
+		hasNextPage,
+		fetchNextPage,
+		isFetchingNextPage,
+	} = useDictionaryHistory()
+
+
+	const topRef = useRef<HTMLDivElement>(null) // Sentinel
+
+	useEffect(() => {
+		const element = topRef.current
+		if (!element) return
+
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+					fetchNextPage()
+				}
+			},
+			{
+				// Start loading before the user actually reaches the bottom.
+				rootMargin: "0px 0px 20px 0px",
+			},
+		)
+
+		observer.observe(element)
+
+		return () => observer.disconnect()
+	}, [hasNextPage, isFetchingNextPage, fetchNextPage])
+
 	return (
 		<Menu.Root onSelect={(e) => setWordQuery(e.value)}>
 			<Menu.Trigger asChild>
@@ -143,12 +177,30 @@ export function LookupHistoryMenu() {
 
 			<Portal>
 				<Menu.Positioner>
-					<Menu.Content zIndex="max">
+					<Menu.Content
+						minW="9rem"
+						maxHeight="40dvh"
+						overflowY="auto"
+						css={{
+							"&::-webkit-scrollbar": {
+								width: "0.4rem",
+							},
+							"&::-webkit-scrollbar-thumb": {
+								bg: "fg.subtle",
+								borderRadius: "full",
+							},
+							"&::-webkit-scrollbar-track": {
+								bg: "transparent",
+							},
+						}}
+					>
 						{history.map((query) => (
 							<Menu.Item key={query} value={query}>
 								{query}
 							</Menu.Item>
 						))}
+
+						<Box ref={topRef} h="1px" />
 					</Menu.Content>
 				</Menu.Positioner>
 			</Portal>

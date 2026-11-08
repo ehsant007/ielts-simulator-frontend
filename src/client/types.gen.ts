@@ -35,13 +35,9 @@ export type AiChatPage = {
    */
   chats: Array<AiChatRead>;
   /**
-   * Next Cursor
+   * Cursor
    */
-  next_cursor?: string | null;
-  /**
-   * Previous Cursor
-   */
-  previous_cursor?: string | null;
+  cursor?: string | null;
 };
 
 /**
@@ -529,6 +525,20 @@ export type DictionaryExample = {
    * Extra
    */
   extra: boolean;
+};
+
+/**
+ * DictionaryHistoryPage
+ */
+export type DictionaryHistoryPage = {
+  /**
+   * History
+   */
+  history: Array<string>;
+  /**
+   * Cursor
+   */
+  cursor?: string | null;
 };
 
 /**
@@ -2428,13 +2438,9 @@ export type ReadChatsData = {
      */
     pinned?: boolean | null;
     /**
-     * Before
+     * Cursor
      */
-    before?: string | null;
-    /**
-     * After
-     */
-    after?: string | null;
+    cursor?: string | null;
     /**
      * Limit
      */
@@ -2682,6 +2688,42 @@ export type DictionarySearchResponses = {
 
 export type DictionarySearchResponse2 =
   DictionarySearchResponses[keyof DictionarySearchResponses];
+
+export type ReadDictionaryHistoryData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Cursor
+     */
+    cursor?: string | null;
+    /**
+     * Limit
+     */
+    limit?: number;
+  };
+  url: "/api/v1/dictionary/history";
+};
+
+export type ReadDictionaryHistoryErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type ReadDictionaryHistoryError =
+  ReadDictionaryHistoryErrors[keyof ReadDictionaryHistoryErrors];
+
+export type ReadDictionaryHistoryResponses = {
+  /**
+   * Successful Response
+   */
+  200: DictionaryHistoryPage;
+};
+
+export type ReadDictionaryHistoryResponse =
+  ReadDictionaryHistoryResponses[keyof ReadDictionaryHistoryResponses];
 
 export type MediaCorpusLookupData = {
   body?: never;

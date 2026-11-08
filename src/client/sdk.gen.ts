@@ -74,6 +74,9 @@ import type {
   ReadChatsData,
   ReadChatsErrors,
   ReadChatsResponses,
+  ReadDictionaryHistoryData,
+  ReadDictionaryHistoryErrors,
+  ReadDictionaryHistoryResponses,
   ReadFileByFilenameData,
   ReadFileByFilenameErrors,
   ReadFileByFilenameResponses,
@@ -372,7 +375,11 @@ export const dictionaryLookup = <ThrowOnError extends boolean = true>(
     DictionaryLookupResponses,
     DictionaryLookupErrors,
     ThrowOnError
-  >({ url: "/api/v1/dictionary/lookup", ...options });
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/v1/dictionary/lookup",
+    ...options,
+  });
 
 /**
  * Dictionary Search
@@ -389,6 +396,26 @@ export const dictionarySearch = <ThrowOnError extends boolean = true>(
     DictionarySearchErrors,
     ThrowOnError
   >({ url: "/api/v1/dictionary/search", ...options });
+
+/**
+ * Read Dictionary History
+ */
+export const readDictionaryHistory = <ThrowOnError extends boolean = true>(
+  options?: Options<ReadDictionaryHistoryData, ThrowOnError>,
+): RequestResult<
+  ReadDictionaryHistoryResponses,
+  ReadDictionaryHistoryErrors,
+  ThrowOnError
+> =>
+  (options?.client ?? client).get<
+    ReadDictionaryHistoryResponses,
+    ReadDictionaryHistoryErrors,
+    ThrowOnError
+  >({
+    security: [{ scheme: "bearer", type: "http" }],
+    url: "/api/v1/dictionary/history",
+    ...options,
+  });
 
 /**
  * Media Corpus Lookup

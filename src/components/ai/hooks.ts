@@ -1,10 +1,10 @@
-import { AiChatCreate, AiChatRead, AiChatPage, AiChatUpdate, AiMessageCreate, AiMessageRead, createChat, deleteChat, readChatById, readChats, readMessages, updateChat, transcribeAudio, AiMessagePage, AiMessageRole } from "@/client"
 import { InfiniteData, infiniteQueryOptions, useInfiniteQuery, useMutation, useMutationState, useQuery, useQueryClient } from "@tanstack/react-query"
-import { streamMessage } from "./stream"
 import { SetStateAction, useCallback, useEffect, useRef, useState } from "react"
+import { AiChatCreate, AiChatPage, AiChatRead, AiChatUpdate, AiMessageCreate, AiMessagePage, AiMessageRead, AiMessageRole, createChat, deleteChat, readChatById, readChats, readMessages, transcribeAudio, updateChat } from "@/client"
 //import { usePathname, useRouter } from "next/navigation"
 import { useChatStore, useChatStoreApi } from "./ChatProvider"
-import { useGoogleLiveAssistant, UseGoogleLiveAssistantProps, WebSocketMessage } from "./live_asistant/hooks"
+import { UseGoogleLiveAssistantProps, useGoogleLiveAssistant, WebSocketMessage } from "./live_asistant/hooks"
+import { streamMessage } from "./stream"
 
 export const chatsQueryKey = ["ai-chats"] as const
 export const chatCreateKey = ["ai-chat-create"] as const
@@ -65,8 +65,8 @@ export function useChatsQuery() {
 				return { pinned: false, limit }
 			}
 
-			return (page.previous_cursor
-				? { before: page.previous_cursor, pinned: false, limit }
+			return (page.cursor
+				? { cursor: page.cursor, pinned: false, limit }
 				: undefined)
 		}
 	})

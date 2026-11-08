@@ -19,7 +19,7 @@ export function createLangToolsStore() {
 			setWordQuery: (value, updateHistory=true) =>
 				set((state) => ({
 					wordQuery: value,
-					translateHistory: updateHistory && value ? [value, ...state.translateHistory.filter((v) => v != value)] : state.translateHistory,
+					translateHistory: updateHistory && value ? [value, ...state.translateHistory.filter((v) => v !== value)] : state.translateHistory,
 				})),
 
 			copiedText: null,
