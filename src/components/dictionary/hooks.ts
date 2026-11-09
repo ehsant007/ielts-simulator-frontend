@@ -1,5 +1,7 @@
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query"
+import { useMemo } from "react"
 import { dictionarySearch, readDictionaryHistory } from "@/client"
+import { useLangToolsStore } from "../lang-tools"
 
 export function useDictionarySearch(text: string | null | undefined) {
 	const query = useQuery({
@@ -15,7 +17,9 @@ export function useDictionarySearch(text: string | null | undefined) {
 }
 
 export function useDictionaryHistory() {
-	return useInfiniteQuery({
+	const optimisticHistory = useLangToolsStore((s) => s.translateHistory)
+
+	const query = useInfiniteQuery({
 		queryKey: ["dictionary-history"],
 		queryFn: ({ pageParam }) =>
 			readDictionaryHistory({
@@ -23,6 +27,19 @@ export function useDictionaryHistory() {
 			}).then((res) => res.data),
 		initialPageParam: undefined as string | undefined,
 		getNextPageParam: (lastPage) => lastPage.cursor ?? undefined,
-		select: (data) => data.pages.flatMap((page) => page.history),
+		//select: (data) => data.pages.flatMap((page) => page.history),
 	})
+
+	const history = useMemo(() => {
+		const map = new Map<string, string>()
+		query.data?.pages.flatMap(page=>page.history).forEach((w) => {
+			map.set(w.toLowerCase(), w)
+		})
+		optimisticHistory.forEach((w) => {
+			map.delete(w.toLowerCase().trim())
+		})
+		return [...optimisticHistory, ...map.values()]
+	}, [query.data, optimisticHistory])
+
+	return { ...query, history }
 }

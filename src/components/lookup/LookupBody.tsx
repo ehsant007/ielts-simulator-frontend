@@ -15,16 +15,14 @@ import {
 	VStack,
 } from "@chakra-ui/react"
 
-import { Suspense, useEffect, useRef, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { LuSearch } from "react-icons/lu"
 import { MdHistory } from "react-icons/md"
 import { useDebounce } from "use-debounce"
 import { Dictionary } from "../dictionary/Dictionary"
 import { useDictionaryHistory } from "../dictionary/hooks"
 import { WordNet } from "../dictionary/Wordnet"
-import {
-	useLangToolsStore,
-} from "../lang-tools/LangToolsProvider"
+import { useLangToolsStore } from "../lang-tools/LangToolsProvider"
 import { CorpusPlayer } from "../media-corpus/CorpusPlayer"
 import { useSearch } from "./hooks"
 import { useLookupContext } from "./LookupProvider"
@@ -134,21 +132,14 @@ function TabContent({
 
 export function LookupHistoryMenu() {
 	const setWordQuery = useLangToolsStore((state) => state.setWordQuery)
-	const history = useLangToolsStore((state) => state.translateHistory)
 
-	const {
-		data: dictionaryHistory = [],
-		hasNextPage,
-		fetchNextPage,
-		isFetchingNextPage,
-	} = useDictionaryHistory()
+	const { history, hasNextPage, fetchNextPage, isFetchingNextPage } =
+		useDictionaryHistory()
 
-
-	const topRef = useRef<HTMLDivElement>(null) // Sentinel
+	const [sentinel, setSentinel] = useState<HTMLDivElement | null>(null)
 
 	useEffect(() => {
-		const element = topRef.current
-		if (!element) return
+		if (!sentinel) return
 
 		const observer = new IntersectionObserver(
 			([entry]) => {
@@ -156,16 +147,12 @@ export function LookupHistoryMenu() {
 					fetchNextPage()
 				}
 			},
-			{
-				// Start loading before the user actually reaches the bottom.
-				rootMargin: "0px 0px 20px 0px",
-			},
+			{ rootMargin: "0px 0px 20px 0px" },
 		)
 
-		observer.observe(element)
-
+		observer.observe(sentinel)
 		return () => observer.disconnect()
-	}, [hasNextPage, isFetchingNextPage, fetchNextPage])
+	}, [sentinel, hasNextPage, isFetchingNextPage, fetchNextPage])
 
 	return (
 		<Menu.Root onSelect={(e) => setWordQuery(e.value)}>
@@ -200,7 +187,7 @@ export function LookupHistoryMenu() {
 							</Menu.Item>
 						))}
 
-						<Box ref={topRef} h="1px" />
+						<Box ref={setSentinel} h="1px" />
 					</Menu.Content>
 				</Menu.Positioner>
 			</Portal>
